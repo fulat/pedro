@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 828 110" width="828" height="110">
+<defs>
+<linearGradient id="notch-surface" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#081321"/>
+<stop offset="0.52" stop-color="#050d18"/>
+<stop offset="1" stop-color="#020711"/>
+</linearGradient>
+</defs>
+<path d="M1.35 0.06C276.44 0.06 551.54 0.06 826.63 0.06C825.61 2.14 816.34 6.63 813.78 8.29C806.29 13.12 800.06 20.37 795.26 27.76C782.16 47.93 784.5 72.72 768.68 91.51C762.83 98.47 754.93 103.5 746.53 106.73C744.91 107.35 735.55 109.52 735.34 109.94C521.12 109.94 306.9 109.94 92.69 109.94C92.49 109.52 83.14 107.34 81.49 106.7C72.81 103.33 65.68 98.34 59.35 91.48C48.66 79.88 46.83 65.25 42.82 50.7C40.59 42.62 37.23 34.83 32.77 27.74C28.02 20.2 21.66 13.28 14.24 8.25C11.58 6.45 2.38 2.34 1.35 0.06Z" fill="url(#notch-surface)" fill-rule="evenodd" stroke="#1d334a" stroke-opacity="0.5" stroke-width="0.65" stroke-linejoin="round"/>
+</svg>
