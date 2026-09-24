@@ -77,7 +77,8 @@ Item {
                 }
                 background: Rectangle {
                     radius: 8
-                    color: closeButton.hovered ? "#24ffffff" : "transparent"
+                    color: closeButton.down ? Theme.controlPressed
+                                            : closeButton.hovered ? Theme.controlHover : "transparent"
                 }
                 HoverHandler { cursorShape: Qt.PointingHandCursor }
             }

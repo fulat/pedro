@@ -16,9 +16,15 @@ Rectangle {
 
     implicitHeight: 58
     radius: 9
-    color: connected ? "#182d4666" : hover.hovered ? "#0dffffff" : "transparent"
+    color: connected ? "#182d4666" : "transparent"
     border.width: connected ? 1 : 0
     border.color: "#4f6fa0c7"
+
+    Rectangle {
+        anchors.fill: parent
+        radius: parent.radius
+        color: hover.hovered ? Theme.controlHover : "transparent"
+    }
 
     RowLayout {
         anchors.fill: parent

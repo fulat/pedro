@@ -15,7 +15,8 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: 62
     radius: 8
-    color: mouse.containsMouse ? "#12ffffff" : "transparent"
+    color: mouse.pressed ? Theme.controlPressed
+                         : mouse.containsMouse ? Theme.controlHover : "transparent"
 
     ColumnLayout {
         anchors.centerIn: parent

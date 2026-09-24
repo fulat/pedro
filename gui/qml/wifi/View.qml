@@ -32,9 +32,16 @@ Item {
                 implicitWidth: 42
                 implicitHeight: 42
                 radius: 21
-                color: backMouse.pressed ? "#35465c" : backMouse.containsMouse ? "#2b3b51" : "#4d1a2a40"
+                color: "#4d1a2a40"
                 border.width: 1
                 border.color: "#385f7692"
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    color: backMouse.pressed ? Theme.controlPressed
+                                             : backMouse.containsMouse ? Theme.controlHover : "transparent"
+                }
 
                 Icon.Tinted {
                     anchors.centerIn: parent
@@ -133,9 +140,16 @@ Item {
                     implicitWidth: 88
                     implicitHeight: 32
                     radius: 16
-                    color: scanButton.down ? "#314158" : scanButton.hovered ? "#28384e" : "#4a18263a"
+                    color: "#4a18263a"
                     border.width: 1
                     border.color: "#526b87a8"
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: parent.radius
+                        color: scanButton.down ? Theme.controlPressed
+                                               : scanButton.hovered ? Theme.controlHover : "transparent"
+                    }
                 }
 
                 HoverHandler { cursorShape: scanButton.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
@@ -260,10 +274,16 @@ Item {
                     Layout.preferredWidth: 218
                     Layout.preferredHeight: 40
                     radius: height / 2
-                    color: settingsMouse.pressed ? "#263a52"
-                                                 : settingsMouse.containsMouse ? "#182b42" : "#35101d30"
+                    color: "#35101d30"
                     border.width: 1
                     border.color: "#4f6fa0c7"
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: parent.radius
+                        color: settingsMouse.pressed ? Theme.controlPressed
+                                                     : settingsMouse.containsMouse ? Theme.controlHover : "transparent"
+                    }
 
                     RowLayout {
                         anchors.centerIn: parent

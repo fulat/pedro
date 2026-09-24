@@ -28,9 +28,17 @@ Item {
                 implicitWidth: 42
                 implicitHeight: 42
                 radius: 21
-                color: backMouse.pressed ? "#35465c" : backMouse.containsMouse ? "#2b3b51" : "#4d1a2a40"
+                color: "#4d1a2a40"
                 border.width: 1
                 border.color: "#385f7692"
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    color: backMouse.pressed ? Theme.controlPressed
+                                             : backMouse.containsMouse ? Theme.controlHover : "transparent"
+                }
+
                 Icon.Tinted {
                     anchors.centerIn: parent
                     width: 10

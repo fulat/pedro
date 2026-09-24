@@ -65,8 +65,8 @@ Item {
             Layout.preferredWidth: 34
             Layout.preferredHeight: 34
             radius: 9
-            color: settingsMouse.pressed ? "#1affffff"
-                                         : settingsMouse.containsMouse ? "#0dffffff" : "transparent"
+            color: settingsMouse.pressed ? Theme.controlPressed
+                                         : settingsMouse.containsMouse ? Theme.controlHover : "transparent"
 
             Icon.Tinted {
                 anchors.centerIn: parent

@@ -22,7 +22,8 @@ Button {
 
     background: Rectangle {
         radius: 5
-        color: root.down ? "#1affffff" : (root.highlighted || root.hovered) ? "#0dffffff" : "transparent"
+        color: root.down ? Theme.controlPressed
+                         : (root.highlighted || root.hovered) ? Theme.controlHover : "transparent"
     }
 
     HoverHandler { cursorShape: Qt.PointingHandCursor }

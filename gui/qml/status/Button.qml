@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.Basic
 import "../icon" as Icon
+import "../logic/theme.js" as Theme
 
 Item {
     id: root
@@ -22,7 +23,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: 5
-        color: mouse.pressed ? "#1affffff" : (root.highlighted || mouse.containsMouse) ? "#0dffffff" : "transparent"
+        color: mouse.pressed ? Theme.controlPressed
+                             : (root.highlighted || mouse.containsMouse) ? Theme.controlHover : "transparent"
     }
 
     Icon.Tinted {

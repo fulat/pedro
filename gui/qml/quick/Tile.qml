@@ -25,7 +25,8 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: 55
     radius: 9
-    color: root.hovered ? "#12ffffff" : "transparent"
+    color: mouse.pressed ? Theme.controlPressed
+                         : root.hovered ? Theme.controlHover : "transparent"
 
     function setActive(state) {
         if (!root.toggleable)
