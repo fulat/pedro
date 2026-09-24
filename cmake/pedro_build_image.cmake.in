@@ -1,0 +1,343 @@
+# Pedro image builder
+#
+# Called via `cmake -P` from the pedro-image custom target. Produces
+# a bootable raw disk image from the staged rootfs.
+#
+# Layout:
+#
+#   build/images/pedro.img
+#       GPT partition table
+#       p1: FAT32 ESP (GRUB EFI for ${PEDRO_ARCH})
+#       p2: ext4 rootfs  (staged rootfs + kernel + initramfs)
+include_guard(GLOBAL)
+
+set(_img     "${PEDRO_IMAGE_FILE}")
+set(_img_dir "${PEDRO_IMAGES_DIR}")
+set(_rootfs  "${PEDRO_ROOTFS_DIR}")
+set(_kernel  "${PEDRO_HOST_KERNEL}")
+set(_initrd  "${PEDRO_HOST_INITRD}")
+set(_arch    "${PEDRO_ARCH}")
+set(_stage   "${PEDRO_STAGE_DIR}")
+set(_tools   "${PEDRO_TOOLS_DIR}")
+set(_mformat "${PEDRO_MFORMAT}")
+set(_mcopy   "${PEDRO_MCOPY}")
+set(_mmd     "${PEDRO_MMD}")
+set(_fuse2fs "${PEDRO_FUSE2FS}")
+set(_mkfsfat "${PEDRO_MKFSFAT}")
+set(_mkfsext4 "${PEDRO_MKFS_EXT4}")
+set(_sfdisk  "${PEDRO_SFDISK}")
+
+file(MAKE_DIRECTORY "${_img_dir}")
+file(MAKE_DIRECTORY "${_stage}")
+
+# ----------------------------------------------------------------
+# Pre-flight verification
+# ----------------------------------------------------------------
+foreach (_need
+        "${_rootfs}/usr/bin/pedro-compositor"
+        "${_rootfs}/usr/bin/pedro-gui"
+        "${_rootfs}/usr/bin/pedro-installer"
+        "${_rootfs}/usr/lib/systemd/system/compositor.service"
+        "${_rootfs}/usr/lib/systemd/system/gui.service"
+        "${_rootfs}/etc/systemd/system/graphical.target.wants/gui.service"
+        "${_kernel}"
+        "${_initrd}")
+    if (NOT EXISTS "${_need}")
+        message(FATAL_ERROR "Required image input missing: ${_need}")
+    endif()
+endforeach()
+
+foreach (_bin
+        "${_rootfs}/usr/bin/pedro-compositor"
+        "${_rootfs}/usr/bin/pedro-gui"
+        "${_rootfs}/usr/bin/pedro-installer")
+    execute_process(
+        COMMAND file -b "${_bin}"
+        OUTPUT_VARIABLE _t
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (NOT _t MATCHES "ELF.*${_arch}")
+        message(FATAL_ERROR
+            "Wrong-arch binary in rootfs: ${_bin} reports '${_t}'")
+    endif()
+endforeach()
+
+# ----------------------------------------------------------------
+# Image geometry (1 MiB aligned)
+# ----------------------------------------------------------------
+set(_MiB 1048576)
+set(_esp_mib 64)
+math(EXPR _rootfs_mib "1024")
+math(EXPR _total_mib  "${_esp_mib} + ${_rootfs_mib} + 4")
+
+math(EXPR _total_bytes   "${_total_mib} * ${_MiB}")
+math(EXPR _esp_bytes     "${_esp_mib} * ${_MiB}")
+
+# GPT layout (1 MiB aligned):
+#   sector 0          : protective MBR
+#   sector 1..33      : GPT header + table
+#   sector 2048       : first usable sector
+#   partition 1 (ESP) : sectors [esp_start, esp_end]
+#   partition 2 (root): sectors [root_start, root_end]
+set(_first_lba 2048)
+math(EXPR _esp_lba_count  "${_esp_bytes} / 512")
+math(EXPR _esp_start      "${_first_lba}")
+math(EXPR _esp_end        "${_esp_start} + ${_esp_lba_count} - 1")
+math(EXPR _root_start     "${_esp_end} + 1")
+math(EXPR _root_lba_count "${_total_bytes} / 512 - ${_root_start} - 34")
+
+message(STATUS "[image] creating raw image ${_img} (${_total_mib} MiB)")
+message(STATUS "[image] ESP    : sectors [${_esp_start}, ${_esp_end}] (${_esp_mib} MiB, FAT32)")
+message(STATUS "[image] rootfs : sectors [${_root_start}, ${_root_start} + ${_root_lba_count} - 1] (${_rootfs_mib} MiB, ext4)")
+
+# ----------------------------------------------------------------
+# Create raw image file + GPT
+# ----------------------------------------------------------------
+file(REMOVE "${_img}")
+execute_process(
+    COMMAND dd if=/dev/zero of=${_img} bs=1M count=${_total_mib} status=none
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "dd failed creating raw image: rv=${_rv}")
+endif()
+
+# sfdisk recipe (passed via stdin so the script is self-contained).
+file(WRITE "${_stage}/partition.sfdisk"
+"label: gpt
+unit: sectors
+start=${_first_lba}, size=${_esp_lba_count}, type=uefi, name=PEDROESP
+start=${_root_start}, type=linux, name=PEDROROOT
+")
+
+execute_process(
+    COMMAND ${_sfdisk} ${_img}
+    INPUT_FILE "${_stage}/partition.sfdisk"
+    OUTPUT_VARIABLE _o
+    ERROR_VARIABLE _e
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "sfdisk failed: rv=${_rv}\n${_e}")
+endif()
+
+# ----------------------------------------------------------------
+# Slice partitions out and format them
+# ----------------------------------------------------------------
+execute_process(
+    COMMAND dd if=${_img} of=${_stage}/esp.raw bs=512 skip=${_esp_start} count=${_esp_lba_count} status=none
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "dd failed slicing ESP: rv=${_rv}")
+endif()
+execute_process(
+    COMMAND dd if=${_img} of=${_stage}/root.raw bs=512 skip=${_root_start} count=${_root_lba_count} status=none
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "dd failed slicing rootfs: rv=${_rv}")
+endif()
+
+message(STATUS "[image] formatting FAT32 ESP (${_esp_mib} MiB)")
+execute_process(
+    COMMAND ${_mkfsfat} -F 32 -n PEDROESP ${_stage}/esp.raw
+    OUTPUT_VARIABLE _o ERROR_VARIABLE _e
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "mkfs.fat failed: rv=${_rv}\n${_e}")
+endif()
+
+message(STATUS "[image] formatting ext4 rootfs (${_rootfs_mib} MiB)")
+execute_process(
+    COMMAND ${_mkfsext4} -F -L PEDROROOT ${_stage}/root.raw
+    OUTPUT_VARIABLE _o ERROR_VARIABLE _e
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "mkfs.ext4 failed: rv=${_rv}\n${_e}")
+endif()
+
+# ----------------------------------------------------------------
+# Build the ESP content (GRUB EFI binary + grub.cfg)
+# ----------------------------------------------------------------
+set(_esp_mnt "${_stage}/esp")
+file(REMOVE_RECURSE "${_esp_mnt}")
+file(MAKE_DIRECTORY "${_esp_mnt}/EFI/BOOT")
+file(MAKE_DIRECTORY "${_esp_mnt}/grub")
+
+# Pick the right standalone EFI binary for our arch.
+if (_arch STREQUAL "aarch64")
+    set(_grub_efi_src "/usr/lib/grub/arm64-efi-signed/grubaa64.efi")
+    if (NOT EXISTS "${_grub_efi_src}")
+        set(_grub_efi_src "/usr/lib/grub/arm64-efi/monolithic/grubaa64.efi")
+    endif()
+    set(_grub_target "BOOTAA64.EFI")
+    set(_grub_local_name "grubaa64.efi")
+else()
+    set(_grub_efi_src "/usr/lib/grub/x86_64-efi-signed/grubx64.efi")
+    if (NOT EXISTS "${_grub_efi_src}")
+        set(_grub_efi_src "/usr/lib/grub/x86_64-efi/monolithic/grubx64.efi")
+    endif()
+    set(_grub_target "BOOTX64.EFI")
+    set(_grub_local_name "grubx64.efi")
+endif()
+
+if (NOT EXISTS "${_grub_efi_src}")
+    message(FATAL_ERROR "Could not locate GRUB EFI binary for ${_arch}.")
+endif()
+
+file(COPY "${_grub_efi_src}"
+     DESTINATION "${_esp_mnt}/EFI/BOOT"
+     FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+file(RENAME "${_esp_mnt}/EFI/BOOT/${_grub_local_name}"
+             "${_esp_mnt}/EFI/BOOT/${_grub_target}")
+
+# grub.cfg: chain to /boot/grub/grub.cfg on the rootfs partition.
+file(WRITE "${_esp_mnt}/grub/grub.cfg"
+"set prefix=(hd0,gpt2)/boot/grub
+configfile $prefix/grub.cfg
+")
+
+# ----------------------------------------------------------------
+# Populate the FAT32 ESP via mtools (no mount required)
+# ----------------------------------------------------------------
+if (NOT EXISTS "${_mformat}")
+    message(FATAL_ERROR "mformat not found at ${_mformat}. Re-run cmake to refresh tools.")
+endif()
+
+set(ENV{MTOOLS_SKIP_CHECK} 1)
+message(STATUS "[image] populating FAT32 ESP via mtools")
+execute_process(
+    COMMAND ${_mformat} -i ${_stage}/esp.raw -N 0xC0FFEE16
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "mformat failed: rv=${_rv}")
+endif()
+
+execute_process(
+    COMMAND ${_mmd} -i ${_stage}/esp.raw ::/EFI
+    RESULT_VARIABLE _rv)
+execute_process(
+    COMMAND ${_mmd} -i ${_stage}/esp.raw ::/EFI/BOOT
+    RESULT_VARIABLE _rv)
+execute_process(
+    COMMAND ${_mmd} -i ${_stage}/esp.raw ::/grub
+    RESULT_VARIABLE _rv)
+
+execute_process(
+    COMMAND ${_mcopy} -i ${_stage}/esp.raw
+        ${_esp_mnt}/EFI/BOOT/${_grub_target} ::/EFI/BOOT/${_grub_target}
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "mcopy EFI binary failed: rv=${_rv}")
+endif()
+
+execute_process(
+    COMMAND ${_mcopy} -i ${_stage}/esp.raw
+        ${_esp_mnt}/grub/grub.cfg ::/grub/grub.cfg
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "mcopy grub.cfg failed: rv=${_rv}")
+endif()
+
+# ----------------------------------------------------------------
+# Populate the ext4 rootfs partition via fuse2fs (no root required)
+# ----------------------------------------------------------------
+if (NOT EXISTS "${_fuse2fs}")
+    message(FATAL_ERROR "fuse2fs not found at ${_fuse2fs}. Re-run cmake to refresh tools.")
+endif()
+
+set(_mountpoint "${_stage}/root_mnt")
+file(REMOVE_RECURSE "${_mountpoint}")
+file(MAKE_DIRECTORY "${_mountpoint}")
+
+message(STATUS "[image] mounting rootfs partition via fuse2fs")
+execute_process(
+    COMMAND ${_fuse2fs} ${_stage}/root.raw ${_mountpoint}
+        -o fakeroot,allow_other,uid=0,gid=0,umask=077
+    RESULT_VARIABLE _rv
+    OUTPUT_VARIABLE _o
+    ERROR_VARIABLE _e)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "fuse2fs mount failed: rv=${_rv}\n${_e}")
+endif()
+
+# Sync the staged rootfs into the mounted partition using rsync so
+# that symlinks, permissions and device files are preserved.
+message(STATUS "[image] copying staged rootfs into ext4 partition via rsync")
+execute_process(
+    COMMAND rsync -aHAXX --numeric-ids
+        ${_rootfs}/ ${_mountpoint}/
+    RESULT_VARIABLE _rv
+    OUTPUT_VARIABLE _o
+    ERROR_VARIABLE _e)
+if (NOT _rv EQUAL 0)
+    execute_process(COMMAND fusermount3 -u ${_mountpoint})
+    message(FATAL_ERROR "rsync into rootfs failed: rv=${_rv}\n${_e}")
+endif()
+
+# Copy the kernel + initramfs into the staged rootfs.
+# Doing it now means the image's /boot contains what GRUB will load.
+execute_process(
+    COMMAND cp ${_kernel} ${_mountpoint}/boot/vmlinuz-pedro
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    execute_process(COMMAND fusermount3 -u ${_mountpoint})
+    message(FATAL_ERROR "Failed to copy kernel into rootfs: rv=${_rv}")
+endif()
+execute_process(
+    COMMAND cp ${_initrd} ${_mountpoint}/boot/initrd.img-pedro
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    execute_process(COMMAND fusermount3 -u ${_mountpoint})
+    message(FATAL_ERROR "Failed to copy initramfs into rootfs: rv=${_rv}")
+endif()
+
+# Install GRUB into the rootfs so /boot/grub/grub.cfg exists where the
+# ESP's grub.cfg expects to find it. We do this via grub-mkstandalone
+# embedded config (no need to call grub-install which needs root).
+message(STATUS "[image] installing GRUB config into /boot/grub on rootfs")
+
+file(MAKE_DIRECTORY "${_mountpoint}/boot/grub")
+
+# Generate a /boot/grub/grub.cfg that boots the kernel + initramfs.
+file(WRITE "${_mountpoint}/boot/grub/grub.cfg"
+"set timeout=3
+set default=0
+
+menuentry 'Pedro' {
+    linux /boot/vmlinuz-pedro root=/dev/sda2 rw quiet
+    initrd /boot/initrd.img-pedro
+}
+
+menuentry 'Pedro (recovery)' {
+    linux /boot/vmlinuz-pedro root=/dev/sda2 rw single
+    initrd /boot/initrd.img-pedro
+}
+")
+
+# Unmount the partition.
+execute_process(
+    COMMAND fusermount3 -u ${_mountpoint}
+    RESULT_VARIABLE _rv
+    OUTPUT_VARIABLE _o
+    ERROR_VARIABLE _e)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "fusermount -u failed: rv=${_rv}\n${_e}")
+endif()
+
+# ----------------------------------------------------------------
+# Splice the partitions back into the final image
+# ----------------------------------------------------------------
+execute_process(
+    COMMAND dd if=${_stage}/esp.raw of=${_img} bs=512 seek=${_esp_start} count=${_esp_lba_count} conv=notrunc status=none
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "dd back-ESP failed: rv=${_rv}")
+endif()
+execute_process(
+    COMMAND dd if=${_stage}/root.raw of=${_img} bs=512 seek=${_root_start} count=${_root_lba_count} conv=notrunc status=none
+    RESULT_VARIABLE _rv)
+if (NOT _rv EQUAL 0)
+    message(FATAL_ERROR "dd back-root failed: rv=${_rv}")
+endif()
+
+message(STATUS "[image] bootable Pedro image written to ${_img}")
+message(STATUS "[image]   GPT p1 (ESP)    : ${_esp_mib} MiB  FAT32")
+message(STATUS "[image]   GPT p2 (rootfs) : ${_rootfs_mib} MiB  ext4")
+message(STATUS "[image]   Architecture    : ${_arch}")

@@ -1,0 +1,44 @@
+# Pedro systemd enablement (offline)
+#
+# Called via `cmake -P` from the pedro-stage custom target. Creates
+# the standard `Wants=`/`Requires=` symlinks inside the staged rootfs
+# so that the resulting image boots straight into the Pedro graphical
+# environment without any interactive `systemctl enable` step.
+#
+# Variables (configured by the root CMakeLists.txt):
+#   PEDRO_ROOTFS_DIR  - the staged root filesystem
+#   PEDRO_SYSTEMD_DIR - /usr/lib/systemd/system inside the rootfs
+include_guard(GLOBAL)
+
+set(_units
+    compositor.service
+    gui.service
+)
+
+set(_wants_dir "${PEDRO_ROOTFS_DIR}/etc/systemd/system/graphical.target.wants")
+file(MAKE_DIRECTORY "${_wants_dir}")
+
+foreach (_u IN LISTS _units)
+    set(_src "${PEDRO_SYSTEMD_DIR}/${_u}")
+    set(_dst "${_wants_dir}/${_u}")
+    if (NOT EXISTS "${_src}")
+        message(FATAL_ERROR
+            "Cannot enable ${_u}: unit file not found at ${_src}.")
+    endif()
+    file(REMOVE "${_dst}")
+    file(CREATE_LINK
+        "/usr/lib/systemd/system/${_u}"
+        "${_dst}"
+        COPY_ON_ERROR SYMBOLIC)
+    message(STATUS "[enable] ${_u} -> graphical.target")
+endforeach()
+
+# Make graphical.target the default boot target. systemd reads
+# /etc/systemd/system/default.target to decide what to start.
+set(_default "${PEDRO_ROOTFS_DIR}/etc/systemd/system/default.target")
+file(REMOVE "${_default}")
+file(CREATE_LINK
+    "/usr/lib/systemd/system/graphical.target"
+    "${_default}"
+    COPY_ON_ERROR SYMBOLIC)
+message(STATUS "[enable] default.target -> graphical.target")

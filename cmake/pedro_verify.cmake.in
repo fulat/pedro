@@ -1,0 +1,52 @@
+# Pedro staging verifier
+#
+# Called via `cmake -P` from the pedro-verify target. Performs
+# pre-flight checks against the staged rootfs so that broken
+# artifacts fail fast instead of leaking into a bootable image.
+include_guard(GLOBAL)
+
+set(_rootfs "${PEDRO_ROOTFS_DIR}")
+set(_err 0)
+
+function(_require _path)
+    if (NOT EXISTS "${_path}")
+        message(STATUS "MISSING: ${_path}")
+        set(_err 1 PARENT_SCOPE)
+    else()
+        message(STATUS "ok      : ${_path}")
+    endif()
+endfunction()
+
+_require("${_rootfs}")
+_require("${_rootfs}/usr")
+_require("${_rootfs}/usr/bin/pedro-compositor")
+_require("${_rootfs}/usr/bin/pedro-gui")
+_require("${_rootfs}/usr/bin/pedro-installer")
+_require("${_rootfs}/usr/lib/systemd/system/compositor.service")
+_require("${_rootfs}/usr/lib/systemd/system/gui.service")
+_require("${_rootfs}/etc/systemd/system/graphical.target.wants/gui.service")
+_require("${_rootfs}/etc/systemd/system/graphical.target.wants/compositor.service")
+_require("${_rootfs}/etc/systemd/system/default.target")
+
+# Architecture consistency.
+foreach (_bin
+        "${_rootfs}/usr/bin/pedro-compositor"
+        "${_rootfs}/usr/bin/pedro-gui"
+        "${_rootfs}/usr/bin/pedro-installer")
+    if (EXISTS "${_bin}")
+        execute_process(
+            COMMAND file -b "${_bin}"
+            OUTPUT_VARIABLE _t
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (NOT _t MATCHES "ELF.*${PEDRO_ARCH}")
+            message(STATUS "WRONG ARCH: ${_bin} (${_t})")
+            set(_err 1)
+        endif()
+    endif()
+endforeach()
+
+if (_err)
+    message(FATAL_ERROR "Pedro staging verification failed.")
+endif()
+
+message(STATUS "Pedro staging OK.")

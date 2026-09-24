@@ -1,0 +1,130 @@
+# Pedro runtime installer
+#
+# Called via `cmake -P` from the pedro-stage custom target. Runs
+# inside the build tree; the variables below are substituted at
+# configure time from the root CMakeLists.txt.
+#
+# Variables (configured by the root CMakeLists.txt via configure_file):
+#   PEDRO_ROOTFS_DIR    - the staged root filesystem directory
+#   PEDRO_STAGE_DIR     - the staging directory (for logs)
+#   PEDRO_BINARY_PATHS  - ;-list of Pedro binaries to walk for ldd
+include_guard(GLOBAL)
+
+message(STATUS "[runtime] install runtime dependencies into ${PEDRO_ROOTFS_DIR}")
+
+# Build the list of packages we want at runtime.
+set(_pedro_runtime_pkgs
+    libqt6core6t64
+    libqt6gui6
+    libqt6qml6
+    libqt6quick6
+    libqt6qmlmeta6
+    libqt6qmlmodels6
+    libqt6network6
+    libqt6dbus6
+    libqt6opengl6
+    libqt6svg6
+    libqt6widgets6
+    qml6-module-qtquick
+    qml6-module-qtquick-window
+    qml6-module-qtqml
+    qml6-module-qtqml-workerscript
+    libwayland-client0
+    libwayland-server0
+    libwayland-cursor0
+    libwayland-egl1
+    libegl1
+    libgles2
+    libgl1
+    libfontconfig1
+    libfreetype6
+    libxkbcommon0
+    libdbus-1-3
+    libglib2.0-0t64
+    libgcc-s1
+    libstdc++6
+    libdrm2
+    libudev1
+    libpng16-16
+    zlib1g
+)
+
+set(_pedro_log "${PEDRO_STAGE_DIR}/install_runtime.log")
+file(WRITE "${_pedro_log}" "")
+
+# ------------------------------------------------------------
+# Primary path: apt-get inside a bwrap-based chroot
+# ------------------------------------------------------------
+find_program(BWRAP bwrap)
+find_program(APT_GET apt-get)
+
+set(_pedro_apt_status "skipped")
+
+if (BWRAP AND APT_GET)
+    message(STATUS "[runtime] primary path: apt-get inside bwrap-chroot")
+    file(APPEND "${_pedro_log}" "[apt-get update]\n")
+    execute_process(
+        COMMAND ${BWRAP}
+            --bind "${PEDRO_ROOTFS_DIR}" /
+            --proc /proc
+            --dev-bind /dev /dev
+            --bind /etc/resolv.conf /etc/resolv.conf
+            --share-net
+            --tmpfs /run
+            --tmpfs /var/cache/apt/archives
+            ${APT_GET} update
+        RESULT_VARIABLE _rv
+        OUTPUT_VARIABLE _out
+        ERROR_VARIABLE _err
+        TIMEOUT 180
+    )
+    file(APPEND "${_pedro_log}" "exit=${_rv}\n${_out}\n${_err}\n")
+    if (_rv EQUAL 0)
+        execute_process(
+            COMMAND ${BWRAP}
+                --bind "${PEDRO_ROOTFS_DIR}" /
+                --proc /proc
+                --dev-bind /dev /dev
+                --bind /etc/resolv.conf /etc/resolv.conf
+                --share-net
+                --tmpfs /run
+                ${APT_GET} install -y --no-install-recommends ${_pedro_runtime_pkgs}
+            RESULT_VARIABLE _rv2
+            OUTPUT_VARIABLE _out2
+            ERROR_VARIABLE _err2
+            TIMEOUT 600
+        )
+        file(APPEND "${_pedro_log}" "\n[apt-get install] exit=${_rv2}\n${_out2}\n${_err2}\n")
+        if (_rv2 EQUAL 0)
+            set(_pedro_apt_status "ok")
+        else()
+            set(_pedro_apt_status "install_failed")
+        endif()
+    else()
+        set(_pedro_apt_status "update_failed")
+    endif()
+else()
+    set(_pedro_apt_status "tools_missing")
+endif()
+
+message(STATUS "[runtime] apt-get status: ${_pedro_apt_status}")
+
+# ------------------------------------------------------------
+# Fallback / supplement: ldd-based copy from the host system.
+# Always runs so transitive libraries that apt-get skipped on a
+# minimal install are still available.
+# ------------------------------------------------------------
+execute_process(
+    COMMAND "${PEDRO_COPY_RUNTIME_SH}"
+        "${PEDRO_ROOTFS_DIR}"
+        ${PEDRO_BINARY_PATHS}
+    RESULT_VARIABLE _rv3
+    OUTPUT_VARIABLE _out3
+    ERROR_VARIABLE _err3
+)
+file(APPEND "${_pedro_log}" "\n[host lib copy] exit=${_rv3}\n${_out3}\n${_err3}\n")
+if (NOT _rv3 EQUAL 0)
+    message(FATAL_ERROR "[runtime] pedro_copy_runtime.sh failed (${_rv3}). See ${_pedro_log}.")
+endif()
+
+message(STATUS "[runtime] runtime installation complete (apt=${_pedro_apt_status})")
