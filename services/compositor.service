@@ -1,12 +1,29 @@
 [Unit]
-Description=Pedro Compositor
+Description=Pedro Wayland Compositor
 After=systemd-user-sessions.service
+Conflicts=getty@tty1.service
+Wants=gui.service
+Before=gui.service
 
 [Service]
-Type=simple
-ExecStart=/usr/bin/compositor
+Type=notify
+NotifyAccess=main
+ExecStart=/usr/bin/pedro-compositor
+RuntimeDirectory=pedro
+RuntimeDirectoryMode=0700
+Environment=XDG_RUNTIME_DIR=/run/pedro
+Environment=QT_QPA_PLATFORM=eglfs
+Environment=QT_QPA_EGLFS_INTEGRATION=eglfs_kms
+Environment=QT_QUICK_BACKEND=software
+Environment=LIBGL_ALWAYS_SOFTWARE=1
+EnvironmentFile=-/etc/pedro/environment
+TTYPath=/dev/tty1
+StandardInput=tty
+TTYReset=yes
+TTYVHangup=yes
 Restart=on-failure
-RestartSec=1
+RestartSec=2
+TimeoutStartSec=30
 
 [Install]
 WantedBy=graphical.target

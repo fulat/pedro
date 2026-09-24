@@ -1,0 +1,20 @@
+[Unit]
+Description=Pedro GUI Shell
+After=compositor.service
+Requires=compositor.service
+BindsTo=compositor.service
+PartOf=compositor.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/pedro-gui
+Environment=XDG_RUNTIME_DIR=/run/pedro
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=QT_QPA_PLATFORM=wayland
+Environment=QT_QUICK_BACKEND=software
+EnvironmentFile=-/etc/pedro/environment
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target
