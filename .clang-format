@@ -1,0 +1,71 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Pedro indentation
+IndentWidth: 4
+ContinuationIndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Every namespace introduces a visible indentation level.
+NamespaceIndentation: All
+
+# Access modifiers participate in the hierarchy:
+#
+# class Info {
+#
+#     public:
+#         bool isConnected() const;
+#
+# };
+IndentAccessModifiers: true
+
+# JavaScript-like brace placement.
+# namespace ... {
+# class ... {
+# if (...) {
+# for (...) {
+# void method() {
+BreakBeforeBraces: Attach
+
+# Do not collapse Pedro blocks into one-liners.
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+
+# Spacing
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Keep pointer/reference declarations visually attached to the type.
+DerivePointerAlignment: false
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Keep the author's include grouping/order.
+SortIncludes: Never
+IncludeBlocks: Preserve
+
+# Keep formatting readable without aggressive wrapping.
+ColumnLimit: 10000000
+
+# Empty-line behavior.
+MaxEmptyLinesToKeep: 1
+EmptyLineBeforeAccessModifier: Always
+EmptyLineAfterAccessModifier: Always
+
+# Preprocessor directives stay anchored at the file level.
+IndentPPDirectives: None
+
+# Do not rewrite code semantically just to satisfy formatting.
+InsertBraces: false
+RemoveBracesLLVM: false
+
+# Keep namespaces visually clean; do not add namespace-end comments.
+FixNamespaceComments: false
+...

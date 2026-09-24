@@ -1,0 +1,30 @@
+# Codex permission profile for pedro core work
+
+default_permissions = "pedro-core"
+
+[permissions.pedro-core]
+description = "do not scan core/ unless you are working on it, and do not scan .git or build folders"
+extends = ":workspace"
+
+[permissions.pedro-core.filesystem.":workspace_roots"]
+# Allow normal workspace access
+"." = "write"
+
+# Active work folders
+"papi/" = "write"
+"compositor/" = "write"
+"gui/" = "write"
+"installer/" = "write"
+"services/" = "write"
+
+# Inactive monorepo areas: deny read/write
+"core" = "deny" # only if you are working on core, you can read/write it
+".git/**" = "deny"
+
+# rest
+"**/dist/**" = "deny"
+".vscode/**" = "deny"
+"**/cmake-build-debug/**" = "deny"
+"**/cmake-build-release/**" = "deny"
+"**/build/**" = "deny"
+"**/.idea/**" = "deny"
