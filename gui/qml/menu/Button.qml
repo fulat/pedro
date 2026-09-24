@@ -1,0 +1,29 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Controls.Basic
+import "../logic/theme.js" as Theme
+
+Button {
+    id: root
+    leftPadding: 10
+    rightPadding: 10
+    topPadding: 7
+    bottomPadding: 7
+
+    contentItem: Label {
+        text: root.text
+        color: Theme.textPrimary
+        font.pixelSize: Theme.fontNormal
+        font.weight: Font.Medium
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+    }
+
+    background: Rectangle {
+        radius: 5
+        color: root.down ? "#1affffff" : (root.highlighted || root.hovered) ? "#0dffffff" : "transparent"
+    }
+
+    HoverHandler { cursorShape: Qt.PointingHandCursor }
+}
