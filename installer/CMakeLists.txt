@@ -1,41 +1,39 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(installer VERSION 0.1 LANGUAGES CXX)
+project(pedro_installer VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# The installer is a Qt 6 Quick / QML application used to bootstrap
+# Pedro onto target hardware. It is a regular Linux ELF executable
+# (no .app bundle, no Win32 GUI subsystem).
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 
-qt_standard_project_setup(REQUIRES 6.10)
+qt_standard_project_setup(REQUIRES 6.5)
 
 
-qt_add_executable(installer
+qt_add_executable(pedro_installer
     main.cpp
 )
 
-qt_add_qml_module(installer
-    URI installer
+qt_add_qml_module(pedro_installer
+    URI pedro_installer
+    NO_IMPORT_SCAN
     QML_FILES
         Main.qml
 )
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
-set_target_properties(installer PROPERTIES
-#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.installer
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
-)
-
-target_link_libraries(installer
+target_link_libraries(pedro_installer
     PRIVATE Qt6::Quick
 )
 
-install(TARGETS installer
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+set_target_properties(pedro_installer PROPERTIES
+    OUTPUT_NAME pedro-installer
+)
+
+# Install destinations are kept relative on purpose. The root CMakeLists
+# drives the install prefix (build/staging/rootfs) so this component
+# stays portable across staging layouts.
+install(TARGETS pedro_installer
+    RUNTIME DESTINATION usr/bin
 )
