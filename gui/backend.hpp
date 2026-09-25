@@ -1,5 +1,6 @@
 #pragma once
 
+#include <pedro/papi/bluetooth/manager.hpp>
 #include <pedro/papi/network/wifi/manager.hpp>
 #include <pedro/papi/system/system.hpp>
 
@@ -31,6 +32,11 @@ class Backend final : public QObject {
         Q_PROPERTY(bool wifiScanning READ wifiScanning NOTIFY wifiChanged)
         Q_PROPERTY(QString wifiError READ wifiError NOTIFY wifiChanged)
         Q_PROPERTY(QVariantList wifiNetworks READ wifiNetworks NOTIFY wifiChanged)
+        Q_PROPERTY(bool bluetoothAvailable READ bluetoothAvailable NOTIFY bluetoothChanged)
+        Q_PROPERTY(bool bluetoothEnabled READ bluetoothEnabled NOTIFY bluetoothChanged)
+        Q_PROPERTY(bool bluetoothScanning READ bluetoothScanning NOTIFY bluetoothChanged)
+        Q_PROPERTY(QString bluetoothError READ bluetoothError NOTIFY bluetoothChanged)
+        Q_PROPERTY(QVariantList bluetoothDevices READ bluetoothDevices NOTIFY bluetoothChanged)
 
     public:
 
@@ -54,6 +60,11 @@ class Backend final : public QObject {
         [[nodiscard]] bool wifiScanning() const;
         [[nodiscard]] QString wifiError() const;
         [[nodiscard]] QVariantList wifiNetworks() const;
+        [[nodiscard]] bool bluetoothAvailable() const;
+        [[nodiscard]] bool bluetoothEnabled() const;
+        [[nodiscard]] bool bluetoothScanning() const;
+        [[nodiscard]] QString bluetoothError() const;
+        [[nodiscard]] QVariantList bluetoothDevices() const;
 
         void setDocumentPath(const QString& path);
 
@@ -64,6 +75,9 @@ class Backend final : public QObject {
         Q_INVOKABLE void refreshWifi();
         Q_INVOKABLE void setWifiEnabled(bool enabled);
         Q_INVOKABLE void scanWifi();
+        Q_INVOKABLE void refreshBluetooth();
+        Q_INVOKABLE void setBluetoothEnabled(bool enabled);
+        Q_INVOKABLE void scanBluetooth();
 
     signals:
         void systemChanged();
@@ -71,6 +85,7 @@ class Backend final : public QObject {
         void documentTextChanged();
         void statusMessageChanged();
         void wifiChanged();
+        void bluetoothChanged();
 
     private:
 
@@ -78,8 +93,10 @@ class Backend final : public QObject {
 
         Pedro::Papi::System system_;
         Pedro::Papi::Network::Wifi::Manager wifi_;
+        Pedro::Papi::Bluetooth::Manager bluetooth_;
         QTimer refreshTimer_;
         QTimer wifiRefreshTimer_;
+        QTimer bluetoothRefreshTimer_;
         QString hostname_;
         QString kernel_;
         QString architecture_;
@@ -97,4 +114,9 @@ class Backend final : public QObject {
         bool wifiScanning_{false};
         QString wifiError_;
         QVariantList wifiNetworks_;
+        bool bluetoothAvailable_{false};
+        bool bluetoothEnabled_{false};
+        bool bluetoothScanning_{false};
+        QString bluetoothError_;
+        QVariantList bluetoothDevices_;
 };

@@ -42,8 +42,12 @@ Backend::Backend(QObject* parent) : QObject(parent) {
     connect(&wifiRefreshTimer_, &QTimer::timeout, this, &Backend::refreshWifi);
     wifiRefreshTimer_.start(10000);
 
+    connect(&bluetoothRefreshTimer_, &QTimer::timeout, this, &Backend::refreshBluetooth);
+    bluetoothRefreshTimer_.start(5000);
+
     refreshSystem();
     refreshWifi();
+    refreshBluetooth();
 }
 
 bool Backend::developmentMode() const {
@@ -100,6 +104,21 @@ QString Backend::wifiError() const {
 }
 QVariantList Backend::wifiNetworks() const {
     return wifiNetworks_;
+}
+bool Backend::bluetoothAvailable() const {
+    return bluetoothAvailable_;
+}
+bool Backend::bluetoothEnabled() const {
+    return bluetoothEnabled_;
+}
+bool Backend::bluetoothScanning() const {
+    return bluetoothScanning_;
+}
+QString Backend::bluetoothError() const {
+    return bluetoothError_;
+}
+QVariantList Backend::bluetoothDevices() const {
+    return bluetoothDevices_;
 }
 
 void Backend::setDocumentPath(const QString& path) {
@@ -223,6 +242,76 @@ void Backend::scanWifi() {
         refreshWifi();
         wifiScanning_ = false;
         emit wifiChanged();
+    });
+}
+
+void Backend::refreshBluetooth() {
+    try {
+        const auto snapshot = bluetooth_.snapshot();
+        QVariantList devices;
+        devices.reserve(static_cast<qsizetype>(snapshot.devices.size()));
+
+        for (const auto& device : snapshot.devices) {
+            QVariantMap value;
+            value.insert(QStringLiteral("name"), QString::fromStdString(device.name));
+            value.insert(QStringLiteral("icon"), QString::fromStdString(device.icon));
+            value.insert(QStringLiteral("connected"), device.connected);
+            value.insert(QStringLiteral("paired"), device.paired);
+            devices.push_back(value);
+        }
+
+        bluetoothAvailable_ = snapshot.available;
+        bluetoothEnabled_ = snapshot.enabled;
+        bluetoothScanning_ = snapshot.scanning;
+        bluetoothDevices_ = std::move(devices);
+        bluetoothError_.clear();
+        emit bluetoothChanged();
+    } catch (const std::exception& error) {
+        bluetoothAvailable_ = false;
+        bluetoothEnabled_ = false;
+        bluetoothScanning_ = false;
+        bluetoothDevices_.clear();
+        bluetoothError_ = QString::fromUtf8(error.what());
+        emit bluetoothChanged();
+    }
+}
+
+void Backend::setBluetoothEnabled(bool enabled) {
+    try {
+        bluetooth_.setEnabled(enabled);
+        refreshBluetooth();
+    } catch (const std::exception& error) {
+        bluetoothError_ = QString::fromUtf8(error.what());
+        emit bluetoothChanged();
+    }
+}
+
+void Backend::scanBluetooth() {
+    if (bluetoothScanning_ || !bluetoothAvailable_ || !bluetoothEnabled_) {
+        return;
+    }
+
+    bluetoothScanning_ = true;
+    bluetoothError_.clear();
+    emit bluetoothChanged();
+
+    try {
+        bluetooth_.scan();
+    } catch (const std::exception& error) {
+        bluetoothScanning_ = false;
+        bluetoothError_ = QString::fromUtf8(error.what());
+        emit bluetoothChanged();
+        return;
+    }
+
+    QTimer::singleShot(6000, this, [this] {
+        try {
+            bluetooth_.stopScan();
+        } catch (const std::exception& error) {
+            bluetoothError_ = QString::fromUtf8(error.what());
+        }
+
+        refreshBluetooth();
     });
 }
 

@@ -12,7 +12,6 @@ Item {
     id: root
     property string notice: Papi.wifiError !== "" ? Papi.wifiError : "Wi-Fi conectado mediante PAPI Network"
     readonly property bool wifiEnabled: Papi.wifiEnabled
-    property alias bluetoothEnabled: bluetoothTile.active
     readonly property bool wifiConnected: Papi.wifiConnected
     signal settingsRequested()
     signal wifiRequested()
@@ -44,13 +43,15 @@ Item {
             Quick.Tile {
                 id: bluetoothTile
                 title: "Bluetooth"
-                subtitle: active ? "Activado" : "Desactivado"
+                subtitle: !Papi.bluetoothAvailable
+                          ? "No disponible"
+                          : active ? "Activado" : "Desactivado"
                 icon: "../../assets/icons/bluetooth.svg"
-                active: true
+                active: Papi.bluetoothEnabled
+                toggleable: true
+                externallyManaged: true
                 statusColor: active ? "#579cff" : "#8290a4"
-                onActivated: root.notice = active
-                             ? "Bluetooth activado · pendiente de conexión con PAPI"
-                             : "Bluetooth desactivado"
+                onToggleRequested: state => Papi.setBluetoothEnabled(state)
                 onDetailsRequested: root.bluetoothRequested()
             }
         }

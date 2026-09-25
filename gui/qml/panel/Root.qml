@@ -27,7 +27,7 @@ Item {
     width: Math.min(360, availableWidth - 24)
     height: Math.min(mode === "quick" ? 594
                      : mode === "wifi" ? 520
-                     : mode === "bluetooth" ? 360
+                     : mode === "bluetooth" ? 520
                      : mode === "sound" ? 92 : 420,
                      availableHeight - 20)
     Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
@@ -107,10 +107,9 @@ Item {
                 onBackRequested: root.modeRequested("quick")
             }
             Bluetooth.View {
-                bluetoothEnabled: control.bluetoothEnabled
                 onBackRequested: root.modeRequested("quick")
-                onBluetoothEnabledRequested: state => control.bluetoothEnabled = state
-                onOptionRequested: option => control.notice = option + " · pendiente de conexión con PAPI"
+                onSettingsRequested: control.notice = "Configuración de Bluetooth · pendiente"
+                onDeviceRequested: name => control.notice = name
             }
             Sound.View {}
         }

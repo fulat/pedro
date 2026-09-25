@@ -52,6 +52,7 @@ qt_add_qml_module(pedro_gui
         qml/media/Button.qml
         qml/wifi/View.qml
         qml/bluetooth/View.qml
+        qml/bluetooth/Device.qml
         qml/sound/View.qml
         qml/option/Row.qml
         qml/toggle/Switch.qml
