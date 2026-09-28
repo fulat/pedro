@@ -3,14 +3,36 @@
 #include <pedro/papi/filesystem/filesystem.hpp>
 
 #include <QDir>
+#include <QFutureWatcher>
 #include <QStandardPaths>
 #include <QVariantMap>
+#include <QtConcurrentRun>
 
 #include <cstdlib>
 #include <exception>
+#include <optional>
 #include <utility>
 
 namespace {
+
+    template <typename Snapshot> struct Refresh {
+            std::optional<Snapshot> snapshot;
+            QString error;
+    };
+
+    template <typename Manager> auto readSnapshot() {
+
+        using Result = Refresh<decltype(Manager{}.snapshot())>;
+        Result result;
+
+        try {
+            result.snapshot = Manager{}.snapshot();
+        } catch (const std::exception& error) {
+            result.error = QString::fromUtf8(error.what());
+        }
+
+        return result;
+    }
 
     QString formatBytes(std::uint64_t bytes) {
         constexpr double gibibyte = 1024.0 * 1024.0 * 1024.0;
@@ -22,9 +44,9 @@ namespace {
         const auto hours = (totalSeconds % 86400) / 3600;
         const auto minutes = (totalSeconds % 3600) / 60;
         if (days > 0) {
-            return QStringLiteral("%1d %2h %3m").arg(days).arg(hours).arg(minutes);
+            return QStringLiteral("%1 d %2 h %3 min").arg(days).arg(hours).arg(minutes);
         }
-        return QStringLiteral("%1h %2m").arg(hours).arg(minutes);
+        return QStringLiteral("%1 h %2 min").arg(hours).arg(minutes);
     }
 
 } // namespace
@@ -140,10 +162,10 @@ void Backend::refreshSystem() {
             cpuUsage_ = *info.cpuUsagePercent;
         }
         memoryUsage_ = info.memory.usedPercent();
-        memorySummary_ = QStringLiteral("%1 of %2 used").arg(formatBytes(info.memory.usedBytes()), formatBytes(info.memory.totalBytes));
+        memorySummary_ = QStringLiteral("%1 de %2 en uso").arg(formatBytes(info.memory.usedBytes()), formatBytes(info.memory.totalBytes));
         emit systemChanged();
     } catch (const std::exception& error) {
-        setStatusMessage(QStringLiteral("System information error: %1").arg(error.what()));
+        setStatusMessage(QStringLiteral("Error de información del sistema: %1").arg(error.what()));
     }
 }
 
@@ -151,9 +173,9 @@ void Backend::loadDocument() {
     try {
         documentText_ = QString::fromStdString(Pedro::Papi::Filesystem::readFile(documentPath_.toStdString()));
         emit documentTextChanged();
-        setStatusMessage(QStringLiteral("Loaded %1 through PAPI").arg(documentPath_));
+        setStatusMessage(QStringLiteral("Se cargó %1 mediante PAPI").arg(documentPath_));
     } catch (const std::exception& error) {
-        setStatusMessage(QStringLiteral("Load failed: %1").arg(error.what()));
+        setStatusMessage(QStringLiteral("No se pudo cargar el archivo: %1").arg(error.what()));
     }
 }
 
@@ -162,24 +184,48 @@ void Backend::saveDocument(const QString& contents) {
         Pedro::Papi::Filesystem::writeFile(documentPath_.toStdString(), contents.toStdString());
         documentText_ = contents;
         emit documentTextChanged();
-        setStatusMessage(QStringLiteral("Saved %1 through PAPI").arg(documentPath_));
+        setStatusMessage(QStringLiteral("Se guardó %1 mediante PAPI").arg(documentPath_));
     } catch (const std::exception& error) {
-        setStatusMessage(QStringLiteral("Save failed: %1").arg(error.what()));
+        setStatusMessage(QStringLiteral("No se pudo guardar el archivo: %1").arg(error.what()));
     }
 }
 
 void Backend::createDirectory(const QString& path) {
     try {
         Pedro::Papi::Filesystem::createDirectory(path.toStdString());
-        setStatusMessage(QStringLiteral("Created %1 through PAPI").arg(path));
+        setStatusMessage(QStringLiteral("Se creó %1 mediante PAPI").arg(path));
     } catch (const std::exception& error) {
-        setStatusMessage(QStringLiteral("Create folder failed: %1").arg(error.what()));
+        setStatusMessage(QStringLiteral("No se pudo crear la carpeta: %1").arg(error.what()));
     }
 }
 
 void Backend::refreshWifi() {
-    try {
-        const auto snapshot = wifi_.snapshot();
+
+    if (wifiRefreshPending_) {
+        return;
+    }
+
+    using Result = Refresh<Pedro::Papi::Network::Wifi::Snapshot>;
+    auto* watcher = new QFutureWatcher<Result>(this);
+    wifiRefreshPending_ = true;
+
+    connect(watcher, &QFutureWatcher<Result>::finished, this, [this, watcher] {
+        const auto result = watcher->result();
+        watcher->deleteLater();
+        wifiRefreshPending_ = false;
+
+        if (!result.snapshot.has_value()) {
+            wifiAvailable_ = false;
+            wifiEnabled_ = false;
+            wifiConnected_ = false;
+            connectedWifiName_.clear();
+            wifiNetworks_.clear();
+            wifiError_ = result.error;
+            emit wifiChanged();
+            return;
+        }
+
+        const auto& snapshot = *result.snapshot;
         QVariantList networks;
         networks.reserve(static_cast<qsizetype>(snapshot.accessPoints.size()));
 
@@ -199,15 +245,9 @@ void Backend::refreshWifi() {
         wifiNetworks_ = std::move(networks);
         wifiError_.clear();
         emit wifiChanged();
-    } catch (const std::exception& error) {
-        wifiAvailable_ = false;
-        wifiEnabled_ = false;
-        wifiConnected_ = false;
-        connectedWifiName_.clear();
-        wifiNetworks_.clear();
-        wifiError_ = QString::fromUtf8(error.what());
-        emit wifiChanged();
-    }
+    });
+
+    watcher->setFuture(QtConcurrent::run([] { return readSnapshot<Pedro::Papi::Network::Wifi::Manager>(); }));
 }
 
 void Backend::setWifiEnabled(bool enabled) {
@@ -246,8 +286,31 @@ void Backend::scanWifi() {
 }
 
 void Backend::refreshBluetooth() {
-    try {
-        const auto snapshot = bluetooth_.snapshot();
+
+    if (bluetoothRefreshPending_) {
+        return;
+    }
+
+    using Result = Refresh<Pedro::Papi::Bluetooth::Snapshot>;
+    auto* watcher = new QFutureWatcher<Result>(this);
+    bluetoothRefreshPending_ = true;
+
+    connect(watcher, &QFutureWatcher<Result>::finished, this, [this, watcher] {
+        const auto result = watcher->result();
+        watcher->deleteLater();
+        bluetoothRefreshPending_ = false;
+
+        if (!result.snapshot.has_value()) {
+            bluetoothAvailable_ = false;
+            bluetoothEnabled_ = false;
+            bluetoothScanning_ = false;
+            bluetoothDevices_.clear();
+            bluetoothError_ = result.error;
+            emit bluetoothChanged();
+            return;
+        }
+
+        const auto& snapshot = *result.snapshot;
         QVariantList devices;
         devices.reserve(static_cast<qsizetype>(snapshot.devices.size()));
 
@@ -266,14 +329,9 @@ void Backend::refreshBluetooth() {
         bluetoothDevices_ = std::move(devices);
         bluetoothError_.clear();
         emit bluetoothChanged();
-    } catch (const std::exception& error) {
-        bluetoothAvailable_ = false;
-        bluetoothEnabled_ = false;
-        bluetoothScanning_ = false;
-        bluetoothDevices_.clear();
-        bluetoothError_ = QString::fromUtf8(error.what());
-        emit bluetoothChanged();
-    }
+    });
+
+    watcher->setFuture(QtConcurrent::run([] { return readSnapshot<Pedro::Papi::Bluetooth::Manager>(); }));
 }
 
 void Backend::setBluetoothEnabled(bool enabled) {

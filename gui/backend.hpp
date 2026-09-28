@@ -110,6 +110,7 @@ class Backend final : public QObject {
         bool wifiAvailable_{false};
         bool wifiEnabled_{false};
         bool wifiConnected_{false};
+        bool wifiRefreshPending_{false};
         QString connectedWifiName_;
         bool wifiScanning_{false};
         QString wifiError_;
@@ -117,6 +118,7 @@ class Backend final : public QObject {
         bool bluetoothAvailable_{false};
         bool bluetoothEnabled_{false};
         bool bluetoothScanning_{false};
+        bool bluetoothRefreshPending_{false};
         QString bluetoothError_;
         QVariantList bluetoothDevices_;
 };

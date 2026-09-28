@@ -6,7 +6,6 @@ import QtQuick.Controls.Basic as Controls
 import gui
 import "../icon" as Icon
 import "../toggle" as Toggle
-import "../logic/theme.js" as Theme
 
 Item {
     id: root
@@ -32,15 +31,15 @@ Item {
                 implicitWidth: 42
                 implicitHeight: 42
                 radius: 21
-                color: "#4d1a2a40"
+                color: "#20ffffff"
                 border.width: 1
-                border.color: "#385f7692"
+                border.color: "#40ffffff"
 
                 Rectangle {
                     anchors.fill: parent
                     radius: parent.radius
-                    color: backMouse.pressed ? Theme.controlPressed
-                                             : backMouse.containsMouse ? Theme.controlHover : "transparent"
+                    color: backMouse.pressed ? "#34ffffff"
+                                             : backMouse.containsMouse ? "#22ffffff" : "transparent"
                 }
 
                 Icon.Tinted {
@@ -67,7 +66,7 @@ Item {
                 Controls.Label {
                     Layout.fillWidth: true
                     text: "Wi-Fi"
-                    color: Theme.textPrimary
+                    color: "#ffffff"
                     font.pixelSize: 20
                     font.weight: Font.DemiBold
                 }
@@ -77,7 +76,7 @@ Item {
                     text: Papi.wifiConnected
                           ? Papi.connectedWifiName + " · Conectado"
                           : Papi.wifiEnabled ? "Sin conexión" : "Desactivado"
-                    color: Papi.wifiConnected ? "#75e3ad" : Theme.textSecondary
+                    color: Papi.wifiConnected ? "#75e3ad" : "#d6dcdf"
                     font.pixelSize: 9
                     elide: Text.ElideRight
                 }
@@ -92,7 +91,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Theme.controlBorder
+            color: "#34ffffff"
         }
 
         RowLayout {
@@ -103,7 +102,7 @@ Item {
             Controls.Label {
                 Layout.fillWidth: true
                 text: "Redes disponibles"
-                color: Theme.textPrimary
+                color: "#ffffff"
                 font.pixelSize: 12
                 font.weight: Font.DemiBold
             }
@@ -129,7 +128,7 @@ Item {
 
                 contentItem: Controls.Label {
                     text: scanButton.text
-                    color: scanButton.enabled ? Theme.textPrimary : Theme.textSecondary
+                    color: scanButton.enabled ? "#ffffff" : "#d6dcdf"
                     font.pixelSize: 10
                     font.weight: Font.Medium
                     horizontalAlignment: Text.AlignHCenter
@@ -140,15 +139,15 @@ Item {
                     implicitWidth: 88
                     implicitHeight: 32
                     radius: 16
-                    color: "#4a18263a"
+                    color: "#20ffffff"
                     border.width: 1
-                    border.color: "#526b87a8"
+                    border.color: "#40ffffff"
 
                     Rectangle {
                         anchors.fill: parent
                         radius: parent.radius
-                        color: scanButton.down ? Theme.controlPressed
-                                               : scanButton.hovered ? Theme.controlHover : "transparent"
+                        color: scanButton.down ? "#34ffffff"
+                                               : scanButton.hovered ? "#22ffffff" : "transparent"
                     }
                 }
 
@@ -216,7 +215,7 @@ Item {
                         width: 78
                         height: 78
                         source: "../../assets/icons/wifi-off.svg"
-                        tint: "#91b7f4"
+                        tint: "#ffffff"
                     }
                 }
 
@@ -229,7 +228,7 @@ Item {
                             : Papi.wifiError !== ""
                               ? "No se pudieron cargar las redes"
                               : "No se encontraron redes"
-                    color: Theme.textPrimary
+                    color: "#ffffff"
                     font.pixelSize: 17
                     font.weight: Font.DemiBold
                     horizontalAlignment: Text.AlignHCenter
@@ -245,7 +244,7 @@ Item {
                             : Papi.wifiError !== ""
                               ? Papi.wifiError
                               : "No hay redes inalámbricas visibles"
-                    color: Theme.textPrimary
+                    color: "#ffffff"
                     font.pixelSize: 10
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
@@ -259,7 +258,7 @@ Item {
                           : !Papi.wifiEnabled
                             ? "Puedes volver a activarlo desde el interruptor superior."
                             : "Acércate al punto de acceso o vuelve a buscar."
-                    color: "#88a5d2"
+                    color: "#d6dcdf"
                     font.pixelSize: 10
                     lineHeight: 1.25
                     horizontalAlignment: Text.AlignHCenter
@@ -274,15 +273,15 @@ Item {
                     Layout.preferredWidth: 218
                     Layout.preferredHeight: 40
                     radius: height / 2
-                    color: "#35101d30"
+                    color: "#20ffffff"
                     border.width: 1
-                    border.color: "#4f6fa0c7"
+                    border.color: "#40ffffff"
 
                     Rectangle {
                         anchors.fill: parent
                         radius: parent.radius
-                        color: settingsMouse.pressed ? Theme.controlPressed
-                                                     : settingsMouse.containsMouse ? Theme.controlHover : "transparent"
+                        color: settingsMouse.pressed ? "#34ffffff"
+                                                     : settingsMouse.containsMouse ? "#22ffffff" : "transparent"
                     }
 
                     RowLayout {
@@ -293,19 +292,19 @@ Item {
                             source: "../../assets/icons/settings.svg"
                             Layout.preferredWidth: 18
                             Layout.preferredHeight: 18
-                            tint: "#75adff"
+                            tint: "#ffffff"
                         }
 
                         Controls.Label {
                             text: "Configuración de red"
-                            color: "#8ebaff"
+                            color: "#ffffff"
                             font.pixelSize: 11
                             font.weight: Font.Medium
                         }
 
                         Controls.Label {
                             text: "↗"
-                            color: "#75adff"
+                            color: "#ffffff"
                             font.pixelSize: 17
                             font.weight: Font.Medium
                         }
@@ -336,7 +335,7 @@ Item {
                 anchors.topMargin: 8
                 visible: Papi.wifiScanning
                 text: "Buscando redes…"
-                color: Theme.textSecondary
+                color: "#d6dcdf"
                 font.pixelSize: 10
             }
 

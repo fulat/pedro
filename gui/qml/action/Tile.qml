@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import "../icon" as Icon
-import "../logic/theme.js" as Theme
 
 Rectangle {
     id: root
@@ -13,10 +12,10 @@ Rectangle {
     property bool separator: false
     signal activated()
     Layout.fillWidth: true
-    implicitHeight: 62
+    implicitHeight: 76
     radius: 8
-    color: mouse.pressed ? Theme.controlPressed
-                         : mouse.containsMouse ? Theme.controlHover : "transparent"
+    color: mouse.pressed ? "#34ffffff"
+                         : mouse.containsMouse ? "#22ffffff" : "transparent"
 
     ColumnLayout {
         anchors.centerIn: parent
@@ -24,14 +23,14 @@ Rectangle {
         Icon.Tinted {
             Layout.alignment: Qt.AlignHCenter
             source: root.icon
-            Layout.preferredWidth: 21
-            Layout.preferredHeight: 21
+            Layout.preferredWidth: 25
+            Layout.preferredHeight: 25
         }
         Label {
             Layout.alignment: Qt.AlignHCenter
             text: root.title
-            color: Theme.textPrimary
-            font.pixelSize: 9
+            color: "#ffffff"
+            font.pixelSize: 13
             font.weight: Font.Medium
         }
     }
@@ -42,7 +41,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         width: 1
         height: 38
-        color: Theme.controlBorder
+        color: "#34ffffff"
     }
 
     MouseArea {

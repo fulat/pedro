@@ -14,9 +14,9 @@ Item {
             id: pathField
             Layout.fillWidth: true
             text: Papi.documentPath
-            color: Theme.textPrimary
+            color: "#ffffff"
             placeholderText: "Ruta absoluta del archivo"
-            placeholderTextColor: Theme.textSecondary
+            placeholderTextColor: "#d6dcdf"
             onEditingFinished: Papi.documentPath = text
             background: Rectangle { radius: 8; color: "#34ffffff"; border.color: "#28ffffff" }
         }
@@ -44,11 +44,11 @@ Item {
             TextArea {
                 id: editor
                 text: Papi.documentText
-                color: Theme.textPrimary
+                color: "#ffffff"
                 selectionColor: Theme.accent
                 selectedTextColor: "#15191e"
                 placeholderText: "Escribe aquí y guarda mediante PAPI…"
-                placeholderTextColor: Theme.textSecondary
+                placeholderTextColor: "#d6dcdf"
                 wrapMode: TextEdit.Wrap
                 background: Rectangle { radius: 9; color: "#2b000000"; border.color: "#28ffffff" }
             }
@@ -60,7 +60,7 @@ Item {
         Label {
             Layout.fillWidth: true
             text: Papi.statusMessage.length ? Papi.statusMessage : "Listo"
-            color: Theme.textPrimary
+            color: "#ffffff"
             font.pixelSize: 10
             elide: Text.ElideMiddle
         }

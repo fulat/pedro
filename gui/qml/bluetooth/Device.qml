@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import "../icon" as Icon
-import "../logic/theme.js" as Theme
 
 Rectangle {
     id: root
@@ -25,8 +24,8 @@ Rectangle {
 
     implicitHeight: 68
     radius: 9
-    color: mouse.pressed ? Theme.controlPressed
-                         : mouse.containsMouse ? Theme.controlHover : "transparent"
+    color: mouse.pressed ? "#34ffffff"
+                         : mouse.containsMouse ? "#22ffffff" : "transparent"
 
     RowLayout {
         anchors.fill: parent
@@ -38,16 +37,16 @@ Rectangle {
             Layout.preferredWidth: 46
             Layout.preferredHeight: 46
             radius: width / 2
-            color: "#401a2a40"
+            color: "#20ffffff"
             border.width: 1
-            border.color: root.connected ? "#526f91ba" : "#385f7692"
+            border.color: root.connected ? "#58ffffff" : "#36ffffff"
 
             Icon.Tinted {
                 anchors.centerIn: parent
                 width: 27
                 height: 27
                 source: root.iconSource
-                tint: root.connected ? "#dce9ff" : "#b9c8df"
+                tint: "#ffffff"
             }
         }
 
@@ -58,7 +57,7 @@ Rectangle {
             Controls.Label {
                 Layout.fillWidth: true
                 text: root.name
-                color: Theme.textPrimary
+                color: "#ffffff"
                 font.pixelSize: 13
                 font.weight: root.connected ? Font.DemiBold : Font.Medium
                 elide: Text.ElideRight
@@ -66,7 +65,7 @@ Rectangle {
 
             Controls.Label {
                 text: root.connected ? "Conectado" : root.paired ? "Emparejado" : "Disponible"
-                color: root.connected ? "#579cff" : Theme.textSecondary
+                color: root.connected ? "#579cff" : "#d6dcdf"
                 font.pixelSize: 10
             }
         }
@@ -75,7 +74,7 @@ Rectangle {
             source: "../../assets/icons/chevron.svg"
             Layout.preferredWidth: 8
             Layout.preferredHeight: 13
-            tint: "#c8d6ee"
+            tint: "#ffffff"
         }
     }
 
@@ -86,7 +85,7 @@ Rectangle {
         anchors.leftMargin: 6
         anchors.rightMargin: 6
         height: 1
-        color: Theme.controlBorder
+        color: "#34ffffff"
     }
 
     MouseArea {

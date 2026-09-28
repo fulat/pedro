@@ -2,12 +2,11 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import "../logic/pixel.js" as Pixel
-import "../logic/theme.js" as Theme
 
 Item {
     id: root
     property url source
-    property color tint: Theme.textPrimary
+    property color tint: "#ffffff"
     readonly property real pixelRatio: Math.max(1, Screen.devicePixelRatio)
     implicitWidth: 24
     implicitHeight: 24

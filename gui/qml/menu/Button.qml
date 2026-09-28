@@ -6,6 +6,7 @@ import "../logic/theme.js" as Theme
 
 Button {
     id: root
+    property bool strongText: false
     leftPadding: 10
     rightPadding: 10
     topPadding: 7
@@ -15,7 +16,7 @@ Button {
         text: root.text
         color: Theme.textPrimary
         font.pixelSize: Theme.fontNormal
-        font.weight: Font.Medium
+        font.weight: root.strongText ? Font.Bold : Font.Medium
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
     }

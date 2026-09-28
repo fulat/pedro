@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import "../icon" as Icon
-import "../logic/theme.js" as Theme
 
 Item {
     id: root
@@ -12,7 +11,7 @@ Item {
     property url icon
     property real level: 0.5
     Layout.fillWidth: true
-    implicitHeight: 44
+    implicitHeight: 56
 
     RowLayout {
         anchors.fill: parent
@@ -22,14 +21,14 @@ Item {
 
         Icon.Tinted {
             source: root.icon
-            Layout.preferredWidth: 21
-            Layout.preferredHeight: 21
+            Layout.preferredWidth: 25
+            Layout.preferredHeight: 25
         }
         Label {
-            Layout.preferredWidth: 48
+            Layout.preferredWidth: 64
             text: root.title
-            color: Theme.textPrimary
-            font.pixelSize: 11
+            color: "#ffffff"
+            font.pixelSize: 15
             font.weight: Font.Medium
         }
         Slider {

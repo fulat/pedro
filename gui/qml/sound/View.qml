@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import "../icon" as Icon
-import "../logic/theme.js" as Theme
 
 Item {
     id: root
@@ -65,15 +64,15 @@ Item {
             Layout.preferredWidth: 34
             Layout.preferredHeight: 34
             radius: 9
-            color: settingsMouse.pressed ? Theme.controlPressed
-                                         : settingsMouse.containsMouse ? Theme.controlHover : "transparent"
+            color: settingsMouse.pressed ? "#34ffffff"
+                                         : settingsMouse.containsMouse ? "#22ffffff" : "transparent"
 
             Icon.Tinted {
                 anchors.centerIn: parent
                 source: "../../assets/icons/chevron.svg"
                 width: 8
                 height: 13
-                tint: Theme.textPrimary
+                tint: "#ffffff"
             }
 
             MouseArea {

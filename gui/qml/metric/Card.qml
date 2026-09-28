@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
-import "../logic/theme.js" as Theme
 
 Rectangle {
     id: root
@@ -19,11 +18,11 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 9
         spacing: 2
-        Label { text: root.label; color: Theme.textSecondary; font.pixelSize: 10 }
+        Label { text: root.label; color: "#d6dcdf"; font.pixelSize: 10 }
         Label {
             Layout.fillWidth: true
             text: root.value
-            color: Theme.textPrimary
+            color: "#ffffff"
             font.pixelSize: 14
             font.weight: Font.Medium
             elide: Text.ElideRight

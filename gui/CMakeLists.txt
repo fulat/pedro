@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # The GUI is Pedro's graphical shell: a Qt 6 Quick / QML application
 # that boots on top of the compositor. It is a regular Linux ELF
 # executable (no .app bundle, no Win32 GUI subsystem).
-find_package(Qt6 REQUIRED COMPONENTS Quick Svg)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Quick Svg)
 
 qt_standard_project_setup(REQUIRES 6.5)
 qt_policy(SET QTP0004 NEW)
@@ -95,6 +95,7 @@ set_target_properties(pedro_gui PROPERTIES
 
 target_link_libraries(pedro_gui
         PRIVATE
+        Qt6::Concurrent
         Qt6::Quick
         Qt6::Svg
         pedro_papi

@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import "../icon" as Icon
-import "../logic/theme.js" as Theme
 
 Rectangle {
     id: root
@@ -16,14 +15,14 @@ Rectangle {
 
     implicitHeight: 58
     radius: 9
-    color: connected ? "#182d4666" : "transparent"
+    color: connected ? "#1dffffff" : "transparent"
     border.width: connected ? 1 : 0
-    border.color: "#4f6fa0c7"
+    border.color: "#45ffffff"
 
     Rectangle {
         anchors.fill: parent
         radius: parent.radius
-        color: hover.hovered ? Theme.controlHover : "transparent"
+        color: hover.hovered ? "#22ffffff" : "transparent"
     }
 
     RowLayout {
@@ -36,7 +35,7 @@ Rectangle {
             source: "../../assets/icons/wifi.svg"
             Layout.preferredWidth: 27
             Layout.preferredHeight: 27
-            tint: root.connected ? "#75adff" : root.strength >= 50 ? "#d7e5fa" : "#8b9ab0"
+            tint: "#ffffff"
         }
 
         ColumnLayout {
@@ -46,7 +45,7 @@ Rectangle {
             Controls.Label {
                 Layout.fillWidth: true
                 text: root.name
-                color: Theme.textPrimary
+                color: "#ffffff"
                 font.pixelSize: 12
                 font.weight: root.connected ? Font.DemiBold : Font.Medium
                 elide: Text.ElideRight
@@ -65,7 +64,7 @@ Rectangle {
 
                 Controls.Label {
                     text: root.connected ? "Conectado" : root.secured ? "Protegida" : "Abierta"
-                    color: root.connected ? "#75e3ad" : Theme.textSecondary
+                    color: root.connected ? "#75e3ad" : "#d6dcdf"
                     font.pixelSize: 9
                 }
             }
@@ -73,7 +72,7 @@ Rectangle {
 
         Controls.Label {
             text: root.strength + "%"
-            color: root.strength >= 65 ? "#9ac0ff" : Theme.textSecondary
+            color: root.strength >= 65 ? "#9ac0ff" : "#d6dcdf"
             font.pixelSize: 10
             font.weight: Font.Medium
         }

@@ -28,20 +28,20 @@ Item {
             Metric.Card { label: "Arquitectura"; value: Papi.architecture }
         }
         Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: "#28ffffff" }
-        Label { text: "Kernel"; color: Theme.textSecondary; font.pixelSize: 10 }
+        Label { text: "Núcleo"; color: "#d6dcdf"; font.pixelSize: 10 }
         Label {
             Layout.fillWidth: true
             text: Papi.kernel
-            color: Theme.textPrimary
+            color: "#ffffff"
             font.pixelSize: 12
             wrapMode: Text.Wrap
         }
-        Label { text: Papi.memorySummary; color: Theme.textSecondary; font.pixelSize: 11 }
+        Label { text: Papi.memorySummary; color: "#d6dcdf"; font.pixelSize: 11 }
         Item { Layout.fillHeight: true }
         Label {
             Layout.fillWidth: true
             text: "Información real de Ubuntu a través de PAPI"
-            color: Theme.textSecondary
+            color: "#d6dcdf"
             font.pixelSize: 10
             horizontalAlignment: Text.AlignHCenter
         }

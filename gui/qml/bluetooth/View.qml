@@ -7,10 +7,11 @@ import gui
 import "../icon" as Icon
 import "../option" as Option
 import "../toggle" as Toggle
-import "../logic/theme.js" as Theme
 
 Item {
     id: root
+
+    property bool scanAfterRefresh: false
 
     signal backRequested()
     signal settingsRequested()
@@ -20,10 +21,22 @@ Item {
         if (!visible)
             return
 
+        scanAfterRefresh = true
         Papi.refreshBluetooth()
+    }
 
-        if (Papi.bluetoothAvailable && Papi.bluetoothEnabled)
-            Papi.scanBluetooth()
+    Connections {
+        target: Papi
+
+        function onBluetoothChanged() {
+            if (!root.scanAfterRefresh)
+                return
+
+            root.scanAfterRefresh = false
+
+            if (root.visible && Papi.bluetoothAvailable && Papi.bluetoothEnabled)
+                Papi.scanBluetooth()
+        }
     }
 
     ColumnLayout {
@@ -39,15 +52,15 @@ Item {
                 implicitWidth: 42
                 implicitHeight: 42
                 radius: 21
-                color: "#4d1a2a40"
+                color: "#20ffffff"
                 border.width: 1
-                border.color: "#385f7692"
+                border.color: "#40ffffff"
 
                 Rectangle {
                     anchors.fill: parent
                     radius: parent.radius
-                    color: backMouse.pressed ? Theme.controlPressed
-                                             : backMouse.containsMouse ? Theme.controlHover : "transparent"
+                    color: backMouse.pressed ? "#34ffffff"
+                                             : backMouse.containsMouse ? "#22ffffff" : "transparent"
                 }
 
                 Icon.Tinted {
@@ -75,7 +88,7 @@ Item {
                 Controls.Label {
                     Layout.fillWidth: true
                     text: "Bluetooth"
-                    color: Theme.textPrimary
+                    color: "#ffffff"
                     font.pixelSize: 20
                     font.weight: Font.DemiBold
                 }
@@ -87,7 +100,7 @@ Item {
                           : Papi.bluetoothEnabled
                             ? "Activado · visible para dispositivos"
                             : "Desactivado"
-                    color: Theme.textSecondary
+                    color: "#d6dcdf"
                     font.pixelSize: 9
                     elide: Text.ElideRight
                 }
@@ -102,7 +115,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Theme.controlBorder
+            color: "#34ffffff"
         }
 
         RowLayout {
@@ -114,7 +127,7 @@ Item {
             Controls.Label {
                 Layout.fillWidth: true
                 text: "Dispositivos"
-                color: Theme.textPrimary
+                color: "#ffffff"
                 font.pixelSize: 13
                 font.weight: Font.DemiBold
             }
@@ -137,7 +150,7 @@ Item {
 
                 contentItem: Controls.Label {
                     text: scanButton.text
-                    color: scanButton.enabled ? Theme.textPrimary : Theme.textSecondary
+                    color: scanButton.enabled ? "#ffffff" : "#d6dcdf"
                     font.pixelSize: 10
                     font.weight: Font.Medium
                     horizontalAlignment: Text.AlignHCenter
@@ -148,15 +161,15 @@ Item {
                     implicitWidth: Papi.bluetoothDevices.length > 0 ? 104 : 88
                     implicitHeight: 34
                     radius: 17
-                    color: "#4a18263a"
+                    color: "#20ffffff"
                     border.width: 1
-                    border.color: "#526b87a8"
+                    border.color: "#40ffffff"
 
                     Rectangle {
                         anchors.fill: parent
                         radius: parent.radius
-                        color: scanButton.down ? Theme.controlPressed
-                                               : scanButton.hovered ? Theme.controlHover : "transparent"
+                        color: scanButton.down ? "#34ffffff"
+                                               : scanButton.hovered ? "#22ffffff" : "transparent"
                     }
                 }
 
@@ -204,16 +217,16 @@ Item {
                     Layout.preferredWidth: 106
                     Layout.preferredHeight: 106
                     radius: width / 2
-                    color: "#101c2d46"
+                    color: "#16ffffff"
                     border.width: 1
-                    border.color: "#41617fa8"
+                    border.color: "#36ffffff"
 
                     Icon.Tinted {
                         anchors.centerIn: parent
                         width: 54
                         height: 54
                         source: "../../assets/icons/bluetooth.svg"
-                        tint: "#a8c5f0"
+                        tint: "#ffffff"
                     }
                 }
 
@@ -227,7 +240,7 @@ Item {
                             : Papi.bluetoothScanning
                               ? "Buscando dispositivos…"
                               : "No se encontraron dispositivos"
-                    color: Theme.textPrimary
+                    color: "#ffffff"
                     font.pixelSize: 17
                     font.weight: Font.DemiBold
                     horizontalAlignment: Text.AlignHCenter
@@ -247,7 +260,7 @@ Item {
                               : Papi.bluetoothScanning
                                 ? "Mantén los dispositivos cercanos encendidos\ny en modo visible."
                                 : "Asegúrate de que los dispositivos cercanos\nestén encendidos y en modo visible."
-                    color: Theme.textSecondary
+                    color: "#d6dcdf"
                     font.pixelSize: 11
                     lineHeight: 1.25
                     horizontalAlignment: Text.AlignHCenter
@@ -259,7 +272,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Theme.controlBorder
+            color: "#34ffffff"
         }
 
         Option.Row {

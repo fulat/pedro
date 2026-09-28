@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import "../icon" as Icon
 import "../toggle" as Toggle
-import "../logic/theme.js" as Theme
 
 Rectangle {
     id: root
@@ -23,10 +22,10 @@ Rectangle {
     signal toggleRequested(bool state)
     signal detailsRequested()
     Layout.fillWidth: true
-    implicitHeight: 55
+    implicitHeight: 68
     radius: 9
-    color: mouse.pressed ? Theme.controlPressed
-                         : root.hovered ? Theme.controlHover : "transparent"
+    color: mouse.pressed ? "#34ffffff"
+                         : root.hovered ? "#22ffffff" : "transparent"
 
     function setActive(state) {
         if (!root.toggleable)
@@ -56,19 +55,19 @@ Rectangle {
         spacing: 10
 
         Rectangle {
-            implicitWidth: 42
-            implicitHeight: 42
-            radius: 21
-            color: "#4d1a2a40"
+            implicitWidth: 48
+            implicitHeight: 48
+            radius: 24
+            color: "#20ffffff"
             border.width: 1
-            border.color: root.active ? "#526f91ba" : "#385f7692"
+            border.color: root.active ? "#58ffffff" : "#36ffffff"
             Icon.Tinted {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: root.symbolOffsetY
                 width: root.symbolSize
                 height: root.symbolSize
                 source: root.icon
-                tint: root.active ? "#ffffff" : "#aeb8c7"
+                tint: "#ffffff"
             }
         }
 
@@ -78,8 +77,8 @@ Rectangle {
             Label {
                 Layout.fillWidth: true
                 text: root.title
-                color: Theme.textPrimary
-                font.pixelSize: 12
+                color: "#ffffff"
+                font.pixelSize: 16
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -93,8 +92,8 @@ Rectangle {
                 }
                 Label {
                     text: root.subtitle
-                    color: Theme.textSecondary
-                    font.pixelSize: 9
+                    color: "#d6dcdf"
+                    font.pixelSize: 13
                     elide: Text.ElideRight
                 }
             }
@@ -109,7 +108,7 @@ Rectangle {
             source: "../../assets/icons/chevron.svg"
             Layout.preferredWidth: 8
             Layout.preferredHeight: 12
-            tint: "#c8d6ee"
+            tint: "#ffffff"
         }
     }
 }

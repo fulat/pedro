@@ -6,10 +6,10 @@ import "../media" as Media
 import "../quick" as Quick
 import "../slider" as Slider
 import "../toggle" as Toggle
-import "../logic/theme.js" as Theme
 
 Item {
     id: root
+    implicitHeight: 660
     property string notice: Papi.wifiError !== "" ? Papi.wifiError : "Wi-Fi conectado mediante PAPI Network"
     readonly property bool wifiEnabled: Papi.wifiEnabled
     readonly property bool wifiConnected: Papi.wifiConnected
@@ -28,7 +28,7 @@ Item {
                 id: wifiTile
                 title: "Wi-Fi"
                 icon: "../../assets/icons/wifi.svg"
-                symbolSize: 22
+                symbolSize: 26
                 symbolOffsetY: 1
                 active: Papi.wifiEnabled
                 toggleable: true
@@ -59,7 +59,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Theme.controlBorder
+            color: "#34ffffff"
         }
 
         ColumnLayout {
@@ -72,12 +72,12 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Theme.controlBorder
+            color: "#34ffffff"
         }
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 144
+            Layout.preferredHeight: 186
 
             GridLayout {
                 anchors.fill: parent
@@ -107,11 +107,11 @@ Item {
                     onActivated: root.notice = "La detección de pantallas todavía está pendiente"
                 }
                 Toggle.Tile {
-                    title: "Night Light"
+                    title: "Luz nocturna"
                     subtitle: active ? "Automático" : "Desactivado"
                     icon: "../../assets/icons/brightness.svg"
                     active: true
-                    onActivated: root.notice = "Night Light se conectará al módulo de pantalla"
+                    onActivated: root.notice = "La luz nocturna se conectará al módulo de pantalla"
                 }
                 Toggle.Tile {
                     title: "Teclado"
@@ -134,15 +134,15 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
-                height: 126
-                color: Theme.controlBorder
+                height: 166
+                color: "#34ffffff"
             }
         }
 
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Theme.controlBorder
+            color: "#34ffffff"
         }
 
         Media.Card {
@@ -154,7 +154,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Theme.controlBorder
+            color: "#34ffffff"
         }
 
         GridLayout {

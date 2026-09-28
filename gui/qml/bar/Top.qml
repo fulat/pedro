@@ -1,12 +1,9 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls.Basic
+import QtQuick.Effects
 
-import "../menu" as Menu
-import "../status" as Status
+import "../icon" as Icon
 import "../logic/clock.js" as Clock
-import "../logic/pixel.js" as Pixel
-import "../logic/theme.js" as Theme
 
 Item {
     id: root
@@ -14,357 +11,357 @@ Item {
     property int windowWidth
     property date currentTime
     property string activeSource: ""
-    property real preferredExpandedWidth: 1030
 
     signal panelRequested(string mode, real anchorX, string source)
     signal desktopRequested
 
-    readonly property real barHeight: 48
-    readonly property real notchCollapsedWidth: Math.max(350, Math.min(350, width * 0.25))
-    readonly property real notchExpandedHeight: 130
-    readonly property real notchMaximumExpandedWidth: notchExpandedHeight * 828 / 110
-    readonly property real notchExpandedWidth: Math.max(notchCollapsedWidth, Math.min(preferredExpandedWidth, notchMaximumExpandedWidth))
-    readonly property bool notchExpanded: notchHover.hovered
-    readonly property real notchWidth: notchExpanded ? notchExpandedWidth : notchCollapsedWidth
-    readonly property real notchHeight: notchExpanded ? notchExpandedHeight : barHeight
-    readonly property real notchHorizontalPadding: 40
-    readonly property real notchExpandedHorizontalPadding: 100
-    readonly property real notchTopPadding: 3
-    readonly property real notchBottomPadding: 3
-    readonly property int notchAnimationDuration: 500
-    readonly property int notchAnimationEasing: Easing.InOutCubic
+    readonly property real barHeight: 64
 
-    height: notchHeight
-
-    Behavior on height {
-        NumberAnimation {
-            duration: root.notchAnimationDuration
-            easing.type: root.notchAnimationEasing
-        }
-    }
+    height: barHeight
 
     function requestPanel(mode, sourceName, item) {
         const point = item.mapToItem(root, item.width / 2, item.height);
-
         root.panelRequested(mode, point.x, sourceName);
     }
 
     Item {
-        id: notch
+        id: logoButton
 
-        readonly property real contentPadding: root.notchExpanded ? root.notchExpandedHorizontalPadding : root.notchHorizontalPadding
-        readonly property real contentWidth: width - contentPadding * 2
-        readonly property real sectionSpacing: 12
-        readonly property real sectionWidth: (contentWidth - sectionSpacing * 2) / 3
+        x: 22
+        y: 5
+        width: 54
+        height: 54
 
-        z: 1
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        width: root.notchWidth
-        height: root.notchHeight
-
-        Behavior on width {
-            NumberAnimation {
-                duration: root.notchAnimationDuration
-                easing.type: root.notchAnimationEasing
-            }
+        MattePill {
+            anchors.fill: parent
+            cornerRadius: logoButton.width / 2
+            softShadow: true
         }
 
-        Behavior on height {
-            NumberAnimation {
-                duration: root.notchAnimationDuration
-                easing.type: root.notchAnimationEasing
+        Rectangle {
+            anchors.fill: parent
+            radius: width / 2
+            color: logoMouse.containsMouse ? "#16ffffff" : "transparent"
+
+            Behavior on color {
+                ColorAnimation { duration: 140 }
             }
         }
 
         Image {
-            anchors.fill: parent
-            source: "../../assets/notch.svg"
-            sourceSize: Qt.size(Pixel.physical(width, Screen.devicePixelRatio), Pixel.physical(height, Screen.devicePixelRatio))
-            fillMode: Image.Stretch
-            opacity: 0.86
+            anchors.centerIn: parent
+            width: 34
+            height: 34
+            source: "../../assets/logo.png"
+            fillMode: Image.PreserveAspectFit
             smooth: true
-            mipmap: false
-            cache: true
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                colorization: 1
+                colorizationColor: "#ffffff"
+            }
         }
 
-        Label {
-            Layout.leftMargin: 8
-            Layout.rightMargin: 8
-            text: Clock.format(root.currentTime)
-            color: Theme.textPrimary
-            font.pixelSize: Theme.fontMedium
-            font.weight: Font.Bold
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        // Player {
-        //     id: player
-        //
-        //     z: 1
-        //     anchors.left: parent.left
-        //     anchors.leftMargin: notch.contentPadding
-        //     anchors.top: parent.top
-        //     anchors.topMargin: root.notchExpanded ? 38 : root.notchTopPadding
-        //     width: root.notchExpanded ? notch.sectionWidth : notch.contentWidth
-        //     height: root.notchExpanded ? 96 : root.barHeight - root.notchTopPadding - root.notchBottomPadding
-        //     expanded: root.notchExpanded
-        //
-        //     Behavior on width {
-        //         NumberAnimation {
-        //             duration: root.notchAnimationDuration
-        //             easing.type: root.notchAnimationEasing
-        //         }
-        //     }
-        //
-        //     Behavior on height {
-        //         NumberAnimation {
-        //             duration: root.notchAnimationDuration
-        //             easing.type: root.notchAnimationEasing
-        //         }
-        //     }
-        //
-        //     Behavior on y {
-        //         NumberAnimation {
-        //             duration: root.notchAnimationDuration
-        //             easing.type: root.notchAnimationEasing
-        //         }
-        //     }
-        //
-        //     Behavior on x {
-        //         NumberAnimation {
-        //             duration: root.notchAnimationDuration
-        //             easing.type: root.notchAnimationEasing
-        //         }
-        //     }
-        // }
-        //
-        // Item {
-        //     id: centerSection
-        //
-        //     x: notch.contentPadding + notch.sectionWidth + notch.sectionSpacing
-        //     y: 38
-        //     width: notch.sectionWidth
-        //     height: 96
-        //     visible: root.notchExpanded
-        //     clip: true
-        // }
-        //
-        // Item {
-        //     id: rightSection
-        //
-        //     x: notch.contentPadding + (notch.sectionWidth + notch.sectionSpacing) * 2
-        //     y: 38
-        //     width: notch.sectionWidth
-        //     height: 96
-        //     visible: root.notchExpanded
-        //     clip: true
-        // }
-
-        HoverHandler {
-            id: notchHover
-        }
-    }
-
-    Item {
-        id: leftZone
-
-        anchors.left: parent.left
-        anchors.right: notch.left
-        anchors.top: parent.top
-        anchors.rightMargin: 8
-        height: root.barHeight
-        clip: true
-
-        RowLayout {
+        MouseArea {
+            id: logoMouse
             anchors.fill: parent
-            anchors.leftMargin: 18
-            spacing: 2
-
-            Menu.Button {
-                id: systemButton
-
-                highlighted: root.activeSource === "system"
-                Layout.preferredWidth: 38
-                Layout.preferredHeight: 38
-                Layout.rightMargin: 7
-                leftPadding: 5
-                rightPadding: 7
-                topPadding: 4
-                bottomPadding: 4
-                onClicked: root.requestPanel("system", "system", systemButton)
-
-                contentItem: RowLayout {
-                    Image {
-                        Layout.preferredWidth: 27
-                        Layout.preferredHeight: 27
-                        source: "../../assets/logo.png"
-                        sourceSize: Qt.size(Pixel.physical(width, Screen.devicePixelRatio), Pixel.physical(height, Screen.devicePixelRatio))
-                        fillMode: Image.PreserveAspectFit
-                        smooth: true
-                        mipmap: false
-                        cache: true
-                    }
-                }
-            }
-
-            Menu.Button {
-                text: "Escritorio"
-                onClicked: root.desktopRequested()
-            }
-
-            Menu.Button {
-                id: filesButton
-                highlighted: root.activeSource === "files"
-                text: "Archivos"
-                onClicked: root.requestPanel("files", "files", filesButton)
-            }
-
-            Menu.Button {
-                id: editButton
-                highlighted: root.activeSource === "edit"
-                text: "Editar"
-                visible: root.windowWidth >= 1180
-                onClicked: root.requestPanel("about", "edit", editButton)
-            }
-
-            Menu.Button {
-                id: viewButton
-                highlighted: root.activeSource === "view"
-                text: "Vista"
-                visible: root.windowWidth >= 1320
-                onClicked: root.requestPanel("about", "view", viewButton)
-            }
-
-            Menu.Button {
-                id: windowButton
-                highlighted: root.activeSource === "window"
-                text: "Ventana"
-                visible: root.windowWidth >= 1460
-                onClicked: root.requestPanel("about", "window", windowButton)
-            }
-
-            Menu.Button {
-                id: helpButton
-                highlighted: root.activeSource === "help"
-                text: "Ayuda"
-                visible: root.windowWidth >= 1600
-                onClicked: root.requestPanel("about", "help", helpButton)
-            }
-
-            Item {
-                Layout.fillWidth: true
-            }
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.requestPanel("system", "system", logoButton)
         }
+
+        ToolTip.visible: logoMouse.containsMouse
+        ToolTip.delay: 500
+        ToolTip.text: "Pedro OS"
     }
 
     Item {
-        id: rightZone
+        id: statusPill
 
-        anchors.left: notch.right
+        anchors.top: parent.top
+        anchors.topMargin: 6
         anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.leftMargin: 8
-        height: root.barHeight
-        clip: true
+        anchors.rightMargin: 20
+        width: statusRow.width + 24
+        height: 48
 
-        RowLayout {
+        MattePill {
             anchors.fill: parent
-            anchors.rightMargin: 15
-            spacing: 5
+            cornerRadius: 24
+        }
 
-            Item {
-                Layout.fillWidth: true
-            }
+        Row {
+            id: statusRow
 
-            Status.Button {
+            anchors.centerIn: parent
+            spacing: 8
+
+            TopAction {
                 id: searchButton
-                highlighted: root.activeSource === "search"
-                kind: "search"
+                icon: "../../assets/icons/search.svg"
                 description: "Buscar"
+                highlighted: root.activeSource === "search"
                 onActivated: root.requestPanel("about", "search", searchButton)
             }
 
-            Status.Button {
-                id: displayButton
-                highlighted: root.activeSource === "display"
-                kind: "display"
-                description: "Centro de control"
-                onActivated: root.requestPanel("quick", "display", displayButton)
-            }
-
-            Status.Button {
-                id: wifiButton
-                highlighted: root.activeSource === "wifi"
-                kind: "wifi"
-                description: "Wi-Fi"
-                onActivated: root.requestPanel("wifi", "wifi", wifiButton)
-            }
-
-            Status.Button {
-                id: bluetoothButton
-                highlighted: root.activeSource === "bluetooth"
-                kind: "bluetooth"
-                description: "Bluetooth"
-                onActivated: root.requestPanel("bluetooth", "bluetooth", bluetoothButton)
-            }
-
-            Status.Button {
-                id: soundButton
-                highlighted: root.activeSource === "sound"
-                kind: "sound"
-                description: "Sonido"
-                onActivated: root.requestPanel("sound", "sound", soundButton)
-            }
-
-            Status.Button {
-                id: batteryButton
-                highlighted: root.activeSource === "battery"
-                kind: "battery"
-                description: "Centro de control"
-                visible: root.windowWidth >= 1180
-                onActivated: root.requestPanel("quick", "battery", batteryButton)
-            }
-
-            // Label {
-            //     Layout.leftMargin: 8
-            //     Layout.rightMargin: 8
-            //     text: Clock.format(root.currentTime)
-            //     color: Theme.textPrimary
-            //     font.pixelSize: Theme.fontSmall
-            //     font.weight: Font.Medium
-            // }
-
             Rectangle {
-                id: profileButton
+                width: 1
+                height: 24
+                y: (statusRow.height - height) / 2
+                color: "#55ffffff"
+            }
 
-                Layout.preferredWidth: 29
-                Layout.preferredHeight: 29
-                radius: width / 2
-                color: "#263244"
-                border.color: "#88ffffff"
+            Item {
+                id: notificationsButton
+                width: 32
+                height: 38
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: parent.radius
-                    color: root.activeSource === "profile" ? "#0dffffff" : "transparent"
+                    radius: 16
+                    color: notificationMouse.containsMouse ? "#26ffffff" : "transparent"
+
+                    Behavior on color {
+                        ColorAnimation { duration: 140 }
+                    }
                 }
 
-                Label {
+                Canvas {
                     anchors.centerIn: parent
-                    text: "P"
-                    color: Theme.textPrimary
-                    font.pixelSize: Theme.fontSmall
-                    font.weight: Font.Bold
+                    width: 21
+                    height: 23
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        ctx.clearRect(0, 0, width, height);
+                        ctx.fillStyle = "#ffffff";
+                        ctx.beginPath();
+                        ctx.moveTo(4, 17);
+                        ctx.quadraticCurveTo(6, 15, 6, 10);
+                        ctx.quadraticCurveTo(6, 3, 10.5, 3);
+                        ctx.quadraticCurveTo(15, 3, 15, 10);
+                        ctx.quadraticCurveTo(15, 15, 17, 17);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(10.5, 20, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                Rectangle {
+                    width: 5
+                    height: 5
+                    radius: 3
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.rightMargin: 2
+                    anchors.topMargin: 4
+                    color: "#9ec8ff"
                 }
 
                 MouseArea {
+                    id: notificationMouse
                     anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.requestPanel("quick", "notifications", notificationsButton)
+                }
+            }
+
+            Rectangle {
+                id: controlButton
+                width: 34
+                height: 34
+                y: (statusRow.height - height) / 2
+                radius: 17
+                color: controlMouse.containsMouse ? "#67413a5a" : "#5d28264a"
+                border.width: 1
+                border.color: "#609dbbff"
+
+                Behavior on color {
+                    ColorAnimation { duration: 140 }
+                }
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 20
+                    height: 20
+                    radius: 10
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: "#6aeaff" }
+                        GradientStop { position: 0.48; color: "#7948ff" }
+                        GradientStop { position: 1; color: "#1445c8" }
+                    }
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 11
+                        height: 11
+                        radius: 6
+                        color: "#392ea0"
+                        border.color: "#c9f4ff"
+                    }
+                }
+
+                MouseArea {
+                    id: controlMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.requestPanel("quick", "control", controlButton)
+                }
+            }
+
+            TopAction {
+                id: wifiButton
+                icon: "../../assets/icons/wifi.svg"
+                description: "Wi-Fi"
+                highlighted: root.activeSource === "wifi"
+                onActivated: root.requestPanel("wifi", "wifi", wifiButton)
+            }
+
+            Text {
+                visible: root.windowWidth >= 760
+                y: (statusRow.height - height) / 2
+                text: "87%"
+                color: "#ffffff"
+                font.pixelSize: 14
+                font.weight: Font.Medium
+            }
+
+            Text {
+                visible: root.windowWidth >= 970
+                y: (statusRow.height - height) / 2
+                text: Clock.format(root.currentTime).split("   ")[0]
+                color: "#ffffff"
+                font.pixelSize: 14
+                font.weight: Font.Medium
+            }
+
+            Text {
+                y: (statusRow.height - height) / 2
+                text: Qt.formatTime(root.currentTime, "HH:mm")
+                color: "#ffffff"
+                font.pixelSize: 14
+                font.weight: Font.DemiBold
+            }
+
+            Rectangle {
+                id: profileButton
+                width: 36
+                height: 36
+                y: (statusRow.height - height) / 2
+                radius: 18
+                color: profileMouse.containsMouse ? "#80666666" : "#555555"
+                border.width: 1
+                border.color: "#74ffffff"
+
+                Behavior on color {
+                    ColorAnimation { duration: 140 }
+                }
+
+                Image {
+                    anchors.centerIn: parent
+                    width: 25
+                    height: 25
+                    source: "../../assets/logo.png"
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1
+                        colorizationColor: "#ffffff"
+                    }
+                }
+
+                MouseArea {
+                    id: profileMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: root.requestPanel("quick", "profile", profileButton)
                 }
             }
         }
+    }
+
+    component MattePill: Item {
+        id: surface
+
+        property real cornerRadius: 24
+        property bool softShadow: false
+
+        Rectangle {
+            visible: !surface.softShadow
+            x: -6
+            y: 5
+            width: surface.width + 12
+            height: surface.height + 4
+            radius: surface.cornerRadius + 6
+            color: "#18000000"
+        }
+
+        Rectangle {
+            x: surface.softShadow ? -2 : -3
+            y: surface.softShadow ? 2 : 3
+            width: surface.width + (surface.softShadow ? 4 : 6)
+            height: surface.height + 2
+            radius: surface.cornerRadius + (surface.softShadow ? 2 : 3)
+            color: surface.softShadow ? "#14000000" : "#2a000000"
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: surface.cornerRadius
+            gradient: Gradient {
+                GradientStop { position: 0; color: "#e8383838" }
+                GradientStop { position: 0.55; color: "#e82c2c2c" }
+                GradientStop { position: 1; color: "#e8202020" }
+            }
+            border.width: 1
+            border.color: "#526f6f6f"
+        }
+    }
+
+    component TopAction: Item {
+        id: action
+
+        property url icon
+        property string description
+        property bool highlighted: false
+        signal activated()
+
+        width: 32
+        height: 38
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 16
+            color: action.highlighted || actionMouse.containsMouse ? "#26ffffff" : "transparent"
+
+            Behavior on color {
+                ColorAnimation { duration: 140 }
+            }
+        }
+
+        Icon.Tinted {
+            anchors.centerIn: parent
+            width: 22
+            height: 22
+            source: action.icon
+            tint: "#ffffff"
+        }
+
+        MouseArea {
+            id: actionMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: action.activated()
+        }
+
+        ToolTip.visible: actionMouse.containsMouse
+        ToolTip.delay: 500
+        ToolTip.text: action.description
     }
 }

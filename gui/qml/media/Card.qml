@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import "../logic/pixel.js" as Pixel
-import "../logic/theme.js" as Theme
 
 Item {
     id: root
@@ -12,7 +11,7 @@ Item {
     signal playRequested()
     signal nextRequested()
     Layout.fillWidth: true
-    Layout.preferredHeight: 94
+    Layout.preferredHeight: 114
 
     ColumnLayout {
         anchors.fill: parent
@@ -21,8 +20,8 @@ Item {
             Layout.fillWidth: true
             spacing: 10
             Rectangle {
-                implicitWidth: 48
-                implicitHeight: 48
+                implicitWidth: 56
+                implicitHeight: 56
                 radius: 8
                 color: "#2a3748"
                 clip: true
@@ -42,14 +41,14 @@ Item {
                 spacing: 2
                 Controls.Label {
                     text: "Blinding Lights"
-                    color: Theme.textPrimary
-                    font.pixelSize: 11
+                    color: "#ffffff"
+                    font.pixelSize: 15
                     font.weight: Font.Medium
                 }
                 Controls.Label {
                     text: "The Weeknd"
-                    color: Theme.textSecondary
-                    font.pixelSize: 9
+                    color: "#d6dcdf"
+                    font.pixelSize: 13
                 }
             }
             Button { icon: "../../assets/icons/previous.svg"; onActivated: root.previousRequested() }
@@ -70,9 +69,9 @@ Item {
         }
         RowLayout {
             Layout.fillWidth: true
-            Controls.Label { text: "1:12"; color: Theme.textSecondary; font.pixelSize: 8 }
+            Controls.Label { text: "1:12"; color: "#d6dcdf"; font.pixelSize: 11 }
             Item { Layout.fillWidth: true }
-            Controls.Label { text: "3:20"; color: Theme.textSecondary; font.pixelSize: 8 }
+            Controls.Label { text: "3:20"; color: "#d6dcdf"; font.pixelSize: 11 }
         }
     }
 }

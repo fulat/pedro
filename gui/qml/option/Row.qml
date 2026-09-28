@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import "../icon" as Icon
-import "../logic/theme.js" as Theme
 
 Rectangle {
     id: root
@@ -14,8 +13,8 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: 68
     radius: 9
-    color: mouse.pressed ? Theme.controlPressed
-                         : mouse.containsMouse ? Theme.controlHover : "transparent"
+    color: mouse.pressed ? "#34ffffff"
+                         : mouse.containsMouse ? "#22ffffff" : "transparent"
 
     RowLayout {
         anchors.fill: parent
@@ -26,12 +25,12 @@ Rectangle {
             source: root.icon
             Layout.preferredWidth: 25
             Layout.preferredHeight: 25
-            tint: "#dbe7ff"
+            tint: "#ffffff"
         }
         Label {
             Layout.fillWidth: true
             text: root.title
-            color: Theme.textPrimary
+            color: "#ffffff"
             font.pixelSize: 12
             font.weight: Font.Medium
             elide: Text.ElideRight
@@ -40,7 +39,7 @@ Rectangle {
             source: "../../assets/icons/chevron.svg"
             Layout.preferredWidth: 8
             Layout.preferredHeight: 13
-            tint: "#c8d6ee"
+            tint: "#ffffff"
         }
     }
 

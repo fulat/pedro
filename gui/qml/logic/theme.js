@@ -1,7 +1,7 @@
 .pragma library
 
-var textPrimary = "#ffffff"
-var textSecondary = "#ffffff"
+var textPrimary = "#000000"
+var textSecondary = "#000000"
 var fontTiny = 9
 var fontSmall = 14
 var fontNormal = 15
@@ -18,3 +18,4 @@ var controlHover = "#12ffffff"
 var controlPressed = "#1fffffff"
 var cardGradientTop = "#902b3749"
 var cardGradientBottom = "#78192331"
+var background = "#ffffff"

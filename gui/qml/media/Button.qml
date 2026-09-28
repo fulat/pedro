@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import "../icon" as Icon
-import "../logic/theme.js" as Theme
 
 Rectangle {
     id: root
@@ -13,15 +12,15 @@ Rectangle {
     Layout.preferredWidth: root.emphasized ? 38 : 25
     Layout.preferredHeight: root.emphasized ? 38 : 25
     radius: width / 2
-    color: emphasized ? "#111a27" : "transparent"
+    color: emphasized ? "#28ffffff" : "transparent"
     border.width: emphasized ? 1 : 0
-    border.color: "#304056"
+    border.color: "#42ffffff"
 
     Rectangle {
         anchors.fill: parent
         radius: parent.radius
-        color: mouse.pressed ? Theme.controlPressed
-                             : mouse.containsMouse ? Theme.controlHover : "transparent"
+        color: mouse.pressed ? "#34ffffff"
+                             : mouse.containsMouse ? "#22ffffff" : "transparent"
     }
 
     Icon.Tinted {
