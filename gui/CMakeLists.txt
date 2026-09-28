@@ -60,6 +60,8 @@ qt_add_qml_module(pedro_gui
         qml/logic/theme.js
         qml/logic/clock.js
         qml/logic/pixel.js
+        language/config.json
+        language/es.json
         assets/icons/wifi.svg
         assets/icons/wifi-off.svg
         assets/icons/search.svg

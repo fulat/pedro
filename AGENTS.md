@@ -2046,3 +2046,33 @@ Formatting must remain scoped. Never recursively format the repository, `core/`,
 Clang-format does not format QML. QML changes must additionally be checked with `qmllint`, and may use `qmlformat` when a repository QML formatting policy is available.
 
 Always run the relevant incremental build after formatting so generated QML cache and C++ compilation remain verified.
+
+---
+
+## 49. Base Language Registry
+
+Pedro's canonical user-facing language is neutral/international Spanish with locale `es`.
+
+The authoritative default locale is stored in:
+
+```text
+gui/language/config.json
+```
+
+The canonical Spanish language contract is stored in:
+
+```text
+gui/language/es.json
+```
+
+Whenever a change introduces or modifies meaningful user-facing text:
+
+1. choose a stable, semantic, lowercase dot-separated key;
+2. add or update that key in `gui/language/es.json` with its actual Spanish value;
+3. reuse an existing common key when the meaning is genuinely identical;
+4. represent dynamic sentences as one concept with named placeholders;
+5. keep language definitions independent from CPU architecture.
+
+Do not derive keys from Spanish wording. Do not scatter the default locale through QML or C++. Do not introduce language switching, external language packages, a marketplace, TypeScript language modules, or a translation compiler unless that infrastructure is explicitly requested.
+
+Maintain the registry incrementally. Do not perform a repository-wide localization migration as a side effect of unrelated work.
