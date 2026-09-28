@@ -4,3 +4,20 @@
 *build/
 /build/
 .DS_Store
+
+# Imported theme sources and generated desktop caches.
+/gnome/upstream/
+/gnome/appearance/gtk/Pedro/gnome-shell
+/gnome/appearance/gtk/Pedro/gtk-2.0/
+/gnome/appearance/gtk/Pedro/gtk-3.0/gtk.gresource
+/gnome/appearance/gtk/Pedro/gtk-4.0/gtk.gresource
+/gnome/appearance/gtk/Pedro/metacity-1/
+/gnome/appearance/gtk/Pedro/xfwm4/
+/gnome/appearance/icons/*/icon-theme.cache
+/gnome/appearance/settings/
+/gnome/extensions/desktop@pedro.com.io/
+
+# Unused design exports; the GUI embeds the raster assets referenced by QML.
+/gui/assets/dock.png
+/gui/assets/dock.svg
+/gui/assets/logo.svg
