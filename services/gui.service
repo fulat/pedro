@@ -11,6 +11,10 @@ ExecStart=/usr/bin/pedro-gui
 Environment=XDG_RUNTIME_DIR=/run/pedro
 Environment=WAYLAND_DISPLAY=wayland-0
 Environment=QT_QPA_PLATFORM=wayland
+Environment=QT_QPA_PLATFORMTHEME=gnome
+Environment=QT_WAYLAND_DECORATION=qgnomeplatform
+Environment=GTK_THEME=Pedro
+Environment=PEDRO_ICON_THEME=Pedro
 Environment=QT_QUICK_BACKEND=software
 EnvironmentFile=-/etc/pedro/environment
 Restart=on-failure

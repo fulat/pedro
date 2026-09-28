@@ -152,13 +152,16 @@ def stage(source, build, arch):
         env = dict(os.environ, DEBIAN_FRONTEND='noninteractive')
         run('chroot', root, 'apt-get', 'update', env=env)
         packages = ['systemd-sysv', 'dbus', 'udev', 'initramfs-tools', 'linux-image-virtual',
-                    'qt6-qpa-plugins', 'qt6-wayland', 'qml6-module-qtquick',
+                    'libqt6concurrent6', 'qt6-qpa-plugins', 'qt6-wayland', 'qgnomeplatform-qt6',
+                    'qml6-module-qtquick',
                     'qml6-module-qtquick-window', 'qml6-module-qtquick-layouts',
                     'qml6-module-qtquick-controls', 'qml6-module-qtquick-templates',
                     'qml6-module-qtqml-workerscript', 'qml6-module-qtwayland-compositor',
                     'libgl1-mesa-dri', 'libegl-mesa0', 'fonts-dejavu-core']
         run('chroot', root, 'apt-get', 'install', '-y', '--no-install-recommends', *packages, env=env)
         run('cmake', '--install', build, '--prefix', root)
+        shutil.copytree(source / 'gnome/appearance/gtk/Pedro', root / 'usr/share/themes/Pedro', dirs_exist_ok=True)
+        shutil.copytree(source / 'gnome/appearance/icons/Pedro', root / 'usr/share/icons/Pedro', dirs_exist_ok=True)
         run('chroot', root, 'ldconfig')
         version = out('chroot', root, 'sh', '-c', 'ls /lib/modules | sort -V | tail -1')
         need(version and (root / f'boot/vmlinuz-{version}').is_file(), 'Missing kernel/module pair.')
@@ -274,6 +277,14 @@ def verify(source, build, arch):
     plugin_roots = list((root / 'usr/lib').glob('*/qt6/plugins'))
     need(any((p / 'platforms/libqeglfs.so').is_file() for p in plugin_roots), 'Missing EGLFS backend.')
     need(any(list((p / 'platforms').glob('libqwayland*.so')) for p in plugin_roots), 'Missing Wayland client backend.')
+    need(any((p / 'platformthemes/libqgnomeplatformtheme.so').is_file() for p in plugin_roots),
+         'Missing Qt GNOME platform theme.')
+    need(any((p / 'wayland-decoration-client/libqgnomeplatformdecoration.so').is_file() for p in plugin_roots),
+         'Missing Qt GNOME Wayland decoration.')
+    for name in ('usr/share/themes/Pedro/gtk-3.0/gtk.css', 'usr/share/themes/Pedro/gtk-4.0/gtk.css',
+                 'usr/share/icons/Pedro/index.theme',
+                 'usr/share/icons/Pedro/scalable/ui/window-close-symbolic.svg'):
+        need((root / name).is_file(), f'Missing Pedro appearance asset: {name}')
     initramfs = out('chroot', root, 'lsinitramfs', '/boot/initrd.img-pedro')
     need('init' in initramfs.splitlines() and version in initramfs, 'Initramfs missing init or matching modules.')
     run('chroot', root, 'systemd-analyze', 'verify', 'compositor.service', 'gui.service')

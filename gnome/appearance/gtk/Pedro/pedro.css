@@ -1,0 +1,170 @@
+/*
+ * Window controls are client-side decorations, so this styling must live in
+ * the GTK theme. A GNOME Shell extension stylesheet cannot style GTK apps.
+ */
+windowcontrols button.close,
+windowcontrols button.minimize,
+windowcontrols button.maximize,
+windowcontrols button.restore,
+button.titlebutton.close,
+button.titlebutton.minimize,
+button.titlebutton.maximize,
+button.titlebutton.restore {
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  box-shadow: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 18px 18px;
+}
+
+windowcontrols button.close,
+windowcontrols button.close:backdrop,
+button.titlebutton.close,
+button.titlebutton.close:backdrop {
+  background-color: transparent;
+  background-image: radial-gradient(
+    circle at center,
+    #ff5c5f 0,
+    #ff5c5f 9px,
+    transparent 9px
+  );
+}
+
+windowcontrols button.close:hover,
+windowcontrols button.close:active,
+button.titlebutton.close:hover,
+button.titlebutton.close:active {
+  background-color: transparent;
+  background-image:
+    url("../../icons/Pedro/scalable/ui/window-close.svg"),
+    radial-gradient(
+      circle at center,
+      #4a4a4f 0,
+      #4a4a4f 9px,
+      transparent 9px
+    );
+  background-size:
+    22.5px 22.5px,
+    18px 18px;
+}
+
+windowcontrols button.minimize,
+windowcontrols button.minimize:backdrop,
+button.titlebutton.minimize,
+button.titlebutton.minimize:backdrop {
+  background-color: transparent;
+  background-image: radial-gradient(
+    circle at center,
+    #fac800 0,
+    #fac800 9px,
+    transparent 9px
+  );
+}
+
+windowcontrols button.minimize:hover,
+windowcontrols button.minimize:active,
+button.titlebutton.minimize:hover,
+button.titlebutton.minimize:active {
+  background-color: transparent;
+  background-image:
+    url("../../icons/Pedro/scalable/ui/window-minimize.svg"),
+    radial-gradient(
+      circle at center,
+      #4a4a4f 0,
+      #4a4a4f 9px,
+      transparent 9px
+    );
+  background-size:
+    22.5px 22.5px,
+    18px 18px;
+}
+
+windowcontrols button.maximize,
+windowcontrols button.maximize:backdrop,
+button.titlebutton.maximize,
+button.titlebutton.maximize:backdrop {
+  background-color: transparent;
+  background-image: radial-gradient(
+    circle at center,
+    #35c759 0,
+    #35c759 9px,
+    transparent 9px
+  );
+}
+
+windowcontrols button.maximize:hover,
+windowcontrols button.maximize:active,
+button.titlebutton.maximize:hover,
+button.titlebutton.maximize:active {
+  background-color: transparent;
+  background-image:
+    url("../../icons/Pedro/scalable/ui/window-maximize.svg"),
+    radial-gradient(
+      circle at center,
+      #4a4a4f 0,
+      #4a4a4f 9px,
+      transparent 9px
+    );
+  background-size:
+    22.5px 22.5px,
+    18px 18px;
+}
+
+windowcontrols button.restore,
+windowcontrols button.restore:backdrop,
+button.titlebutton.restore,
+button.titlebutton.restore:backdrop {
+  background-color: transparent;
+  background-image: radial-gradient(
+    circle at center,
+    #2396f3 0,
+    #2396f3 9px,
+    transparent 9px
+  );
+}
+
+windowcontrols button.restore:hover,
+windowcontrols button.restore:active,
+button.titlebutton.restore:hover,
+button.titlebutton.restore:active {
+  background-color: transparent;
+  background-image:
+    url("../../icons/Pedro/scalable/ui/window-restore.svg"),
+    radial-gradient(
+      circle at center,
+      #4a4a4f 0,
+      #4a4a4f 9px,
+      transparent 9px
+    );
+  background-size:
+    22.5px 22.5px,
+    18px 18px;
+}
+
+/*
+ * Yaru supplies its own symbolic image node. Hiding that node prevents its
+ * gray circle from being painted over Pedro's colored control.
+ */
+windowcontrols button.close image,
+windowcontrols button.minimize image,
+windowcontrols button.maximize image,
+windowcontrols button.restore image,
+button.titlebutton.close image,
+button.titlebutton.minimize image,
+button.titlebutton.maximize image,
+button.titlebutton.restore image {
+  color: transparent;
+  opacity: 0;
+}
+
+windowcontrols button:hover,
+windowcontrols button:active,
+button.titlebutton:hover,
+button.titlebutton:active {
+  box-shadow: none;
+}
