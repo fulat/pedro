@@ -1,0 +1,90 @@
+import QtQuick
+
+import "../../scripts/theme.js" as Theme
+
+// Draws the presentation-only icon for a desktop shortcut.
+Item {
+    id: desktopIcon
+
+    property string kind
+
+    Rectangle {
+        visible: desktopIcon.kind === "notes"
+        anchors.centerIn: parent
+        width: desktopIcon.width * 0.70
+        height: desktopIcon.height * 0.84
+        radius: 4
+        color: Theme.notesBackground
+        border.color: Theme.notesBorder
+
+        Column {
+            x: parent.width * 0.17
+            y: parent.height * 0.27
+            spacing: parent.height * 0.12
+
+            Repeater {
+                model: 3
+
+                delegate: Rectangle {
+                    required property int index
+
+                    width: desktopIcon.width * (index === 2 ? 0.28 : 0.39)
+                    height: 1
+                    color: Theme.notesLines
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        visible: desktopIcon.kind === "image"
+        anchors.centerIn: parent
+        width: desktopIcon.width * 0.82
+        height: desktopIcon.height * 0.68
+        radius: 4
+        color: Theme.imageIconFrame
+        border.width: 2
+        border.color: Theme.imageIconFrame
+        clip: true
+
+        Image {
+            anchors.fill: parent
+            anchors.margins: 2
+            source: Backend.wallpaper
+            sourceSize: Qt.size(128, 96)
+            fillMode: Image.PreserveAspectCrop
+            smooth: true
+            mipmap: true
+        }
+    }
+
+    Rectangle {
+        visible: desktopIcon.kind === "folder"
+        x: desktopIcon.width * 0.12
+        y: desktopIcon.height * 0.22
+        width: desktopIcon.width * 0.48
+        height: desktopIcon.height * 0.19
+        radius: 5
+        color: Theme.folderTab
+    }
+
+    Rectangle {
+        visible: desktopIcon.kind === "folder"
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: desktopIcon.height * 0.32
+        width: desktopIcon.width * 0.78
+        height: desktopIcon.height * 0.52
+        radius: 6
+
+        gradient: Gradient {
+            GradientStop {
+                position: 0
+                color: Theme.folderTop
+            }
+            GradientStop {
+                position: 1
+                color: Theme.folderBottom
+            }
+        }
+    }
+}

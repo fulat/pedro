@@ -3,9 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
+import "../../controllers" as Controllers
 import "../icon" as Icon
 import "../toggle" as Toggle
-import "../../logic/theme.js" as Theme
+import "../../scripts/theme.js" as Theme
 
 Rectangle {
     id: root
@@ -19,23 +20,18 @@ Rectangle {
     property bool externallyManaged: false
     property color statusColor: root.active ? Theme.statusConnected : Theme.statusInactive
     readonly property bool hovered: hover.hovered
-    signal activated()
+    signal activated
     signal toggleRequested(bool state)
-    signal detailsRequested()
+    signal detailsRequested
     Layout.fillWidth: true
     implicitHeight: 68
     radius: 9
-    color: mouse.pressed ? Theme.overlayPressed
-                         : root.hovered ? Theme.overlayHover : "transparent"
+    color: mouse.pressed ? Theme.overlayPressed : root.hovered ? Theme.overlayHover : "transparent"
 
-    function setActive(state) {
-        if (!root.toggleable)
-            return
-
-        if (!root.externallyManaged)
-            root.active = state
-
-        root.toggleRequested(state)
+    // Connects the tile presentation to its behavior controller.
+    Controllers.Quick {
+        id: controller
+        view: root
     }
 
     MouseArea {
@@ -43,13 +39,12 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            root.detailsRequested();
-            root.activated();
-        }
+        onClicked: controller.activate()
     }
 
-    HoverHandler { id: hover }
+    HoverHandler {
+        id: hover
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -104,7 +99,7 @@ Rectangle {
 
         Toggle.Switch {
             active: root.active
-            onToggled: state => root.setActive(state)
+            onToggled: state => controller.setActive(state)
         }
 
         Icon.Tinted {

@@ -33,13 +33,14 @@ qt_policy(SET QTP0004 NEW)
 # =============================================================================
 
 set(PEDRO_GUI_SOURCES
-        main.cpp
+        backend/main.cpp
 
-        backend.cpp
-        backend.hpp
+        backend/backend.cpp
+        backend/backend.hpp
+        backend/icons.hpp
 
-        render/info.cpp
-        render/info.hpp
+        backend/render/info.cpp
+        backend/render/info.hpp
 )
 
 
@@ -203,6 +204,21 @@ set_target_properties(
 
         PROPERTIES
         OUTPUT_NAME pedro-gui
+)
+
+
+# =============================================================================
+# Native include root
+#
+# Qt's QML type registrar includes generated types by header basename. The
+# backend directory is therefore the private include root for Pedro GUI C++.
+# =============================================================================
+
+target_include_directories(
+        pedro_gui
+
+        PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/backend"
 )
 
 

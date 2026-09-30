@@ -3,8 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
+import "../../controllers" as Controllers
 import "../icon" as Icon
-import "../../logic/theme.js" as Theme
+import "../../scripts/theme.js" as Theme
 
 Rectangle {
     id: root
@@ -16,12 +17,18 @@ Rectangle {
     property color symbolColor: root.active ? root.activeColor : root.inactiveColor
     property bool active: false
     property bool toggleable: true
-    signal activated()
+    signal activated
+
+    // Connects the tile presentation to its behavior controller.
+    Controllers.Toggle {
+        id: controller
+        view: root
+    }
+
     Layout.fillWidth: true
     implicitHeight: 62
     radius: 8
-    color: mouse.pressed ? Theme.overlayPressed
-                         : mouse.containsMouse ? Theme.overlayHover : "transparent"
+    color: mouse.pressed ? Theme.overlayPressed : mouse.containsMouse ? Theme.overlayHover : "transparent"
 
     RowLayout {
         anchors.fill: parent
@@ -71,10 +78,6 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            if (root.toggleable)
-                root.active = !root.active
-            root.activated()
-        }
+        onClicked: controller.activate()
     }
 }

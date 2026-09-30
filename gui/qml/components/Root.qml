@@ -9,7 +9,7 @@ import "files" as Files
 import "sound" as Sound
 import "system" as System
 import "wifi" as Wifi
-import "../logic/theme.js" as Theme
+import "../scripts/theme.js" as Theme
 
 Rectangle {
     id: root

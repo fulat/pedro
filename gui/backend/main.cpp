@@ -55,8 +55,6 @@ int main(int argc, char* argv[]) {
         QIcon::setThemeName(QStringLiteral("Pedro"));
     }
 
-    QQmlApplicationEngine engine;
-
     /*
      * Backend exposed to QML.
      *
@@ -64,6 +62,9 @@ int main(int argc, char* argv[]) {
      * otherwise QML will not know what "Backend" is.
      */
     Backend backend;
+
+    // The engine is created after its backend so QML releases first at shutdown.
+    QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty(QStringLiteral("Backend"), &backend);
 
@@ -103,6 +104,15 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Controller object used by native development and capture tooling.
+    auto* applicationController = window->findChild<QObject*>(QStringLiteral("applicationController"));
+
+    if (!applicationController) {
+        qCritical() << "Pedro failed to create its application controller";
+
+        return 1;
+    }
+
     const auto developmentMode = qEnvironmentVariableIsSet("PEDRO_DEVELOPMENT_MODE");
 
     /*
@@ -135,9 +145,9 @@ int main(int argc, char* argv[]) {
         const auto captureDesktop = captureMode == QStringLiteral("desktop");
 
         if (captureFilesWindow) {
-            QMetaObject::invokeMethod(window, "openFilesQuickWindow");
+            QMetaObject::invokeMethod(applicationController, "openFilesQuickWindow");
         } else if (!captureDesktop) {
-            window->setProperty("panelMode", captureMode.isEmpty() ? QStringLiteral("quick") : captureMode);
+            applicationController->setProperty("panelMode", captureMode.isEmpty() ? QStringLiteral("quick") : captureMode);
         }
 
         bool hasCaptureAnchor = false;
@@ -145,7 +155,7 @@ int main(int argc, char* argv[]) {
         const auto captureAnchor = qEnvironmentVariable("PEDRO_CAPTURE_ANCHOR").toDouble(&hasCaptureAnchor);
 
         if (hasCaptureAnchor) {
-            window->setProperty("panelAnchorX", captureAnchor);
+            applicationController->setProperty("panelAnchorX", captureAnchor);
         }
 
         QTimer::singleShot(1000, &app, [window, capturePath, captureFilesWindow] {

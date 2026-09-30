@@ -85,7 +85,6 @@ class Backend final : public QObject {
         Q_INVOKABLE void setBluetoothEnabled(bool enabled);
         Q_INVOKABLE void scanBluetooth();
 
-
     signals:
         void systemChanged();
         void documentPathChanged();
@@ -93,7 +92,7 @@ class Backend final : public QObject {
         void statusMessageChanged();
         void wifiChanged();
         void bluetoothChanged();
-	    void wallpaperChanged();
+        void wallpaperChanged();
 
     private:
 
@@ -137,5 +136,4 @@ class Backend final : public QObject {
 
         QVariantList wifiNetworks_;
         QVariantList bluetoothDevices_;
-
 };

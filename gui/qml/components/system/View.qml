@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import gui
 import "../metric" as Metric
-import "../../logic/theme.js" as Theme
+import "../../scripts/theme.js" as Theme
 
 Item {
     ColumnLayout {

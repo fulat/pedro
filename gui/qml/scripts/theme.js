@@ -135,6 +135,10 @@ var photosOrange = "#f49b3f"
 var photosPurple = "#a270c5"
 var photosRed = "#ed484e"
 var photosYellow = "#f5d84e"
+
+// Ordered color model used to draw the Photos application mark.
+var photosPalette = [photosRed, photosOrange, photosYellow, photosGreen, photosBlue, photosPurple]
+
 var terminalIconBackground = "#202730"
 var terminalIconText = "#f7f7f7"
 var trashBorder = "#a6b0b5"

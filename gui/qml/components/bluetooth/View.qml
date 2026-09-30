@@ -4,41 +4,26 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import gui
+import "../../controllers" as Controllers
 import "../icon" as Icon
 import "../option" as Option
 import "../toggle" as Toggle
-import "../../logic/theme.js" as Theme
+import "../../scripts/theme.js" as Theme
 
 Item {
     id: root
 
-    property bool scanAfterRefresh: false
-
-    signal backRequested()
-    signal settingsRequested()
+    signal backRequested
+    signal settingsRequested
     signal deviceRequested(string name)
 
-    onVisibleChanged: {
-        if (!visible)
-            return
-
-        scanAfterRefresh = true
-        Papi.refreshBluetooth()
+    // Connects Bluetooth presentation events to the controller.
+    Controllers.Bluetooth {
+        id: controller
+        view: root
     }
 
-    Connections {
-        target: Papi
-
-        function onBluetoothChanged() {
-            if (!root.scanAfterRefresh)
-                return
-
-            root.scanAfterRefresh = false
-
-            if (root.visible && Papi.bluetoothAvailable && Papi.bluetoothEnabled)
-                Papi.scanBluetooth()
-        }
-    }
+    onVisibleChanged: controller.visibilityChanged(visible)
 
     ColumnLayout {
         anchors.fill: parent
@@ -60,8 +45,7 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: parent.radius
-                    color: backMouse.pressed ? Theme.overlayPressed
-                                             : backMouse.containsMouse ? Theme.overlayHover : "transparent"
+                    color: backMouse.pressed ? Theme.overlayPressed : backMouse.containsMouse ? Theme.overlayHover : "transparent"
                 }
 
                 Icon.Tinted {
@@ -96,11 +80,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: !Papi.bluetoothAvailable
-                          ? "No disponible"
-                          : Papi.bluetoothEnabled
-                            ? "Activado · visible para dispositivos"
-                            : "Desactivado"
+                    text: !Papi.bluetoothAvailable ? "No disponible" : Papi.bluetoothEnabled ? "Activado · visible para dispositivos" : "Desactivado"
                     color: Theme.textMuted
                     font.pixelSize: 9
                     elide: Text.ElideRight
@@ -144,9 +124,7 @@ Item {
                 id: scanButton
 
                 enabled: Papi.bluetoothAvailable && !Papi.bluetoothScanning
-                text: Papi.bluetoothScanning
-                      ? "Buscando…"
-                      : Papi.bluetoothDevices.length > 0 ? "Buscar más" : "Buscar"
+                text: Papi.bluetoothScanning ? "Buscando…" : Papi.bluetoothDevices.length > 0 ? "Buscar más" : "Buscar"
                 onClicked: Papi.scanBluetooth()
 
                 contentItem: Controls.Label {
@@ -169,8 +147,7 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: parent.radius
-                        color: scanButton.down ? Theme.overlayPressed
-                                               : scanButton.hovered ? Theme.overlayHover : "transparent"
+                        color: scanButton.down ? Theme.overlayPressed : scanButton.hovered ? Theme.overlayHover : "transparent"
                     }
                 }
 
@@ -234,13 +211,7 @@ Item {
                 Controls.Label {
                     Layout.fillWidth: true
                     Layout.topMargin: 6
-                    text: !Papi.bluetoothAvailable
-                          ? "Bluetooth no disponible"
-                          : !Papi.bluetoothEnabled
-                            ? "Bluetooth desactivado"
-                            : Papi.bluetoothScanning
-                              ? "Buscando dispositivos…"
-                              : "No se encontraron dispositivos"
+                    text: !Papi.bluetoothAvailable ? "Bluetooth no disponible" : !Papi.bluetoothEnabled ? "Bluetooth desactivado" : Papi.bluetoothScanning ? "Buscando dispositivos…" : "No se encontraron dispositivos"
                     color: Theme.white
                     font.pixelSize: 17
                     font.weight: Font.DemiBold
@@ -252,15 +223,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.leftMargin: 12
                     Layout.rightMargin: 12
-                    text: !Papi.bluetoothAvailable
-                          ? "BlueZ no detectó un adaptador Bluetooth."
-                          : !Papi.bluetoothEnabled
-                            ? "Actívalo para buscar y conectar\ndispositivos cercanos."
-                            : Papi.bluetoothError !== ""
-                              ? Papi.bluetoothError
-                              : Papi.bluetoothScanning
-                                ? "Mantén los dispositivos cercanos encendidos\ny en modo visible."
-                                : "Asegúrate de que los dispositivos cercanos\nestén encendidos y en modo visible."
+                    text: !Papi.bluetoothAvailable ? "BlueZ no detectó un adaptador Bluetooth." : !Papi.bluetoothEnabled ? "Actívalo para buscar y conectar\ndispositivos cercanos." : Papi.bluetoothError !== "" ? Papi.bluetoothError : Papi.bluetoothScanning ? "Mantén los dispositivos cercanos encendidos\ny en modo visible." : "Asegúrate de que los dispositivos cercanos\nestén encendidos y en modo visible."
                     color: Theme.textMuted
                     font.pixelSize: 11
                     lineHeight: 1.25

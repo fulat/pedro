@@ -4,20 +4,23 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import gui
+import "../../controllers" as Controllers
 import "../icon" as Icon
 import "../toggle" as Toggle
-import "../../logic/theme.js" as Theme
+import "../../scripts/theme.js" as Theme
 
 Item {
     id: root
 
-    signal backRequested()
-    signal settingsRequested()
+    signal backRequested
+    signal settingsRequested
 
-    onVisibleChanged: {
-        if (visible && Papi.wifiAvailable && Papi.wifiEnabled)
-            Papi.scanWifi()
+    // Connects Wi-Fi presentation events to the controller.
+    Controllers.Wifi {
+        id: controller
     }
+
+    onVisibleChanged: controller.visibilityChanged(visible)
 
     ColumnLayout {
         anchors.fill: parent
@@ -39,8 +42,7 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: parent.radius
-                    color: backMouse.pressed ? Theme.overlayPressed
-                                             : backMouse.containsMouse ? Theme.overlayHover : "transparent"
+                    color: backMouse.pressed ? Theme.overlayPressed : backMouse.containsMouse ? Theme.overlayHover : "transparent"
                 }
 
                 Icon.Tinted {
@@ -74,9 +76,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: Papi.wifiConnected
-                          ? Papi.connectedWifiName + " · Conectado"
-                          : Papi.wifiEnabled ? "Sin conexión" : "Desactivado"
+                    text: Papi.wifiConnected ? Papi.connectedWifiName + " · Conectado" : Papi.wifiEnabled ? "Sin conexión" : "Desactivado"
                     color: Papi.wifiConnected ? Theme.statusWifiConnected : Theme.textMuted
                     font.pixelSize: 9
                     elide: Text.ElideRight
@@ -120,12 +120,7 @@ Item {
 
                 enabled: !Papi.wifiScanning
                 text: Papi.wifiScanning ? "Buscando…" : "Buscar"
-                onClicked: {
-                    if (Papi.wifiAvailable && Papi.wifiEnabled)
-                        Papi.scanWifi()
-                    else
-                        Papi.refreshWifi()
-                }
+                onClicked: controller.scanRequested()
 
                 contentItem: Controls.Label {
                     text: scanButton.text
@@ -147,12 +142,13 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: parent.radius
-                        color: scanButton.down ? Theme.overlayPressed
-                                               : scanButton.hovered ? Theme.overlayHover : "transparent"
+                        color: scanButton.down ? Theme.overlayPressed : scanButton.hovered ? Theme.overlayHover : "transparent"
                     }
                 }
 
-                HoverHandler { cursorShape: scanButton.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
+                HoverHandler {
+                    cursorShape: scanButton.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
         }
 
@@ -222,13 +218,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: !Papi.wifiAvailable
-                          ? "No hay Wi-Fi disponible"
-                          : !Papi.wifiEnabled
-                            ? "Wi-Fi desactivado"
-                            : Papi.wifiError !== ""
-                              ? "No se pudieron cargar las redes"
-                              : "No se encontraron redes"
+                    text: !Papi.wifiAvailable ? "No hay Wi-Fi disponible" : !Papi.wifiEnabled ? "Wi-Fi desactivado" : Papi.wifiError !== "" ? "No se pudieron cargar las redes" : "No se encontraron redes"
                     color: Theme.white
                     font.pixelSize: 17
                     font.weight: Font.DemiBold
@@ -238,13 +228,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: !Papi.wifiAvailable
-                          ? "NetworkManager no detectó un adaptador Wi-Fi"
-                          : !Papi.wifiEnabled
-                            ? "Activa Wi-Fi para buscar redes disponibles"
-                            : Papi.wifiError !== ""
-                              ? Papi.wifiError
-                              : "No hay redes inalámbricas visibles"
+                    text: !Papi.wifiAvailable ? "NetworkManager no detectó un adaptador Wi-Fi" : !Papi.wifiEnabled ? "Activa Wi-Fi para buscar redes disponibles" : Papi.wifiError !== "" ? Papi.wifiError : "No hay redes inalámbricas visibles"
                     color: Theme.white
                     font.pixelSize: 10
                     horizontalAlignment: Text.AlignHCenter
@@ -254,11 +238,7 @@ Item {
                 Controls.Label {
                     Layout.fillWidth: true
                     Layout.topMargin: 6
-                    text: !Papi.wifiAvailable
-                          ? "Conecta un adaptador inalámbrico o revisa\nla configuración de red."
-                          : !Papi.wifiEnabled
-                            ? "Puedes volver a activarlo desde el interruptor superior."
-                            : "Acércate al punto de acceso o vuelve a buscar."
+                    text: !Papi.wifiAvailable ? "Conecta un adaptador inalámbrico o revisa\nla configuración de red." : !Papi.wifiEnabled ? "Puedes volver a activarlo desde el interruptor superior." : "Acércate al punto de acceso o vuelve a buscar."
                     color: Theme.textMuted
                     font.pixelSize: 10
                     lineHeight: 1.25
@@ -281,8 +261,7 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: parent.radius
-                        color: settingsMouse.pressed ? Theme.overlayPressed
-                                                     : settingsMouse.containsMouse ? Theme.overlayHover : "transparent"
+                        color: settingsMouse.pressed ? Theme.overlayPressed : settingsMouse.containsMouse ? Theme.overlayHover : "transparent"
                     }
 
                     RowLayout {
@@ -339,7 +318,6 @@ Item {
                 color: Theme.textMuted
                 font.pixelSize: 10
             }
-
         }
     }
 }

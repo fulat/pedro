@@ -3,10 +3,10 @@ import QtQuick as Quick
 import QtQuick.Controls.Basic
 import QtQuick.Effects
 
-
+import "../controllers" as Controllers
 import "icon" as Icon
-import "../logic/clock.js" as Clock
-import "../logic/theme.js" as Theme
+import "../scripts/clock.js" as Clock
+import "../scripts/theme.js" as Theme
 
 Item {
     id: root
@@ -23,9 +23,10 @@ Item {
 
     height: barHeight
 
-    function requestPanel(mode, sourceName, item) {
-        const point = item.mapToItem(root, item.width / 2, item.height);
-        root.panelRequested(mode, point.x, sourceName);
+    // Connects the visual bar to its interaction controller.
+    Controllers.Logo {
+        id: controller
+        view: root
     }
 
     Item {
@@ -72,7 +73,7 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.requestPanel("system", "system", logoButton)
+            onClicked: controller.requestPanel("system", "system", logoButton)
         }
 
         ToolTip.visible: logoMouse.containsMouse
@@ -107,7 +108,7 @@ Item {
                 icon: "../../assets/icons/search.svg"
                 description: "Buscar"
                 highlighted: root.activeSource === "search"
-                onActivated: root.requestPanel("about", "search", searchButton)
+                onActivated: controller.requestPanel("about", "search", searchButton)
             }
 
             Rectangle {
@@ -135,25 +136,11 @@ Item {
                 }
 
                 Canvas {
+                    id: notificationCanvas
                     anchors.centerIn: parent
                     width: 21
                     height: 23
-                    onPaint: {
-                        const ctx = getContext("2d");
-                        ctx.clearRect(0, 0, width, height);
-                        ctx.fillStyle = Theme.white;
-                        ctx.beginPath();
-                        ctx.moveTo(4, 17);
-                        ctx.quadraticCurveTo(6, 15, 6, 10);
-                        ctx.quadraticCurveTo(6, 3, 10.5, 3);
-                        ctx.quadraticCurveTo(15, 3, 15, 10);
-                        ctx.quadraticCurveTo(15, 15, 17, 17);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.arc(10.5, 20, 2, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
+                    onPaint: controller.paintNotification(notificationCanvas)
                 }
 
                 Rectangle {
@@ -172,7 +159,7 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.requestPanel("quick", "notifications", notificationsButton)
+                    onClicked: controller.requestPanel("quick", "notifications", notificationsButton)
                 }
             }
 
@@ -227,7 +214,7 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.requestPanel("quick", "control", controlButton)
+                    onClicked: controller.requestPanel("quick", "control", controlButton)
                 }
             }
 
@@ -236,7 +223,7 @@ Item {
                 icon: "../../assets/icons/wifi.svg"
                 description: "Wi-Fi"
                 highlighted: root.activeSource === "wifi"
-                onActivated: root.requestPanel("wifi", "wifi", wifiButton)
+                onActivated: controller.requestPanel("wifi", "wifi", wifiButton)
             }
 
             Quick.Text {
@@ -300,7 +287,7 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.requestPanel("quick", "profile", profileButton)
+                    onClicked: controller.requestPanel("quick", "profile", profileButton)
                 }
             }
         }

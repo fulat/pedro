@@ -1,5 +1,6 @@
 .pragma library
 
+// Formats the shell clock using Pedro's compact Spanish date style.
 function format(date) {
     const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun",

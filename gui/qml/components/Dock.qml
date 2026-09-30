@@ -2,17 +2,23 @@ import QtQuick
 import QtQuick as QQ
 import QtQuick.Controls.Basic
 
-import "../logic/theme.js" as Theme
+import "../controllers" as Controllers
+import "../scripts/theme.js" as Theme
 
 Item {
     id: dock
+    z: 15
+
+    // Connects procedural icon canvases to their drawing controller.
+    Controllers.Dock {
+        id: controller
+    }
 
     property Item backdrop
     property var shell
     property bool vertical: false
     property real maximumLength: shell ? (vertical ? shell.height - 32 : shell.width - 32) : 0
 
-    z: 15
     width: vertical ? 76 : Math.min(maximumLength, dockLayout.implicitWidth + 34)
     height: vertical ? Math.min(maximumLength, dockLayout.implicitHeight + 34) : 76
 
@@ -47,7 +53,7 @@ Item {
                 required property var modelData
 
                 app: modelData
-                onActivated: dock.shell.activateDockApp(modelData, dock.x + dock.width / 2)
+                onActivated: dock.shell.controller.activateDockApp(modelData, dock.x + dock.width / 2)
             }
         }
 
@@ -64,7 +70,7 @@ Item {
                 required property var modelData
 
                 app: modelData
-                onActivated: dock.shell.activateDockApp(modelData, dock.x + dock.width / 2)
+                onActivated: dock.shell.controller.activateDockApp(modelData, dock.x + dock.width / 2)
             }
         }
     }
@@ -79,6 +85,8 @@ Item {
         height: (dock.shell ? dock.shell.dockTileSize : 0) + 12
 
         Rectangle {
+            id: entryTile
+
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             width: dock.shell ? dock.shell.dockTileSize : 0
@@ -98,18 +106,21 @@ Item {
         DockIcon {
             anchors.horizontalCenter: parent.horizontalCenter
             y: ((dock.shell ? dock.shell.dockTileSize : 0) - height) / 2
-            width: dock.shell ? dock.shell.dockIconSize : 0
+            width: dock.shell ? dock.shell.dockTileSize - 4 : 0
             height: width
             kind: entry.app ? entry.app.icon : ""
         }
 
         Rectangle {
-            anchors.bottom: dock.vertical ? undefined : parent.bottom
-            anchors.right: dock.vertical ? parent.right : undefined
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: dock.vertical ? parent.verticalCenter : undefined
-            anchors.bottomMargin: dock.vertical ? 0 : 3
-            anchors.rightMargin: dock.vertical ? 3 : 0
+            anchors.bottom: dock.vertical ? undefined : entryTile.bottom
+            anchors.right: dock.vertical ? entryTile.right : undefined
+
+            anchors.horizontalCenter: dock.vertical ? undefined : entryTile.horizontalCenter
+            anchors.verticalCenter: dock.vertical ? entryTile.verticalCenter : undefined
+
+            anchors.bottomMargin: dock.vertical ? 0 : -5
+            anchors.rightMargin: dock.vertical ? 5 : 0
+
             width: 3
             height: 3
             radius: 2
@@ -294,41 +305,12 @@ Item {
         }
 
         Canvas {
+            id: codeCanvas
             visible: icon.kind === "code"
             anchors.centerIn: parent
             width: icon.width * 0.78
             height: width
-            onPaint: {
-                const ctx = getContext("2d");
-                const scale = width / 56;
-
-                ctx.clearRect(0, 0, width, height);
-                ctx.save();
-                ctx.scale(scale, scale);
-                ctx.fillStyle = Theme.codeIconDark;
-                ctx.beginPath();
-                ctx.moveTo(36, 6);
-                ctx.lineTo(48, 11);
-                ctx.lineTo(48, 45);
-                ctx.lineTo(36, 50);
-                ctx.lineTo(17, 34);
-                ctx.lineTo(8, 41);
-                ctx.lineTo(3, 36);
-                ctx.lineTo(13, 28);
-                ctx.lineTo(3, 20);
-                ctx.lineTo(8, 15);
-                ctx.lineTo(17, 22);
-                ctx.closePath();
-                ctx.fill();
-                ctx.fillStyle = Theme.codeIconBright;
-                ctx.beginPath();
-                ctx.moveTo(36, 14);
-                ctx.lineTo(36, 42);
-                ctx.lineTo(20, 28);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            }
+            onPaint: controller.paintCode(codeCanvas)
         }
 
         Item {
@@ -406,27 +388,9 @@ Item {
             color: Theme.musicIconBackground
 
             Canvas {
+                id: musicCanvas
                 anchors.fill: parent
-                onPaint: {
-                    const ctx = getContext("2d");
-                    const scale = width / 56;
-
-                    ctx.clearRect(0, 0, width, height);
-                    ctx.save();
-                    ctx.scale(scale, scale);
-                    ctx.strokeStyle = Theme.musicIconStroke;
-                    ctx.lineCap = "round";
-
-                    for (let line = 0; line < 3; ++line) {
-                        ctx.lineWidth = 4 - line * 0.6;
-                        ctx.beginPath();
-                        ctx.moveTo(12 + line * 2, 20 + line * 8);
-                        ctx.quadraticCurveTo(28, 15 + line * 8, 44 - line * 2, 23 + line * 8);
-                        ctx.stroke();
-                    }
-
-                    ctx.restore();
-                }
+                onPaint: controller.paintMusic(musicCanvas)
             }
         }
 
@@ -439,7 +403,7 @@ Item {
             color: Theme.photosBackground
 
             Repeater {
-                model: [Theme.photosRed, Theme.photosOrange, Theme.photosYellow, Theme.photosGreen, Theme.photosBlue, Theme.photosPurple]
+                model: Theme.photosPalette
 
                 delegate: Rectangle {
                     required property int index

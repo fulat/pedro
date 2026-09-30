@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls.Basic as Controls
-import "../../logic/theme.js" as Theme
+import "../../scripts/theme.js" as Theme
 
 Controls.Button {
     id: root

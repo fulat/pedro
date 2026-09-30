@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
-import "../../logic/pixel.js" as Pixel
-import "../../logic/theme.js" as Theme
+import "../../scripts/pixel.js" as Pixel
+import "../../scripts/theme.js" as Theme
 
 Item {
     id: root

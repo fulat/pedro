@@ -78,15 +78,7 @@ class Icons final : public QQuickImageProvider {
         static QString themeIcon(const QString& fileName) {
 
             static const QHash<QString, QString> names = {
-                { QStringLiteral("apps"), QStringLiteral("view-app-grid-symbolic") },
-                { QStringLiteral("browser"), QStringLiteral("web-browser-symbolic") },
-                { QStringLiteral("chat"), QStringLiteral("chat-message-new-symbolic") },
-                { QStringLiteral("folder"), QStringLiteral("folder-symbolic") },
-                { QStringLiteral("home"), QStringLiteral("go-home-symbolic") },
-                { QStringLiteral("music"), QStringLiteral("audio-x-generic-symbolic") },
-                { QStringLiteral("notes"), QStringLiteral("accessories-text-editor-symbolic") },
-                { QStringLiteral("photos"), QStringLiteral("image-x-generic-symbolic") },
-                { QStringLiteral("terminal"), QStringLiteral("utilities-terminal-symbolic") },
+                {QStringLiteral("apps"), QStringLiteral("view-app-grid-symbolic")}, {QStringLiteral("browser"), QStringLiteral("web-browser-symbolic")}, {QStringLiteral("chat"), QStringLiteral("chat-message-new-symbolic")}, {QStringLiteral("folder"), QStringLiteral("folder-symbolic")}, {QStringLiteral("home"), QStringLiteral("go-home-symbolic")}, {QStringLiteral("music"), QStringLiteral("audio-x-generic-symbolic")}, {QStringLiteral("notes"), QStringLiteral("accessories-text-editor-symbolic")}, {QStringLiteral("photos"), QStringLiteral("image-x-generic-symbolic")}, {QStringLiteral("terminal"), QStringLiteral("utilities-terminal-symbolic")},
             };
             const auto name = QFileInfo(fileName).completeBaseName();
 

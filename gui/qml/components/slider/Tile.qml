@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import "../icon" as Icon
-import "../../logic/theme.js" as Theme
+import "../../scripts/theme.js" as Theme
 
 Item {
     id: root
