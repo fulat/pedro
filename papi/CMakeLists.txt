@@ -40,9 +40,9 @@ find_package(
 # │   │       ├── manager.hpp
 # │   │       └── manager.cpp
 # │   │
-# │   └── filesystem/
-# │       ├── filesystem.hpp
-# │       └── filesystem.cpp
+# │   └── fs/
+# │       ├── fs.hpp
+# │       └── fs.cpp
 # │
 # ├── gui/
 # ├── system/
