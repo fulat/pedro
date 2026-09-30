@@ -20,4 +20,3 @@
 # Unused design exports; the GUI embeds the raster assets referenced by QML.
 /gui/assets/dock.png
 /gui/assets/dock.svg
-/gui/assets/logo.svg

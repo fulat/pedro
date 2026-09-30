@@ -1,9 +1,11 @@
 #pragma once
 
-#include <pedro/papi/bluetooth/manager.hpp>
-#include <pedro/papi/network/wifi/manager.hpp>
+#include <pedro/papi/io/bluetooth/manager.hpp>
+#include <pedro/papi/io/network/wifi/manager.hpp>
 #include <pedro/papi/system/system.hpp>
+#include <pedro/papi/utils/utils.hpp>
 
+#include <QUrl>
 #include <QObject>
 #include <QString>
 #include <QTimer>
@@ -38,6 +40,8 @@ class Backend final : public QObject {
         Q_PROPERTY(QString bluetoothError READ bluetoothError NOTIFY bluetoothChanged)
         Q_PROPERTY(QVariantList bluetoothDevices READ bluetoothDevices NOTIFY bluetoothChanged)
 
+        Q_PROPERTY(QUrl wallpaper READ wallpaper NOTIFY wallpaperChanged)
+
     public:
 
         explicit Backend(QObject* parent = nullptr);
@@ -66,6 +70,8 @@ class Backend final : public QObject {
         [[nodiscard]] QString bluetoothError() const;
         [[nodiscard]] QVariantList bluetoothDevices() const;
 
+        [[nodiscard]] QUrl wallpaper() const;
+
         void setDocumentPath(const QString& path);
 
         Q_INVOKABLE void refreshSystem();
@@ -79,6 +85,7 @@ class Backend final : public QObject {
         Q_INVOKABLE void setBluetoothEnabled(bool enabled);
         Q_INVOKABLE void scanBluetooth();
 
+
     signals:
         void systemChanged();
         void documentPathChanged();
@@ -86,6 +93,7 @@ class Backend final : public QObject {
         void statusMessageChanged();
         void wifiChanged();
         void bluetoothChanged();
+	    void wallpaperChanged();
 
     private:
 
@@ -94,31 +102,40 @@ class Backend final : public QObject {
         Pedro::Papi::System system_;
         Pedro::Papi::Network::Wifi::Manager wifi_;
         Pedro::Papi::Bluetooth::Manager bluetooth_;
+
         QTimer refreshTimer_;
         QTimer wifiRefreshTimer_;
         QTimer bluetoothRefreshTimer_;
+
         QString hostname_;
         QString kernel_;
         QString architecture_;
         QString uptime_;
+
         double cpuUsage_{-1.0};
         double memoryUsage_{0.0};
+
         QString memorySummary_;
         QString documentPath_;
         QString documentText_;
+        QString bluetoothError_;
         QString statusMessage_;
+        QString connectedWifiName_;
+        QString wifiError_;
+        QUrl wallpaper_;
+
         bool wifiAvailable_{false};
         bool wifiEnabled_{false};
         bool wifiConnected_{false};
         bool wifiRefreshPending_{false};
-        QString connectedWifiName_;
         bool wifiScanning_{false};
-        QString wifiError_;
-        QVariantList wifiNetworks_;
+
         bool bluetoothAvailable_{false};
         bool bluetoothEnabled_{false};
         bool bluetoothScanning_{false};
         bool bluetoothRefreshPending_{false};
-        QString bluetoothError_;
+
+        QVariantList wifiNetworks_;
         QVariantList bluetoothDevices_;
+
 };

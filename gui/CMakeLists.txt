@@ -2,122 +2,343 @@ cmake_minimum_required(VERSION 3.16)
 
 project(pedro_gui VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# The GUI is Pedro's graphical shell: a Qt 6 Quick / QML application
-# that boots on top of the compositor. It is a regular Linux ELF
-# executable (no .app bundle, no Win32 GUI subsystem).
-find_package(Qt6 REQUIRED COMPONENTS Concurrent Quick Svg)
+# =============================================================================
+# Qt
+#
+# Pedro GUI is the graphical shell of the operating system. It is built as a
+# regular Linux ELF executable using Qt 6 Quick / QML.
+# =============================================================================
+
+find_package(Qt6 REQUIRED COMPONENTS
+        Concurrent
+        Qml
+        Quick
+        Svg
+)
 
 qt_standard_project_setup(REQUIRES 6.5)
+
 qt_policy(SET QTP0004 NEW)
 
-# Content imported from Figma to Qt or similar
-if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/importedcontent/CMakeLists.txt")
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/importedcontent)
-endif()
 
-qt_add_executable(pedro_gui
+# =============================================================================
+# Native C++ sources
+#
+# Native implementation used directly by Pedro's graphical shell.
+#
+# C++ sources are intentionally kept explicit. Unlike GUI assets, adding or
+# removing native source files can affect compilation, linking, and dependency
+# relationships, so keeping this list explicit makes those changes visible.
+# =============================================================================
+
+set(PEDRO_GUI_SOURCES
         main.cpp
+
+        backend.cpp
+        backend.hpp
+
         render/info.cpp
         render/info.hpp
 )
 
-qt_add_qml_module(pedro_gui
-        URI gui
-        # Pedro deploys dynamic Qt/QML modules as runtime packages. Import
-        # scanning only tries to link unavailable static plugin targets on
-        # distro Qt installations, so it is intentionally disabled here.
-        NO_IMPORT_SCAN
-        QML_FILES
-        Main.qml
-        RESOURCES
-        qml/bar/Top.qml
-        qml/bar/Player.qml
-        qml/panel/Root.qml
-        qml/glass/Surface.qml
-        qml/system/View.qml
-        qml/files/View.qml
-        qml/about/View.qml
-        qml/control/Center.qml
-        qml/menu/Button.qml
-        qml/status/Button.qml
-        qml/metric/Card.qml
-        qml/icon/Tinted.qml
-        qml/quick/Tile.qml
-        qml/slider/Tile.qml
-        qml/toggle/Tile.qml
-        qml/action/Tile.qml
-        qml/media/Card.qml
-        qml/media/Button.qml
-        qml/wifi/View.qml
-        qml/bluetooth/View.qml
-        qml/bluetooth/Device.qml
-        qml/sound/View.qml
-        qml/option/Row.qml
-        qml/toggle/Switch.qml
-        qml/wifi/Network.qml
-        qml/logic/theme.js
-        qml/logic/clock.js
-        qml/logic/pixel.js
-        language/config.json
-        language/es.json
-        assets/icons/wifi.svg
-        assets/icons/wifi-off.svg
-        assets/icons/search.svg
-        assets/icons/battery.svg
-        assets/icons/moon.svg
-        assets/icons/leaf.svg
-        assets/icons/display.svg
-        assets/icons/keyboard.svg
-        assets/icons/camera.svg
-        assets/icons/chevron.svg
-        assets/icons/previous.svg
-        assets/icons/next.svg
-        assets/icons/pause.svg
-        assets/icons/bluetooth.svg
-        assets/icons/brightness.svg
-        assets/icons/lock.svg
-        assets/icons/power.svg
-        assets/icons/restart.svg
-        assets/icons/settings.svg
-        assets/icons/speaker.svg
-        assets/logo.png
-        assets/artwork.svg
-        assets/notch.svg
-        assets/wallpaper.jpeg
-        SOURCES
-        backend.cpp
-        backend.hpp
+
+# =============================================================================
+# Automatic QML and JavaScript discovery
+#
+# Every .qml and .js file placed under gui/qml/ is automatically included in
+# Pedro's QML module.
+#
+# CONFIGURE_DEPENDS tells CMake to re-check the directory when files are added
+# or removed, so creating a new QML component does not require manually editing
+# this CMakeLists.txt.
+# =============================================================================
+
+file(GLOB_RECURSE PEDRO_GUI_QML_FILES
+        CONFIGURE_DEPENDS
+
+        RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+
+        "${CMAKE_CURRENT_SOURCE_DIR}/qml/*.qml"
+        "${CMAKE_CURRENT_SOURCE_DIR}/qml/*.js"
 )
 
-set_target_properties(pedro_gui PROPERTIES
+# Main.qml lives at the root of gui/ instead of inside gui/qml/.
+list(APPEND PEDRO_GUI_QML_FILES
+        Main.qml
+)
+
+
+# =============================================================================
+# Automatic GUI resource discovery
+#
+# Visual assets are discovered automatically from gui/assets/.
+#
+# Adding a new SVG, PNG, JPEG, JPG, or WEBP file anywhere under assets/
+# automatically makes it part of the Qt resource system after CMake detects
+# the change.
+#
+# This removes the need to manually maintain every icon or image here.
+# =============================================================================
+
+file(GLOB_RECURSE PEDRO_GUI_ASSETS
+        CONFIGURE_DEPENDS
+
+        RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/*.svg"
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/*.png"
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/*.jpg"
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/*.jpeg"
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/*.webp"
+)
+
+
+# =============================================================================
+# Automatic language resource discovery
+#
+# Every JSON language/configuration file under gui/language/ is automatically
+# included in Pedro's Qt resource system.
+#
+# New languages can therefore be added without modifying this CMakeLists.txt.
+# =============================================================================
+
+file(GLOB_RECURSE PEDRO_GUI_LANGUAGE_FILES
+        CONFIGURE_DEPENDS
+
+        RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+
+        "${CMAKE_CURRENT_SOURCE_DIR}/language/*.json"
+)
+
+
+# =============================================================================
+# Combined embedded resources
+#
+# These resources are embedded into Qt's resource system and can be accessed
+# by QML independently of the process working directory.
+# =============================================================================
+
+set(PEDRO_GUI_RESOURCES
+        ${PEDRO_GUI_ASSETS}
+        ${PEDRO_GUI_LANGUAGE_FILES}
+)
+
+
+# =============================================================================
+# Optional imported design content
+#
+# Content generated by tools such as Figma-to-Qt can live under
+# gui/importedcontent/.
+#
+# The directory remains optional so Pedro can build normally when no generated
+# design package is present.
+# =============================================================================
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/importedcontent/CMakeLists.txt")
+        add_subdirectory(
+                "${CMAKE_CURRENT_LIST_DIR}/importedcontent"
+        )
+endif()
+
+
+# =============================================================================
+# Pedro GUI executable
+#
+# Creates the native Linux executable that hosts Pedro's graphical shell.
+# =============================================================================
+
+qt_add_executable(
+        pedro_gui
+
+        ${PEDRO_GUI_SOURCES}
+)
+
+
+# =============================================================================
+# Pedro QML module
+#
+# URI "gui" identifies Pedro's internal graphical QML module.
+#
+# QML_FILES contains Pedro's QML components and JavaScript libraries.
+# RESOURCES contains images, icons, language files, and other embedded assets.
+#
+# NO_IMPORT_SCAN is intentional. Pedro uses distro-provided dynamic Qt/QML
+# modules, and automatic import scanning may attempt to link static QML plugin
+# targets that are not available on the target Linux installation.
+# =============================================================================
+
+qt_add_qml_module(
+        pedro_gui
+
+        URI gui
+
+        NO_IMPORT_SCAN
+        # Pedro uses directory imports to preserve semantic component
+        # namespaces such as quick/Tile.qml and toggle/Tile.qml. Redirecting
+        # qmldir files flatten those types into the root module and make them
+        # collide at runtime.
+        NO_GENERATE_EXTRA_QMLDIRS
+
+        QML_FILES
+        ${PEDRO_GUI_QML_FILES}
+
+        RESOURCES
+        ${PEDRO_GUI_RESOURCES}
+)
+
+
+# =============================================================================
+# Executable properties
+#
+# "pedro_gui" is the internal CMake target name.
+#
+# The actual executable installed and launched by Pedro is:
+#
+#     pedro-gui
+# =============================================================================
+
+set_target_properties(
+        pedro_gui
+
+        PROPERTIES
         OUTPUT_NAME pedro-gui
 )
 
-target_link_libraries(pedro_gui
+
+# =============================================================================
+# C++ standard
+#
+# Pedro GUI currently requires C++17.
+#
+# The requirement is attached specifically to this target instead of changing
+# the C++ standard globally for unrelated Pedro components.
+# =============================================================================
+
+target_compile_features(
+        pedro_gui
+
+        PRIVATE
+        cxx_std_17
+)
+
+
+# =============================================================================
+# Native dependencies
+#
+# Qt6::Concurrent
+#     Background and concurrent operations.
+#
+# Qt6::Qml
+#     QML engine and native C++/QML integration.
+#
+# Qt6::Quick
+#     Qt Quick graphical runtime.
+#
+# Qt6::Svg
+#     SVG rendering used by Pedro's iconography and UI assets.
+#
+# pedro_papi
+#     Pedro's native operating-system API.
+# =============================================================================
+
+target_link_libraries(
+        pedro_gui
+
         PRIVATE
         Qt6::Concurrent
+        Qt6::Qml
         Qt6::Quick
         Qt6::Svg
+
         pedro_papi
 )
 
-# A development-only convenience target. $<TARGET_FILE:...> resolves to the
-# native executable on Linux and to the executable inside an app bundle on macOS.
-add_custom_target(pedro-gui-run
+
+# =============================================================================
+# Runtime filesystem assets
+#
+# Qt resources are excellent for assets consumed directly by QML, but some
+# Pedro components also need real filesystem files.
+#
+# Examples include:
+#
+#     assets/wallpapers/config.toml
+#     filesystem-managed wallpapers
+#     files read by native C++ libraries such as toml++
+#
+# The complete assets directory is therefore also copied next to the
+# development executable.
+#
+# Development layout:
+#
+#     build/dev/gui/
+#     ├── pedro-gui
+#     └── assets/
+#         ├── icons/
+#         └── wallpapers/
+#
+# $<TARGET_FILE_DIR:pedro_gui> dynamically resolves the directory containing
+# the actual built executable, so this does not depend on a hardcoded build
+# path.
+# =============================================================================
+add_custom_command(
+        TARGET pedro_gui
+        POST_BUILD
+
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+                "$<TARGET_FILE_DIR:pedro_gui>/assets"
+
+        COMMENT "Copying Pedro GUI runtime assets"
+)
+
+
+# =============================================================================
+# Development runner
+#
+# Provides:
+#
+#     pedro-gui-run
+#
+# so the graphical shell can be launched directly from the development build
+# without generating a complete Pedro IMG or ISO.
+#
+# PEDRO_DEVELOPMENT_MODE
+#     Identifies the current execution as a development session.
+#
+# PEDRO_QML_DIR
+#     Points Pedro tooling to the GUI source directory.
+# =============================================================================
+add_custom_target(
+        pedro-gui-run
+
         COMMAND ${CMAKE_COMMAND} -E env
                 PEDRO_DEVELOPMENT_MODE=1
                 PEDRO_QML_DIR=${CMAKE_CURRENT_SOURCE_DIR}
                 $<TARGET_FILE:pedro_gui>
-        DEPENDS pedro_gui
+
+        DEPENDS
+        pedro_gui
+
         USES_TERMINAL
 )
 
-# Install destinations are kept relative on purpose. The root CMakeLists
-# drives the install prefix (build/staging/rootfs) so this component
-# stays portable across staging layouts.
+
+# =============================================================================
+# Installation
+#
+# Install destinations remain relative intentionally.
+#
+# Pedro's root CMake project controls CMAKE_INSTALL_PREFIX when generating a
+# staging directory, root filesystem, IMG, or ISO.
+#
+# Final runtime location inside Pedro:
+#
+#     /usr/bin/pedro-gui
+# =============================================================================
 install(
         TARGETS pedro_gui
+
         RUNTIME DESTINATION usr/bin
 )

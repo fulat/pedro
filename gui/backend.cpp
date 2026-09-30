@@ -1,17 +1,24 @@
 #include "backend.hpp"
 
-#include <pedro/papi/filesystem/filesystem.hpp>
+#include <pedro/papi/io/fs/filesystem.hpp>
+#include <pedro/papi/utils/utils.hpp>
+#include <pedro/papi/gui/wallpapers/wallpaper.hpp>
 
 #include <QDir>
 #include <QFutureWatcher>
 #include <QStandardPaths>
 #include <QVariantMap>
 #include <QtConcurrentRun>
+#include <QFileInfo>
+#include <QCoreApplication>
+#include <QDebug>
 
 #include <cstdlib>
 #include <exception>
 #include <optional>
 #include <utility>
+#include <iostream>
+#include <string>
 
 namespace {
 
@@ -56,6 +63,7 @@ Backend::Backend(QObject* parent) : QObject(parent) {
     if (documents.isEmpty() || !QDir(documents).exists()) {
         documents = QDir::homePath();
     }
+
     documentPath_ = QDir(documents).filePath(QStringLiteral("pedro-notes.txt"));
 
     connect(&refreshTimer_, &QTimer::timeout, this, &Backend::refreshSystem);
@@ -67,6 +75,15 @@ Backend::Backend(QObject* parent) : QObject(parent) {
     connect(&bluetoothRefreshTimer_, &QTimer::timeout, this, &Backend::refreshBluetooth);
     bluetoothRefreshTimer_.start(5000);
 
+    const auto currentWallpaper = Pedro::Papi::Gui::Wallpaper::current();
+    wallpaper_ = QUrl::fromLocalFile(QString::fromStdString(currentWallpaper.string()));
+
+    qDebug() << "Wallpaper filesystem path:" << QString::fromStdString(currentWallpaper.string());
+
+    qDebug() << "Wallpaper QUrl:" << wallpaper_;
+
+    qDebug() << "Wallpaper exists:" << QFileInfo::exists(QString::fromStdString(currentWallpaper.string()));
+
     refreshSystem();
     refreshWifi();
     refreshBluetooth();
@@ -74,6 +91,10 @@ Backend::Backend(QObject* parent) : QObject(parent) {
 
 bool Backend::developmentMode() const {
     return std::getenv("PEDRO_DEVELOPMENT_MODE") != nullptr;
+}
+
+QUrl Backend::wallpaper() const {
+    return wallpaper_;
 }
 
 QString Backend::hostname() const {
@@ -154,16 +175,18 @@ void Backend::setDocumentPath(const QString& path) {
 void Backend::refreshSystem() {
     try {
         const auto info = system_.snapshot();
+
         hostname_ = QString::fromStdString(info.hostname);
         kernel_ = QString::fromStdString(info.kernel);
         architecture_ = QString::fromStdString(info.architecture);
         uptime_ = formatUptime(info.uptimeSeconds);
-        if (info.cpuUsagePercent.has_value()) {
-            cpuUsage_ = *info.cpuUsagePercent;
-        }
+
+        cpuUsage_ = info.cpuUsagePercent;
+
         memoryUsage_ = info.memory.usedPercent();
         memorySummary_ = QStringLiteral("%1 de %2 en uso").arg(formatBytes(info.memory.usedBytes()), formatBytes(info.memory.totalBytes));
         emit systemChanged();
+
     } catch (const std::exception& error) {
         setStatusMessage(QStringLiteral("Error de información del sistema: %1").arg(error.what()));
     }

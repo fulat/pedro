@@ -1,0 +1,10 @@
+
+# Wallpaper configuration for dark themes
+[wallpaper.dark]
+type = "system"
+current = "wallpaper.jpeg"
+
+# Wallpaper configuration for light themes
+[wallpaper.light]
+type = "file"
+current = "wallpaper.jpeg"
