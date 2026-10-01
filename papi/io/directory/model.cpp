@@ -21,7 +21,30 @@ namespace Pedro::Papi::Io::Directory {
         constexpr int entryRole = Qt::UserRole + 1;
         constexpr auto attributes = "standard::name,standard::display-name,standard::type,standard::is-hidden,standard::content-type,standard::size,time::modified";
 
-        class Filter : public QSortFilterProxyModel {
+        class Order : public QSortFilterProxyModel {
+            public:
+
+                QString key = "name";
+
+            protected:
+
+                bool lessThan(const QModelIndex& left, const QModelIndex& right) const override {
+                    const auto first = sourceModel()->data(left, entryRole).toMap();
+                    const auto second = sourceModel()->data(right, entryRole).toMap();
+                    if (key == "size" && first.value(key) != second.value(key)) {
+                        return first.value(key).toLongLong() < second.value(key).toLongLong();
+                    }
+                    if (key == "modified" && first.value(key) != second.value(key)) {
+                        return first.value(key).toDateTime() < second.value(key).toDateTime();
+                    }
+                    if (key == "type" && first.value(key) != second.value(key)) {
+                        return QString::localeAwareCompare(first.value(key).toString(), second.value(key).toString()) < 0;
+                    }
+                    return QString::localeAwareCompare(first.value("name").toString(), second.value("name").toString()) < 0;
+                }
+        };
+
+        class Filter : public Order {
             public:
 
                 explicit Filter(bool folders) : folders(folders) {
@@ -255,6 +278,7 @@ namespace Pedro::Papi::Io::Directory {
 
     struct Model::State {
             QList<QVariantMap> entries;
+            Order all;
             Filter folders{true};
             Filter files{false};
             QString location;
@@ -294,6 +318,7 @@ namespace Pedro::Papi::Io::Directory {
 
     Model::Model(QObject* parent) : QAbstractListModel(parent), state(std::make_unique<State>()) {
 
+        state->all.setSourceModel(this);
         state->folders.setSourceModel(this);
         state->files.setSourceModel(this);
         state->debounce.setSingleShot(true);
@@ -364,6 +389,21 @@ namespace Pedro::Papi::Io::Directory {
 
     bool Model::canGoForward() const {
         return state->cursor + 1 < state->history.size();
+    }
+
+    QAbstractItemModel* Model::entriesModel() {
+        return &state->all;
+    }
+
+    void Model::setSort(const QString& key) {
+        if (key != "name" && key != "type" && key != "size" && key != "modified") {
+            return;
+        }
+        for (Order* proxy : {&state->all, static_cast<Order*>(&state->folders), static_cast<Order*>(&state->files)}) {
+            proxy->key = key;
+            proxy->sort(-1);
+            proxy->sort(0, key == "modified" ? Qt::DescendingOrder : Qt::AscendingOrder);
+        }
     }
 
     QAbstractItemModel* Model::folderModel() {

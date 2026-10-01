@@ -17,6 +17,7 @@ namespace Pedro::Papi::Io::Directory {
             Q_PROPERTY(bool loading READ loading NOTIFY contentsChanged)
             Q_PROPERTY(bool canGoBack READ canGoBack NOTIFY locationChanged)
             Q_PROPERTY(bool canGoForward READ canGoForward NOTIFY locationChanged)
+            Q_PROPERTY(QAbstractItemModel* entriesModel READ entriesModel CONSTANT)
             Q_PROPERTY(QAbstractItemModel* folderModel READ folderModel CONSTANT)
             Q_PROPERTY(QAbstractItemModel* fileModel READ fileModel CONSTANT)
             Q_PROPERTY(QVariantList folders READ folders NOTIFY contentsChanged)
@@ -49,6 +50,10 @@ namespace Pedro::Papi::Io::Directory {
             bool canGoBack() const;
 
             bool canGoForward() const;
+
+            QAbstractItemModel* entriesModel();
+
+            Q_INVOKABLE void setSort(const QString& key);
 
             QAbstractItemModel* folderModel();
 
