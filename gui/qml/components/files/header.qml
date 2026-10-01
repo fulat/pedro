@@ -9,6 +9,8 @@ import "palette.js" as Palette
 Item {
     id: header
     property bool searchExpanded: false
+    property bool pathExpanded: false
+    readonly property string currentPath: controller && controller.directory ? controller.directory.path || controller.directory.location : ""
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     RowLayout {
@@ -21,20 +23,56 @@ Item {
             Loader { source: "button.qml"; onLoaded: { item.symbol = "forward"; item.width = 39; item.enabled = Qt.binding(() => header.controller && header.controller.directory.canGoForward); item.clicked.connect(() => header.controller.forward()); } }
         }
         Rectangle {
-            visible: header.width >= 800
-            Layout.preferredWidth: Math.max(105, Math.min(230, header.width * 0.22))
+            id: location
+            objectName: "filesLocation"
+            Layout.fillWidth: true
+            Layout.minimumWidth: 110
+            Layout.preferredWidth: 240
             Layout.preferredHeight: 38
             radius: 12
             color: header.colors.card
-            RowLayout {
-                anchors.fill: parent; anchors.margins: 10; spacing: 15
-                Icon.Tinted { source: "house.svg"; tint: header.colors.accent; Layout.preferredWidth: 18; Layout.preferredHeight: 18 }
-                Text { text: "›"; color: header.colors.muted }
-                Text { text: header.controller ? header.controller.title : ""; color: header.colors.ink; font.pixelSize: 13; font.bold: true; Layout.fillWidth: true; elide: Text.ElideMiddle }
-                Item { Layout.fillWidth: true }
+            Icon.Tinted { visible: !header.pathExpanded; x: 12; anchors.verticalCenter: parent.verticalCenter; width: 18; height: 18; source: "folder.svg"; tint: header.colors.accent }
+            Text {
+                visible: !header.pathExpanded
+                anchors.left: parent.left
+                anchors.leftMargin: 40
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                text: header.controller ? header.controller.title : ""
+                color: header.colors.ink
+                font.pixelSize: 13
+                font.bold: true
+                elide: Text.ElideMiddle
+            }
+            MouseArea {
+                anchors.fill: parent
+                enabled: !header.pathExpanded
+                cursorShape: Qt.IBeamCursor
+                onClicked: {
+                    header.pathExpanded = true;
+                    pathInput.text = header.currentPath;
+                    pathInput.forceActiveFocus();
+                    pathInput.selectAll();
+                }
+            }
+            TextField {
+                id: pathInput
+                objectName: "filesPathInput"
+                anchors.fill: parent
+                visible: header.pathExpanded
+                text: header.currentPath
+                readOnly: true
+                selectByMouse: true
+                color: header.colors.ink
+                font.pixelSize: 13
+                leftPadding: 10
+                rightPadding: 10
+                background: Item {}
+                onActiveFocusChanged: { if (!activeFocus) header.pathExpanded = false; }
+                Keys.onEscapePressed: { header.pathExpanded = false; focus = false; }
             }
         }
-        Item { Layout.fillWidth: true }
         Loader {
             source: "button.qml"
             onLoaded: {
