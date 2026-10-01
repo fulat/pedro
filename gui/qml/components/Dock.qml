@@ -28,7 +28,7 @@ Item {
     Liquid {
         anchors.fill: parent
         backdrop: dock.backdrop
-        cornerRadius: 18
+        cornerRadius: 14
     }
 
     MouseArea {
