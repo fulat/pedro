@@ -150,8 +150,9 @@ Item {
         Loader {
             source: "dropdown.qml"
             onLoaded: {
-                item.symbol = Qt.binding(() => header.controller && header.controller.viewMode === "list" ? "list" : header.controller && header.controller.viewMode === "columns" ? "columns" : header.controller && header.controller.viewMode === "mixed" ? "mixed" : "grid");
-                item.options = [{key: "grid", label: "files.view.grid"}, {key: "list", label: "files.view.list"}, {key: "columns", label: "files.view.columns"}, {key: "mixed", label: "files.view.mixed"}];
+                item.objectName = "filesViewDropdown";
+                item.symbol = "view";
+                item.options = [{key: "grid", icon: "grid", label: "files.view.grid"}, {key: "list", icon: "list", label: "files.view.list"}, {key: "columns", icon: "columns", label: "files.view.columns"}, {key: "mixed", icon: "mixed", label: "files.view.mixed"}];
                 item.selectedKey = Qt.binding(() => header.controller ? header.controller.viewMode : "mixed");
                 item.chosen.connect(key => header.controller.viewMode = key);
             }
@@ -159,8 +160,9 @@ Item {
         Loader {
             source: "dropdown.qml"
             onLoaded: {
+                item.objectName = "filesSortDropdown";
                 item.symbol = "sort";
-                item.options = [{key: "name", label: "files.sample.name"}, {key: "type", label: "files.sample.type"}, {key: "size", label: "files.sample.size"}, {key: "modified", label: "files.sample.modified"}];
+                item.options = [{key: "name", icon: "sort", label: "files.sample.name"}, {key: "type", icon: "file", label: "files.sample.type"}, {key: "size", icon: "size", label: "files.sample.size"}, {key: "modified", icon: "calendar", label: "files.sample.modified"}];
                 item.selectedKey = Qt.binding(() => header.controller ? header.controller.sortKey : "name");
                 item.chosen.connect(key => { header.controller.sortKey = key; header.controller.directory.setSort(key); });
             }
