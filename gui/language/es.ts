@@ -1011,5 +1011,225 @@
             <extracomment>Stable Pedro key: files.browser.folder</extracomment>
             <translation>Carpeta</translation>
         </message>
+        <message>
+            <source>files.browser.project</source>
+            <extracomment>Stable Pedro key: files.browser.project</extracomment>
+            <translation>Proyecto Pedro</translation>
+        </message>
+        <message>
+            <source>files.browser.drive</source>
+            <extracomment>Stable Pedro key: files.browser.drive</extracomment>
+            <translation>Pedro Drive</translation>
+        </message>
+        <message>
+            <source>files.browser.all</source>
+            <extracomment>Stable Pedro key: files.browser.all</extracomment>
+            <translation>Todos</translation>
+        </message>
+        <message>
+            <source>files.browser.more</source>
+            <extracomment>Stable Pedro key: files.browser.more</extracomment>
+            <translation>Más</translation>
+        </message>
+        <message>
+            <source>files.browser.open</source>
+            <extracomment>Stable Pedro key: files.browser.open</extracomment>
+            <translation>Abrir</translation>
+        </message>
+        <message>
+            <source>files.sample.tags</source>
+            <extracomment>Stable Pedro key: files.sample.tags</extracomment>
+            <translation>Etiquetas</translation>
+        </message>
+        <message>
+            <source>files.sample.search</source>
+            <extracomment>Stable Pedro key: files.sample.search</extracomment>
+            <translation>Buscar en Proyecto Pedro...</translation>
+        </message>
+        <message>
+            <source>files.sample.upload</source>
+            <extracomment>Stable Pedro key: files.sample.upload</extracomment>
+            <translation>Subir</translation>
+        </message>
+        <message>
+            <source>files.sample.summary</source>
+            <extracomment>Stable Pedro key: files.sample.summary</extracomment>
+            <translation>10 elementos · 12.6 GB</translation>
+        </message>
+        <message>
+            <source>files.sample.description</source>
+            <extracomment>Stable Pedro key: files.sample.description</extracomment>
+            <translation>Recursos, diseños y documentos del sistema Pedro OS.</translation>
+        </message>
+        <message>
+            <source>files.sample.storage</source>
+            <extracomment>Stable Pedro key: files.sample.storage</extracomment>
+            <translation>12.6 GB de 50 GB</translation>
+        </message>
+        <message>
+            <source>files.sample.items</source>
+            <extracomment>Stable Pedro key: files.sample.items</extracomment>
+            <translation>%1 elementos</translation>
+        </message>
+        <message>
+            <source>files.sample.designs</source>
+            <extracomment>Stable Pedro key: files.sample.designs</extracomment>
+            <translation>Diseños</translation>
+        </message>
+        <message>
+            <source>files.sample.wallpapers</source>
+            <extracomment>Stable Pedro key: files.sample.wallpapers</extracomment>
+            <translation>Wallpapers</translation>
+        </message>
+        <message>
+            <source>files.sample.contracts</source>
+            <extracomment>Stable Pedro key: files.sample.contracts</extracomment>
+            <translation>Contratos</translation>
+        </message>
+        <message>
+            <source>files.sample.mockups</source>
+            <extracomment>Stable Pedro key: files.sample.mockups</extracomment>
+            <translation>Mockups</translation>
+        </message>
+        <message>
+            <source>files.sample.captures</source>
+            <extracomment>Stable Pedro key: files.sample.captures</extracomment>
+            <translation>Capturas</translation>
+        </message>
+        <message>
+            <source>files.sample.resources</source>
+            <extracomment>Stable Pedro key: files.sample.resources</extracomment>
+            <translation>Recursos</translation>
+        </message>
+        <message>
+            <source>files.sample.references</source>
+            <extracomment>Stable Pedro key: files.sample.references</extracomment>
+            <translation>Referencias</translation>
+        </message>
+        <message>
+            <source>files.sample.design</source>
+            <extracomment>Stable Pedro key: files.sample.design</extracomment>
+            <translation>Diseño</translation>
+        </message>
+        <message>
+            <source>files.sample.work</source>
+            <extracomment>Stable Pedro key: files.sample.work</extracomment>
+            <translation>Trabajo</translation>
+        </message>
+        <message>
+            <source>files.sample.important</source>
+            <extracomment>Stable Pedro key: files.sample.important</extracomment>
+            <translation>Importante</translation>
+        </message>
+        <message>
+            <source>files.sample.personal</source>
+            <extracomment>Stable Pedro key: files.sample.personal</extracomment>
+            <translation>Personal</translation>
+        </message>
+        <message>
+            <source>files.sample.files</source>
+            <extracomment>Stable Pedro key: files.sample.files</extracomment>
+            <translation>Archivos</translation>
+        </message>
+        <message>
+            <source>files.sample.sort</source>
+            <extracomment>Stable Pedro key: files.sample.sort</extracomment>
+            <translation>Ordenar por: Nombre</translation>
+        </message>
+        <message>
+            <source>files.sample.name</source>
+            <extracomment>Stable Pedro key: files.sample.name</extracomment>
+            <translation>Nombre</translation>
+        </message>
+        <message>
+            <source>files.sample.type</source>
+            <extracomment>Stable Pedro key: files.sample.type</extracomment>
+            <translation>Tipo</translation>
+        </message>
+        <message>
+            <source>files.sample.size</source>
+            <extracomment>Stable Pedro key: files.sample.size</extracomment>
+            <translation>Tamaño</translation>
+        </message>
+        <message>
+            <source>files.sample.modified</source>
+            <extracomment>Stable Pedro key: files.sample.modified</extracomment>
+            <translation>Modificado</translation>
+        </message>
+        <message>
+            <source>files.sample.pdf</source>
+            <extracomment>Stable Pedro key: files.sample.pdf</extracomment>
+            <translation>Documento PDF</translation>
+        </message>
+        <message>
+            <source>files.sample.svg</source>
+            <extracomment>Stable Pedro key: files.sample.svg</extracomment>
+            <translation>Imagen SVG</translation>
+        </message>
+        <message>
+            <source>files.sample.presentation</source>
+            <extracomment>Stable Pedro key: files.sample.presentation</extracomment>
+            <translation>Presentación</translation>
+        </message>
+        <message>
+            <source>files.sample.detail</source>
+            <extracomment>Stable Pedro key: files.sample.detail</extracomment>
+            <translation>Carpeta · 10 elementos · 12.6 GB</translation>
+        </message>
+        <message>
+            <source>files.sample.updated</source>
+            <extracomment>Stable Pedro key: files.sample.updated</extracomment>
+            <translation>Modificado 27 sep. 2025, 11:42</translation>
+        </message>
+        <message>
+            <source>files.sample.preview</source>
+            <extracomment>Stable Pedro key: files.sample.preview</extracomment>
+            <translation>Vista previa</translation>
+        </message>
+        <message>
+            <source>files.sample.location</source>
+            <extracomment>Stable Pedro key: files.sample.location</extracomment>
+            <translation>Ubicación</translation>
+        </message>
+        <message>
+            <source>files.sample.folderType</source>
+            <extracomment>Stable Pedro key: files.sample.folderType</extracomment>
+            <translation>Carpeta de archivos</translation>
+        </message>
+        <message>
+            <source>files.sample.documents</source>
+            <extracomment>Stable Pedro key: files.sample.documents</extracomment>
+            <translation>Documentos</translation>
+        </message>
+        <message>
+            <source>files.sample.detailSize</source>
+            <extracomment>Stable Pedro key: files.sample.detailSize</extracomment>
+            <translation>12.6 GB (13,542,321,456 bytes)</translation>
+        </message>
+        <message>
+            <source>files.sample.itemsLabel</source>
+            <extracomment>Stable Pedro key: files.sample.itemsLabel</extracomment>
+            <translation>Elementos</translation>
+        </message>
+        <message>
+            <source>files.sample.detailItems</source>
+            <extracomment>Stable Pedro key: files.sample.detailItems</extracomment>
+            <translation>10 (7 carpetas, 3 archivos)</translation>
+        </message>
+        <message>
+            <source>files.sample.created</source>
+            <extracomment>Stable Pedro key: files.sample.created</extracomment>
+            <translation>Creado</translation>
+        </message>
+        <message>
+            <source>files.sample.createdDate</source>
+            <extracomment>Stable Pedro key: files.sample.createdDate</extracomment>
+            <translation>15 sep. 2025, 14:09</translation>
+        </message>
+        <message>
+            <source>files.sample.modifiedDate</source>
+            <extracomment>Stable Pedro key: files.sample.modifiedDate</extracomment>
+            <translation>27 sep. 2025, 11:42</translation>
+        </message>
     </context>
 </TS>

@@ -98,6 +98,8 @@ Pendiente: conectar «Pegar» al portapapeles mediante PAPI y mostrarlo únicame
 
 Implementado: ventana Qt Quick reutilizable desde la carpeta del dock y la navegación lateral, con UI adaptable light/dark y catálogos inglés/español. Las ubicaciones y tarjetas actuales son una presentación, no contenido enumerado del filesystem.
 
+La vista reproduce la referencia mediante componentes separados para cabecera, navegación lateral, toolbar, resumen, tarjetas, tabla e inspector, con botones y badges reutilizables. Los datos de Proyecto Pedro son muestras visuales; no implementar navegación real a partir de esas muestras.
+
 Pendiente: conectar navegación y listado real a un modelo de PAPI, resolver ubicaciones estándar mediante XDG, reemplazar el `GFileMonitor` al cambiar de directorio e incorporar búsqueda y operaciones asíncronas. Reutilizar las decisiones de filesystem y jobs de este documento; evitar lógica de filesystem dentro de QML.
 
 ### Activación de aplicaciones desde el dock

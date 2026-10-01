@@ -10,6 +10,14 @@ import "../../scripts/theme.js" as Theme
 Window {
     id: frame
 
+    property url headerSource
+    property real headerHeight: 44
+    property real titleOffset: 90
+    property real titleSize: 13
+    property real contentMargin: 12
+    property real contentTopGap: 6
+    property real headerOffset: 240
+    property real windowRadius: 14
     property url contentSource
     property color surfaceColor: "transparent"
     property color titleColor: Theme.white
@@ -45,19 +53,19 @@ Window {
         anchors.fill: parent
         backdrop: windowBackdrop
         frosted: true
-        cornerRadius: frame.maximized ? 0 : 14
+        cornerRadius: frame.maximized ? 0 : frame.windowRadius
     }
 
     Rectangle {
         anchors.fill: parent
         color: frame.surfaceColor
-        radius: frame.maximized ? 0 : 14
+        radius: frame.maximized ? 0 : frame.windowRadius
     }
 
     Item {
         id: header
         width: parent.width
-        height: 44
+        height: frame.headerHeight
 
         DragHandler {
             target: null
@@ -115,16 +123,24 @@ Window {
 
         Text {
             anchors.left: parent.left
-            anchors.leftMargin: 90
+            anchors.leftMargin: frame.titleOffset
             anchors.right: parent.right
             anchors.rightMargin: 18
             anchors.verticalCenter: parent.verticalCenter
             text: frame.title
             color: frame.titleColor
-            font.pixelSize: 13
-            font.weight: Font.Medium
+            font.pixelSize: frame.titleSize
+            font.weight: frame.titleSize > 13 ? Font.Bold : Font.Medium
             elide: Text.ElideRight
         }
+    }
+
+    Loader {
+        anchors.left: parent.left
+        anchors.leftMargin: frame.headerOffset
+        anchors.right: parent.right
+        height: frame.headerHeight
+        source: frame.headerSource
     }
 
     component ControlBackground: Item {
@@ -162,8 +178,8 @@ Window {
 
     Loader {
         anchors.fill: parent
-        anchors.margins: 12
-        anchors.topMargin: header.height + 6
+        anchors.margins: frame.contentMargin
+        anchors.topMargin: header.height + frame.contentTopGap
         source: frame.contentSource
     }
 

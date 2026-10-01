@@ -62,13 +62,22 @@ ApplicationWindow {
             item.objectName = "filesQuickWindow";
             item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
             item.contentSource = Qt.resolvedUrl("files/browser.qml");
-            item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#f1f4f8" : "#202630");
-            item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#202b3c" : "#edf2f8");
+            item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#f9fbff" : "#202735");
+            item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff");
+            item.headerSource = Qt.resolvedUrl("files/header.qml");
+            item.headerHeight = 58;
+            item.titleOffset = 118;
+            item.titleSize = 20;
+            item.contentMargin = 0;
+            item.contentTopGap = 0;
+            item.windowRadius = 22;
+            item.minimumWidth = 1000;
+            item.minimumHeight = 700;
             item.transientParent = null;
-            item.width = Math.min(1120, window.width * 0.90);
-            item.height = Math.min(720, window.height * 0.90);
-            item.minimumWidth = Math.min(420, item.width);
-            item.minimumHeight = Math.min(320, item.height);
+            item.width = Math.min(1320, Screen.desktopAvailableWidth * 0.86);
+            item.height = Math.min(776, Screen.desktopAvailableHeight * 0.82);
+            item.minimumWidth = Math.min(1000, item.width);
+            item.minimumHeight = Math.min(700, item.height);
             item.x = window.x + Math.round((window.width - item.width) / 2);
             item.y = window.y + Math.round((window.height - item.height) / 2);
         }

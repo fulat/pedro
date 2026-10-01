@@ -1,0 +1,81 @@
+pragma ComponentBehavior: Bound
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls.Basic
+import "../icon" as Icon
+import "palette.js" as Palette
+
+Rectangle {
+    id: sidebar
+    readonly property var colors: Palette.colors(Backend.appearanceMode)
+    color: colors.sidebar
+    ScrollView {
+        anchors.fill: parent
+        anchors.margins: 14
+        clip: true
+        contentWidth: availableWidth
+        Column {
+            width: parent.width
+            spacing: 0
+            Repeater {
+                model: [
+                    {name: "home", icon: "house"}, {name: "favorites", icon: "star"}, {name: "recent", icon: "clock"},
+                    {divider: true},
+                    {name: "documents", icon: "file"}, {name: "downloads", icon: "download"}, {name: "images", icon: "image"}, {name: "music", icon: "music"}, {name: "videos", icon: "video"},
+                    {divider: true},
+                    {name: "project", icon: "folder"}, {name: "drive", icon: "cloud"}, {name: "computer", icon: "display"}, {name: "trash", icon: "trash"}, {divider: true}
+                ]
+                delegate: Item {
+                    id: row
+                    required property var modelData
+                    width: parent.width
+                    height: modelData.divider ? 23 : 36
+                    Rectangle {
+                        visible: row.modelData.divider === true
+                        width: parent.width - 12
+                        x: 6
+                        y: 11
+                        height: 1
+                        color: sidebar.colors.line
+                    }
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 18
+                        visible: !row.modelData.divider
+                        color: row.modelData.name === "home" ? sidebar.colors.selected : rowHover.hovered ? sidebar.colors.selected : "transparent"
+                    }
+                    HoverHandler { id: rowHover; enabled: !row.modelData.divider; cursorShape: Qt.PointingHandCursor }
+                    Icon.Tinted {
+                        visible: !row.modelData.divider
+                        x: 14; y: 8; width: 20; height: 20
+                        source: row.modelData.icon ? row.modelData.icon + ".svg" : ""
+                        tint: row.modelData.name === "home" ? sidebar.colors.accent : sidebar.colors.ink
+                    }
+                    Text {
+                        visible: !row.modelData.divider
+                        x: 49
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: row.modelData.name ? qsTranslate("Pedro", "files.browser." + row.modelData.name) : ""
+                        color: sidebar.colors.ink
+                        font.pixelSize: 14
+                        font.bold: row.modelData.name === "home"
+                    }
+                }
+            }
+            Item {
+                width: parent.width; height: 38
+                Text { x: 14; y: 9; text: qsTranslate("Pedro", "files.sample.tags"); color: sidebar.colors.muted; font.pixelSize: 13 }
+                Rectangle { anchors.right: parent.right; width: 30; height: 30; radius: 15; color: sidebar.colors.selected; Text { anchors.centerIn: parent; text: "+"; color: sidebar.colors.ink; font.pixelSize: 23 } }
+            }
+            Repeater {
+                model: [{name: "work", color: "#13c639"}, {name: "design", color: "#8e22ff"}, {name: "important", color: "#ffa100"}, {name: "personal", color: "#ff6eaa"}]
+                delegate: Item {
+                    required property var modelData
+                    width: parent.width; height: 31
+                    Rectangle { x: 15; y: 7; width: 17; height: 17; radius: 9; color: parent.modelData.color }
+                    Text { x: 49; anchors.verticalCenter: parent.verticalCenter; text: qsTranslate("Pedro", "files.sample." + parent.modelData.name); color: sidebar.colors.ink; font.pixelSize: 14 }
+                }
+            }
+        }
+    }
+}
