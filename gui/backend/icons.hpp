@@ -65,10 +65,12 @@ class Icons final : public QQuickImageProvider {
                 source = source.scaled(target, Qt::KeepAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32_Premultiplied);
             }
 
-            QPainter painter(&source);
-            painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-            painter.fillRect(source.rect(), QColor("#" + parts[0]));
-            painter.end();
+            if (parts[0] != "original") {
+                QPainter painter(&source);
+                painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+                painter.fillRect(source.rect(), QColor("#" + parts[0]));
+                painter.end();
+            }
 
             if (size) {
                 *size = source.size();
