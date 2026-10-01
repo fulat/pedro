@@ -53,6 +53,10 @@ QtObject {
         directory.openPlace(place);
     }
 
+    function clearSelection() {
+        selectedEntry = {};
+    }
+
     function select(entry) {
         selectedEntry = entry;
     }

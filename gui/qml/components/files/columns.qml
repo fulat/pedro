@@ -90,7 +90,7 @@ ScrollView {
                         width: ListView.view.width
                         height: 38
                         radius: 7
-                        color: column.selected === entry.id || columns.locations[column.index + 1] === entry.url ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
+                        color: columns.controller && columns.controller.selectedEntry.id === entry.id ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
                         HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
                         Loader {
                             id: entryIcon

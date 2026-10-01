@@ -63,6 +63,27 @@ Rectangle {
             wrapMode: Text.WrapAnywhere
         }
     }
+    Item {
+        anchors.fill: parent
+        z: 3
+        PointHandler {
+            acceptedButtons: Qt.LeftButton
+            onActiveChanged: {
+                if (!active || !browser.controller) {
+                    return;
+                }
+                const position = point.position;
+                if (position.x <= sidebarPanel.width + 1 || position.x >= browser.width - 8 || position.y < 55) {
+                    return;
+                }
+                const local = browser.mapToItem(contentLayout, position.x, position.y);
+                if (!browser.controller.containsEntry(contentLayout, local)) {
+                    browser.controller.clearSelection();
+                }
+            }
+        }
+    }
+
     MouseArea {
         z: 2
         visible: !browser.controller || browser.controller.viewMode !== "columns"
