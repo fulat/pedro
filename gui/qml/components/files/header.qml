@@ -8,19 +8,13 @@ import "palette.js" as Palette
 
 Item {
     id: header
+    property bool searchExpanded: false
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     RowLayout {
         anchors.fill: parent
         anchors.rightMargin: 24
         spacing: 12
-        Loader {
-            source: "button.qml"
-            onLoaded: {
-                item.symbol = "window";
-                item.clicked.connect(() => header.controller.sidebarCollapsed = !header.controller.sidebarCollapsed);
-            }
-        }
         Row {
             spacing: 8
             Loader { source: "button.qml"; onLoaded: { item.symbol = "back"; item.width = 39; item.enabled = Qt.binding(() => header.controller && header.controller.directory.canGoBack); item.clicked.connect(() => header.controller.back()); } }
@@ -40,20 +34,34 @@ Item {
                 Item { Layout.fillWidth: true }
             }
         }
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.minimumWidth: 120
-            Layout.preferredHeight: 40
-            radius: 12
-            color: header.colors.card
-            border.color: header.colors.line
-            Icon.Tinted { x: 14; y: 11; width: 18; height: 18; source: "search.svg"; tint: header.colors.ink }
-            Text { anchors.left: parent.left; anchors.leftMargin: 44; anchors.right: parent.right; anchors.rightMargin: 8; anchors.verticalCenter: parent.verticalCenter; text: qsTranslate("Pedro", "files.browser.search"); color: header.colors.muted; font.pixelSize: 13; elide: Text.ElideRight }
+        Item { Layout.fillWidth: true }
+        Loader {
+            source: "button.qml"
+            onLoaded: {
+                item.objectName = "filesSearchButton";
+                item.symbol = "search";
+                item.clicked.connect(() => { header.searchExpanded = !header.searchExpanded; if (header.searchExpanded) searchInput.forceActiveFocus(); });
+            }
+        }
+        TextField {
+            id: searchInput
+            objectName: "filesSearchInput"
+            visible: header.searchExpanded
+            Layout.preferredWidth: 220
+            Layout.minimumWidth: 220
+            Layout.maximumWidth: 220
+            Layout.preferredHeight: 38
+            placeholderText: qsTranslate("Pedro", "files.browser.search")
+            color: header.colors.ink
+            placeholderTextColor: header.colors.muted
+            selectByMouse: true
+            font.pixelSize: 13
+            background: Rectangle { radius: 10; color: header.colors.card; border.color: header.colors.line }
         }
         Loader {
             source: "dropdown.qml"
             onLoaded: {
-                item.symbol = Qt.binding(() => header.controller && header.controller.viewMode === "list" ? "list" : header.controller && header.controller.viewMode === "columns" ? "tab" : "grid");
+                item.symbol = Qt.binding(() => header.controller && header.controller.viewMode === "list" ? "list" : header.controller && header.controller.viewMode === "columns" ? "columns" : header.controller && header.controller.viewMode === "mixed" ? "mixed" : "grid");
                 item.options = [{key: "grid", label: "files.view.grid"}, {key: "list", label: "files.view.list"}, {key: "columns", label: "files.view.columns"}, {key: "mixed", label: "files.view.mixed"}];
                 item.selectedKey = Qt.binding(() => header.controller ? header.controller.viewMode : "mixed");
                 item.chosen.connect(key => header.controller.viewMode = key);

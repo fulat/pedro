@@ -11,14 +11,14 @@ Button {
     property string selectedKey: ""
     signal chosen(string key)
     readonly property var colors: Palette.colors(Backend.appearanceMode)
-    implicitWidth: 56
+    implicitWidth: 60
     implicitHeight: 38
     hoverEnabled: true
     onClicked: menu.open()
     HoverHandler { cursorShape: Qt.PointingHandCursor }
     contentItem: Item {
-        Icon.Tinted { x: 8; anchors.verticalCenter: parent.verticalCenter; width: 17; height: 17; source: dropdown.symbol + ".svg"; tint: dropdown.colors.ink }
-        Text { anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; text: "⌄"; color: dropdown.colors.muted }
+        Icon.Tinted { x: 7; anchors.verticalCenter: parent.verticalCenter; width: 19; height: 19; source: dropdown.symbol + ".svg"; tint: dropdown.colors.ink }
+        Icon.Tinted { anchors.right: parent.right; anchors.rightMargin: 5; anchors.verticalCenter: parent.verticalCenter; width: 10; height: 10; rotation: 90; source: "chevron.svg"; tint: dropdown.colors.muted }
     }
     background: Rectangle { radius: 10; color: dropdown.hovered ? dropdown.colors.selected : dropdown.colors.card; border.color: dropdown.colors.line }
     Menu {

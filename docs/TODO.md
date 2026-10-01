@@ -96,9 +96,11 @@ Pendiente: conectar «Pegar» al portapapeles mediante PAPI y mostrarlo únicame
 
 ### Pedro Files
 
-Implementado: ventana Qt Quick desde el dock y navegación lateral, con UI light/dark e inglés/español dividida en componentes. Cada ventana mantiene un controlador y modelo independientes de PAPI, historial atrás/adelante, listados reales, inspector y vistas desplazables que virtualizan elementos. Inicio y carpetas estándar usan XDG; Este equipo utiliza montajes GIO; Papelera utiliza GVfs; Favoritos y Recientes consumen los registros compartidos de GTK. Véase [Pedro Files](files.md).
+Implementado: ventana Qt Quick desde el dock y navegación lateral, con UI light/dark e inglés/español dividida en componentes. Cada ventana mantiene un controlador y modelo independientes de PAPI, historial atrás/adelante, listados reales y vistas de cuadrícula, lista, columnas y mixta, sin panel lateral de detalles. Inicio y carpetas estándar usan XDG; Este equipo utiliza montajes GIO; Papelera utiliza GVfs; Favoritos y Recientes consumen los registros compartidos de GTK. Véase [Pedro Files](files.md).
 
-Pendiente: búsqueda, filtros, orden alternativo, etiquetas, edición de marcadores, apertura de archivos con aplicaciones y operaciones asíncronas de archivos en esta ventana, incluyendo restaurar/vaciar Papelera. Integrar los backends GIO/GVfs requeridos en la futura sesión de producción; no crear sistemas paralelos de filesystem o montaje.
+Implementado: orden por nombre, tipo, tamaño y fecha mediante proxies del modelo PAPI.
+
+Pendiente: ajustar el ancho de la navegación lateral mediante arrastre de su división, con posibilidad de reducirla a iconos; búsqueda, filtros, etiquetas, edición de marcadores, apertura de archivos con aplicaciones y operaciones asíncronas de archivos en esta ventana, incluyendo restaurar/vaciar Papelera. Integrar los backends GIO/GVfs requeridos en la futura sesión de producción; no crear sistemas paralelos de filesystem o montaje.
 
 ### Activación de aplicaciones desde el dock
 
