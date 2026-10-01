@@ -62,7 +62,7 @@ ApplicationWindow {
             item.objectName = "filesQuickWindow";
             item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
             item.contentSource = Qt.resolvedUrl("files/browser.qml");
-            item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#70e8edf5" : "#80101825");
+            item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#70e8edf5" : "#50101825");
             item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff");
             item.headerSource = Qt.resolvedUrl("files/header.qml");
             item.headerHeight = 58;
