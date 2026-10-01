@@ -3,6 +3,7 @@
 //
 
 #include "paths.hpp"
+#include <pedro/papi/config/store.hpp>
 #include <QStandardPaths>
 
 namespace Pedro::Papi::Utils::Paths {
@@ -26,7 +27,7 @@ namespace Pedro::Papi::Utils::Paths {
     }
 
     fs::path appearanceConfig() {
-        return config() / "appearance.toml";
+        return Pedro::Papi::Config::Store::path("preferences").toStdString();
     }
 
 }

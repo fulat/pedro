@@ -103,7 +103,7 @@ Backend::Backend(QObject* parent) : QObject(parent) {
     bluetoothRefreshTimer_.start(5000);
 
     const auto reloadConfiguration = [this] {
-        const auto mode = configuration_.value("appearance", "appearance", "mode");
+        const auto mode = configuration_.value("preferences", "appearance", "mode");
         if ((mode == "light" || mode == "dark") && appearanceMode_ != mode) {
             appearanceMode_ = mode;
             emit appearanceModeChanged();
@@ -116,7 +116,7 @@ Backend::Backend(QObject* parent) : QObject(parent) {
                 emit wallpaperChanged();
             }
         }
-        const auto locale = configuration_.value("language", "language", "current");
+        const auto locale = configuration_.value("preferences", "language", "current");
         if ((locale == "en" || locale == "es") && language_ != locale) {
             language_ = locale;
             emit languageChanged();

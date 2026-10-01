@@ -1,3 +1,10 @@
+# Global Pedro preferences
+
+[language]
+current = "en"
+
+[appearance]
+mode = "dark" # "light" or "dark"
 
 # Wallpaper configuration for dark themes
 [wallpaper.dark]

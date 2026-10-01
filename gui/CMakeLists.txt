@@ -280,7 +280,7 @@ target_link_libraries(
 #
 # Examples include:
 #
-#     config/wallpaper.toml
+#     config/preferences.toml
 #     filesystem-managed wallpapers
 #     files read by native C++ libraries such as toml++
 #

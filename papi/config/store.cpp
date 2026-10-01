@@ -4,6 +4,9 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QFile>
+#include <QSaveFile>
+
+#include <sstream>
 #include <QStandardPaths>
 #include <QDebug>
 
@@ -63,12 +66,37 @@ namespace Pedro::Papi::Config {
         }
         const auto user = QDir(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)).filePath("pedro");
         QDir().mkpath(user);
-        if (qEnvironmentVariableIsEmpty("PEDRO_QML_DIR") && !qEnvironmentVariableIsSet("PEDRO_DEVELOPMENT_MODE")) {
+        const auto preferences = QDir(user).filePath("preferences.toml");
+        if (!QFileInfo::exists(preferences)) {
+            // Import existing user overrides once, without removing legacy files.
+            bool legacy = false;
             for (const auto& name : {QStringLiteral("language"), QStringLiteral("wallpaper"), QStringLiteral("appearance")}) {
-                const auto target = QDir(user).filePath(name + ".toml");
-                if (!QFileInfo::exists(target)) {
-                    QFile::copy(QDir(defaults()).filePath(name + ".toml"), target);
+                legacy = legacy || QFileInfo::exists(QDir(user).filePath(name + ".toml"));
+            }
+            if (legacy) {
+                try {
+                    auto table = toml::parse_file(QDir(defaults()).filePath("preferences.toml").toStdString());
+                    for (const auto& name : {QStringLiteral("language"), QStringLiteral("wallpaper"), QStringLiteral("appearance")}) {
+                        const auto file = QDir(user).filePath(name + ".toml");
+                        if (QFileInfo::exists(file)) {
+                            const auto previous = toml::parse_file(file.toStdString());
+                            if (const auto* section = previous[name.toStdString()].as_table()) {
+                                table.insert_or_assign(name.toStdString(), *section);
+                            }
+                        }
+                    }
+                    std::ostringstream output;
+                    output << table;
+                    QSaveFile file(preferences);
+                    const auto contents = QByteArray::fromStdString(output.str());
+                    if (!file.open(QIODevice::WriteOnly) || file.write(contents) != contents.size() || !file.commit()) {
+                        qWarning() << "Could not migrate Pedro preferences:" << file.errorString();
+                    }
+                } catch (const toml::parse_error& error) {
+                    qWarning() << "Could not migrate Pedro preferences:" << error.what();
                 }
+            } else if (qEnvironmentVariableIsEmpty("PEDRO_QML_DIR") && !qEnvironmentVariableIsSet("PEDRO_DEVELOPMENT_MODE")) {
+                QFile::copy(QDir(defaults()).filePath("preferences.toml"), preferences);
             }
         }
         for (const auto& directory : {defaults(), user}) {
@@ -76,7 +104,7 @@ namespace Pedro::Papi::Config {
                 watcher.addPath(directory);
             }
         }
-        for (const auto& name : {QStringLiteral("language"), QStringLiteral("wallpaper"), QStringLiteral("appearance")}) {
+        for (const auto& name : {QStringLiteral("preferences")}) {
             const auto file = path(name);
             if (QFileInfo::exists(file)) {
                 watcher.addPath(file);
