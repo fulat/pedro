@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import QtQuick as QQ
 import QtQuick.Controls.Basic
 
@@ -134,7 +135,8 @@ Item {
             anchors.centerIn: entryTile
             width: dockIcon.width
             height: width
-            source: "../../assets/icons/trash.png"
+            source: "image://icons/original/bin.svg"
+            sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
             fillMode: Image.PreserveAspectFit
             smooth: true
             visible: entry.app.trash === true
