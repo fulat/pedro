@@ -91,7 +91,6 @@ Item {
                     width: table.width * 0.18; height: parent.height
                     Text { anchors.verticalCenter: parent.verticalCenter; text: "—"; color: table.colors.muted; font.pixelSize: 12 }
                 }
-                Text { text: "•••"; height: parent.height; verticalAlignment: Text.AlignVCenter; color: table.colors.ink }
             }
         }
     }
