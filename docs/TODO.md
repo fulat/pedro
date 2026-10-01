@@ -94,6 +94,12 @@ Pendiente: conectar la UI de preferencias al zoom del dock. El factor ya es conf
 
 Pendiente: conectar «Pegar» al portapapeles mediante PAPI y mostrarlo únicamente cuando haya archivos compatibles; implementar selección de todos los elementos, orden por nombre/tipo/fecha/tamaño y acceso a widgets. La presentación está preparada; conservar las acciones existentes de creación y organización sin duplicar la lógica del modelo.
 
+### Pedro Files
+
+Implementado: ventana Qt Quick reutilizable desde la carpeta del dock y la navegación lateral, con UI adaptable light/dark y catálogos inglés/español. Las ubicaciones y tarjetas actuales son una presentación, no contenido enumerado del filesystem.
+
+Pendiente: conectar navegación y listado real a un modelo de PAPI, resolver ubicaciones estándar mediante XDG, reemplazar el `GFileMonitor` al cambiar de directorio e incorporar búsqueda y operaciones asíncronas. Reutilizar las decisiones de filesystem y jobs de este documento; evitar lógica de filesystem dentro de QML.
+
 ### Activación de aplicaciones desde el dock
 
 Implementado para el overlay Ubuntu/GNOME: PAPI activa mediante la integración `applications@pedro`, que delega en `Shell.App.activate()`; el clic enfoca/restaura ventanas existentes o abre la aplicación cuando está cerrada. GNOME aporta los indicadores basados en ventanas. La extensión requiere una nueva sesión tras instalarse. Véase [integración GNOME](../gnome/application/readme.md).

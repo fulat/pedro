@@ -3,6 +3,7 @@ import QtQuick as QQ
 import QtQuick.Controls.Basic
 
 import "application" as Application
+import "desktop" as Desktop
 import "../controllers" as Controllers
 import "../scripts/theme.js" as Theme
 
@@ -53,7 +54,7 @@ Item {
         scale: Math.max(0, Math.min(1, dock.vertical ? (dock.height - 20) / Math.max(1, implicitHeight) : (dock.width - dock.horizontalPadding * 2) / Math.max(1, implicitWidth)))
 
         Repeater {
-            model: dock.shell ? dock.shell.pinnedApps : []
+            model: dock.shell ? [{id: "pedro-files", name: qsTranslate("Pedro", "app.files.name"), native: true, running: dock.shell.filesQuickWindowVisible}].concat(dock.shell.pinnedApps) : []
 
             delegate: DockEntry {
                 required property var modelData
@@ -91,13 +92,23 @@ Item {
             anchors.centerIn: entryTile
             width: dock.shell ? dock.shell.dockIconSize : 0
             height: width
-            name: entry.app ? entry.app.icon : ""
+            name: entry.app ? entry.app.icon || "" : ""
+            visible: !entry.app.native
             readonly property bool showingPress: pressFeedback.running || (entryMouse.pressed && (entryMouse.pressedButtons & Qt.LeftButton) !== 0)
             scale: showingPress ? dock.pressScale : entryMouse.containsMouse ? dock.hoverScale : 1
 
             Behavior on scale {
                 NumberAnimation { duration: dockIcon.showingPress ? 90 : 180; easing.type: Easing.InOutQuad }
             }
+        }
+
+        Desktop.Icon {
+            anchors.centerIn: entryTile
+            width: dockIcon.width
+            height: width
+            kind: "folder"
+            visible: entry.app.native === true
+            scale: dockIcon.scale
         }
 
         Rectangle {
@@ -123,10 +134,16 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: mouse => {
                 if (mouse.button === Qt.RightButton) {
-                    favoriteMenu.popup(mouse.x, mouse.y);
+                    if (!entry.app.native) {
+                        favoriteMenu.popup(mouse.x, mouse.y);
+                    }
                 } else {
                     pressFeedback.restart();
-                    controller.launchApplication(entry.app);
+                    if (entry.app.native) {
+                        dock.shell.controller.openFilesQuickWindow();
+                    } else {
+                        controller.launchApplication(entry.app);
+                    }
                 }
             }
         }
