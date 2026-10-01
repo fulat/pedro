@@ -15,6 +15,8 @@ Item {
     property int windowWidth
     property date currentTime
     property string activeSource: ""
+    property alias logoControl: logoButton
+    property alias statusControl: statusPill
 
     signal panelRequested(string mode, real anchorX, string source)
     signal desktopRequested

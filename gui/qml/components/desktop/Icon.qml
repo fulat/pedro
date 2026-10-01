@@ -7,6 +7,7 @@ Item {
     id: desktopIcon
 
     property string kind
+    property url imageUrl
 
     Rectangle {
         visible: desktopIcon.kind === "notes"
@@ -50,7 +51,8 @@ Item {
         Image {
             anchors.fill: parent
             anchors.margins: 2
-            source: Backend.wallpaper
+            source: desktopIcon.kind === "image" ? desktopIcon.imageUrl : ""
+            asynchronous: true
             sourceSize: Qt.size(128, 96)
             fillMode: Image.PreserveAspectCrop
             smooth: true

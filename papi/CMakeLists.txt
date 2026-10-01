@@ -173,6 +173,8 @@ add_library(
     ${PEDRO_PAPI_PUBLIC_HEADERS}
 )
 
+set_target_properties(pedro_papi PROPERTIES AUTOMOC ON)
+
 target_compile_features(
     pedro_papi
     PUBLIC

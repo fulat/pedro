@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls.Basic
 
 import "../../scripts/theme.js" as Theme
 
@@ -12,6 +13,9 @@ Item {
     required property real cellHeight
     property var app
     property bool selected: false
+    readonly property var stack: shell.controller.stackInfo(app)
+    readonly property bool stacked: Backend.desktopModel.organization === "stack"
+    visible: !stacked || stack.visible
 
     signal menuRequested(real localX, real localY)
 
@@ -19,6 +23,11 @@ Item {
     height: cellHeight
     z: shell.desktopDragging && shortcut.selected ? 3 : 1
     scale: shell.desktopDragging && shortcut.selected ? 1.04 : 1
+    opacity: shell.controller.stackDragActive && shell.controller.stackDragSource === shortcut ? 0.5 : 1
+
+    Behavior on opacity {
+        NumberAnimation { duration: 120 }
+    }
 
     Behavior on scale {
         NumberAnimation {
@@ -46,8 +55,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: 12
-        color: shortcut.selected ? Theme.shortcutSelected : shortcutMouse.containsMouse ? Theme.shortcutHover : "transparent"
-        border.width: shortcut.selected ? 1 : 0
+        color: shell.controller.stackDropTargetId === shortcut.app.id ? "#405b99dd" : shortcut.selected ? Theme.shortcutSelected : shortcutMouse.containsMouse ? Theme.shortcutHover : "transparent"
+        border.width: shortcut.selected || shell.controller.stackDropTargetId === shortcut.app.id ? 1 : 0
         border.color: Theme.shortcutSelectedBorder
 
         Behavior on color {
@@ -57,6 +66,18 @@ Item {
         }
     }
 
+    Rectangle {
+        visible: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1
+        width: 42
+        height: 38
+        radius: 5
+        color: "#4036475a"
+        border.color: "#40ffffff"
+        x: (parent.width - width) / 2 + 5
+        y: 10
+        rotation: 8
+    }
+
     Icon {
         anchors.top: parent.top
         anchors.topMargin: 3
@@ -64,6 +85,24 @@ Item {
         width: 57
         height: 57
         kind: shortcut.app ? shortcut.app.icon : ""
+        imageUrl: shortcut.app ? shortcut.app.url : ""
+    }
+
+    Rectangle {
+        visible: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.rightMargin: 12
+        width: 24
+        height: 24
+        radius: 12
+        color: "#cc253445"
+        Text {
+            anchors.centerIn: parent
+            text: shortcut.stack.count
+            color: Theme.white
+            font.pixelSize: 12
+        }
     }
 
     Text {
@@ -71,13 +110,50 @@ Item {
         anchors.topMargin: 65
         anchors.left: parent.left
         anchors.right: parent.right
-        text: shortcut.app ? shortcut.app.name : ""
+        visible: shell.controller.renamingDesktopId !== shortcut.app.id
+        text: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && !shortcut.stack.expanded
+            ? shell.controller.stackLabel(shortcut.stack.key) : shortcut.app ? shortcut.app.name : ""
         color: Theme.white
         style: Text.Outline
         styleColor: Theme.shortcutShadow
         font.pixelSize: 13
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
+    }
+
+    TextField {
+        id: nameEditor
+        objectName: "desktopNameEditor"
+        anchors.top: parent.top
+        anchors.topMargin: 63
+        anchors.left: parent.left
+        anchors.right: parent.right
+        z: 5
+        height: 28
+        visible: shortcut.app && shell.controller.renamingDesktopId === shortcut.app.id
+        readOnly: shell.controller.renamingDesktopBusy
+        color: Theme.white
+        selectionColor: "#805b99dd"
+        font.pixelSize: 13
+        horizontalAlignment: Text.AlignHCenter
+        background: Rectangle {
+            color: "#d9232e3c"
+            radius: 5
+            border.color: "#80ffffff"
+        }
+        onVisibleChanged: {
+            if (visible) {
+                text = shortcut.app.name;
+                Qt.callLater(() => { forceActiveFocus(); selectAll(); });
+            }
+        }
+        onAccepted: shell.controller.commitDesktopRename(shortcut.app, text)
+        onActiveFocusChanged: {
+            if (!activeFocus && visible) {
+                shell.controller.commitDesktopRename(shortcut.app, text);
+            }
+        }
+        Keys.onEscapePressed: shell.controller.renamingDesktopId = ""
     }
 
     MouseArea {

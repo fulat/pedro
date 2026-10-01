@@ -2,42 +2,6 @@
 
 // Supplies temporary presentation models until PAPI exposes live equivalents.
 
-// Shortcuts and initial grid positions shown on the desktop.
-const desktopShortcutRepeaterItems = [
-    {
-        id: "projects",
-        name: "Proyectos",
-        icon: "folder",
-        mode: "files",
-        column: 0,
-        row: 0
-    },
-    {
-        id: "notes",
-        name: "Notas",
-        icon: "notes",
-        mode: "about",
-        column: 1,
-        row: 0
-    },
-    {
-        id: "wallpaper",
-        name: "Wallpaper.jpg",
-        icon: "image",
-        mode: "about",
-        column: 2,
-        row: 0
-    },
-    {
-        id: "designs",
-        name: "Diseños",
-        icon: "folder",
-        mode: "files",
-        column: 3,
-        row: 0
-    }
-]
-
 // Entries rendered by the fixed operating-system navigation rail.
 const osNavigationMenuItems = [
     {

@@ -163,6 +163,8 @@ QtObject {
     function shortcutClicked(mouse, moved, shortcut) {
         if (mouse.button === Qt.RightButton) {
             shortcut.menuRequested(mouse.x, mouse.y);
+        } else if (!moved && Backend.desktopModel.organization === "stack" && shortcut.stack.leader && shortcut.stack.count > 1) {
+            view.controller.toggleStack(shortcut.app);
         } else if (!moved && !(mouse.modifiers & Qt.ControlModifier)) {
             view.controller.selectOnlyDesktopShortcut(shortcut.app.id);
         }

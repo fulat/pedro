@@ -15,15 +15,27 @@ QtObject {
     property real panelAnchorX: window.width - 190
     property date currentTime: new Date()
     property var selectedDesktopIds: []
+    property string renamingDesktopId: ""
+    property bool renamingDesktopBusy: false
+    property string desktopOperationError: ""
+    property var expandedDesktopStacks: []
     property var desktopDragItems: []
     property var desktopDragAnchor: null
     property point desktopDragOrigin: Qt.point(0, 0)
     property bool desktopDragging: false
+    property bool stackDragPending: false
+    property bool stackDragActive: false
+    property var stackDragEntry: null
+    property var stackDragSource: null
+    property point stackDragPoint: Qt.point(0, 0)
+    property string stackDropTargetId: ""
     property var desktopShortcuts
     property var desktopShortcutRepeater
     property var desktopContextMenu
+    property var folderContextMenu
     property var sideBar
     property var topBar
+    property var desktopObstacles: []
 
     readonly property var installedApps: Papi.installedApplications
     readonly property var pinnedApps: Papi.pinnedApplications
@@ -67,10 +79,200 @@ QtObject {
     function openDesktopShortcutMenu(shortcut, localX, localY, shortcutName) {
         const position = shortcut.mapToItem(window.contentItem, localX, localY);
 
+        if (folderContextMenu) {
+            folderContextMenu.close();
+        }
+
+        if (shortcut.app && folderContextMenu) {
+            desktopContextMenu.close();
+            folderContextMenu.folderName = shortcutName;
+            folderContextMenu.fileMode = !shortcut.app.isDirectory;
+            folderContextMenu.imageFile = shortcut.app.icon === "image";
+            folderContextMenu.popup(Math.max(12, Math.min(window.width - folderContextMenu.width - 12, position.x)),
+                                    Math.max(12, Math.min(window.height - folderContextMenu.height - 12, position.y)));
+            return;
+        }
+
         desktopContextMenu.shortcutName = shortcutName || "Escritorio";
-        desktopContextMenu.x = Math.max(12, Math.min(window.width - desktopContextMenu.width - 12, position.x));
-        desktopContextMenu.y = Math.max(topBar.barHeight + 8, Math.min(window.height - desktopContextMenu.height - 12, position.y));
-        desktopContextMenu.open();
+        const menuX = Math.max(12, Math.min(window.width - desktopContextMenu.width - 12, position.x));
+        const menuY = Math.max(12, Math.min(window.height - desktopContextMenu.height - 12, position.y));
+        desktopContextMenu.popup(menuX, menuY);
+    }
+
+    function wallpaperAction(action) {
+        desktopOperationError = "";
+        if (action === "folder") {
+            Backend.desktopModel.createFolder("Nueva carpeta");
+        } else if (action === "file") {
+            Backend.desktopModel.createFile("Nuevo archivo");
+        } else if (action === "grid" || action === "free" || action === "stack") {
+            if (Backend.desktopModel.organization !== "stack") {
+                for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+                    const item = desktopShortcutRepeater.itemAt(index);
+                    if (item) {
+                        Backend.desktopModel.savePosition(item.app.id, item.x, item.y);
+                    }
+                }
+            }
+            expandedDesktopStacks = [];
+            Backend.desktopModel.setOrganization(action);
+        } else if (action === "align") {
+            Backend.desktopModel.setKeepAligned(!Backend.desktopModel.keepAligned);
+        }
+    }
+
+    function stackInfo(entry) {
+        if (!entry) {
+            return {key: "file", count: 1, leader: true, visible: true, expanded: false, slot: 0};
+        }
+        const groups = Backend.desktopModel.groups;
+        let slot = 0;
+        for (const group of groups) {
+            const expanded = expandedDesktopStacks.indexOf(group.key) !== -1;
+            const member = group.members.indexOf(entry.id);
+            if (member !== -1) {
+                return {key: group.key, count: group.members.length, leader: member === 0,
+                    visible: member === 0 || expanded, expanded: expanded, slot: slot + (expanded ? member : 0)};
+            }
+            slot += expanded ? group.members.length : 1;
+        }
+        return {key: "file", count: 1, leader: true, visible: true, expanded: false, slot: slot};
+    }
+
+    function toggleStack(entry) {
+        const info = stackInfo(entry);
+        const expanded = expandedDesktopStacks.slice();
+        const index = expanded.indexOf(info.key);
+        if (index === -1) {
+            expanded.push(info.key);
+        } else {
+            expanded.splice(index, 1);
+        }
+        expandedDesktopStacks = expanded;
+        arrangeDesktop();
+    }
+
+    function stackLabel(key) {
+        const labels = {folder: "Carpetas", image: "Imágenes", text: "Documentos", audio: "Audio", video: "Vídeos", file: "Otros archivos"};
+        return labels[key] || labels.file;
+    }
+
+    function startDesktopRename(id) {
+        renamingDesktopBusy = false;
+        renamingDesktopId = id;
+        selectOnlyDesktopShortcut(id);
+        for (const group of Backend.desktopModel.groups) {
+            if (group.members.indexOf(id) !== -1 && expandedDesktopStacks.indexOf(group.key) === -1) {
+                expandedDesktopStacks = expandedDesktopStacks.concat([group.key]);
+            }
+        }
+        if (Backend.desktopModel.organization === "stack") {
+            arrangeDesktop();
+        }
+    }
+
+    function commitDesktopRename(entry, name) {
+        if (renamingDesktopBusy || renamingDesktopId !== entry.id) {
+            return;
+        }
+        if (name === entry.name) {
+            renamingDesktopId = "";
+            return;
+        }
+        renamingDesktopBusy = true;
+        Backend.desktopModel.renameEntry(entry.id, name);
+    }
+
+    function arrangeDesktop() {
+        if (desktopDragging) {
+            endDesktopDrag();
+        }
+        const mode = Backend.desktopModel.organization;
+        for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+            const item = desktopShortcutRepeater.itemAt(index);
+            if (!item) {
+                continue;
+            }
+            const position = mode === "stack" ? desktopStackPosition(stackInfo(item.app).slot)
+                : desktopRestoredPosition(item.app, index);
+            item.x = position.x;
+            item.y = position.y;
+        }
+    }
+
+    // Restores persisted positions, constraining them to the current screen.
+    function desktopRestoredPosition(entry, index) {
+        if (Backend.desktopModel.organization === "stack") {
+            return desktopStackPosition(stackInfo(entry).slot);
+        }
+        if (entry.position) {
+            const x = Math.max(0, Math.min(entry.position.x, desktopShortcuts.width - desktopShortcuts.cellWidth));
+            const y = Math.max(0, Math.min(entry.position.y, desktopShortcuts.height - desktopShortcuts.cellHeight));
+
+            if (!desktopPlacementOverlapsShell(x, y, desktopShortcuts.cellWidth, desktopShortcuts.cellHeight)) {
+                return Qt.point(x, y);
+            }
+        }
+
+        return desktopInitialPosition(index);
+    }
+
+    // Fill stack columns from the right edge, scanning each from top to bottom.
+    function desktopStackPosition(index) {
+        let slot = 0;
+        const columns = Math.max(1, Math.floor(desktopShortcuts.width / desktopShortcuts.cellWidth));
+        const rows = Math.max(1, Math.floor(desktopShortcuts.height / desktopShortcuts.cellHeight));
+
+        for (let column = 0; column < columns; ++column) {
+            const x = Math.max(0, desktopShortcuts.width - desktopShortcuts.cellWidth * (column + 1));
+
+            for (let row = 0; row < rows; ++row) {
+                const y = row * desktopShortcuts.cellHeight;
+
+                if (!desktopPlacementOverlapsShell(x, y, desktopShortcuts.cellWidth, desktopShortcuts.cellHeight)) {
+                    if (slot++ === index) {
+                        return Qt.point(x, y);
+                    }
+                }
+            }
+        }
+
+        return Qt.point(0, rows * desktopShortcuts.cellHeight);
+    }
+
+    // Places initial model entries in free desktop cells without filesystem logic.
+    function desktopInitialPosition(index, ignoreSaved = false) {
+        let slot = 0;
+        const columns = Math.max(1, Math.floor(desktopShortcuts.width / desktopShortcuts.cellWidth));
+        const rows = Math.max(1, Math.floor(desktopShortcuts.height / desktopShortcuts.cellHeight));
+
+        for (let row = 0; row < rows; ++row) {
+            for (let column = 0; column < columns; ++column) {
+                const x = column * desktopShortcuts.cellWidth;
+                const y = row * desktopShortcuts.cellHeight;
+
+                let reserved = false;
+
+                for (let itemIndex = 0; itemIndex < desktopShortcutRepeater.count; ++itemIndex) {
+                    const item = desktopShortcutRepeater.itemAt(itemIndex);
+                    const saved = item && item.app ? item.app.position : null;
+
+                    if (!ignoreSaved && saved && x < saved.x + desktopShortcuts.cellWidth && x + desktopShortcuts.cellWidth > saved.x
+                            && y < saved.y + desktopShortcuts.cellHeight && y + desktopShortcuts.cellHeight > saved.y) {
+                        reserved = true;
+                        break;
+                    }
+                }
+
+                if (!reserved && !desktopPlacementOverlapsShell(x, y, desktopShortcuts.cellWidth, desktopShortcuts.cellHeight)) {
+                    if (slot++ === index) {
+                        return Qt.point(x, y);
+                    }
+                }
+            }
+        }
+
+        return Qt.point((index % columns) * desktopShortcuts.cellWidth, rows * desktopShortcuts.cellHeight);
     }
 
     // Reports whether a desktop shortcut belongs to the current selection.
@@ -123,13 +325,29 @@ QtObject {
 
     // Captures the selected shortcuts before a grouped desktop drag.
     function beginDesktopDrag(shortcut, localX, localY) {
+        if (renamingDesktopId.length > 0) {
+            return;
+        }
         const position = shortcut.mapToItem(desktopShortcuts, localX, localY);
+        if (Backend.desktopModel.organization === "stack") {
+            stackDragPending = true;
+            stackDragActive = false;
+            stackDragEntry = shortcut.app;
+            stackDragSource = shortcut;
+            stackDragPoint = position;
+            stackDropTargetId = "";
+            desktopContextMenu.close();
+            if (folderContextMenu) {
+                folderContextMenu.close();
+            }
+            return;
+        }
         const items = [];
 
         for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
             const candidate = desktopShortcutRepeater.itemAt(index);
 
-            if (candidate && isDesktopShortcutSelected(candidate.app.id)) {
+            if (candidate && candidate.visible && isDesktopShortcutSelected(candidate.app.id)) {
                 items.push({
                     item: candidate,
                     x: candidate.x,
@@ -143,10 +361,31 @@ QtObject {
         desktopDragAnchor = shortcut;
         desktopDragging = items.length > 0;
         desktopContextMenu.close();
+        if (folderContextMenu) {
+            folderContextMenu.close();
+        }
     }
 
     // Moves the selected shortcuts while keeping them inside the desktop area.
     function updateDesktopDrag(shortcut, localX, localY) {
+        if (stackDragPending) {
+            stackDragActive = true;
+            stackDragPoint = shortcut.mapToItem(desktopShortcuts, localX, localY);
+            stackDropTargetId = "";
+            for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+                const candidate = desktopShortcutRepeater.itemAt(index);
+                if (!candidate || !candidate.visible || candidate === stackDragSource || !candidate.app.isDirectory
+                        || (candidate.stack.leader && candidate.stack.count > 1 && !candidate.stack.expanded)) {
+                    continue;
+                }
+                if (stackDragPoint.x >= candidate.x && stackDragPoint.x <= candidate.x + candidate.width
+                        && stackDragPoint.y >= candidate.y && stackDragPoint.y <= candidate.y + candidate.height) {
+                    stackDropTargetId = candidate.app.id;
+                    break;
+                }
+            }
+            return;
+        }
         if (!desktopDragging || desktopDragItems.length === 0) {
             return;
         }
@@ -182,13 +421,21 @@ QtObject {
     // Reports whether a proposed shortcut position overlaps fixed shell chrome.
     function desktopPlacementOverlapsShell(itemX, itemY, itemWidth, itemHeight) {
         const clearance = 8;
-        const sideBarPosition = sideBar.mapToItem(desktopShortcuts, 0, 0);
-        const reservedX = sideBarPosition.x - clearance;
-        const reservedY = sideBarPosition.y - clearance;
-        const reservedWidth = sideBar.width + clearance * 2;
-        const reservedHeight = sideBar.height + clearance * 2;
 
-        return itemX < reservedX + reservedWidth && itemX + itemWidth > reservedX && itemY < reservedY + reservedHeight && itemY + itemHeight > reservedY;
+        for (const obstacle of desktopObstacles) {
+            if (!obstacle || !obstacle.visible || obstacle.width <= 0 || obstacle.height <= 0) {
+                continue;
+            }
+
+            const position = obstacle.mapToItem(desktopShortcuts, 0, 0);
+
+            if (itemX < position.x + obstacle.width + clearance && itemX + itemWidth > position.x - clearance
+                    && itemY < position.y + obstacle.height + clearance && itemY + itemHeight > position.y - clearance) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Snaps a grouped drag to the nearest free set of desktop grid cells.
@@ -197,9 +444,12 @@ QtObject {
             return;
         }
 
-        const cellWidth = desktopShortcuts.cellWidth;
-        const cellHeight = desktopShortcuts.cellHeight;
-        const occupied = {};
+        const maximumColumn = Math.max(0, Math.floor((desktopShortcuts.width - desktopDragAnchor.width) / desktopShortcuts.cellWidth));
+        const maximumRow = Math.max(0, Math.floor((desktopShortcuts.height - desktopDragAnchor.height) / desktopShortcuts.cellHeight));
+        // Distribute leftover space so the first and last cells touch both edges.
+        const cellWidth = maximumColumn > 0 ? (desktopShortcuts.width - desktopDragAnchor.width) / maximumColumn : desktopShortcuts.cellWidth;
+        const cellHeight = maximumRow > 0 ? (desktopShortcuts.height - desktopDragAnchor.height) / maximumRow : desktopShortcuts.cellHeight;
+        const occupied = [];
         const cells = [];
         let anchorCell = null;
 
@@ -207,10 +457,7 @@ QtObject {
             const shortcut = desktopShortcutRepeater.itemAt(index);
 
             if (shortcut && !isDesktopShortcutSelected(shortcut.app.id)) {
-                const column = Math.round(shortcut.x / cellWidth);
-                const row = Math.round(shortcut.y / cellHeight);
-
-                occupied[column + ":" + row] = true;
+                occupied.push(shortcut);
             }
         }
 
@@ -237,8 +484,6 @@ QtObject {
         const preferredRow = Math.round(desktopDragAnchor.y / cellHeight);
         const horizontalDirection = Math.sign(preferredColumn - anchorCell.column);
         const verticalDirection = Math.sign(preferredRow - anchorCell.row);
-        const maximumColumn = Math.max(0, Math.floor((desktopShortcuts.width - desktopDragAnchor.width) / cellWidth));
-        const maximumRow = Math.max(0, Math.floor((desktopShortcuts.height - desktopDragAnchor.height) / cellHeight));
         let bestPlacement = null;
         let bestDistance = Number.MAX_VALUE;
         let bestDirectionPenalty = Number.MAX_VALUE;
@@ -259,7 +504,11 @@ QtObject {
                     const targetY = targetRow * cellHeight;
                     const key = targetColumn + ":" + targetRow;
 
-                    if (targetColumn < 0 || targetRow < 0 || targetX + cell.item.width > desktopShortcuts.width || targetY + cell.item.height > desktopShortcuts.height || desktopPlacementOverlapsShell(targetX, targetY, cell.item.width, cell.item.height) || occupied[key] || placementCells[key]) {
+                    const overlapsShortcut = occupied.some(shortcut => targetX < shortcut.x + shortcut.width
+                            && targetX + cell.item.width > shortcut.x && targetY < shortcut.y + shortcut.height
+                            && targetY + cell.item.height > shortcut.y);
+
+                    if (targetColumn < 0 || targetRow < 0 || targetX + cell.item.width > desktopShortcuts.width || targetY + cell.item.height > desktopShortcuts.height || desktopPlacementOverlapsShell(targetX, targetY, cell.item.width, cell.item.height) || overlapsShortcut || placementCells[key]) {
                         valid = false;
                         break;
                     }
@@ -288,10 +537,10 @@ QtObject {
         }
 
         if (!bestPlacement) {
-            bestPlacement = cells.map(cell => ({
-                        item: cell.item,
-                        x: cell.column * cellWidth,
-                        y: cell.row * cellHeight
+            bestPlacement = desktopDragItems.map(entry => ({
+                        item: entry.item,
+                        x: entry.x,
+                        y: entry.y
                     }));
         }
 
@@ -302,12 +551,34 @@ QtObject {
 
             placement.item.x = placement.x;
             placement.item.y = placement.y;
+            Backend.desktopModel.savePosition(placement.item.app.id, placement.x, placement.y);
         }
     }
 
     // Completes a desktop drag and clears its transient state.
     function endDesktopDrag() {
-        snapDesktopDragToGrid();
+        if (stackDragPending) {
+            stackDragActive = false;
+            if (stackDragSource) {
+                stackDragPoint = Qt.point(stackDragSource.x + stackDragSource.width / 2, stackDragSource.y + 28);
+            }
+            stackDragPending = false;
+            stackDropTargetId = "";
+            stackDragSource = null;
+            return;
+        }
+        if (Backend.desktopModel.organization === "free" || !Backend.desktopModel.keepAligned) {
+            const blocked = desktopDragItems.some(entry => desktopPlacementOverlapsShell(entry.item.x, entry.item.y, entry.item.width, entry.item.height));
+            for (const entry of desktopDragItems) {
+                if (blocked) {
+                    entry.item.x = entry.x;
+                    entry.item.y = entry.y;
+                }
+                Backend.desktopModel.savePosition(entry.item.app.id, entry.item.x, entry.item.y);
+            }
+        } else {
+            snapDesktopDragToGrid();
+        }
         desktopDragging = false;
         desktopDragAnchor = null;
         desktopDragItems = [];

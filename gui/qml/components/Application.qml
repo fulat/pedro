@@ -22,8 +22,10 @@ ApplicationWindow {
     property alias desktopShortcuts: applicationController.desktopShortcuts
     property alias desktopShortcutRepeater: applicationController.desktopShortcutRepeater
     property alias desktopContextMenu: applicationController.desktopContextMenu
+    property alias folderContextMenu: applicationController.folderContextMenu
     property alias sideBar: applicationController.sideBar
     property alias topBar: applicationController.topBar
+    property alias desktopObstacles: applicationController.desktopObstacles
 
     readonly property bool filesQuickWindowVisible: filesWindowLoader.item ? filesWindowLoader.item.visible : false
     readonly property real designAspectRatio: Constants.DESIGN_ASPECT_RATIO

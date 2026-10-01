@@ -508,3 +508,12 @@ void Backend::setStatusMessage(const QString& message) {
     statusMessage_ = message;
     emit statusMessageChanged();
 }
+
+QAbstractItemModel* Backend::desktopModel() {
+
+    if (!desktop_) {
+        desktop_ = std::make_unique<Pedro::Papi::Io::Desktop::Model>();
+    }
+
+    return desktop_.get();
+}

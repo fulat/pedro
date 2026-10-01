@@ -2,6 +2,7 @@
 
 #include <pedro/papi/gui/application/manager.hpp>
 #include <pedro/papi/io/bluetooth/manager.hpp>
+#include <pedro/papi/io/desktop/model.hpp>
 #include <pedro/papi/io/network/wifi/manager.hpp>
 #include <pedro/papi/system/system.hpp>
 #include <pedro/papi/utils/utils.hpp>
@@ -13,10 +14,13 @@
 #include <QVariantList>
 #include <QtQmlIntegration/qqmlintegration.h>
 
+#include <memory>
+
 class Backend final : public QObject {
         Q_OBJECT
         QML_NAMED_ELEMENT(Papi)
         QML_SINGLETON
+        Q_PROPERTY(QAbstractItemModel* desktopModel READ desktopModel CONSTANT)
         Q_PROPERTY(bool developmentMode READ developmentMode CONSTANT)
         Q_PROPERTY(QString hostname READ hostname NOTIFY systemChanged)
         Q_PROPERTY(QString kernel READ kernel NOTIFY systemChanged)
@@ -49,6 +53,8 @@ class Backend final : public QObject {
     public:
 
         explicit Backend(QObject* parent = nullptr);
+
+        QAbstractItemModel* desktopModel();
 
         [[nodiscard]] bool developmentMode() const;
         [[nodiscard]] QString hostname() const;
@@ -108,6 +114,8 @@ class Backend final : public QObject {
     private:
 
         void setStatusMessage(const QString& message);
+
+        std::unique_ptr<Pedro::Papi::Io::Desktop::Model> desktop_;
 
         Pedro::Papi::System system_;
         Pedro::Papi::Gui::Application::Manager applications_;

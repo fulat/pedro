@@ -34,9 +34,11 @@ Components.Application {
 
     desktopShortcuts: desktopShortcutsArea
     desktopShortcutRepeater: desktopShortcutRepeaterItem
-    desktopContextMenu: desktopMenu
+    desktopContextMenu: wallpaperMenuLoader.item
+    folderContextMenu: folderMenuLoader.item
     sideBar: sideBarItem
     topBar: topBarItem
+    desktopObstacles: [topBarItem.logoControl, topBarItem.statusControl, sideBarItem, weatherCard, dock, panelLoader]
 
     // -------------------------------------------------------------------------
     // Wallpaper
@@ -64,14 +66,7 @@ Components.Application {
 
         z: 10
 
-        anchors {
-            top: topBarItem.bottom
-            bottom: main.contentItem.bottom
-            left: main.contentItem.left
-            right: main.contentItem.right
-            bottomMargin: 100
-            leftMargin: sideBarItem.y < topBarItem.height + desktopShortcutsArea.cellHeight ? sideBarItem.x + sideBarItem.width + 12 : 0
-        }
+        anchors.fill: parent
 
         MouseArea {
             id: desktopSelectionArea
@@ -80,7 +75,7 @@ Components.Application {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             cursorShape: selectionRectangle.visible ? Qt.CrossCursor : Qt.ArrowCursor
 
-            onPressed: mouse => mainController.desktopPressed(mouse, desktopShortcutsArea, selectionRectangle, desktopMenu)
+            onPressed: mouse => mainController.desktopPressed(mouse, desktopShortcutsArea, selectionRectangle, main.desktopContextMenu)
             onPositionChanged: mouse => mainController.desktopPositionChanged(mouse, pressedButtons, selectionRectangle)
             onReleased: mouse => mainController.desktopReleased(mouse, selectionRectangle)
 
@@ -89,23 +84,68 @@ Components.Application {
 
         Repeater {
             id: desktopShortcutRepeaterItem
-            model: Mocks.desktopShortcutRepeaterItems
+            model: Backend.desktopModel
 
             delegate: Desktop.Shortcut {
                 id: desktopShortcut
 
-                required property var modelData
+                required property var entry
+                required property int index
 
-                x: modelData.column * desktopShortcutsArea.cellWidth
-                y: modelData.row * desktopShortcutsArea.cellHeight
+                readonly property point initialPosition: main.controller.desktopRestoredPosition(entry, index)
+                x: initialPosition.x
+                y: initialPosition.y
                 shell: main
                 controller: mainController
                 cellWidth: desktopShortcutsArea.cellWidth
                 cellHeight: desktopShortcutsArea.cellHeight
-                app: modelData
-                selected: main.controller.isDesktopShortcutSelected(modelData.id)
+                app: entry
+                selected: main.controller.isDesktopShortcutSelected(entry.id)
 
                 onMenuRequested: (localX, localY) => mainController.shortcutMenuRequested(desktopShortcut, localX, localY)
+            }
+        }
+
+        Item {
+            id: stackDragPreview
+            z: 100
+            width: desktopShortcutsArea.cellWidth
+            height: desktopShortcutsArea.cellHeight
+            x: main.controller.stackDragPoint.x - width / 2
+            y: main.controller.stackDragPoint.y - 28
+            opacity: main.controller.stackDragActive ? 0.9 : 0
+            visible: opacity > 0
+            scale: main.controller.stackDragActive ? 1.08 : 1
+
+            Behavior on opacity { NumberAnimation { duration: 140 } }
+            Behavior on scale { NumberAnimation { duration: 140 } }
+            Behavior on x {
+                enabled: !main.controller.stackDragActive
+                NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+            }
+            Behavior on y {
+                enabled: !main.controller.stackDragActive
+                NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+            }
+
+            Desktop.Icon {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 57
+                height: 57
+                kind: main.controller.stackDragEntry ? main.controller.stackDragEntry.icon : ""
+                imageUrl: main.controller.stackDragEntry ? main.controller.stackDragEntry.url : ""
+            }
+            Text {
+                anchors.top: parent.top
+                anchors.topMargin: 65
+                width: parent.width
+                text: main.controller.stackDragEntry ? main.controller.stackDragEntry.name : ""
+                color: Theme.white
+                style: Text.Outline
+                styleColor: Theme.shortcutShadow
+                font.pixelSize: 13
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
             }
         }
 
@@ -120,48 +160,67 @@ Components.Application {
         }
     }
 
-    Popup {
-        id: desktopMenu
+    Loader {
+        id: folderMenuLoader
+        source: "qml/components/desktop/menu.qml"
 
-        property string shortcutName: "Escritorio"
+        onLoaded: {
+            item.parent = main.contentItem;
+            item.backdrop = wallpaper;
+            item.maximumHeight = Qt.binding(() => main.height - 24);
+        }
+    }
 
-        z: 100
-        width: 210
-        height: 82
-        padding: 0
-        focus: true
-        popupType: Popup.Item
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+    Loader {
+        id: wallpaperMenuLoader
+        source: "qml/components/wallpaper/menu.qml"
 
+        onLoaded: {
+            item.parent = main.contentItem;
+            item.backdrop = wallpaper;
+            item.organization = Qt.binding(() => Backend.desktopModel.organization);
+            item.keepAligned = Qt.binding(() => Backend.desktopModel.keepAligned);
+            item.actionRequested.connect(action => main.controller.wallpaperAction(action));
+        }
+    }
+
+    Connections {
+        target: Backend.desktopModel
+        function onEntryCreated(id) { main.controller.startDesktopRename(id); }
+        function onEntryRenamed(id) {
+            main.controller.desktopOperationError = "";
+            main.controller.renamingDesktopId = "";
+            main.controller.renamingDesktopBusy = false;
+            main.controller.selectOnlyDesktopShortcut(id);
+        }
+        function onOperationFailed(message) {
+            main.controller.renamingDesktopBusy = false;
+            main.controller.desktopOperationError = message;
+        }
+        function onOrganizationChanged() { Qt.callLater(main.controller.arrangeDesktop); }
+        function onGroupsChanged() {
+            if (Backend.desktopModel.organization === "stack") {
+                Qt.callLater(main.controller.arrangeDesktop);
+            }
+        }
+    }
+
+    Label {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 76
+        z: 200
+        visible: main.controller.desktopOperationError.length > 0
+        text: "No se pudo completar la operación: " + main.controller.desktopOperationError
+        color: Theme.white
+        padding: 12
+        width: Math.min(implicitWidth, main.width - 24)
+        wrapMode: Text.Wrap
         background: Components.Liquid {
             backdrop: wallpaper
-            frosted: false
-            cornerRadius: 13
+            frosted: true
         }
-
-        contentItem: Column {
-            leftPadding: 14
-            rightPadding: 14
-            topPadding: 12
-            bottomPadding: 10
-            spacing: 5
-
-            Label {
-                width: desktopMenu.width - 28
-                text: desktopMenu.shortcutName
-                color: Theme.white
-                font.pixelSize: 13
-                font.weight: Font.Medium
-                elide: Text.ElideRight
-            }
-
-            Label {
-                width: desktopMenu.width - 28
-                text: "Sin acciones disponibles"
-                color: Theme.contextMenuTextMuted
-                font.pixelSize: 11
-            }
-        }
+        TapHandler { onTapped: main.controller.desktopOperationError = "" }
     }
 
     // -------------------------------------------------------------------------
@@ -169,6 +228,7 @@ Components.Application {
     // -------------------------------------------------------------------------
     Components.Logo {
         id: topBarItem
+        z: 20
         backdrop: wallpaper
         windowWidth: main.width
         currentTime: main.currentTime
