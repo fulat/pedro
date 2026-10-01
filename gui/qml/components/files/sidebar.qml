@@ -24,7 +24,7 @@ Rectangle {
                     {divider: true},
                     {name: "desktop", icon: "display"}, {name: "documents", icon: "file"}, {name: "downloads", icon: "download"}, {name: "images", icon: "image"}, {name: "music", icon: "music"}, {name: "videos", icon: "video"},
                     {divider: true},
-                    {name: "computer", icon: "display"}, {name: "trash", icon: "trash"}, {divider: true}
+                    {name: "computer", icon: "display"}, {divider: true}
                 ]
                 delegate: Item {
                     id: row

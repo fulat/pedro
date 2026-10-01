@@ -79,7 +79,7 @@ Item {
         }
 
         DockEntry {
-            app: ({id: "pedro-trash", name: qsTranslate("Pedro", "files.browser.trash"), native: true, trash: true, running: false})
+            app: ({id: "pedro-trash", name: qsTranslate("Pedro", "files.browser.trash"), native: true, trash: true, running: dock.shell ? dock.shell.trashQuickWindowActive : false})
         }
     }
 
@@ -144,6 +144,7 @@ Item {
         }
 
         Rectangle {
+            objectName: "dockIndicator-" + entry.app.id
             visible: entry.app ? entry.app.running : false
             anchors.bottom: dock.vertical ? undefined : entryTile.bottom
             anchors.right: dock.vertical ? entryTile.right : undefined

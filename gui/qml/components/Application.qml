@@ -26,6 +26,11 @@ ApplicationWindow {
     property alias topBar: applicationController.topBar
     property alias desktopObstacles: applicationController.desktopObstacles
 
+    readonly property bool trashQuickWindowActive: filesWindowLoader.item !== null
+        && filesWindowLoader.item.visible && filesWindowLoader.item.active
+        && filesWindowLoader.item.controller !== null
+        && filesWindowLoader.item.controller.directory !== null
+        && filesWindowLoader.item.controller.directory.place === "trash"
     readonly property bool filesQuickWindowVisible: filesWindowLoader.item ? filesWindowLoader.item.visible : false
     readonly property real designAspectRatio: Constants.DESIGN_ASPECT_RATIO
     readonly property real developmentWidth: Screen.desktopAvailableWidth > 0 ? Math.min(1600, Screen.desktopAvailableWidth * 0.82) : 1280
