@@ -89,3 +89,9 @@ Pendiente: herramienta independiente en Node.js para generar catálogos a partir
 Decisión: unificar preferencias globales relacionadas (idioma, apariencia/theme y wallpaper) en `preferences.toml`, usando secciones TOML. Reservar archivos separados para dominios con responsabilidad propia; preservar ajustes existentes mediante migración.
 
 Pendiente: conectar la UI de preferencias al zoom del dock. El factor ya es configurable dinámicamente mediante `[dock].hoverScale` en `preferences.toml` y está expuesto a QML; no introducir una segunda fuente de configuración.
+
+### Activación de aplicaciones desde el dock
+
+Implementado para el overlay Ubuntu/GNOME: PAPI activa mediante la integración `applications@pedro`, que delega en `Shell.App.activate()`; el clic enfoca/restaura ventanas existentes o abre la aplicación cuando está cerrada. GNOME aporta los indicadores basados en ventanas. La extensión requiere una nueva sesión tras instalarse. Véase [integración GNOME](../gnome/application/readme.md).
+
+Pendiente: menú explícito de nueva ventana y distribución de esta integración dentro de la futura sesión GNOME de producción, cuando se defina ese boot/session flow. No convertir los clics normales en solicitudes de nueva ventana ni implementar gestión de ventanas paralela.
