@@ -11,6 +11,7 @@ function colors(mode) {
         muted: light ? "#536baa" : "#a5b7db",
         line: light ? "#30919cad" : "#387f90a8",
         accent: "#0877ff",
+        hover: light ? "#16707780" : "#18ffffff",
         selected: light ? "#b3cde3ff" : "#aa304e76",
         banner: light ? "#e7f2ff" : "#2b4262"
     };

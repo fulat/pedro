@@ -51,7 +51,7 @@ Item {
             required property var entry
             readonly property var modelData: entry
             width: table.width; height: 43; radius: 9
-            color: table.controller && table.controller.selectedEntry.id === modelData.id ? table.colors.selected : "transparent"
+            color: table.controller && table.controller.selectedEntry.id === modelData.id ? table.colors.selected : hover.hovered ? table.colors.hover : "transparent"
             border.color: "transparent"
             TapHandler { onTapped: table.controller.select(row.modelData); onDoubleTapped: table.controller.openEntry(row.modelData) }
             MouseArea {
@@ -63,7 +63,7 @@ Item {
                     entryIcon.item.openMenu(point.x, point.y);
                 }
             }
-            HoverHandler { cursorShape: Qt.PointingHandCursor }
+            HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
             Row {
                 anchors.fill: parent
                 Item {
