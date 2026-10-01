@@ -2094,3 +2094,9 @@ Desktop previews that display the wallpaper must also use `Backend.wallpaper`. L
 Visual changes to shell components, menus, or materials must not change the selected wallpaper or its configuration unless the user explicitly requests a wallpaper change.
 
 When development loads QML from `PEDRO_QML_DIR`, wallpaper configuration and assets must also be read from that source directory. Do not let an old asset copy under `build/` override the configured wallpaper.
+
+---
+
+## 54. Commits for Completed Changes
+
+After completing and verifying each user-requested change, create a commit with a descriptive message for that change. Keep distinct changes in separate commits. Do not include unrelated work in a commit.
