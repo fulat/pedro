@@ -376,7 +376,7 @@ Components.Application {
         Components.Liquid {
             anchors.fill: parent
             backdrop: wallpaper
-            cornerRadius: 20
+            cornerRadius: 28
         }
 
         Rectangle {
