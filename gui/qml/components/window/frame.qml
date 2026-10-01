@@ -23,6 +23,8 @@ Window {
     property url contentSource
     property color surfaceColor: "transparent"
     property color titleColor: Theme.white
+    readonly property real resizeBorder: 7
+    readonly property real resizeCorner: 18
     readonly property bool maximized: visibility === Window.Maximized
 
     color: "transparent"
@@ -210,27 +212,31 @@ Window {
             source: frame.contentSource
         }
 
-        // Ubuntu owns the actual move/resize operation and its Wayland input grab.
-        Repeater {
-            model: [Qt.LeftEdge, Qt.RightEdge, Qt.TopEdge, Qt.BottomEdge,
-                    Qt.TopEdge | Qt.LeftEdge, Qt.TopEdge | Qt.RightEdge,
-                    Qt.BottomEdge | Qt.LeftEdge, Qt.BottomEdge | Qt.RightEdge]
+    }
 
-            delegate: MouseArea {
-                required property int modelData
-                readonly property bool horizontal: (modelData & (Qt.LeftEdge | Qt.RightEdge)) !== 0
-                readonly property bool vertical: (modelData & (Qt.TopEdge | Qt.BottomEdge)) !== 0
-                visible: !frame.maximized
-                width: horizontal ? (vertical ? 12 : 6) : frame.width - 24
-                height: vertical ? (horizontal ? 12 : 6) : frame.height - 24
-                x: (modelData & Qt.RightEdge) ? frame.width - width : horizontal ? 0 : 12
-                y: (modelData & Qt.BottomEdge) ? frame.height - height : vertical ? 0 : 12
-                cursorShape: horizontal && vertical
-                    ? ((modelData === (Qt.TopEdge | Qt.LeftEdge) || modelData === (Qt.BottomEdge | Qt.RightEdge)) ? Qt.SizeFDiagCursor : Qt.SizeBDiagCursor)
-                    : horizontal ? Qt.SizeHorCursor : Qt.SizeVerCursor
-                acceptedButtons: Qt.LeftButton
-                onPressed: frame.startSystemResize(modelData)
-            }
+    // Ubuntu owns the actual move/resize operation and its Wayland input grab.
+    Repeater {
+        model: [Qt.LeftEdge, Qt.RightEdge, Qt.TopEdge, Qt.BottomEdge,
+                Qt.TopEdge | Qt.LeftEdge, Qt.TopEdge | Qt.RightEdge,
+                Qt.BottomEdge | Qt.LeftEdge, Qt.BottomEdge | Qt.RightEdge]
+
+        delegate: MouseArea {
+            required property int modelData
+            objectName: "windowResize-" + modelData
+            z: 100
+            hoverEnabled: true
+            readonly property bool horizontal: (modelData & (Qt.LeftEdge | Qt.RightEdge)) !== 0
+            readonly property bool vertical: (modelData & (Qt.TopEdge | Qt.BottomEdge)) !== 0
+            visible: !frame.maximized
+            width: horizontal ? (vertical ? frame.resizeCorner : frame.resizeBorder) : Math.max(0, frame.width - frame.resizeCorner * 2)
+            height: vertical ? (horizontal ? frame.resizeCorner : frame.resizeBorder) : Math.max(0, frame.height - frame.resizeCorner * 2)
+            x: (modelData & Qt.RightEdge) ? frame.width - width : horizontal ? 0 : frame.resizeCorner
+            y: (modelData & Qt.BottomEdge) ? frame.height - height : vertical ? 0 : frame.resizeCorner
+            cursorShape: horizontal && vertical
+                ? ((modelData === (Qt.TopEdge | Qt.LeftEdge) || modelData === (Qt.BottomEdge | Qt.RightEdge)) ? Qt.SizeFDiagCursor : Qt.SizeBDiagCursor)
+                : horizontal ? Qt.SizeHorCursor : Qt.SizeVerCursor
+            acceptedButtons: Qt.LeftButton
+            onPressed: frame.startSystemResize(modelData)
         }
     }
 }
