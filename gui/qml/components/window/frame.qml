@@ -10,6 +10,7 @@ import "../../scripts/theme.js" as Theme
 Window {
     id: frame
 
+    readonly property var controller: contentLoader.item ? contentLoader.item.controller || null : null
     property url headerSource
     property real headerHeight: 44
     property real titleOffset: 90
@@ -141,6 +142,7 @@ Window {
         anchors.right: parent.right
         height: frame.headerHeight
         source: frame.headerSource
+        onLoaded: item.controller = Qt.binding(() => frame.controller)
     }
 
     component ControlBackground: Item {
@@ -178,6 +180,7 @@ Window {
     }
 
     Loader {
+        id: contentLoader
         anchors.fill: parent
         anchors.margins: frame.contentMargin
         anchors.topMargin: header.height + frame.contentTopGap

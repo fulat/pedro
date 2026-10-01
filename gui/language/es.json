@@ -244,5 +244,8 @@
     "files.sample.detailItems": "10 (7 carpetas, 3 archivos)",
     "files.sample.created": "Creado",
     "files.sample.createdDate": "15 sep. 2025, 14:09",
-    "files.sample.modifiedDate": "27 sep. 2025, 11:42"
+    "files.sample.modifiedDate": "27 sep. 2025, 11:42",
+    "files.browser.desktop": "Escritorio",
+    "files.browser.public": "Público",
+    "files.browser.empty": "Esta ubicación está vacía"
 }

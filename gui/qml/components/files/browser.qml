@@ -2,13 +2,22 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
+import Pedro.Files 1.0
 import "palette.js" as Palette
 
-// Reference layout with sample data only; filesystem navigation remains in PAPI.
 Rectangle {
     id: browser
     readonly property var colors: Palette.colors(Backend.appearanceMode)
+    readonly property var controller: controllerLoader.item
     color: colors.surface
+
+    Directory { id: directory; objectName: "filesDirectory" }
+    Loader {
+        id: controllerLoader
+        source: "../../controllers/files/navigation.qml"
+        onLoaded: item.directory = directory
+    }
+
     RowLayout {
         anchors.fill: parent
         spacing: 0
@@ -16,53 +25,75 @@ Rectangle {
             Layout.preferredWidth: 205
             Layout.fillHeight: true
             source: "sidebar.qml"
+            onLoaded: item.controller = Qt.binding(() => browser.controller)
         }
         ScrollView {
+            id: contentScroll
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.leftMargin: 17
             Layout.rightMargin: 16
             clip: true
             contentWidth: availableWidth
+            ScrollBar.vertical.policy: ScrollBar.AsNeeded
             ColumnLayout {
-                width: parent.width
+                width: contentScroll.availableWidth
                 spacing: 15
                 Loader { Layout.fillWidth: true; Layout.preferredHeight: 55; source: "toolbar.qml" }
-                Loader { Layout.fillWidth: true; Layout.preferredHeight: 115; source: "banner.qml" }
+                Loader { Layout.fillWidth: true; Layout.preferredHeight: 115; source: "banner.qml"; onLoaded: item.controller = Qt.binding(() => browser.controller) }
+                Text {
+                    Layout.fillWidth: true
+                    visible: directory.error.length > 0
+                    text: directory.error
+                    color: browser.colors.muted
+                    wrapMode: Text.WordWrap
+                }
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.topMargin: 1
-                    Text { text: qsTranslate("Pedro", "files.browser.folders") + "  (7)"; color: browser.colors.ink; font.pixelSize: 17; font.bold: true }
+                    Text { text: qsTranslate("Pedro", "files.browser.folders") + "  (" + (browser.controller ? browser.controller.folders.length : 0) + ")"; color: browser.colors.ink; font.pixelSize: 17; font.bold: true }
                     Item { Layout.fillWidth: true }
                     Text { text: qsTranslate("Pedro", "files.sample.sort") + "  ⌄"; color: browser.colors.muted; font.pixelSize: 12 }
                     Loader { source: "button.qml"; onLoaded: item.symbol = "grid" }
                     Loader { source: "button.qml"; onLoaded: item.symbol = "list" }
                 }
-                GridLayout {
+                GridView {
+                    id: folderGrid
+                    objectName: "filesFolderGrid"
+                    readonly property int columns: browser.width >= 1100 ? 4 : browser.width >= 880 ? 3 : 2
                     Layout.fillWidth: true
-                    columns: browser.width >= 1100 ? 4 : browser.width >= 880 ? 3 : 2
-                    columnSpacing: 9
-                    rowSpacing: 9
-                    Repeater {
-                        model: [
-                            {name: "designs", count: 12, size: "4.2 GB", tag: "design"}, {name: "wallpapers", count: 24, size: "3.6 GB", tag: "work"},
-                            {name: "contracts", count: 4, size: "532 MB", tag: ""}, {name: "mockups", count: 15, size: "2.1 GB", tag: "design"},
-                            {name: "captures", count: 8, size: "1.4 GB", tag: ""}, {name: "resources", count: 9, size: "1.1 GB", tag: "work"},
-                            {name: "references", count: 6, size: "893 MB", tag: "important"}
-                        ]
-                        delegate: Loader {
-                            id: folder
-                            required property var modelData
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 112
-                            source: "card.qml"
-                            onLoaded: item.entry = modelData
+                    Layout.preferredHeight: Math.min(Math.ceil(count / columns) * cellHeight, 310)
+                    cellWidth: width / columns
+                    cellHeight: 101
+                    clip: true
+                    model: directory.folderModel
+                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                    delegate: Loader {
+                        id: folder
+                        required property var entry
+                        width: folderGrid.cellWidth - 9
+                        height: 92
+                        source: "card.qml"
+                        onLoaded: {
+                            item.entry = Qt.binding(() => folder.entry);
+                            item.controller = Qt.binding(() => browser.controller);
                         }
                     }
                 }
                 Rectangle { Layout.fillWidth: true; height: 1; color: browser.colors.line }
-                Text { text: qsTranslate("Pedro", "files.sample.files") + "  (3)"; color: browser.colors.ink; font.pixelSize: 17; font.bold: true }
-                Loader { Layout.fillWidth: true; Layout.preferredHeight: 162; source: "table.qml" }
+                Text { text: qsTranslate("Pedro", "files.sample.files") + "  (" + (browser.controller ? browser.controller.files.length : 0) + ")"; color: browser.colors.ink; font.pixelSize: 17; font.bold: true }
+                Loader {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: item ? item.implicitHeight : 33
+                    source: "table.qml"
+                    onLoaded: item.controller = Qt.binding(() => browser.controller)
+                }
+                Text {
+                    Layout.fillWidth: true
+                    visible: !directory.loading && directory.rowCount() === 0 && !directory.error.length
+                    text: qsTranslate("Pedro", "files.browser.empty")
+                    color: browser.colors.muted
+                    horizontalAlignment: Text.AlignHCenter
+                }
             }
         }
         Rectangle { Layout.fillHeight: true; width: 1; color: browser.colors.line }
@@ -73,6 +104,7 @@ Rectangle {
             Layout.rightMargin: 14
             Layout.topMargin: 16
             source: "inspector.qml"
+            onLoaded: item.controller = Qt.binding(() => browser.controller)
         }
     }
 }

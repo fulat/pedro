@@ -25,7 +25,7 @@ Usar preferentemente GLib/GIO (`GFileMonitor`) para observar cambios en director
 - Si llegan muchos cambios juntos, agruparlos antes de actualizar la UI para evitar renders innecesarios.
 - El monitoreo debe permanecer invisible para el usuario; no mostrar “Refreshing” salvo que exista una operación excepcionalmente costosa.
 
-Estado: el Desktop ya enumera su contenido de forma asíncrona y usa `GFileMonitor` con actualizaciones incrementales y agrupación de eventos. El monitoreo de Pedro Files queda pendiente.
+Estado: Desktop y Pedro Files enumeran de forma asíncrona y usan `GFileMonitor` con actualizaciones incrementales y agrupación de eventos. Pedro Files reemplaza el monitor al navegar y reconcilia snapshots por URI.
 
 ### Carpetas estándar del usuario mediante XDG
 
@@ -96,11 +96,9 @@ Pendiente: conectar «Pegar» al portapapeles mediante PAPI y mostrarlo únicame
 
 ### Pedro Files
 
-Implementado: ventana Qt Quick reutilizable desde la carpeta del dock y la navegación lateral, con UI adaptable light/dark y catálogos inglés/español. Las ubicaciones y tarjetas actuales son una presentación, no contenido enumerado del filesystem.
+Implementado: ventana Qt Quick desde el dock y navegación lateral, con UI light/dark e inglés/español dividida en componentes. Cada ventana mantiene un controlador y modelo independientes de PAPI, historial atrás/adelante, listados reales, inspector y vistas desplazables que virtualizan elementos. Inicio y carpetas estándar usan XDG; Este equipo utiliza montajes GIO; Papelera utiliza GVfs; Favoritos y Recientes consumen los registros compartidos de GTK. Véase [Pedro Files](files.md).
 
-La vista reproduce la referencia mediante componentes separados para cabecera, navegación lateral, toolbar, resumen, tarjetas, tabla e inspector, con botones y badges reutilizables. Los datos de Proyecto Pedro son muestras visuales; no implementar navegación real a partir de esas muestras.
-
-Pendiente: conectar navegación y listado real a un modelo de PAPI, resolver ubicaciones estándar mediante XDG, reemplazar el `GFileMonitor` al cambiar de directorio e incorporar búsqueda y operaciones asíncronas. Reutilizar las decisiones de filesystem y jobs de este documento; evitar lógica de filesystem dentro de QML.
+Pendiente: búsqueda, filtros, orden alternativo, etiquetas, edición de marcadores, apertura de archivos con aplicaciones y operaciones asíncronas de archivos en esta ventana, incluyendo restaurar/vaciar Papelera. Integrar los backends GIO/GVfs requeridos en la futura sesión de producción; no crear sistemas paralelos de filesystem o montaje.
 
 ### Activación de aplicaciones desde el dock
 

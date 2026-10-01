@@ -7,6 +7,7 @@ import "palette.js" as Palette
 
 Rectangle {
     id: sidebar
+    property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     color: colors.sidebar
     ScrollView {
@@ -23,11 +24,12 @@ Rectangle {
                     {divider: true},
                     {name: "documents", icon: "file"}, {name: "downloads", icon: "download"}, {name: "images", icon: "image"}, {name: "music", icon: "music"}, {name: "videos", icon: "video"},
                     {divider: true},
-                    {name: "project", icon: "folder"}, {name: "drive", icon: "cloud"}, {name: "computer", icon: "display"}, {name: "trash", icon: "trash"}, {divider: true}
+                    {name: "computer", icon: "display"}, {name: "trash", icon: "trash"}, {divider: true}
                 ]
                 delegate: Item {
                     id: row
                     required property var modelData
+                    objectName: modelData.name ? "filesPlace-" + modelData.name : ""
                     width: parent.width
                     height: modelData.divider ? 23 : 36
                     Rectangle {
@@ -42,7 +44,11 @@ Rectangle {
                         anchors.fill: parent
                         radius: 18
                         visible: !row.modelData.divider
-                        color: row.modelData.name === "home" ? sidebar.colors.selected : rowHover.hovered ? sidebar.colors.selected : "transparent"
+                        color: sidebar.controller && row.modelData.name === sidebar.controller.directory.place ? sidebar.colors.selected : rowHover.hovered ? sidebar.colors.selected : "transparent"
+                    }
+                    TapHandler {
+                        enabled: !row.modelData.divider
+                        onTapped: sidebar.controller.openPlace(row.modelData.name)
                     }
                     HoverHandler { id: rowHover; enabled: !row.modelData.divider; cursorShape: Qt.PointingHandCursor }
                     Icon.Tinted {
@@ -58,7 +64,7 @@ Rectangle {
                         text: row.modelData.name ? qsTranslate("Pedro", "files.browser." + row.modelData.name) : ""
                         color: sidebar.colors.ink
                         font.pixelSize: 14
-                        font.bold: row.modelData.name === "home"
+                        font.bold: sidebar.controller && row.modelData.name === sidebar.controller.directory.place
                     }
                 }
             }

@@ -1231,5 +1231,20 @@
             <extracomment>Stable Pedro key: files.sample.modifiedDate</extracomment>
             <translation>Sep 27, 2025, 11:42</translation>
         </message>
+        <message>
+            <source>files.browser.desktop</source>
+            <extracomment>Stable Pedro key: files.browser.desktop</extracomment>
+            <translation>Desktop</translation>
+        </message>
+        <message>
+            <source>files.browser.public</source>
+            <extracomment>Stable Pedro key: files.browser.public</extracomment>
+            <translation>Public</translation>
+        </message>
+        <message>
+            <source>files.browser.empty</source>
+            <extracomment>Stable Pedro key: files.browser.empty</extracomment>
+            <translation>This location is empty</translation>
+        </message>
     </context>
 </TS>

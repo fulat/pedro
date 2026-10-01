@@ -6,6 +6,7 @@ import "palette.js" as Palette
 
 Rectangle {
     id: banner
+    property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     implicitHeight: 115
     radius: 12
@@ -20,19 +21,11 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 6
             RowLayout {
-                Text { text: qsTranslate("Pedro", "files.browser.project"); color: banner.colors.ink; font.pixelSize: 20; font.bold: true }
-                Text { text: "★"; color: "#ffb512"; font.pixelSize: 22 }
+                Layout.fillWidth: true
+                Text { text: banner.controller ? banner.controller.title : ""; color: banner.colors.ink; font.pixelSize: 20; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
             }
-            Text { text: qsTranslate("Pedro", "files.sample.summary"); color: banner.colors.muted; font.pixelSize: 13 }
-            Text { text: qsTranslate("Pedro", "files.sample.description"); color: banner.colors.muted; font.pixelSize: 13; Layout.fillWidth: true; elide: Text.ElideRight }
-        }
-        Column {
-            Layout.preferredWidth: 185
-            Layout.alignment: Qt.AlignTop
-            Layout.topMargin: 9
-            spacing: 8
-            Text { text: qsTranslate("Pedro", "files.sample.storage"); color: banner.colors.muted; font.pixelSize: 12 }
-            Rectangle { width: 185; height: 8; radius: 4; color: "#bdd1ed"; Rectangle { width: 50; height: 8; radius: 4; color: banner.colors.accent } }
+            Text { text: banner.controller ? qsTranslate("Pedro", "files.sample.items").arg(banner.controller.folders.length + banner.controller.files.length) : ""; color: banner.colors.muted; font.pixelSize: 13 }
+            Text { text: banner.controller ? banner.controller.directory.path || banner.controller.title : ""; color: banner.colors.muted; font.pixelSize: 13; Layout.fillWidth: true; elide: Text.ElideRight }
         }
     }
 }
