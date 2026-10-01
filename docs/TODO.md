@@ -100,6 +100,7 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 - [x] Crear carpetas y archivos vacíos con nombres únicos de forma asíncrona, con renombrado en línea.
 - [x] Organización cuadrícula, libre y pilas expandibles por tipo; alineación y persistencia de preferencias y posiciones por modo.
 - [x] Barreras de arrastre en Libre y Cuadrícula contra logo, menús, widgets y dock, con margen universal de 8 px también en Pila; Cuadrícula busca una celda válida cercana al soltar.
+- [x] Gap de 8 px entre elementos en Cuadrícula y Pila, incluyendo áreas de selección; Libre permite superposición.
 - [x] Arrastre visual en pilas: representación bajo el cursor, resaltado de destino y retorno sin modificar posiciones; permite arrastrar elementos de pilas expandidas.
 - [ ] Conectar el drop a movimiento asíncrono de archivos/carpetas mediante PAPI, validando destinos, colisiones, errores y progreso. El gesto visual no mueve contenido.
 - [ ] Conectar Pegar al portapapeles PAPI y mostrarlo únicamente con archivos compatibles.

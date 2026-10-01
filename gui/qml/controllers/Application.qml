@@ -225,19 +225,74 @@ QtObject {
         return Math.min(8, Math.max(0, (extent - itemExtent) / 2));
     }
 
+    function desktopGap() {
+        return desktopShortcuts.cellGap || 0;
+    }
+
+    function desktopItemWidth() {
+        return desktopShortcuts.cellWidth - desktopGap();
+    }
+
+    function desktopItemHeight() {
+        return desktopShortcuts.cellHeight - desktopGap();
+    }
+
+    // Preserve saved grid positions unless they violate spacing with earlier items.
+    function desktopSpacedPosition(x, y, index) {
+        function available(candidateX, candidateY) {
+            if (desktopPlacementOverlapsShell(candidateX, candidateY, desktopItemWidth(), desktopItemHeight())) {
+                return false;
+            }
+            for (let previous = 0; previous < index; ++previous) {
+                const item = desktopShortcutRepeater.itemAt(previous);
+                if (!item) {
+                    continue;
+                }
+                const position = item.initialPosition || Qt.point(item.x, item.y);
+                if (candidateX < position.x + item.width + desktopGap()
+                        && candidateX + desktopItemWidth() + desktopGap() > position.x
+                        && candidateY < position.y + item.height + desktopGap()
+                        && candidateY + desktopItemHeight() + desktopGap() > position.y) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        if (available(x, y)) {
+            return Qt.point(x, y);
+        }
+
+        const insetX = desktopInset(desktopShortcuts.width, desktopItemWidth());
+        const insetY = desktopInset(desktopShortcuts.height, desktopItemHeight());
+        let closest = null;
+        let distance = Number.MAX_VALUE;
+        for (let candidateY = insetY; candidateY + desktopItemHeight() <= desktopShortcuts.height - insetY; candidateY += desktopShortcuts.cellHeight) {
+            for (let candidateX = insetX; candidateX + desktopItemWidth() <= desktopShortcuts.width - insetX; candidateX += desktopShortcuts.cellWidth) {
+                const candidateDistance = Math.pow(candidateX - x, 2) + Math.pow(candidateY - y, 2);
+                if (candidateDistance < distance && available(candidateX, candidateY)) {
+                    closest = Qt.point(candidateX, candidateY);
+                    distance = candidateDistance;
+                }
+            }
+        }
+        return closest || desktopInitialPosition(index);
+    }
+
     // Restores persisted positions, constraining them to the current screen.
     function desktopRestoredPosition(entry, index) {
         if (Backend.desktopModel.organization === "stack") {
             return desktopStackPosition(stackInfo(entry).slot);
         }
         if (entry.position) {
-            const insetX = desktopInset(desktopShortcuts.width, desktopShortcuts.cellWidth);
-            const insetY = desktopInset(desktopShortcuts.height, desktopShortcuts.cellHeight);
-            const x = Math.max(insetX, Math.min(entry.position.x, desktopShortcuts.width - desktopShortcuts.cellWidth - insetX));
-            const y = Math.max(insetY, Math.min(entry.position.y, desktopShortcuts.height - desktopShortcuts.cellHeight - insetY));
+            const insetX = desktopInset(desktopShortcuts.width, desktopItemWidth());
+            const insetY = desktopInset(desktopShortcuts.height, desktopItemHeight());
+            const x = Math.max(insetX, Math.min(entry.position.x, desktopShortcuts.width - desktopItemWidth() - insetX));
+            const y = Math.max(insetY, Math.min(entry.position.y, desktopShortcuts.height - desktopItemHeight() - insetY));
 
-            if (!desktopPlacementOverlapsShell(x, y, desktopShortcuts.cellWidth, desktopShortcuts.cellHeight)) {
-                return Qt.point(x, y);
+            if (!desktopPlacementOverlapsShell(x, y, desktopItemWidth(), desktopItemHeight())) {
+                return Backend.desktopModel.organization === "grid"
+                    ? desktopSpacedPosition(x, y, index) : Qt.point(x, y);
             }
         }
 
@@ -247,18 +302,18 @@ QtObject {
     // Fill stack columns from the inset right edge, scanning each from top to bottom.
     function desktopStackPosition(index) {
         let slot = 0;
-        const insetX = desktopInset(desktopShortcuts.width, desktopShortcuts.cellWidth);
-        const insetY = desktopInset(desktopShortcuts.height, desktopShortcuts.cellHeight);
-        const columns = Math.max(1, Math.floor((desktopShortcuts.width - insetX * 2) / desktopShortcuts.cellWidth));
-        const rows = Math.max(1, Math.floor((desktopShortcuts.height - insetY * 2) / desktopShortcuts.cellHeight));
+        const insetX = desktopInset(desktopShortcuts.width, desktopItemWidth());
+        const insetY = desktopInset(desktopShortcuts.height, desktopItemHeight());
+        const columns = Math.max(1, Math.floor((desktopShortcuts.width - insetX * 2 + desktopGap()) / desktopShortcuts.cellWidth));
+        const rows = Math.max(1, Math.floor((desktopShortcuts.height - insetY * 2 + desktopGap()) / desktopShortcuts.cellHeight));
 
         for (let column = 0; column < columns; ++column) {
-            const x = Math.max(insetX, desktopShortcuts.width - insetX - desktopShortcuts.cellWidth * (column + 1));
+            const x = Math.max(insetX, desktopShortcuts.width - insetX - desktopItemWidth() - desktopShortcuts.cellWidth * column);
 
             for (let row = 0; row < rows; ++row) {
                 const y = insetY + row * desktopShortcuts.cellHeight;
 
-                if (!desktopPlacementOverlapsShell(x, y, desktopShortcuts.cellWidth, desktopShortcuts.cellHeight)) {
+                if (!desktopPlacementOverlapsShell(x, y, desktopItemWidth(), desktopItemHeight())) {
                     if (slot++ === index) {
                         return Qt.point(x, y);
                     }
@@ -272,10 +327,10 @@ QtObject {
     // Places initial model entries in free desktop cells without filesystem logic.
     function desktopInitialPosition(index, ignoreSaved = false) {
         let slot = 0;
-        const insetX = desktopInset(desktopShortcuts.width, desktopShortcuts.cellWidth);
-        const insetY = desktopInset(desktopShortcuts.height, desktopShortcuts.cellHeight);
-        const columns = Math.max(1, Math.floor((desktopShortcuts.width - insetX * 2) / desktopShortcuts.cellWidth));
-        const rows = Math.max(1, Math.floor((desktopShortcuts.height - insetY * 2) / desktopShortcuts.cellHeight));
+        const insetX = desktopInset(desktopShortcuts.width, desktopItemWidth());
+        const insetY = desktopInset(desktopShortcuts.height, desktopItemHeight());
+        const columns = Math.max(1, Math.floor((desktopShortcuts.width - insetX * 2 + desktopGap()) / desktopShortcuts.cellWidth));
+        const rows = Math.max(1, Math.floor((desktopShortcuts.height - insetY * 2 + desktopGap()) / desktopShortcuts.cellHeight));
 
         for (let row = 0; row < rows; ++row) {
             for (let column = 0; column < columns; ++column) {
@@ -288,14 +343,14 @@ QtObject {
                     const item = desktopShortcutRepeater.itemAt(itemIndex);
                     const saved = item && item.app ? item.app.position : null;
 
-                    if (!ignoreSaved && saved && x < saved.x + desktopShortcuts.cellWidth && x + desktopShortcuts.cellWidth > saved.x
-                            && y < saved.y + desktopShortcuts.cellHeight && y + desktopShortcuts.cellHeight > saved.y) {
+                    if (!ignoreSaved && saved && x < saved.x + desktopItemWidth() && x + desktopItemWidth() > saved.x
+                            && y < saved.y + desktopItemHeight() && y + desktopItemHeight() > saved.y) {
                         reserved = true;
                         break;
                     }
                 }
 
-                if (!reserved && !desktopPlacementOverlapsShell(x, y, desktopShortcuts.cellWidth, desktopShortcuts.cellHeight)) {
+                if (!reserved && !desktopPlacementOverlapsShell(x, y, desktopItemWidth(), desktopItemHeight())) {
                     if (slot++ === index) {
                         return Qt.point(x, y);
                     }
@@ -553,9 +608,9 @@ QtObject {
                     const targetY = insetY + targetRow * cellHeight;
                     const key = targetColumn + ":" + targetRow;
 
-                    const overlapsShortcut = occupied.some(shortcut => targetX < shortcut.x + shortcut.width
-                            && targetX + cell.item.width > shortcut.x && targetY < shortcut.y + shortcut.height
-                            && targetY + cell.item.height > shortcut.y);
+                    const overlapsShortcut = occupied.some(shortcut => targetX < shortcut.x + shortcut.width + desktopGap()
+                            && targetX + cell.item.width + desktopGap() > shortcut.x && targetY < shortcut.y + shortcut.height + desktopGap()
+                            && targetY + cell.item.height + desktopGap() > shortcut.y);
 
                     if (targetColumn < 0 || targetRow < 0 || targetX + cell.item.width > desktopShortcuts.width - insetX || targetY + cell.item.height > desktopShortcuts.height - insetY || desktopPlacementOverlapsShell(targetX, targetY, cell.item.width, cell.item.height) || overlapsShortcut || placementCells[key]) {
                         valid = false;

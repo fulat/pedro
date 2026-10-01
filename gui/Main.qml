@@ -61,8 +61,11 @@ Components.Application {
     Item {
         id: desktopShortcutsArea
 
-        readonly property real cellWidth: 106
-        readonly property real cellHeight: 102
+        readonly property real itemWidth: 106
+        readonly property real itemHeight: 102
+        readonly property real cellGap: 8
+        readonly property real cellWidth: itemWidth + cellGap
+        readonly property real cellHeight: itemHeight + cellGap
 
         z: 10
 
@@ -97,8 +100,8 @@ Components.Application {
                 y: initialPosition.y
                 shell: main
                 controller: mainController
-                cellWidth: desktopShortcutsArea.cellWidth
-                cellHeight: desktopShortcutsArea.cellHeight
+                cellWidth: desktopShortcutsArea.itemWidth
+                cellHeight: desktopShortcutsArea.itemHeight
                 app: entry
                 selected: main.controller.isDesktopShortcutSelected(entry.id)
 
@@ -109,8 +112,8 @@ Components.Application {
         Item {
             id: stackDragPreview
             z: 100
-            width: desktopShortcutsArea.cellWidth
-            height: desktopShortcutsArea.cellHeight
+            width: desktopShortcutsArea.itemWidth
+            height: desktopShortcutsArea.itemHeight
             x: main.controller.stackDragPoint.x - width / 2
             y: main.controller.stackDragPoint.y - 28
             opacity: main.controller.stackDragActive ? 0.9 : 0
