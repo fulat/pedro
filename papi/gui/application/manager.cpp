@@ -330,6 +330,31 @@ namespace Pedro::Papi::Gui::Application {
         return result;
     }
 
+    void Manager::launch(const std::string& id) const {
+
+        if (id.empty()) {
+            throw std::invalid_argument("Application id cannot be empty");
+        }
+
+        auto application = Object<GDesktopAppInfo>(g_desktop_app_info_new(id.c_str()));
+
+        if (!application) {
+            throw std::runtime_error("Application is not installed: " + id);
+        }
+
+        GError* error = nullptr;
+
+        if (!g_app_info_launch(G_APP_INFO(application.get()), nullptr, nullptr, &error)) {
+            const auto message = error ? text(error->message) : "Unable to launch application";
+
+            if (error) {
+                g_error_free(error);
+            }
+
+            throw std::runtime_error(message);
+        }
+    }
+
     void Manager::setPinned(const std::string& id, bool pinned) const {
 
         if (id.empty()) {

@@ -13,6 +13,8 @@ namespace Pedro::Papi::Gui::Application {
 
             [[nodiscard]] Snapshot snapshot() const;
 
+            void launch(const std::string& id) const;
+
             void setPinned(const std::string& id, bool pinned) const;
     };
 

@@ -290,6 +290,32 @@ void Backend::refreshApplications() {
     watcher->setFuture(QtConcurrent::run([] { return readSnapshot<Pedro::Papi::Gui::Application::Manager>(); }));
 }
 
+void Backend::launchApplication(const QString& id) {
+
+    auto* watcher = new QFutureWatcher<QString>(this);
+
+    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher] {
+        applicationError_ = watcher->result();
+        watcher->deleteLater();
+        emit applicationsChanged();
+
+        if (applicationError_.isEmpty()) {
+            refreshApplications();
+        } else {
+            qWarning() << "Application launch failed:" << applicationError_;
+        }
+    });
+
+    watcher->setFuture(QtConcurrent::run([id] {
+        try {
+            Pedro::Papi::Gui::Application::Manager{}.launch(id.toStdString());
+            return QString{};
+        } catch (const std::exception& error) {
+            return QString::fromUtf8(error.what());
+        }
+    }));
+}
+
 void Backend::setApplicationPinned(const QString& id, bool pinned) {
 
     try {

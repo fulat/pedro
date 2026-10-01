@@ -1,8 +1,16 @@
 import QtQuick
 import gui
 
-// Owns application favorite changes requested from the dock.
+// Coordinates desktop application launch and favorite changes through PAPI.
 QtObject {
+
+    function launchApplication(application) {
+        if (!application || !application.id) {
+            return;
+        }
+
+        Papi.launchApplication(application.id);
+    }
 
     // Adds or removes one installed application from GNOME favorites.
     function setPinned(application, pinned) {

@@ -112,10 +112,16 @@ Item {
             id: entryMouse
 
             anchors.fill: parent
-            acceptedButtons: Qt.RightButton
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: mouse => favoriteMenu.popup(mouse.x, mouse.y)
+            onClicked: mouse => {
+                if (mouse.button === Qt.RightButton) {
+                    favoriteMenu.popup(mouse.x, mouse.y);
+                } else {
+                    controller.launchApplication(entry.app);
+                }
+            }
         }
 
         Menu {

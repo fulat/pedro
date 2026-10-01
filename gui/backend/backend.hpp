@@ -86,6 +86,7 @@ class Backend final : public QObject {
         Q_INVOKABLE void saveDocument(const QString& contents);
         Q_INVOKABLE void createDirectory(const QString& path);
         Q_INVOKABLE void refreshApplications();
+        Q_INVOKABLE void launchApplication(const QString& id);
         Q_INVOKABLE void setApplicationPinned(const QString& id, bool pinned);
         Q_INVOKABLE void refreshWifi();
         Q_INVOKABLE void setWifiEnabled(bool enabled);
