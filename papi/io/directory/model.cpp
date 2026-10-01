@@ -31,6 +31,9 @@ namespace Pedro::Papi::Io::Directory {
                 bool lessThan(const QModelIndex& left, const QModelIndex& right) const override {
                     const auto first = sourceModel()->data(left, entryRole).toMap();
                     const auto second = sourceModel()->data(right, entryRole).toMap();
+                    if (key == "type" && first.value("isDirectory").toBool() != second.value("isDirectory").toBool()) {
+                        return first.value("isDirectory").toBool();
+                    }
                     if (key == "size" && first.value(key) != second.value(key)) {
                         return first.value(key).toLongLong() < second.value(key).toLongLong();
                     }
