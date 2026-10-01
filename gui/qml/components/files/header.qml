@@ -13,6 +13,35 @@ Item {
     readonly property string currentPath: controller && controller.directory ? controller.directory.path || controller.directory.location : ""
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
+    TextMetrics {
+        id: nameMetrics
+        font.pixelSize: 13
+        font.bold: true
+        text: header.controller ? header.controller.title : ""
+    }
+    TextMetrics {
+        id: pathMetrics
+        font.pixelSize: 13
+        text: header.currentPath
+    }
+    Item {
+        parent: header.Window.window ? header.Window.window.contentItem : null
+        anchors.fill: parent
+        z: 1000
+        PointHandler {
+            acceptedButtons: Qt.AllButtons
+            onActiveChanged: {
+                if (active && header.pathExpanded) {
+                    const local = parent.mapToItem(location, point.position.x, point.position.y);
+                    if (!location.contains(local)) header.pathExpanded = false;
+                }
+            }
+        }
+    }
+    Connections {
+        target: header.Window.window
+        function onActiveChanged() { if (!header.Window.window || !header.Window.window.active) header.pathExpanded = false; }
+    }
     RowLayout {
         anchors.fill: parent
         anchors.rightMargin: 24
@@ -25,9 +54,9 @@ Item {
         Rectangle {
             id: location
             objectName: "filesLocation"
-            Layout.fillWidth: true
             Layout.minimumWidth: 110
-            Layout.preferredWidth: 240
+            Layout.maximumWidth: Math.max(110, Math.min(header.pathExpanded ? 480 : 240, header.width - (header.searchExpanded ? 220 : 44) - 278))
+            Layout.preferredWidth: Math.min(Layout.maximumWidth, Math.max(110, header.pathExpanded ? pathMetrics.advanceWidth + 20 : nameMetrics.advanceWidth + 50))
             Layout.preferredHeight: 38
             radius: 12
             color: header.colors.card
@@ -73,7 +102,9 @@ Item {
                 Keys.onEscapePressed: { header.pathExpanded = false; focus = false; }
             }
         }
+        Item { Layout.fillWidth: true }
         Loader {
+            visible: !header.searchExpanded
             source: "button.qml"
             onLoaded: {
                 item.objectName = "filesSearchButton";
@@ -94,6 +125,16 @@ Item {
             placeholderTextColor: header.colors.muted
             selectByMouse: true
             font.pixelSize: 13
+            leftPadding: 38
+            Keys.onEscapePressed: { header.searchExpanded = false; focus = false; }
+            Icon.Tinted {
+                x: 12
+                anchors.verticalCenter: parent.verticalCenter
+                width: 18
+                height: 18
+                source: "search.svg"
+                tint: header.colors.muted
+            }
             background: Rectangle { radius: 10; color: header.colors.card; border.color: header.colors.line }
         }
         Loader {
