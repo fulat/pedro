@@ -1,7 +1,5 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import "../desktop" as Desktop
-import "../icon" as Icon
 import "palette.js" as Palette
 
 Rectangle {
@@ -16,33 +14,14 @@ Rectangle {
     TapHandler { onTapped: card.controller.select(card.entry); onDoubleTapped: card.controller.openEntry(card.entry) }
     HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
     Behavior on color { ColorAnimation { duration: 150 } }
-    Desktop.Icon {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 8
-        width: 64
-        height: 64
-        kind: "folder"
-        visible: card.entry.isDirectory
-        cornerRadius: 5
-    }
-    Icon.Tinted {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 17
-        width: 46
-        height: 46
-        visible: !card.entry.isDirectory
-        source: (card.entry.icon || "file") + ".svg"
-        tint: card.colors.muted
-    }
-    Text {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 6
-        y: 77
-        text: card.entry.name
-        color: card.colors.ink
-        font.pixelSize: 12
-        horizontalAlignment: Text.AlignHCenter
-        elide: Text.ElideMiddle
+    Loader {
+        anchors.fill: parent
+        source: card.entry.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
+        onLoaded: {
+            item.entry = Qt.binding(() => card.entry);
+            item.textColor = Qt.binding(() => card.colors.ink);
+            item.contextRequested.connect(() => card.controller.select(card.entry));
+            item.actionRequested.connect(action => { if (action === "open") card.controller.openEntry(card.entry); });
+        }
     }
 }

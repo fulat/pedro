@@ -16,6 +16,10 @@ La resolución es la misma en development y production. La futura sesión de pro
 
 ## Interacción y actualizaciones
 
+La carpeta actual permanece visible en la barra superior incluso en ventanas pequeñas. Pulsar su nombre muestra la ruta completa (o URI para ubicaciones virtuales) en un campo de solo lectura seleccionable, con Ctrl+C y Escape para volver al nombre.
+
+Los componentes reutilizables `gui/qml/components/entry/folder.qml` y `file.qml` comparten presentación y menú en `entry/item.qml` y `entry/menu.qml`. Cada elemento carga el menú Liquid bajo demanda, configura las acciones de carpeta o archivo y emite solicitudes al controlador de la vista. Escritorio, cuadrícula, lista y columnas los reutilizan; el contexto de selección, navegación y arrastre permanece en los controladores correspondientes. Las operaciones de archivos pendientes no se implementan en los componentes visuales.
+
 Un clic en una ubicación cambia el directorio; un doble clic en una carpeta entra en ella. Atrás/adelante utiliza el historial del controlador/modelo de esa ventana. Seleccionar un elemento resalta su tarjeta o fila. El navegador no muestra un panel lateral de detalles.
 
 Las consultas GIO y la creación de directorios se ejecutan en workers de Qt Concurrent con `GCancellable`. Cambiar de ubicación cancela la consulta anterior y descarta resultados obsoletos mediante generaciones. La GUI aplica los resultados en su propio hilo.

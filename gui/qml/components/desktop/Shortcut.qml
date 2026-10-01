@@ -78,14 +78,25 @@ Item {
         rotation: 8
     }
 
-    Icon {
+    function openMenu(localX, localY) {
+        const position = mapToItem(entryLoader, localX, localY);
+        entryLoader.item.openMenu(position.x, position.y);
+    }
+
+    Loader {
+        id: entryLoader
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.horizontalCenter: parent.horizontalCenter
         width: 57
         height: 57
-        kind: shortcut.app ? shortcut.app.icon : ""
-        imageUrl: shortcut.app ? shortcut.app.url : ""
+        source: shortcut.app && shortcut.app.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
+        onLoaded: {
+            item.entry = Qt.binding(() => shortcut.app || {});
+            item.showName = false;
+            item.inputEnabled = false;
+            item.iconSize = 57;
+        }
     }
 
     Rectangle {

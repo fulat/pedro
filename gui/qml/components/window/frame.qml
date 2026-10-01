@@ -12,6 +12,7 @@ Window {
     id: frame
 
     readonly property var controller: contentLoader.item ? contentLoader.item.controller || null : null
+    readonly property alias entryBackdrop: windowBackdrop
     property url headerSource
     property real headerHeight: 44
     property real titleOffset: 90

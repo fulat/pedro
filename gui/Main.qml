@@ -10,6 +10,7 @@ import "qml/scripts/mocks.js" as Mocks
 
 Components.Application {
     id: main
+    readonly property Item entryBackdrop: wallpaper
 
     // Available positions:
     //
@@ -35,7 +36,6 @@ Components.Application {
     desktopShortcuts: desktopShortcutsArea
     desktopShortcutRepeater: desktopShortcutRepeaterItem
     desktopContextMenu: wallpaperMenuLoader.item
-    folderContextMenu: folderMenuLoader.item
     sideBar: sideBarItem
     topBar: topBarItem
     desktopObstacles: [topBarItem.logoControl, topBarItem.statusControl, sideBarItem, weatherCard, dock, panelLoader]
@@ -157,17 +157,6 @@ Components.Application {
             color: Theme.selectionArea
             border.width: 1
             border.color: Theme.selectionAreaBorder
-        }
-    }
-
-    Loader {
-        id: folderMenuLoader
-        source: "qml/components/desktop/menu.qml"
-
-        onLoaded: {
-            item.parent = main.contentItem;
-            item.backdrop = wallpaper;
-            item.maximumHeight = Qt.binding(() => main.height - 24);
         }
     }
 

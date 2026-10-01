@@ -2,8 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.Basic
 import Pedro.Files 1.0
-import "../desktop" as Desktop
-import "../icon" as Icon
 import "palette.js" as Palette
 
 ScrollView {
@@ -28,6 +26,13 @@ ScrollView {
                 required property string modelData
                 required property int index
                 property string selected: ""
+                function openEntry(entry) {
+                    selected = entry.id;
+                    columns.controller.select(entry);
+                    const locations = columns.locations.slice(0, index + 1);
+                    if (entry.isDirectory) locations.push(entry.url);
+                    columns.locations = locations;
+                }
                 width: 240
                 height: parent.height
                 Directory {
@@ -68,19 +73,35 @@ ScrollView {
                         height: 38
                         radius: 7
                         color: column.selected === entry.id || columns.locations[column.index + 1] === entry.url ? columns.colors.selected : "transparent"
-                        Desktop.Icon { x: 8; y: 5; width: 28; height: 28; kind: "folder"; cornerRadius: 2; visible: row.entry.isDirectory }
-                        Icon.Tinted { x: 11; y: 8; width: 22; height: 22; visible: !row.entry.isDirectory; source: (row.entry.icon || "file") + ".svg"; tint: columns.colors.muted }
+                        Loader {
+                            id: entryIcon
+                            x: 8
+                            y: 5
+                            width: 28
+                            height: 28
+                            source: row.entry.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
+                            onLoaded: {
+                                item.entry = Qt.binding(() => row.entry);
+                                item.showName = false;
+                                item.inputEnabled = false;
+                                item.iconSize = 28;
+                                item.actionRequested.connect(action => { if (action === "open") column.openEntry(row.entry); });
+                            }
+                        }
                         Text { x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; text: row.entry.name; color: columns.colors.ink; font.pixelSize: 12; elide: Text.ElideMiddle }
                         Text { visible: row.entry.isDirectory; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: columns.colors.muted }
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                column.selected = row.entry.id;
-                                columns.controller.select(row.entry);
-                                const locations = columns.locations.slice(0, column.index + 1);
-                                if (row.entry.isDirectory) locations.push(row.entry.url);
-                                columns.locations = locations;
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            onClicked: mouse => {
+                                if (mouse.button === Qt.RightButton) {
+                                    columns.controller.select(row.entry);
+                                    const point = row.mapToItem(entryIcon, mouse.x, mouse.y);
+                                    entryIcon.item.openMenu(point.x, point.y);
+                                } else {
+                                    column.openEntry(row.entry);
+                                }
                             }
                         }
                     }

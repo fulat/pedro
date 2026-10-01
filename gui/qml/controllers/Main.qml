@@ -84,7 +84,8 @@ QtObject {
     // Opens a shortcut-specific context menu.
     function shortcutMenuRequested(shortcut, localX, localY) {
         view.controller.closePanel();
-        view.controller.openDesktopShortcutMenu(shortcut, localX, localY, shortcut.app.name);
+        if (view.desktopContextMenu) view.desktopContextMenu.close();
+        shortcut.openMenu(localX, localY);
     }
 
     // Routes navigation entries to their controller-owned destinations.

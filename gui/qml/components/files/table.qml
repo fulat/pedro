@@ -2,8 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
-import "../icon" as Icon
-import "../desktop" as Desktop
 import "palette.js" as Palette
 
 Item {
@@ -56,13 +54,35 @@ Item {
             color: table.controller && table.controller.selectedEntry.id === modelData.id ? table.colors.selected : "transparent"
             border.color: "transparent"
             TapHandler { onTapped: table.controller.select(row.modelData); onDoubleTapped: table.controller.openEntry(row.modelData) }
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.RightButton
+                onClicked: mouse => {
+                    table.controller.select(row.modelData);
+                    const point = row.mapToItem(entryIcon, mouse.x, mouse.y);
+                    entryIcon.item.openMenu(point.x, point.y);
+                }
+            }
             HoverHandler { cursorShape: Qt.PointingHandCursor }
             Row {
                 anchors.fill: parent
                 Item {
                     width: table.width * 0.28; height: parent.height
-                    Desktop.Icon { x: 12; anchors.verticalCenter: parent.verticalCenter; width: 34; height: 34; cornerRadius: 2; kind: "folder"; visible: row.modelData.isDirectory }
-                    Icon.Tinted { x: 15; anchors.verticalCenter: parent.verticalCenter; width: 25; height: 25; visible: !row.modelData.isDirectory; source: (row.modelData.icon || "file") + ".svg"; tint: table.colors.muted }
+                    Loader {
+                        id: entryIcon
+                        x: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 34
+                        height: 34
+                        source: row.modelData.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
+                        onLoaded: {
+                            item.entry = Qt.binding(() => row.modelData);
+                            item.showName = false;
+                            item.inputEnabled = false;
+                            item.iconSize = 34;
+                            item.actionRequested.connect(action => { if (action === "open") table.controller.openEntry(row.modelData); });
+                        }
+                    }
                     Text { x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; elide: Text.ElideMiddle; text: row.modelData.name; color: table.colors.ink; font.pixelSize: 12; font.bold: true }
                 }
                 Text { width: table.width * 0.18; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.type; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
