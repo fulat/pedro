@@ -75,6 +75,13 @@ QtObject {
         filesQuickWindow.requestActivate();
     }
 
+    function openTrashQuickWindow() {
+        openFilesQuickWindow();
+        if (filesQuickWindow.controller) {
+            filesQuickWindow.controller.openPlace("trash");
+        }
+    }
+
     // Opens the desktop context menu at a position constrained to the window.
     function openDesktopShortcutMenu(shortcut, localX, localY, shortcutName) {
         const position = shortcut.mapToItem(window.contentItem, localX, localY);

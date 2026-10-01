@@ -62,6 +62,24 @@ Item {
                 app: modelData
             }
         }
+
+        Item {
+            width: dock.vertical ? (dock.shell ? dock.shell.dockTileSize : 0) : 9
+            height: dock.vertical ? 9 : (dock.shell ? dock.shell.dockTileSize : 0) + 8
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: dock.vertical ? 22 : 1
+                height: dock.vertical ? 1 : 22
+                radius: 0.5
+                color: Theme.dividerBright
+                opacity: 0.6
+            }
+        }
+
+        DockEntry {
+            app: ({id: "pedro-trash", name: qsTranslate("Pedro", "files.browser.trash"), native: true, trash: true, running: false})
+        }
     }
 
     component DockEntry: Item {
@@ -108,7 +126,18 @@ Item {
             height: width
             kind: "folder"
             cornerRadius: 3
-            visible: entry.app.native === true
+            visible: entry.app.native === true && !entry.app.trash
+            scale: dockIcon.scale
+        }
+
+        Image {
+            anchors.centerIn: entryTile
+            width: dockIcon.width
+            height: width
+            source: "../../assets/icons/trash.png"
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            visible: entry.app.trash === true
             scale: dockIcon.scale
         }
 
@@ -141,7 +170,11 @@ Item {
                 } else {
                     pressFeedback.restart();
                     if (entry.app.native) {
-                        dock.shell.controller.openFilesQuickWindow();
+                        if (entry.app.trash) {
+                            dock.shell.controller.openTrashQuickWindow();
+                        } else {
+                            dock.shell.controller.openFilesQuickWindow();
+                        }
                     } else {
                         controller.launchApplication(entry.app);
                     }
