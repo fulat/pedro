@@ -92,15 +92,5 @@ Rectangle {
                 }
             }
         }
-        Rectangle { Layout.fillHeight: true; width: 1; color: browser.colors.line }
-        Loader {
-            Layout.preferredWidth: 218
-            Layout.fillHeight: true
-            Layout.leftMargin: 14
-            Layout.rightMargin: 14
-            Layout.topMargin: 16
-            source: "inspector.qml"
-            onLoaded: item.controller = Qt.binding(() => browser.controller)
-        }
     }
 }

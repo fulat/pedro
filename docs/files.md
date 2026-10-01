@@ -16,7 +16,7 @@ La resolución es la misma en development y production. La futura sesión de pro
 
 ## Interacción y actualizaciones
 
-Un clic en una ubicación cambia el directorio; un doble clic en una carpeta entra en ella. Atrás/adelante utiliza el historial del controlador/modelo de esa ventana. Seleccionar un elemento actualiza el inspector; imágenes locales muestran una vista previa.
+Un clic en una ubicación cambia el directorio; un doble clic en una carpeta entra en ella. Atrás/adelante utiliza el historial del controlador/modelo de esa ventana. Seleccionar un elemento resalta su tarjeta o fila. El navegador no muestra un panel lateral de detalles.
 
 Las consultas GIO y la creación de directorios se ejecutan en workers de Qt Concurrent con `GCancellable`. Cambiar de ubicación cancela la consulta anterior y descarta resultados obsoletos mediante generaciones. La GUI aplica los resultados en su propio hilo.
 
@@ -24,4 +24,4 @@ Las consultas GIO y la creación de directorios se ejecutan en workers de Qt Con
 
 ## Pendiente
 
-Los filtros, los controles de vista, búsqueda, etiquetas y orden alternativo siguen siendo UI. La barra superior reúne los filtros a la izquierda y el orden y las vistas a la derecha; el inspector conserva la información del elemento seleccionado. No confundirlos con las operaciones ya disponibles en el menú del Desktop. Apertura de archivos con aplicaciones, marcadores editables, restaurar/vaciar Papelera y montaje de dispositivos aún no se implementan.
+Los filtros, los controles de vista, búsqueda, etiquetas y orden alternativo siguen siendo UI. La barra superior reúne los filtros a la izquierda y el orden y las vistas a la derecha; el listado ocupa todo el espacio restante, sin panel de información. No confundirlos con las operaciones ya disponibles en el menú del Desktop. Apertura de archivos con aplicaciones, marcadores editables, restaurar/vaciar Papelera y montaje de dispositivos aún no se implementan.
