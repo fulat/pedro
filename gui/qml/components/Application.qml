@@ -78,11 +78,11 @@ ApplicationWindow {
             item.contentTopGap = 0;
             item.windowRadius = 22;
             item.minimumWidth = Screen.desktopAvailableWidth > 0 ? Math.min(900, Screen.desktopAvailableWidth * 0.86) : 900;
-            item.minimumHeight = 480;
+            item.minimumHeight = Screen.desktopAvailableHeight > 0
+                ? Math.min(720, Screen.desktopAvailableHeight * 0.82) : 720;
             item.transientParent = null;
             item.width = item.minimumWidth;
-            item.height = Math.min(776, Screen.desktopAvailableHeight * 0.82);
-            item.minimumHeight = Math.min(480, item.height);
+            item.height = item.minimumHeight;
             item.x = window.x + Math.round((window.width - item.width) / 2);
             item.y = window.y + Math.round((window.height - item.height) / 2);
         }
