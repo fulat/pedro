@@ -24,4 +24,4 @@ Las consultas GIO y la creación de directorios se ejecutan en workers de Qt Con
 
 ## Pendiente
 
-Los controles de nuevo archivo/carpeta de esta ventana, subir, compartir, vista, filtros, búsqueda, etiquetas y orden alternativo siguen siendo UI. No confundirlos con las operaciones ya disponibles en el menú del Desktop. Apertura de archivos con aplicaciones, marcadores editables, restaurar/vaciar Papelera y montaje de dispositivos aún no se implementan.
+Los filtros, los controles de vista, búsqueda, etiquetas y orden alternativo siguen siendo UI. La barra superior reúne los filtros a la izquierda y el orden y las vistas a la derecha; el inspector conserva la información del elemento seleccionado. No confundirlos con las operaciones ya disponibles en el menú del Desktop. Apertura de archivos con aplicaciones, marcadores editables, restaurar/vaciar Papelera y montaje de dispositivos aún no se implementan.

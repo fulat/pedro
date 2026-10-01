@@ -40,7 +40,6 @@ Rectangle {
                 width: contentScroll.availableWidth
                 spacing: 15
                 Loader { Layout.fillWidth: true; Layout.preferredHeight: 55; source: "toolbar.qml" }
-                Loader { Layout.fillWidth: true; Layout.preferredHeight: 115; source: "banner.qml"; onLoaded: item.controller = Qt.binding(() => browser.controller) }
                 Text {
                     Layout.fillWidth: true
                     visible: directory.error.length > 0
@@ -52,9 +51,6 @@ Rectangle {
                     Layout.fillWidth: true
                     Text { text: qsTranslate("Pedro", "files.browser.folders") + "  (" + (browser.controller ? browser.controller.folders.length : 0) + ")"; color: browser.colors.ink; font.pixelSize: 17; font.bold: true }
                     Item { Layout.fillWidth: true }
-                    Text { text: qsTranslate("Pedro", "files.sample.sort") + "  ⌄"; color: browser.colors.muted; font.pixelSize: 12 }
-                    Loader { source: "button.qml"; onLoaded: item.symbol = "grid" }
-                    Loader { source: "button.qml"; onLoaded: item.symbol = "list" }
                 }
                 GridView {
                     id: folderGrid
