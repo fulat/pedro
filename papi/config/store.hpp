@@ -18,7 +18,7 @@ namespace Pedro::Papi::Config {
 
             static QString path(const QString& name);
 
-            QString value(const QString& name, const QString& section, const QString& key) const;
+            static QString value(const QString& name, const QString& section, const QString& key);
 
         signals:
             void changed();

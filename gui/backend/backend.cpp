@@ -103,7 +103,12 @@ Backend::Backend(QObject* parent) : QObject(parent) {
     bluetoothRefreshTimer_.start(5000);
 
     const auto reloadConfiguration = [this] {
-        const auto current = Pedro::Papi::Gui::Wallpaper::current();
+        const auto mode = configuration_.value("appearance", "appearance", "mode");
+        if ((mode == "light" || mode == "dark") && appearanceMode_ != mode) {
+            appearanceMode_ = mode;
+            emit appearanceModeChanged();
+        }
+        const auto current = Pedro::Papi::Gui::Wallpaper::current(appearanceMode_);
         if (!current.empty() && QFileInfo::exists(QString::fromStdString(current.string()))) {
             const auto url = QUrl::fromLocalFile(QString::fromStdString(current.string()));
             if (wallpaper_ != url) {
@@ -530,4 +535,8 @@ QAbstractItemModel* Backend::desktopModel() {
 
 QString Backend::language() const {
     return language_;
+}
+
+QString Backend::appearanceMode() const {
+    return appearanceMode_;
 }

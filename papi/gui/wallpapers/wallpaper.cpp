@@ -46,10 +46,10 @@ namespace Pedro::Papi::Gui::Wallpaper {
         return Pedro::Papi::Config::Store::path("wallpaper").toStdString();
     }
 
-    std::filesystem::path current() {
+    std::filesystem::path current(const QString& mode) {
         const auto configPath = config();
 
-        const std::any value = Pedro::Papi::Utils::Toml::parse(configPath.string(), "wallpaper.light", "current");
+        const std::any value = Pedro::Papi::Utils::Toml::parse(configPath.string(), std::string("wallpaper.") + ((mode.isEmpty() ? Pedro::Papi::Config::Store::value("appearance", "appearance", "mode") : mode) == "dark" ? "dark" : "light"), "current");
 
         const auto filename = std::any_cast<std::string>(&value);
 

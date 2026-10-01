@@ -42,7 +42,7 @@ namespace Pedro::Papi::Config {
         return QFileInfo::exists(user) ? user : QDir(defaults()).filePath(name + ".toml");
     }
 
-    QString Store::value(const QString& name, const QString& section, const QString& key) const {
+    QString Store::value(const QString& name, const QString& section, const QString& key) {
 
         try {
             const auto table = toml::parse_file(path(name).toStdString());
@@ -64,7 +64,7 @@ namespace Pedro::Papi::Config {
         const auto user = QDir(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)).filePath("pedro");
         QDir().mkpath(user);
         if (qEnvironmentVariableIsEmpty("PEDRO_QML_DIR") && !qEnvironmentVariableIsSet("PEDRO_DEVELOPMENT_MODE")) {
-            for (const auto& name : {QStringLiteral("language"), QStringLiteral("wallpaper")}) {
+            for (const auto& name : {QStringLiteral("language"), QStringLiteral("wallpaper"), QStringLiteral("appearance")}) {
                 const auto target = QDir(user).filePath(name + ".toml");
                 if (!QFileInfo::exists(target)) {
                     QFile::copy(QDir(defaults()).filePath(name + ".toml"), target);
@@ -76,7 +76,7 @@ namespace Pedro::Papi::Config {
                 watcher.addPath(directory);
             }
         }
-        for (const auto& name : {QStringLiteral("language"), QStringLiteral("wallpaper")}) {
+        for (const auto& name : {QStringLiteral("language"), QStringLiteral("wallpaper"), QStringLiteral("appearance")}) {
             const auto file = path(name);
             if (QFileInfo::exists(file)) {
                 watcher.addPath(file);

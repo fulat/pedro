@@ -51,6 +51,7 @@ class Backend final : public QObject {
 
         Q_PROPERTY(QUrl wallpaper READ wallpaper NOTIFY wallpaperChanged)
         Q_PROPERTY(QString language READ language NOTIFY languageChanged)
+        Q_PROPERTY(QString appearanceMode READ appearanceMode NOTIFY appearanceModeChanged)
 
     public:
 
@@ -89,6 +90,8 @@ class Backend final : public QObject {
 
         QString language() const;
 
+        QString appearanceMode() const;
+
         void setDocumentPath(const QString& path);
 
         Q_INVOKABLE void refreshSystem();
@@ -116,6 +119,8 @@ class Backend final : public QObject {
         void wallpaperChanged();
 
         void languageChanged();
+
+        void appearanceModeChanged();
 
     private:
 
@@ -152,6 +157,8 @@ class Backend final : public QObject {
         QUrl wallpaper_;
 
         QString language_;
+
+        QString appearanceMode_ = "light";
 
         Pedro::Papi::Config::Store configuration_;
 

@@ -10,6 +10,7 @@ Item {
     property Item backdrop
     property real cornerRadius: 16
     property bool frosted: false
+    readonly property bool lightMode: Backend.appearanceMode === "light"
     property real blurAmount: frosted ? 1.0 : Theme.menuBlur
     property point backdropOrigin: Qt.point(0, 0)
 
@@ -69,7 +70,7 @@ Item {
         blurMax: liquid.frosted ? 64 : 32
         blurMultiplier: liquid.frosted ? 1.6 : 1.0
         saturation: liquid.frosted ? -0.30 : -0.08
-        brightness: 0
+        brightness: liquid.lightMode ? 0.06 : 0
         contrast: 0
         maskEnabled: true
         maskSource: glassMask
@@ -81,7 +82,12 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: liquid.cornerRadius
-        color: liquid.frosted ? Theme.menuGlassHaze : Theme.liquidHaze
+        color: liquid.lightMode
+            ? (liquid.frosted ? Theme.menuGlassLightHaze : Theme.liquidLightHaze)
+            : (liquid.frosted ? Theme.menuGlassHaze : Theme.liquidHaze)
+        Behavior on color {
+            ColorAnimation { duration: 180; easing.type: Easing.InOutQuad }
+        }
         border.width: 1
         border.color: Theme.liquidEdge
         antialiasing: true
