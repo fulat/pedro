@@ -15,6 +15,7 @@ Item {
     property var shell
     property bool vertical: false
     property real hoverScale: Backend.dockHoverScale
+    readonly property real pressScale: hoverScale + 0.08
     readonly property real horizontalPadding: 16
     property real maximumLength: shell ? (vertical ? shell.height - 32 : shell.width - 32) : 0
 
@@ -79,15 +80,23 @@ Item {
             height: width
         }
 
+        Timer {
+            id: pressFeedback
+            interval: 160
+        }
+
         Application.Icon {
+            id: dockIcon
+
             anchors.centerIn: entryTile
             width: dock.shell ? dock.shell.dockIconSize : 0
             height: width
             name: entry.app ? entry.app.icon : ""
-            scale: entryMouse.containsMouse ? dock.hoverScale : 1
+            readonly property bool showingPress: pressFeedback.running || (entryMouse.pressed && (entryMouse.pressedButtons & Qt.LeftButton) !== 0)
+            scale: showingPress ? dock.pressScale : entryMouse.containsMouse ? dock.hoverScale : 1
 
             Behavior on scale {
-                NumberAnimation { duration: 180; easing.type: Easing.InOutQuad }
+                NumberAnimation { duration: dockIcon.showingPress ? 90 : 180; easing.type: Easing.InOutQuad }
             }
         }
 
@@ -116,6 +125,7 @@ Item {
                 if (mouse.button === Qt.RightButton) {
                     favoriteMenu.popup(mouse.x, mouse.y);
                 } else {
+                    pressFeedback.restart();
                     controller.launchApplication(entry.app);
                 }
             }
