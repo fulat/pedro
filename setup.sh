@@ -85,7 +85,7 @@ if ! dpkg --compare-versions "$qtVersion" ge 6.8; then
 fi
 
 packages=(
-    build-essential cmake ninja-build python3 pkg-config clang-format
+    build-essential cmake ninja-build python3 python3-gi pkg-config clang-format
     qt6-l10n-tools qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-svg-plugins qt6-wayland-dev
     libglib2.0-dev libsystemd-dev libtomlplusplus-dev
     libwayland-dev wayland-protocols libxkbcommon-dev libegl-dev

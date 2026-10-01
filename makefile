@@ -25,12 +25,17 @@ help:
 	@echo "make dev        Same as make start"
 	@echo "make GUI        Same as make start"
 	@echo "make gui-build  Build only PAPI and the GUI in build/dev"
+	@echo "make gnome      Install Pedro application activation in GNOME"
 	@echo "make gui        Same as make start"
 	@echo "make qml        Relaunch the existing binary with QML loaded from source"
 	@echo "make diagnose   Launch the GUI and print display/rendering diagnostics"
 	@echo "make compositor | build | stage | verify | image | clean"
 setup:
 	./setup.sh
+
+.PHONY: gnome
+gnome:
+	python3 gnome/application/install.py
 
 host-check:
 	@if test "$$(uname -s)" != Linux; then \
