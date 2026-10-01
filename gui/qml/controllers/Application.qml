@@ -220,14 +220,21 @@ QtObject {
         }
     }
 
+    // Keep a small inset even when the viewport cannot fit a full cell.
+    function desktopInset(extent, itemExtent) {
+        return Math.min(8, Math.max(0, (extent - itemExtent) / 2));
+    }
+
     // Restores persisted positions, constraining them to the current screen.
     function desktopRestoredPosition(entry, index) {
         if (Backend.desktopModel.organization === "stack") {
             return desktopStackPosition(stackInfo(entry).slot);
         }
         if (entry.position) {
-            const x = Math.max(0, Math.min(entry.position.x, desktopShortcuts.width - desktopShortcuts.cellWidth));
-            const y = Math.max(0, Math.min(entry.position.y, desktopShortcuts.height - desktopShortcuts.cellHeight));
+            const insetX = desktopInset(desktopShortcuts.width, desktopShortcuts.cellWidth);
+            const insetY = desktopInset(desktopShortcuts.height, desktopShortcuts.cellHeight);
+            const x = Math.max(insetX, Math.min(entry.position.x, desktopShortcuts.width - desktopShortcuts.cellWidth - insetX));
+            const y = Math.max(insetY, Math.min(entry.position.y, desktopShortcuts.height - desktopShortcuts.cellHeight - insetY));
 
             if (!desktopPlacementOverlapsShell(x, y, desktopShortcuts.cellWidth, desktopShortcuts.cellHeight)) {
                 return Qt.point(x, y);
@@ -263,13 +270,15 @@ QtObject {
     // Places initial model entries in free desktop cells without filesystem logic.
     function desktopInitialPosition(index, ignoreSaved = false) {
         let slot = 0;
-        const columns = Math.max(1, Math.floor(desktopShortcuts.width / desktopShortcuts.cellWidth));
-        const rows = Math.max(1, Math.floor(desktopShortcuts.height / desktopShortcuts.cellHeight));
+        const insetX = desktopInset(desktopShortcuts.width, desktopShortcuts.cellWidth);
+        const insetY = desktopInset(desktopShortcuts.height, desktopShortcuts.cellHeight);
+        const columns = Math.max(1, Math.floor((desktopShortcuts.width - insetX * 2) / desktopShortcuts.cellWidth));
+        const rows = Math.max(1, Math.floor((desktopShortcuts.height - insetY * 2) / desktopShortcuts.cellHeight));
 
         for (let row = 0; row < rows; ++row) {
             for (let column = 0; column < columns; ++column) {
-                const x = column * desktopShortcuts.cellWidth;
-                const y = row * desktopShortcuts.cellHeight;
+                const x = insetX + column * desktopShortcuts.cellWidth;
+                const y = insetY + row * desktopShortcuts.cellHeight;
 
                 let reserved = false;
 
@@ -292,7 +301,8 @@ QtObject {
             }
         }
 
-        return Qt.point((index % columns) * desktopShortcuts.cellWidth, rows * desktopShortcuts.cellHeight);
+        return Qt.point(insetX + (index % columns) * desktopShortcuts.cellWidth,
+            insetY + rows * desktopShortcuts.cellHeight);
     }
 
     // Reports whether a desktop shortcut belongs to the current selection.
@@ -423,27 +433,27 @@ QtObject {
             maximumY = Math.max(maximumY, entry.y + entry.item.height);
         }
 
-        movementX = Math.max(-minimumX, Math.min(desktopShortcuts.width - maximumX, movementX));
-        movementY = Math.max(-minimumY, Math.min(desktopShortcuts.height - maximumY, movementY));
+        const insetX = desktopInset(desktopShortcuts.width, maximumX - minimumX);
+        const insetY = desktopInset(desktopShortcuts.height, maximumY - minimumY);
+        movementX = Math.max(insetX - minimumX, Math.min(desktopShortcuts.width - maximumX - insetX, movementX));
+        movementY = Math.max(insetY - minimumY, Math.min(desktopShortcuts.height - maximumY - insetY, movementY));
 
-        if (Backend.desktopModel.organization === "free" || !Backend.desktopModel.keepAligned) {
-            const rectangles = desktopDragItems.map(entry => ({x: entry.item.x, y: entry.item.y,
-                width: entry.item.width, height: entry.item.height}));
-            const obstacles = [];
-            for (const obstacle of desktopObstacles) {
-                if (!obstacle || !obstacle.visible || obstacle.width <= 0 || obstacle.height <= 0) {
-                    continue;
-                }
-                const origin = obstacle.mapToItem(desktopShortcuts, 0, 0);
-                obstacles.push({x: origin.x - 8, y: origin.y - 8,
-                    width: obstacle.width + 16, height: obstacle.height + 16});
+        const rectangles = desktopDragItems.map(entry => ({x: entry.item.x, y: entry.item.y,
+            width: entry.item.width, height: entry.item.height}));
+        const obstacles = [];
+        for (const obstacle of desktopObstacles) {
+            if (!obstacle || !obstacle.visible || obstacle.width <= 0 || obstacle.height <= 0) {
+                continue;
             }
-            const currentX = desktopDragItems[0].item.x - desktopDragItems[0].x;
-            const currentY = desktopDragItems[0].item.y - desktopDragItems[0].y;
-            const allowed = Collision.constrain(rectangles, obstacles, movementX - currentX, movementY - currentY);
-            movementX = currentX + allowed.x;
-            movementY = currentY + allowed.y;
+            const origin = obstacle.mapToItem(desktopShortcuts, 0, 0);
+            obstacles.push({x: origin.x - 8, y: origin.y - 8,
+                width: obstacle.width + 16, height: obstacle.height + 16});
         }
+        const currentX = desktopDragItems[0].item.x - desktopDragItems[0].x;
+        const currentY = desktopDragItems[0].item.y - desktopDragItems[0].y;
+        const allowed = Collision.constrain(rectangles, obstacles, movementX - currentX, movementY - currentY);
+        movementX = currentX + allowed.x;
+        movementY = currentY + allowed.y;
 
         for (let index = 0; index < desktopDragItems.length; ++index) {
             const entry = desktopDragItems[index];
@@ -479,11 +489,13 @@ QtObject {
             return;
         }
 
-        const maximumColumn = Math.max(0, Math.floor((desktopShortcuts.width - desktopDragAnchor.width) / desktopShortcuts.cellWidth));
-        const maximumRow = Math.max(0, Math.floor((desktopShortcuts.height - desktopDragAnchor.height) / desktopShortcuts.cellHeight));
-        // Distribute leftover space so the first and last cells touch both edges.
-        const cellWidth = maximumColumn > 0 ? (desktopShortcuts.width - desktopDragAnchor.width) / maximumColumn : desktopShortcuts.cellWidth;
-        const cellHeight = maximumRow > 0 ? (desktopShortcuts.height - desktopDragAnchor.height) / maximumRow : desktopShortcuts.cellHeight;
+        const insetX = desktopInset(desktopShortcuts.width, desktopDragAnchor.width);
+        const insetY = desktopInset(desktopShortcuts.height, desktopDragAnchor.height);
+        const maximumColumn = Math.max(0, Math.floor((desktopShortcuts.width - desktopDragAnchor.width - insetX * 2) / desktopShortcuts.cellWidth));
+        const maximumRow = Math.max(0, Math.floor((desktopShortcuts.height - desktopDragAnchor.height - insetY * 2) / desktopShortcuts.cellHeight));
+        // Distribute leftover space between the inset screen edges.
+        const cellWidth = maximumColumn > 0 ? (desktopShortcuts.width - desktopDragAnchor.width - insetX * 2) / maximumColumn : desktopShortcuts.cellWidth;
+        const cellHeight = maximumRow > 0 ? (desktopShortcuts.height - desktopDragAnchor.height - insetY * 2) / maximumRow : desktopShortcuts.cellHeight;
         const occupied = [];
         const cells = [];
         let anchorCell = null;
@@ -500,8 +512,8 @@ QtObject {
             const entry = desktopDragItems[index];
             const cell = {
                 item: entry.item,
-                column: Math.round(entry.x / cellWidth),
-                row: Math.round(entry.y / cellHeight)
+                column: Math.round((entry.x - insetX) / cellWidth),
+                row: Math.round((entry.y - insetY) / cellHeight)
             };
 
             cells.push(cell);
@@ -515,8 +527,8 @@ QtObject {
             anchorCell = cells[0];
         }
 
-        const preferredColumn = Math.round(desktopDragAnchor.x / cellWidth);
-        const preferredRow = Math.round(desktopDragAnchor.y / cellHeight);
+        const preferredColumn = Math.round((desktopDragAnchor.x - insetX) / cellWidth);
+        const preferredRow = Math.round((desktopDragAnchor.y - insetY) / cellHeight);
         const horizontalDirection = Math.sign(preferredColumn - anchorCell.column);
         const verticalDirection = Math.sign(preferredRow - anchorCell.row);
         let bestPlacement = null;
@@ -535,15 +547,15 @@ QtObject {
                     const cell = cells[index];
                     const targetColumn = cell.column + columnOffset;
                     const targetRow = cell.row + rowOffset;
-                    const targetX = targetColumn * cellWidth;
-                    const targetY = targetRow * cellHeight;
+                    const targetX = insetX + targetColumn * cellWidth;
+                    const targetY = insetY + targetRow * cellHeight;
                     const key = targetColumn + ":" + targetRow;
 
                     const overlapsShortcut = occupied.some(shortcut => targetX < shortcut.x + shortcut.width
                             && targetX + cell.item.width > shortcut.x && targetY < shortcut.y + shortcut.height
                             && targetY + cell.item.height > shortcut.y);
 
-                    if (targetColumn < 0 || targetRow < 0 || targetX + cell.item.width > desktopShortcuts.width || targetY + cell.item.height > desktopShortcuts.height || desktopPlacementOverlapsShell(targetX, targetY, cell.item.width, cell.item.height) || overlapsShortcut || placementCells[key]) {
+                    if (targetColumn < 0 || targetRow < 0 || targetX + cell.item.width > desktopShortcuts.width - insetX || targetY + cell.item.height > desktopShortcuts.height - insetY || desktopPlacementOverlapsShell(targetX, targetY, cell.item.width, cell.item.height) || overlapsShortcut || placementCells[key]) {
                         valid = false;
                         break;
                     }
@@ -560,7 +572,7 @@ QtObject {
                     continue;
                 }
 
-                const distance = Math.pow(column - preferredColumn, 2) + Math.pow(row - preferredRow, 2);
+                const distance = Math.pow(insetX + column * cellWidth - desktopDragAnchor.x, 2) + Math.pow(insetY + row * cellHeight - desktopDragAnchor.y, 2);
                 const directionPenalty = (horizontalDirection !== 0 && (column - preferredColumn) * horizontalDirection < 0 ? 1 : 0) + (verticalDirection !== 0 && (row - preferredRow) * verticalDirection < 0 ? 1 : 0);
 
                 if (distance < bestDistance || (distance === bestDistance && directionPenalty < bestDirectionPenalty)) {
