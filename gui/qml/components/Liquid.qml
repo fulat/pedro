@@ -70,7 +70,7 @@ Item {
         blurMax: liquid.frosted ? 64 : 32
         blurMultiplier: liquid.frosted ? 1.6 : 1.0
         saturation: liquid.frosted ? -0.30 : -0.08
-        brightness: liquid.lightMode ? 0.06 : 0
+        brightness: liquid.lightMode ? 0.015 : 0
         contrast: 0
         maskEnabled: true
         maskSource: glassMask
