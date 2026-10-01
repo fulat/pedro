@@ -78,8 +78,6 @@ Window {
                 Accessible.name: "Cerrar"
                 onClicked: frame.close()
                 background: ControlBackground { control: closeControl; tint: "#ff5c5f"; symbol: "close" }
-                Controls.ToolTip.visible: hovered
-                Controls.ToolTip.text: Accessible.name
             }
             Controls.Button {
                 id: minimizeControl
@@ -90,8 +88,6 @@ Window {
                 Accessible.name: "Minimizar"
                 onClicked: frame.showMinimized()
                 background: ControlBackground { control: minimizeControl; tint: "#fac800"; symbol: "minimize" }
-                Controls.ToolTip.visible: hovered
-                Controls.ToolTip.text: Accessible.name
             }
             Controls.Button {
                 id: maximizeControl
@@ -106,8 +102,6 @@ Window {
                     tint: frame.maximized ? "#2396f3" : "#35c759"
                     symbol: frame.maximized ? "restore" : "maximize"
                 }
-                Controls.ToolTip.visible: hovered
-                Controls.ToolTip.text: Accessible.name
             }
         }
 
