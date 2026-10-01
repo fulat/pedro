@@ -79,3 +79,9 @@ En production:
 ```text
 Pedro → Mutter → GPU/DRM/KMS → physical display
 ```
+
+### Idiomas y configuración centralizada
+
+Implementado: inglés y español mediante catálogos Qt `.ts`/`.qm`, claves semánticas y JSON de referencia; selección dinámica en `language.toml`. Configuración TOML centralizada con defaults en `gui/config/` y overrides XDG del usuario en `pedro/`. Véase [idiomas y configuración](language.md).
+
+Pendiente: herramienta independiente para generar catálogos a partir de metadatos y selección de dark/light mode y temas. Mantener claves y placeholders equivalentes en ambos idiomas; no volver a introducir textos de UI directamente en español ni configuraciones dentro de los assets.

@@ -2132,3 +2132,11 @@ See `docs/desktop.md` for the current implementation and `docs/TODO.md` for pend
 ## 54. Commits for Completed Changes
 
 After completing and verifying each user-requested change, create a commit with a descriptive message for that change. Keep distinct changes in separate commits. Do not include unrelated work in a commit.
+
+---
+
+## 55. Languages and Central Configuration
+
+User-facing Pedro UI text uses stable semantic keys with Qt translation catalogs (`gui/language/en.ts` and `es.ts`) and `qsTranslate("Pedro", key)` or the C++ equivalent. Keep English and Spanish catalogs and JSON reference metadata consistent. JSON is not the runtime translation mechanism. Generated `.qm` files belong in `build/`.
+
+TOML defaults belong in `gui/config/`, separated from assets. PAPI resolves user overrides through XDG configuration under `pedro/` and observes changes through filesystem events. Preserve live language retranslation and `Backend.wallpaper`; never change the user's selection as part of visual work. See `docs/language.md`.
