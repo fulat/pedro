@@ -23,7 +23,11 @@ class Icons final : public QQuickImageProvider {
 
             const auto directory = qEnvironmentVariable("PEDRO_QML_DIR");
             const auto base = directory.isEmpty() ? QString(":/qt/qml/gui") : directory;
-            const auto path = base + "/assets/icons/" + parts[1];
+            auto path = base + "/assets/icons/" + parts[1];
+
+            if (!QFileInfo(path).isFile() && parts[1].startsWith("window-")) {
+                path = QStringLiteral(":/pedro/appearance/icons/Pedro/scalable/ui/") + parts[1];
+            }
             const auto target = (requested.isValid() ? requested : QSize(64, 64)).boundedTo(QSize(1024, 1024)).expandedTo(QSize(1, 1));
             QImage source;
 

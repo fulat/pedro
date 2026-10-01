@@ -361,3 +361,15 @@ install(
 
         RUNTIME DESTINATION usr/bin
 )
+
+# Share Pedro's appearance assets with QML window decorations, without GTK dependencies.
+set(PEDRO_APPEARANCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../gnome/appearance")
+qt_add_resources(pedro_gui pedro_appearance
+        PREFIX "/pedro/appearance"
+        BASE "${PEDRO_APPEARANCE_ROOT}"
+        FILES
+        "${PEDRO_APPEARANCE_ROOT}/icons/Pedro/scalable/ui/window-close.svg"
+        "${PEDRO_APPEARANCE_ROOT}/icons/Pedro/scalable/ui/window-minimize.svg"
+        "${PEDRO_APPEARANCE_ROOT}/icons/Pedro/scalable/ui/window-maximize.svg"
+        "${PEDRO_APPEARANCE_ROOT}/icons/Pedro/scalable/ui/window-restore.svg"
+)

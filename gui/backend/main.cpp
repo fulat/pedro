@@ -170,7 +170,7 @@ int main(int argc, char* argv[]) {
 
             if (captureFilesWindow) {
                 for (auto* candidate : QGuiApplication::allWindows()) {
-                    if (candidate->title() == QStringLiteral("Archivos · Ventana rápida")) {
+                    if (candidate->objectName() == QStringLiteral("filesQuickWindow")) {
                         captureWindow = qobject_cast<QQuickWindow*>(candidate);
 
                         break;
