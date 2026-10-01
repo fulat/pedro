@@ -2097,6 +2097,38 @@ When development loads QML from `PEDRO_QML_DIR`, wallpaper configuration and ass
 
 ---
 
+## 51. Ubuntu Desktop Overlay
+
+For the current Ubuntu desktop experience, Pedro is a shell overlay on the existing Ubuntu session. Reuse existing Ubuntu, Qt, and freedesktop facilities wherever possible.
+
+Ubuntu's compositor and window manager own native application windows, focus, stacking, input, and window lifecycle. Launch installed applications through PAPI using their desktop entries and the current Ubuntu session.
+
+Do not embed external application windows into `QQuickWindow`, start a nested Pedro compositor, or implement a parallel window manager for this overlay. `QQuickWindow` remains appropriate for Pedro-owned QML content.
+
+The existing `compositor/` component remains part of the separate OS image architecture. Do not enable or extend it for normal Ubuntu overlay development unless the user explicitly changes this decision.
+
+---
+
+## 52. Development Decision Register
+
+`docs/TODO.md` is the permanent internal register of defined design decisions, architectural improvements, and future functionality.
+
+When development establishes an important decision for later implementation, add a brief, clear, organized entry to this document. Read existing entries first and update related entries rather than introducing duplicates.
+
+Entries preserve decisions; they do not authorize or require immediate implementation of all listed work.
+
+---
+
+## 53. User Directories and Desktop Model
+
+Resolve standard user folders through XDG APIs, preferably GLib's `g_get_user_special_dir`. Never hardcode user-specific paths or select a different Desktop path based on development/production mode.
+
+The Desktop UI consumes `Backend.desktopModel`, backed by `Pedro::Papi::Io::Desktop::Model`. Filesystem resolution, asynchronous enumeration, and `GFileMonitor` belong in PAPI; QML represents model entries. Preserve event-driven, incremental updates without polling or per-frame filesystem refreshes.
+
+See `docs/desktop.md` for the current implementation and `docs/TODO.md` for pending decisions.
+
+---
+
 ## 54. Commits for Completed Changes
 
 After completing and verifying each user-requested change, create a commit with a descriptive message for that change. Keep distinct changes in separate commits. Do not include unrelated work in a commit.
