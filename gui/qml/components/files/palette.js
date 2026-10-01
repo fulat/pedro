@@ -4,14 +4,14 @@ function colors(mode) {
     const light = mode === "light";
     return {
         light: light,
-        surface: light ? "#f9fbff" : "#202735",
-        sidebar: light ? "#f0f5fd" : "#242e40",
-        card: light ? "#ffffff" : "#283345",
+        surface: "transparent",
+        sidebar: light ? "#32e6edf7" : "#30131b29",
+        card: light ? "#65ffffff" : "#65304156",
         ink: light ? "#10164d" : "#eef3ff",
         muted: light ? "#536baa" : "#a5b7db",
-        line: light ? "#e5ebf6" : "#3a465e",
+        line: light ? "#30919cad" : "#387f90a8",
         accent: "#0877ff",
-        selected: light ? "#dcecff" : "#30486c",
+        selected: light ? "#b3cde3ff" : "#aa304e76",
         banner: light ? "#e7f2ff" : "#2b4262"
     };
 }

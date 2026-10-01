@@ -21,7 +21,7 @@ Item {
         Rectangle {
             Layout.preferredWidth: 300
             Layout.preferredHeight: 38
-            radius: 19
+            radius: 12
             color: header.colors.card
             RowLayout {
                 anchors.fill: parent; anchors.margins: 10; spacing: 15
@@ -35,7 +35,7 @@ Item {
         Rectangle {
             Layout.preferredWidth: Math.max(150, header.width * 0.29)
             Layout.preferredHeight: 40
-            radius: 15
+            radius: 12
             color: header.colors.card
             border.color: header.colors.line
             Icon.Tinted { x: 14; y: 11; width: 18; height: 18; source: "search.svg"; tint: header.colors.ink }
