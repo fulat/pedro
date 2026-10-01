@@ -2,7 +2,7 @@
 
 Pedro es una capa sobre la sesión Ubuntu. Un clic en el dock debe activar la aplicación, no solicitar una ventana nueva.
 
-`applications@pedro` ofrece una interfaz D-Bus de sesión mínima: `org.pedro.Applications`, objeto `/org/pedro/Applications`, métodos `Activate(s)` y `GetRunning() → as`. Reutiliza `Shell.AppSystem` y `Shell.App.activate()`; GNOME correlaciona desktop entries con ventanas, restaura minimizadas, cambia workspace y gestiona el foco. No se ejecuta código arbitrario ni se habilita `unsafe_mode`/`Eval`.
+`applications@pedro` ofrece una interfaz D-Bus de sesión mínima: `org.pedro.Applications`, objeto `/org/pedro/Applications`, métodos `Activate(s)` y `GetRunning() → as`. Reutiliza `Shell.AppSystem` y `Shell.App.activate_full()`; GNOME correlaciona desktop entries con ventanas, restaura minimizadas, cambia workspace y gestiona el foco. Cada solicitud obtiene un timestamp actual con `Meta.Display.get_current_time_roundtrip()`: una petición D-Bus no tiene un evento de entrada de Shell y reutilizar su último timestamp puede producir “ready” en lugar de foco. No se ejecuta código arbitrario ni se habilita `unsafe_mode`/`Eval`.
 
 PAPI `Gui::Application::Manager::activate()` llama la integración desde el worker existente del backend. `launch()` permanece separado para una futura acción explícita de abrir una ventana nueva. Los indicadores usan aplicaciones con ventanas reportadas por GNOME cuando la integración está activa, conservando la detección por procesos como fallback. Los clics simultáneos de una misma aplicación no duplican solicitudes pendientes.
 

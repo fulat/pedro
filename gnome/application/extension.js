@@ -24,8 +24,10 @@ export default class Applications extends Extension {
         if (!application)
             throw new Error(`Application is not installed: ${id}`);
 
-        // App.activate focuses the most recent existing window or launches once.
-        application.activate();
+        // D-Bus requests have no Shell input event. A stale event timestamp makes
+        // Mutter request attention instead of focusing the existing window.
+        const timestamp = global.display.get_current_time_roundtrip();
+        application.activate_full(-1, timestamp);
     }
 
     GetRunning() {
