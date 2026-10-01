@@ -22,7 +22,12 @@ Rectangle {
         anchors.fill: parent
         spacing: 0
         Loader {
-            Layout.preferredWidth: browser.controller && browser.controller.sidebarCollapsed ? 62 : 205
+            property real sidebarWidth: browser.controller && browser.controller.sidebarCollapsed ? 62 : 205
+            Layout.preferredWidth: sidebarWidth
+            clip: true
+            Behavior on sidebarWidth {
+                NumberAnimation { duration: 240; easing.type: Easing.InOutCubic }
+            }
             Layout.fillHeight: true
             source: "sidebar.qml"
             onLoaded: item.controller = Qt.binding(() => browser.controller)

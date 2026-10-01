@@ -21,7 +21,11 @@ Window {
     signal titleClicked()
     property real contentMargin: 12
     property real contentTopGap: 6
+    readonly property real titleContentWidth: windowTitle.contentWidth
     property real headerOffset: 240
+    Behavior on headerOffset {
+        NumberAnimation { duration: 240; easing.type: Easing.InOutCubic }
+    }
     property real windowRadius: 14
     property url contentSource
     property color surfaceColor: "transparent"
@@ -151,6 +155,7 @@ Window {
             }
 
             Text {
+                id: windowTitle
                 anchors.left: parent.left
                 anchors.leftMargin: frame.titleOffset
                 anchors.right: parent.right
