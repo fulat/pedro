@@ -80,6 +80,9 @@ Item {
         anchors.margins: 6
         text: entryItem.entry.name || ""
         color: entryItem.textColor
+        // A one-pixel shadow keeps names legible over light wallpapers.
+        style: Text.Raised
+        styleColor: "#70000000"
         horizontalAlignment: Text.AlignHCenter
         font.pixelSize: 12
         elide: Text.ElideMiddle
