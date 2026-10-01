@@ -80,6 +80,24 @@ En production:
 Pedro → Mutter → GPU/DRM/KMS → physical display
 ```
 
+### Power profiles y Night Light
+
+Estado: funcionalidad y decisión arquitectónica pendientes de implementación.
+
+Pedro debe reutilizar la infraestructura existente de Ubuntu/GNOME para ahorro de energía y temperatura de color, sin implementar estos sistemas desde cero.
+
+- Consultar y cambiar el perfil activo mediante `power-profiles-daemon` y su interfaz correspondiente: `Power Saver`, `Balanced` y `Performance` cuando el hardware lo soporte.
+- Pedro Settings debe ofrecer su propia UI; el backend de energía en PAPI debe delegar la gestión real al sistema. No implementar manualmente CPU governors ni políticas propias de ahorro salvo una necesidad futura específica.
+- Integrar Night Light mediante la funcionalidad existente de GNOME/Mutter, con controles para On/Off, horario automático `Sunset to Sunrise`, horario manual y temperatura de color de tonos más fríos a más cálidos.
+- Aplicar Night Light mediante la transformación de color del compositor/sistema para afectar toda la pantalla. No superponer filtros visuales propios sobre las ventanas.
+- Mantener la misma implementación durante development sobre Ubuntu y posteriormente en la ISO de Pedro.
+
+Arquitectura esperada:
+
+```text
+Pedro Settings → Pedro Power/Display Backend (PAPI) → GNOME / power-profiles-daemon / Mutter → Linux/hardware
+```
+
 ### Idiomas y configuración centralizada
 
 Implementado: inglés y español mediante catálogos Qt `.ts`/`.qm`, claves semánticas y JSON de referencia; selección dinámica en `[language]` de `preferences.toml`. Configuración TOML centralizada con defaults en `gui/config/` y overrides XDG del usuario en `pedro/`. Véase [idiomas y configuración](language.md).
