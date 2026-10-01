@@ -247,5 +247,9 @@
     "files.sample.modifiedDate": "Sep 27, 2025, 11:42",
     "files.browser.desktop": "Desktop",
     "files.browser.public": "Public",
-    "files.browser.empty": "This location is empty"
+    "files.browser.empty": "This location is empty",
+    "files.view.grid": "Grid",
+    "files.view.list": "List",
+    "files.view.columns": "Columns",
+    "files.view.mixed": "Mixed"
 }

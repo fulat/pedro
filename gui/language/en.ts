@@ -1246,5 +1246,25 @@
             <extracomment>Stable Pedro key: files.browser.empty</extracomment>
             <translation>This location is empty</translation>
         </message>
+        <message>
+            <source>files.view.grid</source>
+            <extracomment>Stable Pedro key: files.view.grid</extracomment>
+            <translation>Grid</translation>
+        </message>
+        <message>
+            <source>files.view.list</source>
+            <extracomment>Stable Pedro key: files.view.list</extracomment>
+            <translation>List</translation>
+        </message>
+        <message>
+            <source>files.view.columns</source>
+            <extracomment>Stable Pedro key: files.view.columns</extracomment>
+            <translation>Columns</translation>
+        </message>
+        <message>
+            <source>files.view.mixed</source>
+            <extracomment>Stable Pedro key: files.view.mixed</extracomment>
+            <translation>Mixed</translation>
+        </message>
     </context>
 </TS>

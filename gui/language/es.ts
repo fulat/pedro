@@ -1246,5 +1246,25 @@
             <extracomment>Stable Pedro key: files.browser.empty</extracomment>
             <translation>Esta ubicación está vacía</translation>
         </message>
+        <message>
+            <source>files.view.grid</source>
+            <extracomment>Stable Pedro key: files.view.grid</extracomment>
+            <translation>Cuadrícula</translation>
+        </message>
+        <message>
+            <source>files.view.list</source>
+            <extracomment>Stable Pedro key: files.view.list</extracomment>
+            <translation>Lista</translation>
+        </message>
+        <message>
+            <source>files.view.columns</source>
+            <extracomment>Stable Pedro key: files.view.columns</extracomment>
+            <translation>Columnas</translation>
+        </message>
+        <message>
+            <source>files.view.mixed</source>
+            <extracomment>Stable Pedro key: files.view.mixed</extracomment>
+            <translation>Mixta</translation>
+        </message>
     </context>
 </TS>

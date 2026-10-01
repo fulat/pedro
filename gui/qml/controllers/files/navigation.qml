@@ -6,6 +6,8 @@ QtObject {
     objectName: "filesController"
     property bool sidebarCollapsed: false
     property string viewMode: "mixed"
+    property string sortKey: "name"
+    onSortKeyChanged: { if (directory) directory.setSort(sortKey); }
     property var directory: null
     property var selectedEntry: ({})
     readonly property string title: directory ? directory.place.length ? qsTranslate("Pedro", "files.browser." + directory.place) : directory.name || qsTranslate("Pedro", "files.browser.computer") : ""

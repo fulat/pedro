@@ -3,11 +3,13 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import "../icon" as Icon
+import "../desktop" as Desktop
 import "palette.js" as Palette
 
 Column {
     id: table
     property bool folders: false
+    property bool all: true
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     width: parent.width
@@ -25,21 +27,21 @@ Column {
         height: Math.min(count * 43, 360)
         clip: true
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-        model: table.controller && table.controller.directory ? (table.folders ? table.controller.directory.folderModel : table.controller.directory.fileModel) : null
+        model: table.controller && table.controller.directory ? (table.all ? table.controller.directory.entriesModel : table.folders ? table.controller.directory.folderModel : table.controller.directory.fileModel) : null
         delegate: Rectangle {
             id: row
             required property var entry
             readonly property var modelData: entry
             width: table.width; height: 43; radius: 9
-            color: table.controller && table.controller.selectedEntry.id === modelData.id ? table.colors.selected : table.colors.card
-            border.color: table.colors.line
+            color: table.controller && table.controller.selectedEntry.id === modelData.id ? table.colors.selected : "transparent"
+            border.color: "transparent"
             TapHandler { onTapped: table.controller.select(row.modelData); onDoubleTapped: table.controller.openEntry(row.modelData) }
             HoverHandler { cursorShape: Qt.PointingHandCursor }
             Row {
                 anchors.fill: parent
                 Item {
                     width: table.width * 0.28; height: parent.height
-                    Icon.Tinted { x: 12; anchors.verticalCenter: parent.verticalCenter; width: 24; height: 28; source: row.modelData.icon + ".svg"; tint: table.colors.accent }
+                    Desktop.Icon { x: 12; anchors.verticalCenter: parent.verticalCenter; width: 32; height: 32; kind: row.modelData.icon || "file" }
                     Text { x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; elide: Text.ElideMiddle; text: row.modelData.name; color: table.colors.ink; font.pixelSize: 12; font.bold: true }
                 }
                 Text { width: table.width * 0.18; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.type; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
