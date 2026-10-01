@@ -87,7 +87,7 @@ fi
 packages=(
     build-essential cmake ninja-build python3 python3-gi pkg-config clang-format
     qt6-l10n-tools qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-svg-plugins qt6-wayland-dev
-    libglib2.0-dev libsystemd-dev libtomlplusplus-dev
+    libglib2.0-dev libsystemd-dev libtomlplusplus-dev gvfs gvfs-backends
     libwayland-dev wayland-protocols libxkbcommon-dev libegl-dev
     qt6-qpa-plugins qt6-wayland qgnomeplatform-qt6
     qml6-module-qtqml qml6-module-qtqml-workerscript
