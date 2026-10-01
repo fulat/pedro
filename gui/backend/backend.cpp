@@ -102,14 +102,24 @@ Backend::Backend(QObject* parent) : QObject(parent) {
     connect(&bluetoothRefreshTimer_, &QTimer::timeout, this, &Backend::refreshBluetooth);
     bluetoothRefreshTimer_.start(5000);
 
-    const auto currentWallpaper = Pedro::Papi::Gui::Wallpaper::current();
-    wallpaper_ = QUrl::fromLocalFile(QString::fromStdString(currentWallpaper.string()));
-
-    qDebug() << "Wallpaper filesystem path:" << QString::fromStdString(currentWallpaper.string());
-
-    qDebug() << "Wallpaper QUrl:" << wallpaper_;
-
-    qDebug() << "Wallpaper exists:" << QFileInfo::exists(QString::fromStdString(currentWallpaper.string()));
+    const auto reloadConfiguration = [this] {
+        const auto current = Pedro::Papi::Gui::Wallpaper::current();
+        if (!current.empty() && QFileInfo::exists(QString::fromStdString(current.string()))) {
+            const auto url = QUrl::fromLocalFile(QString::fromStdString(current.string()));
+            if (wallpaper_ != url) {
+                wallpaper_ = url;
+                emit wallpaperChanged();
+            }
+        }
+        const auto locale = configuration_.value("language", "language", "current");
+        if ((locale == "en" || locale == "es") && language_ != locale) {
+            language_ = locale;
+            emit languageChanged();
+        }
+    };
+    language_ = "es";
+    connect(&configuration_, &Pedro::Papi::Config::Store::changed, this, reloadConfiguration);
+    reloadConfiguration();
 
     refreshSystem();
     refreshApplications();
@@ -516,4 +526,8 @@ QAbstractItemModel* Backend::desktopModel() {
     }
 
     return desktop_.get();
+}
+
+QString Backend::language() const {
+    return language_;
 }

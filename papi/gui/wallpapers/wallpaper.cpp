@@ -9,6 +9,7 @@
 #include <string>
 
 #include <pedro/papi/utils/toml/toml.hpp>
+#include <pedro/papi/config/store.hpp>
 
 namespace Pedro::Papi::Gui::Wallpaper {
 
@@ -42,7 +43,7 @@ namespace Pedro::Papi::Gui::Wallpaper {
     }
 
     std::filesystem::path config() {
-        return directory() / "config.toml";
+        return Pedro::Papi::Config::Store::path("wallpaper").toStdString();
     }
 
     std::filesystem::path current() {

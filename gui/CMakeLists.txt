@@ -373,3 +373,10 @@ qt_add_resources(pedro_gui pedro_appearance
         "${PEDRO_APPEARANCE_ROOT}/icons/Pedro/scalable/ui/window-maximize.svg"
         "${PEDRO_APPEARANCE_ROOT}/icons/Pedro/scalable/ui/window-restore.svg"
 )
+
+# Centralized TOML defaults and filesystem wallpaper assets.
+add_custom_command(TARGET pedro_gui POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_CURRENT_SOURCE_DIR}/config" "$<TARGET_FILE_DIR:pedro_gui>/config")
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/config/" DESTINATION usr/share/pedro/config)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets/wallpapers/" DESTINATION usr/share/pedro/wallpapers)

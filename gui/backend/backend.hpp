@@ -15,6 +15,7 @@
 #include <QtQmlIntegration/qqmlintegration.h>
 
 #include <memory>
+#include <pedro/papi/config/store.hpp>
 
 class Backend final : public QObject {
         Q_OBJECT
@@ -49,6 +50,7 @@ class Backend final : public QObject {
         Q_PROPERTY(QVariantList bluetoothDevices READ bluetoothDevices NOTIFY bluetoothChanged)
 
         Q_PROPERTY(QUrl wallpaper READ wallpaper NOTIFY wallpaperChanged)
+        Q_PROPERTY(QString language READ language NOTIFY languageChanged)
 
     public:
 
@@ -85,6 +87,8 @@ class Backend final : public QObject {
 
         [[nodiscard]] QUrl wallpaper() const;
 
+        QString language() const;
+
         void setDocumentPath(const QString& path);
 
         Q_INVOKABLE void refreshSystem();
@@ -110,6 +114,8 @@ class Backend final : public QObject {
         void wifiChanged();
         void bluetoothChanged();
         void wallpaperChanged();
+
+        void languageChanged();
 
     private:
 
@@ -144,6 +150,10 @@ class Backend final : public QObject {
         QString connectedWifiName_;
         QString wifiError_;
         QUrl wallpaper_;
+
+        QString language_;
+
+        Pedro::Papi::Config::Store configuration_;
 
         bool wifiAvailable_{false};
         bool wifiEnabled_{false};

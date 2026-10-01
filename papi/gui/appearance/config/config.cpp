@@ -7,8 +7,7 @@
 #include <filesystem>
 #include <QString>
 
-#include <pedro/papi/utils/paths/paths.hpp>
-#include <pedro/papi/utils/toml/toml.hpp>
+#include <pedro/papi/gui/wallpapers/wallpaper.hpp>
 
 namespace Pedro::Papi::Appearance::Config {
 
@@ -19,21 +18,16 @@ namespace Pedro::Papi::Appearance::Config {
     }
 
     void Config::load() {
-        const fs::path configPath = Utils::Paths::appearanceConfig();
 
-        auto value = Utils::Toml::parse(configPath.string(), "wallpaper", "current");
-
-        auto filename = std::any_cast<std::string>(&value);
-
-        if (!filename)
+        const auto path = Pedro::Papi::Gui::Wallpaper::current();
+        if (path.empty() || !fs::exists(path)) {
             return;
-
-        const fs::path path = Utils::Paths::wallpaper(*filename);
-
-        if (!fs::exists(path))
-            return;
-
-        m_wallpaper = QUrl::fromLocalFile(QString::fromStdString(path.string()));
+        }
+        const auto wallpaper = QUrl::fromLocalFile(QString::fromStdString(path.string()));
+        if (m_wallpaper != wallpaper) {
+            m_wallpaper = wallpaper;
+            emit wallpaperChanged();
+        }
     }
 
     QUrl Config::wallpaper() const {
