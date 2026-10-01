@@ -36,12 +36,21 @@ Item {
                     const local = parent.mapToItem(location, point.position.x, point.position.y);
                     if (!location.contains(local)) header.pathExpanded = false;
                 }
+                if (active && header.searchExpanded) {
+                    const local = parent.mapToItem(searchInput, point.position.x, point.position.y);
+                    if (!searchInput.contains(local)) header.searchExpanded = false;
+                }
             }
         }
     }
     Connections {
         target: header.Window.window
-        function onActiveChanged() { if (!header.Window.window || !header.Window.window.active) header.pathExpanded = false; }
+        function onActiveChanged() {
+            if (!header.Window.window || !header.Window.window.active) {
+                header.pathExpanded = false;
+                header.searchExpanded = false;
+            }
+        }
     }
     RowLayout {
         anchors.fill: parent
