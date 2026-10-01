@@ -45,3 +45,5 @@ Un doble clic o Abrir sobre una carpeta del Desktop presenta la ventana de Archi
 Un clic primario en el espacio vacío del cuerpo limpia la selección en cuadrícula, lista, mixta y columnas. Un handler pasivo conserva los gestos de scroll y los clics de los componentes compartidos. El escritorio conserva su selección mediante arrastre y limpia la selección al pulsar su fondo, salvo Ctrl para selección aditiva.
 
 Los dropdowns de vista y orden presentan un ícono por opción y un radio exclusivo a la derecha, con el estilo de Arrange. Elegir una opción aplica el cambio y cierra el menú. Las filas de lista no muestran el acceso de tres puntos; conservan el menú contextual compartido mediante clic derecho.
+
+Los menús nativos y sus submenús deben tener dimensiones estrictamente positivas antes de abrirse. Wayland rechaza una altura cero como error fatal de protocolo. Los submenús definen su altura desde el contenido y padding; la primera apertura contextual ocurre directamente desde el evento, sin `Qt.callLater`. Esta regresión se reprodujo con eventos reales de Mutter y se verifica en Wayland, además de las pruebas de interfaz.

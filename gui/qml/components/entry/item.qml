@@ -111,7 +111,7 @@ Item {
                 if (interaction.item) interaction.item.dispatch(action);
                 entryItem.actionRequested(action);
             });
-            Qt.callLater(entryItem.showMenu);
+            entryItem.showMenu();
         }
     }
 }
