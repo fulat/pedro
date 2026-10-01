@@ -80,7 +80,7 @@ Item {
 
         ToolTip.visible: logoMouse.containsMouse
         ToolTip.delay: 400
-        ToolTip.text: "Pedro OS"
+        ToolTip.text: qsTranslate("Pedro", "shell.panel.about")
     }
 
     Item {
@@ -108,7 +108,7 @@ Item {
             TopAction {
                 id: searchButton
                 icon: "../../assets/icons/search.svg"
-                description: "Buscar"
+                description: qsTranslate("Pedro", "common.search")
                 highlighted: root.activeSource === "search"
                 onActivated: controller.requestPanel("about", "search", searchButton)
             }
@@ -224,7 +224,7 @@ Item {
             TopAction {
                 id: wifiButton
                 icon: "../../assets/icons/wifi.svg"
-                description: "Wi-Fi"
+                description: qsTranslate("Pedro", "network.wifi.title")
                 highlighted: root.activeSource === "wifi"
                 onActivated: controller.requestPanel("wifi", "wifi", wifiButton)
             }
@@ -241,7 +241,7 @@ Item {
             Quick.Text {
                 visible: root.windowWidth >= 970
                 y: (statusRow.height - height) / 2
-                text: Clock.format(root.currentTime).split("   ")[0]
+                text: Clock.format(root.currentTime, Backend.language).split("   ")[0]
                 color: Theme.white
                 font.pixelSize: 13
                 font.weight: Font.Medium

@@ -65,7 +65,7 @@ Rectangle {
             }
 
             Controls.Label {
-                text: root.connected ? "Conectado" : root.paired ? "Emparejado" : "Disponible"
+                text: root.connected ? qsTranslate("Pedro", "bluetooth.device.connected") : root.paired ? qsTranslate("Pedro", "bluetooth.device.paired") : qsTranslate("Pedro", "bluetooth.device.available")
                 color: root.connected ? Theme.statusActive : Theme.textMuted
                 font.pixelSize: 10
             }

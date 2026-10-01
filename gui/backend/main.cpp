@@ -14,6 +14,9 @@
 #include <QQmlContext>
 #include <QQuickWindow>
 #include <QTimer>
+#include <QTranslator>
+#include <QLocale>
+#include <memory>
 
 #include <pedro/papi/gui/appearance/config/config.hpp>
 
@@ -69,6 +72,25 @@ int main(int argc, char* argv[]) {
 
     // The engine is created after its backend so QML releases first at shutdown.
     QQmlApplicationEngine engine;
+
+    std::unique_ptr<QTranslator> translator;
+    const auto translate = [&] {
+        auto next = std::make_unique<QTranslator>();
+        if (!next->load(":/pedro/language/" + backend.language() + ".qm")) {
+            qWarning() << "Could not load Pedro language:" << backend.language();
+            return;
+        }
+        if (translator) {
+            app.removeTranslator(translator.get());
+        }
+        translator = std::move(next);
+        app.installTranslator(translator.get());
+        QLocale::setDefault(QLocale(backend.language()));
+        engine.retranslate();
+        qInfo() << "Pedro language:" << backend.language();
+    };
+    QObject::connect(&backend, &Backend::languageChanged, &engine, translate);
+    translate();
 
     engine.rootContext()->setContextProperty(QStringLiteral("Backend"), &backend);
 

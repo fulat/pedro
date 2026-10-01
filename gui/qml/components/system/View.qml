@@ -22,13 +22,13 @@ Item {
             columns: 2
             columnSpacing: 10
             rowSpacing: 10
-            Metric.Card { label: "CPU"; value: Papi.cpuUsage < 0 ? "Midiendo…" : Papi.cpuUsage.toFixed(1) + "%" }
-            Metric.Card { label: "Memoria"; value: Papi.memoryUsage.toFixed(1) + "%" }
-            Metric.Card { label: "Tiempo activo"; value: Papi.uptime }
-            Metric.Card { label: "Arquitectura"; value: Papi.architecture }
+            Metric.Card { label: qsTranslate("Pedro", "system.metrics.cpu"); value: Papi.cpuUsage < 0 ? qsTranslate("Pedro", "system.metrics.measuring") : Papi.cpuUsage.toFixed(1) + "%" }
+            Metric.Card { label: qsTranslate("Pedro", "system.metrics.memory"); value: Papi.memoryUsage.toFixed(1) + "%" }
+            Metric.Card { label: qsTranslate("Pedro", "system.metrics.uptime"); value: Papi.uptime }
+            Metric.Card { label: qsTranslate("Pedro", "system.metrics.architecture"); value: Papi.architecture }
         }
         Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Theme.dividerSoft }
-        Label { text: "Núcleo"; color: Theme.textMuted; font.pixelSize: 10 }
+        Label { text: qsTranslate("Pedro", "system.metrics.kernel"); color: Theme.textMuted; font.pixelSize: 10 }
         Label {
             Layout.fillWidth: true
             text: Papi.kernel
@@ -40,7 +40,7 @@ Item {
         Item { Layout.fillHeight: true }
         Label {
             Layout.fillWidth: true
-            text: "Información real de Ubuntu a través de PAPI"
+            text: qsTranslate("Pedro", "system.info.caption")
             color: Theme.textMuted
             font.pixelSize: 10
             horizontalAlignment: Text.AlignHCenter

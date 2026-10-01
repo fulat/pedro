@@ -68,7 +68,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: "Wi-Fi"
+                    text: qsTranslate("Pedro", "network.wifi.title")
                     color: Theme.white
                     font.pixelSize: 20
                     font.weight: Font.DemiBold
@@ -76,7 +76,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: Papi.wifiConnected ? Papi.connectedWifiName + " · Conectado" : Papi.wifiEnabled ? "Sin conexión" : "Desactivado"
+                    text: Papi.wifiConnected ? Papi.connectedWifiName + " · Conectado" : Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.status.disconnected") : qsTranslate("Pedro", "bluetooth.status.off")
                     color: Papi.wifiConnected ? Theme.statusWifiConnected : Theme.textMuted
                     font.pixelSize: 9
                     elide: Text.ElideRight
@@ -102,7 +102,7 @@ Item {
 
             Controls.Label {
                 Layout.fillWidth: true
-                text: "Redes disponibles"
+                text: qsTranslate("Pedro", "network.wifi.networks.title")
                 color: Theme.white
                 font.pixelSize: 12
                 font.weight: Font.DemiBold
@@ -119,7 +119,7 @@ Item {
                 id: scanButton
 
                 enabled: !Papi.wifiScanning
-                text: Papi.wifiScanning ? "Buscando…" : "Buscar"
+                text: Papi.wifiScanning ? qsTranslate("Pedro", "common.searching") : qsTranslate("Pedro", "common.search")
                 onClicked: controller.scanRequested()
 
                 contentItem: Controls.Label {
@@ -218,7 +218,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: !Papi.wifiAvailable ? "No hay Wi-Fi disponible" : !Papi.wifiEnabled ? "Wi-Fi desactivado" : Papi.wifiError !== "" ? "No se pudieron cargar las redes" : "No se encontraron redes"
+                    text: !Papi.wifiAvailable ? qsTranslate("Pedro", "network.wifi.empty.unavailableTitle") : !Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.empty.disabledTitle") : Papi.wifiError !== "" ? qsTranslate("Pedro", "network.wifi.empty.loadFailed") : qsTranslate("Pedro", "network.wifi.empty.noNetworks")
                     color: Theme.white
                     font.pixelSize: 17
                     font.weight: Font.DemiBold
@@ -228,7 +228,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: !Papi.wifiAvailable ? "NetworkManager no detectó un adaptador Wi-Fi" : !Papi.wifiEnabled ? "Activa Wi-Fi para buscar redes disponibles" : Papi.wifiError !== "" ? Papi.wifiError : "No hay redes inalámbricas visibles"
+                    text: !Papi.wifiAvailable ? qsTranslate("Pedro", "network.wifi.empty.adapterMissing") : !Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.empty.enableHint") : Papi.wifiError !== "" ? Papi.wifiError : qsTranslate("Pedro", "network.wifi.empty.noNetworksHint")
                     color: Theme.white
                     font.pixelSize: 10
                     horizontalAlignment: Text.AlignHCenter
@@ -238,7 +238,7 @@ Item {
                 Controls.Label {
                     Layout.fillWidth: true
                     Layout.topMargin: 6
-                    text: !Papi.wifiAvailable ? "Conecta un adaptador inalámbrico o revisa\nla configuración de red." : !Papi.wifiEnabled ? "Puedes volver a activarlo desde el interruptor superior." : "Acércate al punto de acceso o vuelve a buscar."
+                    text: !Papi.wifiAvailable ? qsTranslate("Pedro", "network.wifi.empty.adapterHint") : !Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.empty.disabledHint") : qsTranslate("Pedro", "network.wifi.empty.outOfRangeHint")
                     color: Theme.textMuted
                     font.pixelSize: 10
                     lineHeight: 1.25
@@ -276,7 +276,7 @@ Item {
                         }
 
                         Controls.Label {
-                            text: "Configuración de red"
+                            text: qsTranslate("Pedro", "network.settings.title")
                             color: Theme.white
                             font.pixelSize: 11
                             font.weight: Font.Medium
@@ -314,7 +314,7 @@ Item {
                 anchors.top: parent.top
                 anchors.topMargin: 8
                 visible: Papi.wifiScanning
-                text: "Buscando redes…"
+                text: qsTranslate("Pedro", "network.wifi.networks.searching")
                 color: Theme.textMuted
                 font.pixelSize: 10
             }

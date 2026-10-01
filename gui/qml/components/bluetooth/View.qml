@@ -72,7 +72,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: "Bluetooth"
+                    text: qsTranslate("Pedro", "bluetooth.title")
                     color: Theme.white
                     font.pixelSize: 20
                     font.weight: Font.DemiBold
@@ -80,7 +80,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: !Papi.bluetoothAvailable ? "No disponible" : Papi.bluetoothEnabled ? "Activado · visible para dispositivos" : "Desactivado"
+                    text: !Papi.bluetoothAvailable ? qsTranslate("Pedro", "bluetooth.status.unavailableShort") : Papi.bluetoothEnabled ? qsTranslate("Pedro", "bluetooth.status.active") : qsTranslate("Pedro", "bluetooth.status.off")
                     color: Theme.textMuted
                     font.pixelSize: 9
                     elide: Text.ElideRight
@@ -107,7 +107,7 @@ Item {
 
             Controls.Label {
                 Layout.fillWidth: true
-                text: "Dispositivos"
+                text: qsTranslate("Pedro", "bluetooth.devices.title")
                 color: Theme.white
                 font.pixelSize: 13
                 font.weight: Font.DemiBold
@@ -124,7 +124,7 @@ Item {
                 id: scanButton
 
                 enabled: Papi.bluetoothAvailable && !Papi.bluetoothScanning
-                text: Papi.bluetoothScanning ? "Buscando…" : Papi.bluetoothDevices.length > 0 ? "Buscar más" : "Buscar"
+                text: Papi.bluetoothScanning ? qsTranslate("Pedro", "common.searching") : Papi.bluetoothDevices.length > 0 ? qsTranslate("Pedro", "common.searchMore") : qsTranslate("Pedro", "common.search")
                 onClicked: Papi.scanBluetooth()
 
                 contentItem: Controls.Label {
@@ -211,7 +211,7 @@ Item {
                 Controls.Label {
                     Layout.fillWidth: true
                     Layout.topMargin: 6
-                    text: !Papi.bluetoothAvailable ? "Bluetooth no disponible" : !Papi.bluetoothEnabled ? "Bluetooth desactivado" : Papi.bluetoothScanning ? "Buscando dispositivos…" : "No se encontraron dispositivos"
+                    text: !Papi.bluetoothAvailable ? qsTranslate("Pedro", "bluetooth.status.unavailable") : !Papi.bluetoothEnabled ? qsTranslate("Pedro", "bluetooth.status.disabled") : Papi.bluetoothScanning ? qsTranslate("Pedro", "bluetooth.devices.searching") : qsTranslate("Pedro", "bluetooth.devices.empty")
                     color: Theme.white
                     font.pixelSize: 17
                     font.weight: Font.DemiBold
@@ -223,7 +223,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.leftMargin: 12
                     Layout.rightMargin: 12
-                    text: !Papi.bluetoothAvailable ? "BlueZ no detectó un adaptador Bluetooth." : !Papi.bluetoothEnabled ? "Actívalo para buscar y conectar\ndispositivos cercanos." : Papi.bluetoothError !== "" ? Papi.bluetoothError : Papi.bluetoothScanning ? "Mantén los dispositivos cercanos encendidos\ny en modo visible." : "Asegúrate de que los dispositivos cercanos\nestén encendidos y en modo visible."
+                    text: !Papi.bluetoothAvailable ? qsTranslate("Pedro", "bluetooth.empty.adapterMissing") : !Papi.bluetoothEnabled ? qsTranslate("Pedro", "bluetooth.empty.disabledHint") : Papi.bluetoothError !== "" ? Papi.bluetoothError : Papi.bluetoothScanning ? qsTranslate("Pedro", "bluetooth.empty.searchingHint") : qsTranslate("Pedro", "bluetooth.empty.noDevicesHint")
                     color: Theme.textMuted
                     font.pixelSize: 11
                     lineHeight: 1.25
@@ -241,7 +241,7 @@ Item {
 
         Option.Row {
             Layout.preferredHeight: 62
-            title: "Configuración de Bluetooth"
+            title: qsTranslate("Pedro", "bluetooth.settings.title")
             icon: "../../../assets/icons/settings.svg"
             onActivated: root.settingsRequested()
         }

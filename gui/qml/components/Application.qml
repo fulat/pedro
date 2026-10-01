@@ -35,7 +35,7 @@ ApplicationWindow {
     readonly property real dockTileSize: applicationController.dockTileSize
     readonly property real dockSpacing: applicationController.dockSpacing
 
-    title: qsTr(Constants.WINDOW_TITLE)
+    title: qsTranslate("Pedro", "shell.productName")
     visibility: Backend.developmentMode ? Window.Windowed : Window.FullScreen
     color: Theme.desktopBackground
     visible: true
@@ -60,7 +60,7 @@ ApplicationWindow {
 
         onLoaded: {
             item.objectName = "filesQuickWindow";
-            item.title = "Archivos";
+            item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
             item.contentSource = Qt.resolvedUrl("files/View.qml");
             item.transientParent = null;
             item.width = Math.min(760, window.width * 0.85);

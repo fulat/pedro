@@ -88,7 +88,7 @@ Item {
             Controls.ToolTip {
                 visible: settingsMouse.containsMouse
                 delay: 500
-                text: "Configuración de sonido"
+                text: qsTranslate("Pedro", "shell.sound.settings")
             }
         }
     }

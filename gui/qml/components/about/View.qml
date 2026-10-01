@@ -17,14 +17,14 @@ Item {
         }
         Label {
             Layout.alignment: Qt.AlignHCenter
-            text: "Pedro OS"
+            text: qsTranslate("Pedro", "shell.panel.about")
             color: "#ffffff"
             font.pixelSize: 20
             font.weight: Font.Medium
         }
         Label {
             Layout.fillWidth: true
-            text: "El escritorio está tomando forma. Wi-Fi ya consulta NetworkManager mediante PAPI; sonido, energía y búsqueda se conectarán conforme se implementen esas capacidades."
+            text: qsTranslate("Pedro", "about.description")
             color: "#d6dcdf"
             font.pixelSize: 12
             wrapMode: Text.Wrap

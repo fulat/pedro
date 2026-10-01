@@ -98,20 +98,20 @@ Controls.Menu {
     }
 
     Entry {
-        text: "Nueva carpeta"
+        text: qsTranslate("Pedro", "desktop.menu.folder")
         symbol: "folder"
         onTriggered: root.actionRequested("folder")
     }
 
     Entry {
-        text: "Nuevo archivo"
+        text: qsTranslate("Pedro", "desktop.menu.file")
         symbol: "file"
         onTriggered: root.actionRequested("file")
     }
 
     Controls.Menu {
         id: organizationMenu
-        title: "Organización"
+        title: qsTranslate("Pedro", "desktop.menu.organization")
         width: 250
         padding: 6
         popupType: Controls.Popup.Item
@@ -119,42 +119,42 @@ Controls.Menu {
         background: Glass {}
 
         Entry {
-            text: "Cuadrícula"
+            text: qsTranslate("Pedro", "desktop.menu.grid")
             symbol: "grid"
             checked: root.organization === "grid"
             onTriggered: root.actionRequested("grid")
         }
         Entry {
-            text: "Pila"
+            text: qsTranslate("Pedro", "desktop.menu.stack")
             symbol: "stack"
             checked: root.organization === "stack"
             onTriggered: root.actionRequested("stack")
         }
         Entry {
-            text: "Libre"
+            text: qsTranslate("Pedro", "desktop.menu.free")
             symbol: "free"
             checked: root.organization === "free"
             onTriggered: root.actionRequested("free")
         }
         Divider {}
         Entry {
-            text: "Agrupar por nombre"
+            text: qsTranslate("Pedro", "desktop.menu.name")
             symbol: "sort"
             onTriggered: root.actionRequested("name")
         }
         Entry {
-            text: "Agrupar por tipo"
+            text: qsTranslate("Pedro", "desktop.menu.type")
             symbol: "tag"
             onTriggered: root.actionRequested("type")
         }
         Entry {
-            text: "Agrupar por fecha"
+            text: qsTranslate("Pedro", "desktop.menu.date")
             symbol: "calendar"
             onTriggered: root.actionRequested("date")
         }
         Divider {}
         Entry {
-            text: "Mantener alineado"
+            text: qsTranslate("Pedro", "desktop.menu.align")
             symbol: "align"
             checked: root.keepAligned
             onTriggered: root.actionRequested("align")
@@ -163,21 +163,21 @@ Controls.Menu {
 
     Divider {}
     Entry {
-        text: "Ajustes de pantalla"
+        text: qsTranslate("Pedro", "desktop.menu.display")
         symbol: "display"
         onTriggered: root.actionRequested("display")
     }
 
     Controls.Menu {
         id: widgetsMenu
-        title: "Widgets"
+        title: qsTranslate("Pedro", "desktop.menu.widgets")
         width: 200
         padding: 6
         popupType: Controls.Popup.Item
         delegate: Entry {}
         background: Glass {}
         Entry {
-            text: "Clima"
+            text: qsTranslate("Pedro", "desktop.menu.weather")
             symbol: "weather"
             onTriggered: root.actionRequested("weather")
         }

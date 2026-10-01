@@ -93,7 +93,7 @@ QtObject {
             return;
         }
 
-        desktopContextMenu.shortcutName = shortcutName || "Escritorio";
+        desktopContextMenu.shortcutName = shortcutName || qsTranslate("Pedro", "desktop.title");
         const menuX = Math.max(12, Math.min(window.width - desktopContextMenu.width - 12, position.x));
         const menuY = Math.max(12, Math.min(window.height - desktopContextMenu.height - 12, position.y));
         desktopContextMenu.popup(menuX, menuY);
@@ -102,9 +102,9 @@ QtObject {
     function wallpaperAction(action) {
         desktopOperationError = "";
         if (action === "folder") {
-            Backend.desktopModel.createFolder("Nueva carpeta");
+            Backend.desktopModel.createFolder(qsTranslate("Pedro", "desktop.menu.folder"));
         } else if (action === "file") {
-            Backend.desktopModel.createFile("Nuevo archivo");
+            Backend.desktopModel.createFile(qsTranslate("Pedro", "desktop.menu.file"));
         } else if (action === "grid" || action === "free" || action === "stack") {
             if (Backend.desktopModel.organization !== "stack") {
                 for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
@@ -153,7 +153,7 @@ QtObject {
     }
 
     function stackLabel(key) {
-        const labels = {folder: "Carpetas", image: "Imágenes", text: "Documentos", audio: "Audio", video: "Vídeos", file: "Otros archivos"};
+        const labels = {folder: qsTranslate("Pedro", "desktop.stack.folder"), image: qsTranslate("Pedro", "desktop.stack.image"), text: qsTranslate("Pedro", "shell.navigation.documents"), audio: qsTranslate("Pedro", "desktop.stack.audio"), video: qsTranslate("Pedro", "desktop.stack.video"), file: qsTranslate("Pedro", "desktop.stack.file")};
         return labels[key] || labels.file;
     }
 

@@ -3,59 +3,62 @@
 // Supplies temporary presentation models until PAPI exposes live equivalents.
 
 // Entries rendered by the fixed operating-system navigation rail.
-const osNavigationMenuItems = [
+function osNavigationMenuItems() {
+    return [
     {
         id: "home",
-        name: "Inicio",
+        name: qsTranslate("Pedro", "shell.navigation.home"),
         icon: "home",
         mode: ""
     },
     {
         id: "files",
-        name: "Archivos",
+        name: qsTranslate("Pedro", "app.files.name"),
         icon: "folder",
         mode: "files"
     },
     {
         id: "apps",
-        name: "Aplicaciones",
+        name: qsTranslate("Pedro", "shell.applications.title"),
         icon: "apps",
         mode: "about"
     },
     {
         id: "messages",
-        name: "Mensajes",
+        name: qsTranslate("Pedro", "app.messages.name"),
         icon: "chat",
         mode: "about"
     },
     {
         id: "settings",
-        name: "Configuración",
+        name: qsTranslate("Pedro", "shell.navigation.settings"),
         icon: "settings",
         mode: "system"
     },
     {
         id: "focus",
-        name: "Concentración",
+        name: qsTranslate("Pedro", "shell.navigation.focus"),
         icon: "moon",
         mode: "quick"
     },
     {
         id: "documents",
-        name: "Documentos",
+        name: qsTranslate("Pedro", "shell.navigation.documents"),
         icon: "notes",
         mode: "files"
     },
     {
         id: "display",
-        name: "Pantalla",
+        name: qsTranslate("Pedro", "shell.navigation.display"),
         icon: "brightness",
         mode: "quick"
     },
     {
         id: "power",
-        name: "Energía",
+        name: qsTranslate("Pedro", "shell.navigation.power"),
         icon: "power",
         mode: "system"
     }
 ]
+
+}

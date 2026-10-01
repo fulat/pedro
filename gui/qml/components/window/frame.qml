@@ -75,7 +75,7 @@ Window {
                 width: 20
                 height: 28
                 hoverEnabled: true
-                Accessible.name: "Cerrar"
+                Accessible.name: qsTranslate("Pedro", "common.close")
                 onClicked: frame.close()
                 background: ControlBackground { control: closeControl; tint: "#ff5c5f"; symbol: "close" }
             }
@@ -85,7 +85,7 @@ Window {
                 width: 20
                 height: 28
                 hoverEnabled: true
-                Accessible.name: "Minimizar"
+                Accessible.name: qsTranslate("Pedro", "window.minimize")
                 onClicked: frame.showMinimized()
                 background: ControlBackground { control: minimizeControl; tint: "#fac800"; symbol: "minimize" }
             }
@@ -95,7 +95,7 @@ Window {
                 width: 20
                 height: 28
                 hoverEnabled: true
-                Accessible.name: frame.maximized ? "Restaurar" : "Maximizar"
+                Accessible.name: frame.maximized ? qsTranslate("Pedro", "window.restore") : qsTranslate("Pedro", "window.maximize")
                 onClicked: frame.toggleMaximized()
                 background: ControlBackground {
                     control: maximizeControl

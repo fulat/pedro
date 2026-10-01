@@ -23,7 +23,7 @@ Item {
             Layout.fillWidth: true
             text: Papi.documentPath
             color: Theme.white
-            placeholderText: "Ruta absoluta del archivo"
+            placeholderText: qsTranslate("Pedro", "files.editor.pathPlaceholder")
             placeholderTextColor: Theme.textMuted
             onEditingFinished: controller.updatePath()
             background: Rectangle {
@@ -35,11 +35,11 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             Menu.Button {
-                text: "Abrir"
+                text: qsTranslate("Pedro", "common.open")
                 onClicked: controller.openDocument()
             }
             Menu.Button {
-                text: "Guardar"
+                text: qsTranslate("Pedro", "common.save")
                 onClicked: controller.saveDocument()
             }
             Item {
@@ -55,7 +55,7 @@ Item {
                 color: Theme.white
                 selectionColor: Theme.accent
                 selectedTextColor: Theme.selectionText
-                placeholderText: "Escribe aquí y guarda mediante PAPI…"
+                placeholderText: qsTranslate("Pedro", "files.editor.contentPlaceholder")
                 placeholderTextColor: Theme.textMuted
                 wrapMode: TextEdit.Wrap
                 background: Rectangle {
@@ -67,7 +67,7 @@ Item {
         }
         Label {
             Layout.fillWidth: true
-            text: Papi.statusMessage.length ? Papi.statusMessage : "Listo"
+            text: Papi.statusMessage.length ? Papi.statusMessage : qsTranslate("Pedro", "common.done")
             color: Theme.white
             font.pixelSize: 10
             elide: Text.ElideMiddle

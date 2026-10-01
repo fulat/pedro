@@ -211,7 +211,7 @@ Components.Application {
         anchors.bottomMargin: 76
         z: 200
         visible: main.controller.desktopOperationError.length > 0
-        text: "No se pudo completar la operación: " + main.controller.desktopOperationError
+        text: qsTranslate("Pedro", "desktop.operation.error").replace("{message}", main.controller.desktopOperationError)
         color: Theme.white
         padding: 12
         width: Math.min(implicitWidth, main.width - 24)
@@ -274,7 +274,7 @@ Components.Application {
             Repeater {
                 id: navigationRepeater
 
-                model: Mocks.osNavigationMenuItems
+                model: { Backend.language; return Mocks.osNavigationMenuItems(); }
 
                 delegate: Item {
                     id: navigationEntry

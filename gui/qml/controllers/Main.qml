@@ -44,7 +44,7 @@ QtObject {
         if (mouse.button === Qt.RightButton) {
             view.selectedDesktopIds = [];
             view.controller.closePanel();
-            view.controller.openDesktopShortcutMenu(desktopArea, mouse.x, mouse.y, "Escritorio");
+            view.controller.openDesktopShortcutMenu(desktopArea, mouse.x, mouse.y, qsTranslate("Pedro", "desktop.title"));
             return;
         }
 

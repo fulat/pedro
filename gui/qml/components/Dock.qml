@@ -139,7 +139,7 @@ Item {
             MenuItem {
                 id: favoriteAction
 
-                text: entry.app && entry.app.pinned ? qsTr("Quitar del dock") : qsTr("Mantener en el dock")
+                text: entry.app && entry.app.pinned ? qsTranslate("Pedro", "dock.unpin") : qsTranslate("Pedro", "dock.pin")
                 leftPadding: 12
                 rightPadding: 12
                 topPadding: 9

@@ -231,11 +231,11 @@ void Backend::refreshSystem() {
         cpuUsage_ = info.cpuUsagePercent;
 
         memoryUsage_ = info.memory.usedPercent();
-        memorySummary_ = QStringLiteral("%1 de %2 en uso").arg(formatBytes(info.memory.usedBytes()), formatBytes(info.memory.totalBytes));
+        memorySummary_ = QCoreApplication::translate("Pedro", "system.memory.summary").replace("{used}", formatBytes(info.memory.usedBytes())).replace("{total}", formatBytes(info.memory.totalBytes));
         emit systemChanged();
 
     } catch (const std::exception& error) {
-        setStatusMessage(QStringLiteral("Error de información del sistema: %1").arg(error.what()));
+        setStatusMessage(QCoreApplication::translate("Pedro", "system.errors.information").replace("{error}", error.what()));
     }
 }
 
@@ -243,9 +243,9 @@ void Backend::loadDocument() {
     try {
         documentText_ = QString::fromStdString(Pedro::Papi::Filesystem::readFile(documentPath_.toStdString()));
         emit documentTextChanged();
-        setStatusMessage(QStringLiteral("Se cargó %1 mediante PAPI").arg(documentPath_));
+        setStatusMessage(QCoreApplication::translate("Pedro", "files.status.loaded").replace("{path}", documentPath_));
     } catch (const std::exception& error) {
-        setStatusMessage(QStringLiteral("No se pudo cargar el archivo: %1").arg(error.what()));
+        setStatusMessage(QCoreApplication::translate("Pedro", "files.status.loadFailed").replace("{error}", error.what()));
     }
 }
 
@@ -254,18 +254,18 @@ void Backend::saveDocument(const QString& contents) {
         Pedro::Papi::Filesystem::writeFile(documentPath_.toStdString(), contents.toStdString());
         documentText_ = contents;
         emit documentTextChanged();
-        setStatusMessage(QStringLiteral("Se guardó %1 mediante PAPI").arg(documentPath_));
+        setStatusMessage(QCoreApplication::translate("Pedro", "files.status.saved").replace("{path}", documentPath_));
     } catch (const std::exception& error) {
-        setStatusMessage(QStringLiteral("No se pudo guardar el archivo: %1").arg(error.what()));
+        setStatusMessage(QCoreApplication::translate("Pedro", "files.status.saveFailed").replace("{error}", error.what()));
     }
 }
 
 void Backend::createDirectory(const QString& path) {
     try {
         Pedro::Papi::Filesystem::createDirectory(path.toStdString());
-        setStatusMessage(QStringLiteral("Se creó %1 mediante PAPI").arg(path));
+        setStatusMessage(QCoreApplication::translate("Pedro", "files.status.createdDirectory").replace("{path}", path));
     } catch (const std::exception& error) {
-        setStatusMessage(QStringLiteral("No se pudo crear la carpeta: %1").arg(error.what()));
+        setStatusMessage(QCoreApplication::translate("Pedro", "files.status.createDirectoryFailed").replace("{error}", error.what()));
     }
 }
 

@@ -57,7 +57,7 @@ Rectangle {
             Layout.fillWidth: true
             visible: !root.controlMode
             Label {
-                text: root.mode === "files" ? "Archivos" : root.mode === "about" ? "Pedro OS" : "Sistema"
+                text: root.mode === "files" ? qsTranslate("Pedro", "app.files.name") : root.mode === "about" ? qsTranslate("Pedro", "shell.panel.about") : qsTranslate("Pedro", "shell.panel.system")
                 color: Theme.white
                 font.pixelSize: 16
                 font.weight: Font.Medium
@@ -116,7 +116,7 @@ Rectangle {
             }
             Bluetooth.View {
                 onBackRequested: root.modeRequested("quick")
-                onSettingsRequested: control.notice = "Configuración de Bluetooth · pendiente"
+                onSettingsRequested: control.notice = qsTranslate("Pedro", "bluetooth.settings.pending")
                 onDeviceRequested: name => control.notice = name
             }
             Sound.View {}

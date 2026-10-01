@@ -1,7 +1,6 @@
 .pragma library
 
 // Defines shared window identity, sizing, and initial panel state.
-const WINDOW_TITLE = "Pedro OS"
 
 const DESIGN_ASPECT_RATIO = 20 / 13;
 const DEVELOPMENT_WIDTH = 1280;

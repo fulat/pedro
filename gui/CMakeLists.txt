@@ -99,22 +99,21 @@ file(GLOB_RECURSE PEDRO_GUI_ASSETS
 
 
 # =============================================================================
-# Automatic language resource discovery
-#
-# Every JSON language/configuration file under gui/language/ is automatically
-# included in Pedro's Qt resource system.
-#
-# New languages can therefore be added without modifying this CMakeLists.txt.
-# =============================================================================
-
-file(GLOB_RECURSE PEDRO_GUI_LANGUAGE_FILES
-        CONFIGURE_DEPENDS
-
-        RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
-
-        "${CMAKE_CURRENT_SOURCE_DIR}/language/*.json"
-)
-
+# Qt translation catalogs are compiled by the standard Qt Linguist tool.
+# JSON files are reference metadata only and are not loaded at runtime.
+find_program(PEDRO_LRELEASE NAMES lrelease-qt6 lrelease
+        HINTS /usr/lib/qt6/bin
+        REQUIRED)
+set(PEDRO_GUI_LANGUAGE_FILES)
+foreach(locale en es)
+        set(qm "${CMAKE_CURRENT_BINARY_DIR}/language/${locale}.qm")
+        add_custom_command(OUTPUT "${qm}"
+                COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/language"
+                COMMAND "${PEDRO_LRELEASE}" "${CMAKE_CURRENT_SOURCE_DIR}/language/${locale}.ts" -qm "${qm}"
+                DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/language/${locale}.ts"
+                VERBATIM)
+        list(APPEND PEDRO_GUI_LANGUAGE_FILES "${qm}")
+endforeach()
 
 # =============================================================================
 # Combined embedded resources
@@ -125,7 +124,6 @@ file(GLOB_RECURSE PEDRO_GUI_LANGUAGE_FILES
 
 set(PEDRO_GUI_RESOURCES
         ${PEDRO_GUI_ASSETS}
-        ${PEDRO_GUI_LANGUAGE_FILES}
 )
 
 
@@ -282,7 +280,7 @@ target_link_libraries(
 #
 # Examples include:
 #
-#     assets/wallpapers/config.toml
+#     config/wallpaper.toml
 #     filesystem-managed wallpapers
 #     files read by native C++ libraries such as toml++
 #
@@ -374,7 +372,10 @@ qt_add_resources(pedro_gui pedro_appearance
         "${PEDRO_APPEARANCE_ROOT}/icons/Pedro/scalable/ui/window-restore.svg"
 )
 
-# Centralized TOML defaults and filesystem wallpaper assets.
+qt_add_resources(pedro_gui pedro_languages
+        PREFIX "/pedro/language"
+        BASE "${CMAKE_CURRENT_BINARY_DIR}/language"
+        FILES ${PEDRO_GUI_LANGUAGE_FILES})
 add_custom_command(TARGET pedro_gui POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 "${CMAKE_CURRENT_SOURCE_DIR}/config" "$<TARGET_FILE_DIR:pedro_gui>/config")

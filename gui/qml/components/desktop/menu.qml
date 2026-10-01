@@ -101,7 +101,7 @@ Controls.Menu {
     }
 
     Entry {
-        text: "Abrir"
+        text: qsTranslate("Pedro", "common.open")
         symbol: root.fileMode ? "file" : "folder"
         shortcutText: "Enter"
         onTriggered: root.actionRequested("open")
@@ -109,21 +109,21 @@ Controls.Menu {
 
     Entry {
         visible: !root.fileMode
-        text: "Abrir en una pestaña nueva"
+        text: qsTranslate("Pedro", "folder.menu.open.tab")
         symbol: "tab"
         onTriggered: root.actionRequested("tab")
     }
 
     Entry {
         visible: !root.fileMode
-        text: "Abrir en una ventana nueva"
+        text: qsTranslate("Pedro", "folder.menu.open.window")
         symbol: "window"
         onTriggered: root.actionRequested("window")
     }
 
     Controls.Menu {
         id: openWithMenu
-        title: "Abrir con…"
+        title: qsTranslate("Pedro", "file.menu.open.with")
         width: 210
         popupType: Controls.Popup.Item
         delegate: Entry {}
@@ -134,7 +134,7 @@ Controls.Menu {
             cornerRadius: 12
         }
         Entry {
-            text: "Elegir otra aplicación…"
+            text: qsTranslate("Pedro", "file.menu.application")
             symbol: "window"
             onTriggered: root.actionRequested("application")
         }
@@ -142,7 +142,7 @@ Controls.Menu {
 
     Entry {
         visible: root.fileMode
-        text: "Vista rápida"
+        text: qsTranslate("Pedro", "file.menu.preview")
         symbol: "eye"
         shortcutText: "Espacio"
         onTriggered: root.actionRequested("preview")
@@ -150,21 +150,21 @@ Controls.Menu {
 
     Divider {}
     Entry {
-        text: "Cortar"
+        text: qsTranslate("Pedro", "folder.menu.cut")
         symbol: "cut"
         shortcutText: "Ctrl+X"
         onTriggered: root.actionRequested("cut")
     }
 
     Entry {
-        text: "Copiar"
+        text: qsTranslate("Pedro", "folder.menu.copy")
         symbol: "copy"
         shortcutText: "Ctrl+C"
         onTriggered: root.actionRequested("copy")
     }
 
     Entry {
-        text: "Pegar"
+        text: qsTranslate("Pedro", "folder.menu.paste")
         symbol: "paste"
         shortcutText: "Ctrl+V"
         enabled: root.canPaste
@@ -173,7 +173,7 @@ Controls.Menu {
 
     Divider {}
     Entry {
-        text: "Renombrar"
+        text: qsTranslate("Pedro", "folder.menu.rename")
         symbol: "rename"
         shortcutText: "F2"
         onTriggered: root.actionRequested("rename")
@@ -181,14 +181,14 @@ Controls.Menu {
 
     Entry {
         visible: root.fileMode
-        text: "Duplicar"
+        text: qsTranslate("Pedro", "file.menu.duplicate")
         symbol: "copy"
         shortcutText: "Ctrl+D"
         onTriggered: root.actionRequested("duplicate")
     }
 
     Entry {
-        text: "Mover a la papelera"
+        text: qsTranslate("Pedro", "folder.menu.trash")
         symbol: "trash"
         shortcutText: "Delete"
         onTriggered: root.actionRequested("trash")
@@ -198,7 +198,7 @@ Controls.Menu {
 
     Controls.Menu {
         id: compressionMenu
-        title: "Comprimir"
+        title: qsTranslate("Pedro", "folder.menu.compress")
         width: 210
         popupType: Controls.Popup.Item
         delegate: Entry {}
@@ -209,25 +209,25 @@ Controls.Menu {
             cornerRadius: 12
         }
         Entry {
-            text: "Archivo .zip"
+            text: qsTranslate("Pedro", "folder.menu.archive.zip")
             symbol: "file"
             onTriggered: root.actionRequested("zip")
         }
 
         Entry {
-            text: "Archivo .tar.gz"
+            text: qsTranslate("Pedro", "folder.menu.archive.gzip")
             symbol: "file"
             onTriggered: root.actionRequested("gzip")
         }
 
         Entry {
-            text: "Archivo .tar.xz"
+            text: qsTranslate("Pedro", "folder.menu.archive.xz")
             symbol: "file"
             onTriggered: root.actionRequested("xz")
         }
 
         Entry {
-            text: "Otro formato…"
+            text: qsTranslate("Pedro", "folder.menu.archive.other")
             symbol: "file"
             onTriggered: root.actionRequested("archive")
         }
@@ -236,7 +236,7 @@ Controls.Menu {
 
     Controls.Menu {
         id: sharingMenu
-        title: "Compartir"
+        title: qsTranslate("Pedro", "folder.menu.share")
         width: 210
         popupType: Controls.Popup.Item
         delegate: Entry {}
@@ -247,7 +247,7 @@ Controls.Menu {
             cornerRadius: 12
         }
         Entry {
-            text: "Copiar ubicación"
+            text: qsTranslate("Pedro", "folder.menu.location.copy")
             symbol: "copy"
             onTriggered: root.actionRequested("location")
         }
@@ -256,7 +256,7 @@ Controls.Menu {
 
     Entry {
         visible: root.fileMode && root.imageFile
-        text: "Establecer como fondo"
+        text: qsTranslate("Pedro", "file.menu.wallpaper")
         symbol: "image"
         onTriggered: root.actionRequested("wallpaper")
     }
@@ -267,14 +267,14 @@ Controls.Menu {
     }
     Entry {
         visible: !root.fileMode
-        text: "Abrir en Terminal"
+        text: qsTranslate("Pedro", "folder.menu.terminal")
         symbol: "terminal"
         onTriggered: root.actionRequested("terminal")
     }
 
     Divider {}
     Entry {
-        text: "Propiedades"
+        text: qsTranslate("Pedro", "folder.menu.properties")
         symbol: "info"
         shortcutText: "Alt+Enter"
         onTriggered: root.actionRequested("properties")

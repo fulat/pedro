@@ -4,7 +4,7 @@ import gui
 // Coordinates actions emitted by the control-center presentation.
 QtObject {
     required property var view
-    property string notice: Papi.wifiError !== "" ? Papi.wifiError : "Wi-Fi conectado mediante PAPI Network"
+    property string notice: Papi.wifiError !== "" ? Papi.wifiError : qsTranslate("Pedro", "shell.status.wifiConnected")
 
     // Changes Wi-Fi state through PAPI.
     function setWifiEnabled(state) {

@@ -34,22 +34,22 @@ Item {
             spacing: 0
             Quick.Tile {
                 id: wifiTile
-                title: "Wi-Fi"
+                title: qsTranslate("Pedro", "network.wifi.title")
                 icon: "../../../assets/icons/wifi.svg"
                 symbolSize: 23
                 symbolOffsetY: 1
                 active: Papi.wifiEnabled
                 toggleable: true
                 externallyManaged: true
-                subtitle: Papi.wifiConnected ? Papi.connectedWifiName + " · Conectado" : Papi.wifiEnabled ? "Sin conexión" : "Desactivado"
+                subtitle: Papi.wifiConnected ? Papi.connectedWifiName + " · Conectado" : Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.status.disconnected") : qsTranslate("Pedro", "bluetooth.status.off")
                 statusColor: root.wifiConnected ? Theme.statusConnected : active ? Theme.statusActive : Theme.statusInactive
                 onToggleRequested: state => controller.setWifiEnabled(state)
                 onActivated: controller.requestWifi()
             }
             Quick.Tile {
                 id: bluetoothTile
-                title: "Bluetooth"
-                subtitle: !Papi.bluetoothAvailable ? "No disponible" : active ? "Activado" : "Desactivado"
+                title: qsTranslate("Pedro", "bluetooth.title")
+                subtitle: !Papi.bluetoothAvailable ? qsTranslate("Pedro", "bluetooth.status.unavailableShort") : active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                 icon: "../../../assets/icons/bluetooth.svg"
                 active: Papi.bluetoothEnabled
                 toggleable: true
@@ -70,12 +70,12 @@ Item {
             Layout.fillWidth: true
             spacing: 0
             Slider.Tile {
-                title: "Brillo"
+                title: qsTranslate("Pedro", "shell.system.brightness")
                 icon: "../../../assets/icons/brightness.svg"
                 level: 0.58
             }
             Slider.Tile {
-                title: "Sonido"
+                title: qsTranslate("Pedro", "shell.sound.title")
                 icon: "../../../assets/icons/speaker.svg"
                 level: 0.62
             }
@@ -98,47 +98,47 @@ Item {
                 rowSpacing: 0
 
                 Toggle.Tile {
-                    title: "Modo enfoque"
-                    subtitle: active ? "Activado" : "Desactivado"
+                    title: qsTranslate("Pedro", "shell.focus.title")
+                    subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/moon.svg"
                     active: true
-                    onActivated: controller.showNotice("El modo Enfoque es una vista previa")
+                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.focus.preview"))
                 }
                 Toggle.Tile {
-                    title: "Ahorro de energía"
-                    subtitle: active ? "Activado" : "Desactivado"
+                    title: qsTranslate("Pedro", "shell.system.powerSaving.title")
+                    subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/leaf.svg"
                     activeColor: Theme.batteryHealthy
-                    onActivated: controller.showNotice("Ahorro de energía se conectará a PAPI Power")
+                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.system.powerSaving.pending"))
                 }
                 Toggle.Tile {
-                    title: "Pantalla externa"
-                    subtitle: active ? "Conectada" : "Desconectada"
+                    title: qsTranslate("Pedro", "shell.display.title")
+                    subtitle: active ? qsTranslate("Pedro", "shell.display.connected") : qsTranslate("Pedro", "shell.display.disconnected")
                     icon: "../../../assets/icons/display.svg"
                     active: true
-                    onActivated: controller.showNotice("La detección de pantallas todavía está pendiente")
+                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.display.pending"))
                 }
                 Toggle.Tile {
-                    title: "Luz nocturna"
-                    subtitle: active ? "Automático" : "Desactivado"
+                    title: qsTranslate("Pedro", "shell.nightLight.title")
+                    subtitle: active ? qsTranslate("Pedro", "shell.nightLight.automatic") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/brightness.svg"
                     active: true
-                    onActivated: controller.showNotice("La luz nocturna se conectará al módulo de pantalla")
+                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.nightLight.pending"))
                 }
                 Toggle.Tile {
-                    title: "Teclado"
-                    subtitle: "Español (ES)"
+                    title: qsTranslate("Pedro", "shell.keyboard.title")
+                    subtitle: qsTranslate("Pedro", "shell.keyboard.layout")
                     icon: "../../../assets/icons/keyboard.svg"
                     active: true
                     toggleable: false
-                    onActivated: controller.showNotice("La selección de teclado todavía está pendiente")
+                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.keyboard.pending"))
                 }
                 Toggle.Tile {
                     symbolColor: Theme.controlSymbol
-                    title: "Cámara"
-                    subtitle: active ? "Activada" : "Desactivada"
+                    title: qsTranslate("Pedro", "shell.camera.title")
+                    subtitle: active ? qsTranslate("Pedro", "shell.camera.enabled") : qsTranslate("Pedro", "shell.camera.disabled")
                     icon: "../../../assets/icons/camera.svg"
-                    onActivated: controller.showNotice("La cámara todavía no está conectada a PAPI")
+                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.camera.pending"))
                 }
             }
 
@@ -158,9 +158,9 @@ Item {
         }
 
         Media.Card {
-            onPreviousRequested: controller.showNotice("Pista anterior · pendiente de conexión con Qt Multimedia")
-            onPlayRequested: controller.showNotice("Reproducción · pendiente de conexión con Qt Multimedia")
-            onNextRequested: controller.showNotice("Pista siguiente · pendiente de conexión con Qt Multimedia")
+            onPreviousRequested: controller.showNotice(qsTranslate("Pedro", "media.previous.pending"))
+            onPlayRequested: controller.showNotice(qsTranslate("Pedro", "media.playback.pending"))
+            onNextRequested: controller.showNotice(qsTranslate("Pedro", "media.next.pending"))
         }
 
         Rectangle {
@@ -175,27 +175,27 @@ Item {
             columnSpacing: 0
             rowSpacing: 0
             Action.Tile {
-                title: "Ajustes"
+                title: qsTranslate("Pedro", "settings.title")
                 icon: "../../../assets/icons/settings.svg"
                 separator: true
                 onActivated: controller.requestSettings()
             }
             Action.Tile {
-                title: "Bloquear"
+                title: qsTranslate("Pedro", "shell.power.lock")
                 icon: "../../../assets/icons/lock.svg"
                 separator: true
-                onActivated: controller.showNotice("Bloquear se conectará a la sesión de Pedro")
+                onActivated: controller.showNotice(qsTranslate("Pedro", "shell.power.lockPending"))
             }
             Action.Tile {
-                title: "Reiniciar"
+                title: qsTranslate("Pedro", "shell.power.restart")
                 icon: "../../../assets/icons/restart.svg"
                 separator: true
-                onActivated: controller.showNotice("Reiniciar requiere PAPI Power")
+                onActivated: controller.showNotice(qsTranslate("Pedro", "shell.power.restartPending"))
             }
             Action.Tile {
-                title: "Apagar"
+                title: qsTranslate("Pedro", "shell.power.off")
                 icon: "../../../assets/icons/power.svg"
-                onActivated: controller.showNotice("Apagar requiere PAPI Power")
+                onActivated: controller.showNotice(qsTranslate("Pedro", "shell.power.offPending"))
             }
         }
     }

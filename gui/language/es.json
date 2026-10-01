@@ -171,5 +171,11 @@
     "window.close": "Cerrar",
     "window.minimize": "Minimizar",
     "window.maximize": "Maximizar",
-    "window.restore": "Restaurar"
+    "window.restore": "Restaurar",
+    "network.wifi.empty.enableHint": "Activa Wi-Fi para buscar redes disponibles",
+    "desktop.title": "Escritorio",
+    "common.cancel": "Cancelar",
+    "clock.pattern": "ddd, d 'de' MMM   HH:mm",
+    "dock.unpin": "Quitar del dock",
+    "dock.pin": "Mantener en el dock"
 }

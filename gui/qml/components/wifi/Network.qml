@@ -64,7 +64,7 @@ Rectangle {
                 }
 
                 Controls.Label {
-                    text: root.connected ? "Conectado" : root.secured ? "Protegida" : "Abierta"
+                    text: root.connected ? qsTranslate("Pedro", "bluetooth.device.connected") : root.secured ? qsTranslate("Pedro", "network.wifi.network.secured") : qsTranslate("Pedro", "network.wifi.network.open")
                     color: root.connected ? Theme.statusWifiConnected : Theme.textMuted
                     font.pixelSize: 9
                 }
