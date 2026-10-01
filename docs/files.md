@@ -37,3 +37,7 @@ Los menús contextuales de carpetas y archivos usan `Popup.Window` de Qt: pueden
 Un clic derecho en el espacio vacío del cuerpo abre el menú Liquid de la carpeta actual; en columnas se utiliza la ubicación de la columna pulsada. Nueva carpeta y Nuevo archivo crean nombres únicos mediante GIO en un worker de Qt Concurrent, sin sobrescribir elementos existentes ni bloquear la UI. Las ubicaciones virtuales deshabilitan la creación. Propiedades muestra el nombre, la ruta o URI y el número de elementos de esa ubicación. Los errores se muestran en el navegador.
 
 El hover de los elementos usa gris translúcido y cursor de manita en cuadrícula, lista y columnas. El azul se reserva para la selección o la columna navegada.
+
+La interacción de `entry/folder.qml` y `entry/file.qml` se centraliza en `entry/item.qml` y `controllers/entry/action.qml`: selección, doble clic y Abrir del menú comparten el mismo despacho. Los hosts pasan el elemento y su controlador de navegación; las filas y el escritorio delegan sus gestos al componente cuando necesitan conservar su propio layout o arrastre. No existe un menú de carpeta separado para el escritorio.
+
+Un doble clic o Abrir sobre una carpeta del Desktop presenta la ventana de Archivos existente y navega a su URI real. Si su controlador todavía está cargando, conserva la solicitud hasta que esté disponible. La ubicación Desktop del lateral utiliza `openPlace("desktop")` y la configuración XDG del usuario, igual que el modelo del escritorio.

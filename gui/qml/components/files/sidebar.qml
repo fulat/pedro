@@ -22,7 +22,7 @@ Rectangle {
                 model: [
                     {name: "home", icon: "house"}, {name: "favorites", icon: "star"}, {name: "recent", icon: "clock"},
                     {divider: true},
-                    {name: "documents", icon: "file"}, {name: "downloads", icon: "download"}, {name: "images", icon: "image"}, {name: "music", icon: "music"}, {name: "videos", icon: "video"},
+                    {name: "desktop", icon: "display"}, {name: "documents", icon: "file"}, {name: "downloads", icon: "download"}, {name: "images", icon: "image"}, {name: "music", icon: "music"}, {name: "videos", icon: "video"},
                     {divider: true},
                     {name: "computer", icon: "display"}, {name: "trash", icon: "trash"}, {divider: true}
                 ]
@@ -44,7 +44,7 @@ Rectangle {
                         anchors.fill: parent
                         radius: 18
                         visible: !row.modelData.divider
-                        color: sidebar.controller && row.modelData.name === sidebar.controller.directory.place ? sidebar.colors.selected : rowHover.hovered ? sidebar.colors.selected : "transparent"
+                        color: sidebar.controller && row.modelData.name === sidebar.controller.directory.place ? sidebar.colors.selected : rowHover.hovered ? sidebar.colors.hover : "transparent"
                     }
                     TapHandler {
                         enabled: !row.modelData.divider
