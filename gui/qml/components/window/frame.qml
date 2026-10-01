@@ -11,6 +11,8 @@ Window {
     id: frame
 
     property url contentSource
+    property color surfaceColor: "transparent"
+    property color titleColor: Theme.white
     readonly property bool maximized: visibility === Window.Maximized
 
     color: "transparent"
@@ -44,6 +46,12 @@ Window {
         backdrop: windowBackdrop
         frosted: true
         cornerRadius: frame.maximized ? 0 : 14
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: frame.surfaceColor
+        radius: frame.maximized ? 0 : 14
     }
 
     Item {
@@ -112,7 +120,7 @@ Window {
             anchors.rightMargin: 18
             anchors.verticalCenter: parent.verticalCenter
             text: frame.title
-            color: Theme.white
+            color: frame.titleColor
             font.pixelSize: 13
             font.weight: Font.Medium
             elide: Text.ElideRight

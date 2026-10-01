@@ -906,5 +906,110 @@
             <extracomment>Stable Pedro key: desktop.menu.select</extracomment>
             <translation>Seleccionar todo</translation>
         </message>
+        <message>
+            <source>files.browser.home</source>
+            <extracomment>Stable Pedro key: files.browser.home</extracomment>
+            <translation>Inicio</translation>
+        </message>
+        <message>
+            <source>files.browser.favorites</source>
+            <extracomment>Stable Pedro key: files.browser.favorites</extracomment>
+            <translation>Favoritos</translation>
+        </message>
+        <message>
+            <source>files.browser.recent</source>
+            <extracomment>Stable Pedro key: files.browser.recent</extracomment>
+            <translation>Recientes</translation>
+        </message>
+        <message>
+            <source>files.browser.documents</source>
+            <extracomment>Stable Pedro key: files.browser.documents</extracomment>
+            <translation>Documentos</translation>
+        </message>
+        <message>
+            <source>files.browser.downloads</source>
+            <extracomment>Stable Pedro key: files.browser.downloads</extracomment>
+            <translation>Descargas</translation>
+        </message>
+        <message>
+            <source>files.browser.images</source>
+            <extracomment>Stable Pedro key: files.browser.images</extracomment>
+            <translation>Imágenes</translation>
+        </message>
+        <message>
+            <source>files.browser.music</source>
+            <extracomment>Stable Pedro key: files.browser.music</extracomment>
+            <translation>Música</translation>
+        </message>
+        <message>
+            <source>files.browser.videos</source>
+            <extracomment>Stable Pedro key: files.browser.videos</extracomment>
+            <translation>Vídeos</translation>
+        </message>
+        <message>
+            <source>files.browser.computer</source>
+            <extracomment>Stable Pedro key: files.browser.computer</extracomment>
+            <translation>Este equipo</translation>
+        </message>
+        <message>
+            <source>files.browser.trash</source>
+            <extracomment>Stable Pedro key: files.browser.trash</extracomment>
+            <translation>Papelera</translation>
+        </message>
+        <message>
+            <source>files.browser.places</source>
+            <extracomment>Stable Pedro key: files.browser.places</extracomment>
+            <translation>Ubicaciones</translation>
+        </message>
+        <message>
+            <source>files.browser.search</source>
+            <extracomment>Stable Pedro key: files.browser.search</extracomment>
+            <translation>Buscar archivos…</translation>
+        </message>
+        <message>
+            <source>files.browser.new</source>
+            <extracomment>Stable Pedro key: files.browser.new</extracomment>
+            <translation>Nuevo</translation>
+        </message>
+        <message>
+            <source>files.browser.share</source>
+            <extracomment>Stable Pedro key: files.browser.share</extracomment>
+            <translation>Compartir</translation>
+        </message>
+        <message>
+            <source>files.browser.view</source>
+            <extracomment>Stable Pedro key: files.browser.view</extracomment>
+            <translation>Vista</translation>
+        </message>
+        <message>
+            <source>files.browser.intro</source>
+            <extracomment>Stable Pedro key: files.browser.intro</extracomment>
+            <translation>Tus archivos y ubicaciones favoritas</translation>
+        </message>
+        <message>
+            <source>files.browser.folders</source>
+            <extracomment>Stable Pedro key: files.browser.folders</extracomment>
+            <translation>Carpetas</translation>
+        </message>
+        <message>
+            <source>files.browser.preview</source>
+            <extracomment>Stable Pedro key: files.browser.preview</extracomment>
+            <translation>Vista previa de la interfaz · Operaciones de archivos pendientes</translation>
+        </message>
+        <message>
+            <source>files.browser.information</source>
+            <extracomment>Stable Pedro key: files.browser.information</extracomment>
+            <translation>Información</translation>
+        </message>
+        <message>
+            <source>files.browser.type</source>
+            <extracomment>Stable Pedro key: files.browser.type</extracomment>
+            <translation>Tipo</translation>
+        </message>
+        <message>
+            <source>files.browser.folder</source>
+            <extracomment>Stable Pedro key: files.browser.folder</extracomment>
+            <translation>Carpeta</translation>
+        </message>
     </context>
 </TS>

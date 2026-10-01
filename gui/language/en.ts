@@ -906,5 +906,110 @@
             <extracomment>Stable Pedro key: desktop.menu.select</extracomment>
             <translation>Select all</translation>
         </message>
+        <message>
+            <source>files.browser.home</source>
+            <extracomment>Stable Pedro key: files.browser.home</extracomment>
+            <translation>Home</translation>
+        </message>
+        <message>
+            <source>files.browser.favorites</source>
+            <extracomment>Stable Pedro key: files.browser.favorites</extracomment>
+            <translation>Favorites</translation>
+        </message>
+        <message>
+            <source>files.browser.recent</source>
+            <extracomment>Stable Pedro key: files.browser.recent</extracomment>
+            <translation>Recent</translation>
+        </message>
+        <message>
+            <source>files.browser.documents</source>
+            <extracomment>Stable Pedro key: files.browser.documents</extracomment>
+            <translation>Documents</translation>
+        </message>
+        <message>
+            <source>files.browser.downloads</source>
+            <extracomment>Stable Pedro key: files.browser.downloads</extracomment>
+            <translation>Downloads</translation>
+        </message>
+        <message>
+            <source>files.browser.images</source>
+            <extracomment>Stable Pedro key: files.browser.images</extracomment>
+            <translation>Pictures</translation>
+        </message>
+        <message>
+            <source>files.browser.music</source>
+            <extracomment>Stable Pedro key: files.browser.music</extracomment>
+            <translation>Music</translation>
+        </message>
+        <message>
+            <source>files.browser.videos</source>
+            <extracomment>Stable Pedro key: files.browser.videos</extracomment>
+            <translation>Videos</translation>
+        </message>
+        <message>
+            <source>files.browser.computer</source>
+            <extracomment>Stable Pedro key: files.browser.computer</extracomment>
+            <translation>This computer</translation>
+        </message>
+        <message>
+            <source>files.browser.trash</source>
+            <extracomment>Stable Pedro key: files.browser.trash</extracomment>
+            <translation>Trash</translation>
+        </message>
+        <message>
+            <source>files.browser.places</source>
+            <extracomment>Stable Pedro key: files.browser.places</extracomment>
+            <translation>Places</translation>
+        </message>
+        <message>
+            <source>files.browser.search</source>
+            <extracomment>Stable Pedro key: files.browser.search</extracomment>
+            <translation>Search files…</translation>
+        </message>
+        <message>
+            <source>files.browser.new</source>
+            <extracomment>Stable Pedro key: files.browser.new</extracomment>
+            <translation>New</translation>
+        </message>
+        <message>
+            <source>files.browser.share</source>
+            <extracomment>Stable Pedro key: files.browser.share</extracomment>
+            <translation>Share</translation>
+        </message>
+        <message>
+            <source>files.browser.view</source>
+            <extracomment>Stable Pedro key: files.browser.view</extracomment>
+            <translation>View</translation>
+        </message>
+        <message>
+            <source>files.browser.intro</source>
+            <extracomment>Stable Pedro key: files.browser.intro</extracomment>
+            <translation>Your files and favorite places</translation>
+        </message>
+        <message>
+            <source>files.browser.folders</source>
+            <extracomment>Stable Pedro key: files.browser.folders</extracomment>
+            <translation>Folders</translation>
+        </message>
+        <message>
+            <source>files.browser.preview</source>
+            <extracomment>Stable Pedro key: files.browser.preview</extracomment>
+            <translation>Interface preview · File operations coming soon</translation>
+        </message>
+        <message>
+            <source>files.browser.information</source>
+            <extracomment>Stable Pedro key: files.browser.information</extracomment>
+            <translation>Information</translation>
+        </message>
+        <message>
+            <source>files.browser.type</source>
+            <extracomment>Stable Pedro key: files.browser.type</extracomment>
+            <translation>Type</translation>
+        </message>
+        <message>
+            <source>files.browser.folder</source>
+            <extracomment>Stable Pedro key: files.browser.folder</extracomment>
+            <translation>Folder</translation>
+        </message>
     </context>
 </TS>

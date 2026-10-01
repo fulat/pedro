@@ -61,10 +61,12 @@ ApplicationWindow {
         onLoaded: {
             item.objectName = "filesQuickWindow";
             item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
-            item.contentSource = Qt.resolvedUrl("files/View.qml");
+            item.contentSource = Qt.resolvedUrl("files/browser.qml");
+            item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#f1f4f8" : "#202630");
+            item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#202b3c" : "#edf2f8");
             item.transientParent = null;
-            item.width = Math.min(760, window.width * 0.85);
-            item.height = Math.min(520, window.height * 0.85);
+            item.width = Math.min(1120, window.width * 0.90);
+            item.height = Math.min(720, window.height * 0.90);
             item.minimumWidth = Math.min(420, item.width);
             item.minimumHeight = Math.min(320, item.height);
             item.x = window.x + Math.round((window.width - item.width) / 2);
