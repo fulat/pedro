@@ -38,3 +38,7 @@ El valor de `mode` selecciona `light` o `dark`; los defaults actuales están en 
 Idioma, apariencia y wallpaper comparten `gui/config/preferences.toml` y el override `$XDG_CONFIG_HOME/pedro/preferences.toml`. Se mantienen tablas TOML separadas dentro del mismo archivo. Otros dominios pueden tener sus propios TOML cuando su responsabilidad lo justifique; no crear un archivo por cada preferencia global.
 
 Si falta el archivo unificado del usuario pero existen los anteriores `language.toml`, `appearance.toml` o `wallpaper.toml`, PAPI combina sus secciones con los defaults y guarda `preferences.toml` de forma atómica. Los originales se conservan como respaldo y dejan de leerse cuando existe el nuevo archivo. Un archivo unificado existente nunca se sobrescribe durante la migración. Se observa únicamente el nuevo archivo y sus directorios; todos los cambios de idioma, modo y wallpaper siguen siendo dinámicos.
+
+## Zoom del dock
+
+La sección `[dock]` de `preferences.toml` permite configurar `hoverScale = 1.20`. El valor es un factor: `1.20` amplía el icono un 20 %, y `1.0` desactiva el zoom. Se aceptan valores de 1.0 a 1.3 para evitar que los iconos se superpongan. El default es 1.20; valores inválidos conservan la última selección válida. PAPI lee el número TOML y la GUI lo expone mediante `Backend.dockHoverScale` y la propiedad `hoverScale` del dock, preparadas para la futura UI de preferencias. La transición de entrada/salida mantiene 180 ms y `InOutQuad`, sin fondo de hover.
