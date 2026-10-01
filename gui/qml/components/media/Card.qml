@@ -12,7 +12,7 @@ Item {
     signal playRequested()
     signal nextRequested()
     Layout.fillWidth: true
-    Layout.preferredHeight: 114
+    Layout.preferredHeight: 100
 
     ColumnLayout {
         anchors.fill: parent

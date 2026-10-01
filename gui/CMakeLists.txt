@@ -10,14 +10,14 @@ project(pedro_gui VERSION 0.1 LANGUAGES CXX)
 # regular Linux ELF executable using Qt 6 Quick / QML.
 # =============================================================================
 
-find_package(Qt6 REQUIRED COMPONENTS
+find_package(Qt6 6.8 REQUIRED COMPONENTS
         Concurrent
         Qml
         Quick
         Svg
 )
 
-qt_standard_project_setup(REQUIRES 6.5)
+qt_standard_project_setup(REQUIRES 6.8)
 
 qt_policy(SET QTP0004 NEW)
 
@@ -38,6 +38,9 @@ set(PEDRO_GUI_SOURCES
         backend/backend.cpp
         backend/backend.hpp
         backend/icons.hpp
+
+        backend/application/icon/provider.cpp
+        backend/application/icon/provider.hpp
 
         backend/render/info.cpp
         backend/render/info.hpp

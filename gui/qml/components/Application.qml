@@ -17,8 +17,8 @@ ApplicationWindow {
     property alias currentTime: applicationController.currentTime
     property alias selectedDesktopIds: applicationController.selectedDesktopIds
     property alias desktopDragging: applicationController.desktopDragging
+    property alias installedApps: applicationController.installedApps
     property alias pinnedApps: applicationController.pinnedApps
-    property alias recentApps: applicationController.recentApps
     property alias desktopShortcuts: applicationController.desktopShortcuts
     property alias desktopShortcutRepeater: applicationController.desktopShortcutRepeater
     property alias desktopContextMenu: applicationController.desktopContextMenu
@@ -32,8 +32,6 @@ ApplicationWindow {
     readonly property real dockIconSize: applicationController.dockIconSize
     readonly property real dockTileSize: applicationController.dockTileSize
     readonly property real dockSpacing: applicationController.dockSpacing
-
-    signal applicationRequested(string applicationId)
 
     title: qsTr(Constants.WINDOW_TITLE)
     visibility: Backend.developmentMode ? Window.Windowed : Window.FullScreen
@@ -51,7 +49,6 @@ ApplicationWindow {
         objectName: "applicationController"
         window: window
         filesQuickWindow: filesQuickWindow
-        onApplicationRequested: applicationId => window.applicationRequested(applicationId)
     }
 
     // Provides the secondary files surface managed by the controller.
@@ -67,5 +64,29 @@ ApplicationWindow {
         visible: false
         transientParent: window
         flags: Qt.Window | Qt.FramelessWindowHint
+
+        // Sample the backend wallpaper locally: textures cannot cross windows.
+        Image {
+            id: filesBackdrop
+
+            anchors.fill: parent
+            source: Backend.wallpaper
+            fillMode: Image.PreserveAspectCrop
+            smooth: true
+            mipmap: true
+            visible: false
+        }
+
+        Root {
+            anchors.centerIn: parent
+            width: Math.min(760, filesQuickWindow.width - 32)
+            height: Math.min(520, filesQuickWindow.height - 32)
+            availableWidth: filesQuickWindow.width
+            availableHeight: filesQuickWindow.height
+            backdrop: filesBackdrop
+            mode: "files"
+
+            onCloseRequested: filesQuickWindow.close()
+        }
     }
 }

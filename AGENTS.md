@@ -2076,3 +2076,21 @@ Whenever a change introduces or modifies meaningful user-facing text:
 Do not derive keys from Spanish wording. Do not scatter the default locale through QML or C++. Do not introduce language switching, external language packages, a marketplace, TypeScript language modules, or a translation compiler unless that infrastructure is explicitly requested.
 
 Maintain the registry incrementally. Do not perform a repository-wide localization migration as a side effect of unrelated work.
+
+---
+
+## 50. Wallpaper Source
+
+The GUI wallpaper must come explicitly from the backend property exposed to QML as:
+
+```qml
+source: Backend.wallpaper
+```
+
+Never hardcode a wallpaper filename, filesystem path, resource URL, or fallback image in QML or JavaScript. Wallpaper selection belongs to the existing backend/PAPI configuration flow.
+
+Desktop previews that display the wallpaper must also use `Backend.wallpaper`. Liquid surfaces must sample the existing wallpaper item through their `backdrop` property, rather than load a separate image.
+
+Visual changes to shell components, menus, or materials must not change the selected wallpaper or its configuration unless the user explicitly requests a wallpaper change.
+
+When development loads QML from `PEDRO_QML_DIR`, wallpaper configuration and assets must also be read from that source directory. Do not let an old asset copy under `build/` override the configured wallpaper.

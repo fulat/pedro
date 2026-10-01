@@ -10,9 +10,19 @@ The normal GUI development loop runs directly on Ubuntu and does not touch the
 OS image pipeline:
 
 ```sh
-sudo apt-get install build-essential cmake ninja-build qt6-base-dev qt6-declarative-dev qt6-svg-dev
+make setup
 make start
 ```
+
+`make setup` runs `setup.sh` on Ubuntu. It updates APT, enables `universe`
+when needed, and installs the Qt 6, Wayland, GIO/GLib, systemd, TOML, QML,
+GNOME platform, and build tool packages used by Pedro. It also installs the
+host tools for image creation and QEMU testing. The script detects `amd64` or
+`arm64` and installs the matching GRUB and QEMU packages. Ubuntu's repositories
+must provide Qt 6.8 or newer; the script checks that before installing the
+development packages. It resolves the complete package list before installing,
+then verifies the CMake dependencies for GUI, PAPI, compositor, and installer
+in `build/setup`, with the image pipeline disabled. It does not access `core/`.
 
 `make start` configures `build/dev` with `PEDRO_BUILD_IMAGE=OFF`, incrementally
 builds PAPI and `pedro-gui`, and launches the GUI in a desktop window. It does
@@ -55,21 +65,14 @@ them.
 
 Use Ubuntu **matching `core/etc/os-release`**, on the same architecture as core
 (`aarch64` or `x86_64`). This checkout contains an Ubuntu 26.04 ARM64 base.
-Qt 6.5 or newer is required. Do not configure the image build with a macOS Qt SDK.
+Qt 6.8 or newer is required. Do not configure the image build with a macOS Qt SDK.
 
-Install host build tools (ARM64):
+Install host build tools and dependencies:
 
 ```sh
-sudo apt-get update
-sudo apt-get install --no-install-recommends \
-  build-essential cmake ninja-build python3 pkg-config \
-  qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-wayland-dev libsystemd-dev \
-  rsync file binutils util-linux e2fsprogs dosfstools mtools \
-  grub-common grub-efi-arm64-bin qemu-system-arm qemu-efi-aarch64
+make setup
 ```
 
-On x86_64, replace the last line with
-`grub-common grub-efi-amd64-bin qemu-system-x86 ovmf`.
 The host and staged APT sources must provide compatible Qt packages. Custom Qt
 SDKs are not supported by this package-based deployment path.
 
@@ -190,7 +193,7 @@ make compositor                  # Linux; run nested in an existing desktop
 
 These targets configure with `PEDRO_BUILD_IMAGE=OFF`. They do not inspect or
 copy `core/`, stage runtime packages, create systemd enablement, or create an
-image. The runtime needs a working Ubuntu desktop session and Qt 6.5 or newer.
+image. The runtime needs a working Ubuntu desktop session and Qt 6.8 or newer.
 Pass custom CMake settings with `DEV_CMAKE_ARGS`, for example
 `make dev DEV_CMAKE_ARGS='-DCMAKE_PREFIX_PATH=/opt/Qt/6.8/gcc_64'`.
 

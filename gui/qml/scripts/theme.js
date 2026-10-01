@@ -1,13 +1,12 @@
 .pragma library
 
 // Pedro GUI palette. Edit colors here to update every QML consumer.
-// The reusable glass surface shares these values across the bar, dock, panels
-// and desktop context menu. Blur softens the wallpaper; haze gives it a cloudy finish.
-var menuBackground = "#2f2e2e"
-var menuOpacity = 0.5
-var menuBlur = 0.82
-var menuHazeColor = "#7d7c7b"
-var menuHazeOpacity = 0.11
+// Menu surfaces.
+var menuBackground = "#222222"
+var menuOpacity = 0.65
+var menuBlur = 0.65
+var menuHazeColor = "#343434"
+var menuHazeOpacity = 0.18
 
 // Base, text and type.
 var accent = "#ffffff"
@@ -31,6 +30,8 @@ var controlPressed = "#1fffffff"
 var dividerBright = "#55ffffff"
 var dividerSoft = "#28ffffff"
 var inputBackground = "#2b000000"
+var liquidHaze = "#301a2430"
+var menuGlassHaze = "#781a2430"
 var menuBorder = "#526f6f6f"
 var overlayHover = "#22ffffff"
 var overlayPressed = "#34ffffff"
@@ -41,7 +42,7 @@ var shadowOuter = "#18000000"
 var shadowSoft = "#14000000"
 
 // Windows and desktop selection.
-var contextMenuTextMuted = "#aeb4b8"
+var contextMenuTextMuted = "#d6dcdf"
 var filesWindowBackground = "#2c2c2c"
 var filesWindowBorder = "#454545"
 var filesWindowText = "#dedede"
@@ -97,54 +98,16 @@ var wifiSignalStrong = "#9ac0ff"
 var mediaArtworkBackground = "#2a3748"
 var mediaButtonBorder = "#42ffffff"
 
-// Desktop illustrations.
-var browserBottom = "#123dc0"
-var browserLetter = "#e6ffffff"
-var browserMiddle = "#167dd1"
-var browserTop = "#12bfae"
-var chatIconBackground = "#f8f8f5"
-var chatIconBlue = "#53a4e6"
-var chatIconGreen = "#38bc82"
-var chatIconPink = "#e95372"
-var chatIconYellow = "#f0bc40"
-var codeIconBackground = "#252c35"
-var codeIconBright = "#24a5f2"
-var codeIconDark = "#07549b"
+// Desktop and dock illustrations.
 var controlSymbol = "#f4f7ff"
-var designBlue = "#1abcfe"
-var designCoral = "#ff7262"
-var designGreen = "#0acf83"
-var designOrange = "#f24e1e"
-var designPurple = "#a259ff"
-var dockDivider = "#75ffffff"
 var dockIndicator = "#54b9ff"
 var folderBottom = "#087be5"
 var folderTab = "#59caff"
 var folderTop = "#22baff"
 var imageIconFrame = "#f6f4ef"
-var musicIconBackground = "#16c864"
-var musicIconStroke = "#173c31"
 var notesBackground = "#f7f6f1"
 var notesBorder = "#c9c8c4"
 var notesLines = "#8b9398"
-var photosBackground = "#fffdfb"
-var photosBlue = "#4ea5dc"
-var photosCenter = "#fff9ed"
-var photosGreen = "#63ba57"
-var photosOrange = "#f49b3f"
-var photosPurple = "#a270c5"
-var photosRed = "#ed484e"
-var photosYellow = "#f5d84e"
-
-// Ordered color model used to draw the Photos application mark.
-var photosPalette = [photosRed, photosOrange, photosYellow, photosGreen, photosBlue, photosPurple]
-
-var terminalIconBackground = "#202730"
-var terminalIconText = "#f7f7f7"
-var trashBorder = "#a6b0b5"
-var trashBottom = "#9ca7ad"
-var trashLid = "#e1e7e9"
-var trashTop = "#f6f7f8"
 var weatherCloud = "#f8f8f6"
 var weatherPlace = "#f5f5f5"
 var weatherSun = "#ffc42d"

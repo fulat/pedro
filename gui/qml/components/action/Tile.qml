@@ -13,7 +13,7 @@ Rectangle {
     property bool separator: false
     signal activated()
     Layout.fillWidth: true
-    implicitHeight: 76
+    implicitHeight: 64
     radius: 8
     color: mouse.pressed ? Theme.overlayPressed
                          : mouse.containsMouse ? Theme.overlayHover : "transparent"

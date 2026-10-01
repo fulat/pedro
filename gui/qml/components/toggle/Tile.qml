@@ -26,7 +26,7 @@ Rectangle {
     }
 
     Layout.fillWidth: true
-    implicitHeight: 62
+    implicitHeight: 54
     radius: 8
     color: mouse.pressed ? Theme.overlayPressed : mouse.containsMouse ? Theme.overlayHover : "transparent"
 
@@ -36,8 +36,8 @@ Rectangle {
         anchors.rightMargin: 3
         spacing: 8
         Item {
-            implicitWidth: 35
-            implicitHeight: 35
+            implicitWidth: 30
+            implicitHeight: 30
             Icon.Tinted {
                 anchors.centerIn: parent
                 source: root.icon
@@ -53,7 +53,7 @@ Rectangle {
                 Layout.fillWidth: true
                 text: root.title
                 color: Theme.white
-                font.pixelSize: root.title.length > 16 ? 12 : 14
+                font.pixelSize: root.title.length > 16 ? 12 : 13
                 font.weight: Font.Medium
                 elide: Text.ElideRight
             }

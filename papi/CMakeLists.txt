@@ -21,6 +21,20 @@ find_package(
     REQUIRED
 )
 
+find_package(
+    PkgConfig
+    REQUIRED
+)
+
+# GIO supplies installed desktop application metadata and GNOME favorites.
+pkg_check_modules(
+    GIO
+    REQUIRED
+    IMPORTED_TARGET
+    gio-2.0
+    gio-unix-2.0
+)
+
 
 # -----------------------------------------------------------------------------
 # Sources
@@ -195,6 +209,7 @@ target_link_libraries(
 
     PRIVATE
         Qt6::DBus
+        PkgConfig::GIO
         tomlplusplus::tomlplusplus
 )
 

@@ -4,6 +4,7 @@
 *build/
 /build/
 .DS_Store
+.vscode/
 
 # Imported theme sources and generated desktop caches.
 /gnome/upstream/

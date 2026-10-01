@@ -19,6 +19,7 @@
 #include <utility>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -56,6 +57,29 @@ namespace {
         return QStringLiteral("%1 h %2 min").arg(hours).arg(minutes);
     }
 
+    QVariantMap applicationValue(const Pedro::Papi::Gui::Application::Info& application) {
+
+        QVariantMap value;
+        value.insert(QStringLiteral("id"), QString::fromStdString(application.id));
+        value.insert(QStringLiteral("name"), QString::fromStdString(application.name));
+        value.insert(QStringLiteral("icon"), QString::fromStdString(application.icon));
+        value.insert(QStringLiteral("pinned"), application.pinned);
+        value.insert(QStringLiteral("running"), application.running);
+        return value;
+    }
+
+    QVariantList applicationValues(const std::vector<Pedro::Papi::Gui::Application::Info>& applications) {
+
+        QVariantList values;
+        values.reserve(static_cast<qsizetype>(applications.size()));
+
+        for (const auto& application : applications) {
+            values.push_back(applicationValue(application));
+        }
+
+        return values;
+    }
+
 } // namespace
 
 Backend::Backend(QObject* parent) : QObject(parent) {
@@ -68,6 +92,9 @@ Backend::Backend(QObject* parent) : QObject(parent) {
 
     connect(&refreshTimer_, &QTimer::timeout, this, &Backend::refreshSystem);
     refreshTimer_.start(1000);
+
+    connect(&applicationsRefreshTimer_, &QTimer::timeout, this, &Backend::refreshApplications);
+    applicationsRefreshTimer_.start(3000);
 
     connect(&wifiRefreshTimer_, &QTimer::timeout, this, &Backend::refreshWifi);
     wifiRefreshTimer_.start(10000);
@@ -85,6 +112,7 @@ Backend::Backend(QObject* parent) : QObject(parent) {
     qDebug() << "Wallpaper exists:" << QFileInfo::exists(QString::fromStdString(currentWallpaper.string()));
 
     refreshSystem();
+    refreshApplications();
     refreshWifi();
     refreshBluetooth();
 }
@@ -126,6 +154,15 @@ QString Backend::documentText() const {
 }
 QString Backend::statusMessage() const {
     return statusMessage_;
+}
+QVariantList Backend::installedApplications() const {
+    return installedApplications_;
+}
+QVariantList Backend::pinnedApplications() const {
+    return pinnedApplications_;
+}
+QString Backend::applicationError() const {
+    return applicationError_;
 }
 bool Backend::wifiAvailable() const {
     return wifiAvailable_;
@@ -219,6 +256,48 @@ void Backend::createDirectory(const QString& path) {
         setStatusMessage(QStringLiteral("Se creó %1 mediante PAPI").arg(path));
     } catch (const std::exception& error) {
         setStatusMessage(QStringLiteral("No se pudo crear la carpeta: %1").arg(error.what()));
+    }
+}
+
+void Backend::refreshApplications() {
+
+    if (applicationsRefreshPending_) {
+        return;
+    }
+
+    using Result = Refresh<Pedro::Papi::Gui::Application::Snapshot>;
+    auto* watcher = new QFutureWatcher<Result>(this);
+    applicationsRefreshPending_ = true;
+
+    connect(watcher, &QFutureWatcher<Result>::finished, this, [this, watcher] {
+        const auto result = watcher->result();
+        watcher->deleteLater();
+        applicationsRefreshPending_ = false;
+
+        if (!result.snapshot.has_value()) {
+            applicationError_ = result.error;
+            emit applicationsChanged();
+            return;
+        }
+
+        const auto& snapshot = *result.snapshot;
+        installedApplications_ = applicationValues(snapshot.installed);
+        pinnedApplications_ = applicationValues(snapshot.pinned);
+        applicationError_.clear();
+        emit applicationsChanged();
+    });
+
+    watcher->setFuture(QtConcurrent::run([] { return readSnapshot<Pedro::Papi::Gui::Application::Manager>(); }));
+}
+
+void Backend::setApplicationPinned(const QString& id, bool pinned) {
+
+    try {
+        applications_.setPinned(id.toStdString(), pinned);
+        refreshApplications();
+    } catch (const std::exception& error) {
+        applicationError_ = QString::fromUtf8(error.what());
+        emit applicationsChanged();
     }
 }
 

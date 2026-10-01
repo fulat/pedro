@@ -14,7 +14,7 @@ Controls.Button {
 
     contentItem: Controls.Label {
         text: root.text
-        color: Theme.textPrimary
+        color: Theme.white
         font.pixelSize: Theme.fontNormal
         font.weight: root.strongText ? Font.Bold : Font.Medium
         horizontalAlignment: Text.AlignHCenter

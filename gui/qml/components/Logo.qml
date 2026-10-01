@@ -19,7 +19,7 @@ Item {
     signal panelRequested(string mode, real anchorX, string source)
     signal desktopRequested
 
-    readonly property real barHeight: 64
+    readonly property real barHeight: 48
 
     height: barHeight
 
@@ -32,16 +32,16 @@ Item {
     Item {
         id: logoButton
 
-        x: 22
-        y: 5
-        width: 54
-        height: 54
+        x: 18
+        y: 6
+        width: 36
+        height: 36
 
-        Glass {
+        // Applies the shared liquid surface while preserving an exact circle.
+        Liquid {
             anchors.fill: parent
             backdrop: root.backdrop
-            softShadow: true
-            cornerRadius: logoButton.width / 2
+            cornerRadius: width / 2
         }
 
         Rectangle {
@@ -58,9 +58,9 @@ Item {
 
         Image {
             anchors.centerIn: parent
-            width: 32
-            height: 32
-            source: "../../assets/logo.svg"
+            width: 20
+            height: 20
+            source: "../../assets/logo.png"
             sourceSize: Qt.size(128, 128)
             fillMode: Image.PreserveAspectFit
             smooth: true
@@ -77,7 +77,7 @@ Item {
         }
 
         ToolTip.visible: logoMouse.containsMouse
-        ToolTip.delay: 500
+        ToolTip.delay: 400
         ToolTip.text: "Pedro OS"
     }
 
@@ -85,23 +85,23 @@ Item {
         id: statusPill
 
         anchors.top: parent.top
-        anchors.topMargin: 6
+        anchors.topMargin: 10
         anchors.right: parent.right
         anchors.rightMargin: 20
-        width: statusRow.width + 24
-        height: 48
+        width: statusRow.width + 16
+        height: 30
 
-        Glass {
+        Liquid {
             anchors.fill: parent
             backdrop: root.backdrop
-            cornerRadius: 24
+            cornerRadius: 15
         }
 
         Row {
             id: statusRow
 
             anchors.centerIn: parent
-            spacing: 8
+            spacing: 4
 
             TopAction {
                 id: searchButton
@@ -113,19 +113,19 @@ Item {
 
             Rectangle {
                 width: 1
-                height: 24
+                height: 20
                 y: (statusRow.height - height) / 2
                 color: Theme.dividerBright
             }
 
             Item {
                 id: notificationsButton
-                width: 32
-                height: 38
+                width: 24
+                height: 24
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 16
+                    radius: 12
                     color: notificationMouse.containsMouse ? Theme.actionHover : "transparent"
 
                     Behavior on color {
@@ -137,6 +137,7 @@ Item {
 
                 Canvas {
                     id: notificationCanvas
+                    scale: 0.74
                     anchors.centerIn: parent
                     width: 21
                     height: 23
@@ -165,10 +166,10 @@ Item {
 
             Rectangle {
                 id: controlButton
-                width: 34
-                height: 34
+                width: 22
+                height: 22
                 y: (statusRow.height - height) / 2
-                radius: 17
+                radius: 11
                 color: controlMouse.containsMouse ? Theme.controlOrbHover : Theme.controlOrbBackground
                 border.width: 1
                 border.color: Theme.controlOrbBorder
@@ -181,9 +182,9 @@ Item {
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: 20
-                    height: 20
-                    radius: 10
+                    width: 16
+                    height: 16
+                    radius: 8
                     gradient: Gradient {
                         GradientStop {
                             position: 0
@@ -201,9 +202,9 @@ Item {
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 11
-                        height: 11
-                        radius: 6
+                        width: 9
+                        height: 9
+                        radius: 5
                         color: Theme.controlOrbCenter
                         border.color: Theme.controlOrbHighlight
                     }
@@ -231,7 +232,7 @@ Item {
                 y: (statusRow.height - height) / 2
                 text: "87%"
                 color: Theme.white
-                font.pixelSize: 14
+                font.pixelSize: 13
                 font.weight: Font.Medium
             }
 
@@ -240,7 +241,7 @@ Item {
                 y: (statusRow.height - height) / 2
                 text: Clock.format(root.currentTime).split("   ")[0]
                 color: Theme.white
-                font.pixelSize: 14
+                font.pixelSize: 13
                 font.weight: Font.Medium
             }
 
@@ -248,16 +249,16 @@ Item {
                 y: (statusRow.height - height) / 2
                 text: Qt.formatTime(root.currentTime, "HH:mm")
                 color: Theme.white
-                font.pixelSize: 14
+                font.pixelSize: 13
                 font.weight: Font.DemiBold
             }
 
             Rectangle {
                 id: profileButton
-                width: 36
-                height: 36
+                width: 22
+                height: 22
                 y: (statusRow.height - height) / 2
-                radius: 18
+                radius: 11
                 color: profileMouse.containsMouse ? Theme.profileHover : Theme.profileBackground
                 border.width: 1
                 border.color: Theme.profileBorder
@@ -270,8 +271,8 @@ Item {
 
                 Image {
                     anchors.centerIn: parent
-                    width: 25
-                    height: 25
+                    width: 16
+                    height: 16
                     source: "../../assets/logo.png"
                     fillMode: Image.PreserveAspectFit
                     smooth: true
@@ -301,12 +302,12 @@ Item {
         property bool highlighted: false
         signal activated
 
-        width: 32
-        height: 38
+        width: 24
+        height: 24
 
         Rectangle {
             anchors.fill: parent
-            radius: 16
+            radius: 12
             color: action.highlighted || actionMouse.containsMouse ? Theme.actionHover : "transparent"
 
             Behavior on color {
@@ -318,8 +319,8 @@ Item {
 
         Icon.Tinted {
             anchors.centerIn: parent
-            width: 22
-            height: 22
+            width: 16
+            height: 16
             source: action.icon
             tint: Theme.white
         }
@@ -333,7 +334,7 @@ Item {
         }
 
         ToolTip.visible: actionMouse.containsMouse
-        ToolTip.delay: 500
+        ToolTip.delay: 400
         ToolTip.text: action.description
     }
 }

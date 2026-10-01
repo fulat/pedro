@@ -13,7 +13,7 @@ Rectangle {
     property string title
     property string subtitle
     property url icon
-    property real symbolSize: 25
+    property real symbolSize: 23
     property real symbolOffsetY: 0
     property bool active: false
     property bool toggleable: true
@@ -24,7 +24,7 @@ Rectangle {
     signal toggleRequested(bool state)
     signal detailsRequested
     Layout.fillWidth: true
-    implicitHeight: 68
+    implicitHeight: 58
     radius: 9
     color: mouse.pressed ? Theme.overlayPressed : root.hovered ? Theme.overlayHover : "transparent"
 
@@ -53,9 +53,9 @@ Rectangle {
         spacing: 10
 
         Rectangle {
-            implicitWidth: 48
-            implicitHeight: 48
-            radius: 24
+            implicitWidth: 40
+            implicitHeight: 40
+            radius: 20
             color: Theme.cardSurface
             border.width: 1
             border.color: root.active ? Theme.cardBorderStrong : Theme.cardBorder
@@ -76,7 +76,7 @@ Rectangle {
                 Layout.fillWidth: true
                 text: root.title
                 color: Theme.white
-                font.pixelSize: 16
+                font.pixelSize: 14
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }

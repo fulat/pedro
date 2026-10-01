@@ -2,54 +2,6 @@
 
 // Supplies temporary presentation models until PAPI exposes live equivalents.
 
-// Applications pinned permanently to the dock.
-const pinnedApps = [
-    {
-        id: "files",
-        name: "Archivos",
-        icon: "folder"
-    },
-    {
-        id: "browser",
-        name: "Navegador",
-        icon: "browser"
-    },
-    {
-        id: "terminal",
-        name: "Terminal",
-        icon: "terminal"
-    },
-    {
-        id: "music",
-        name: "Música",
-        icon: "music"
-    },
-    {
-        id: "photos",
-        name: "Fotos",
-        icon: "photos"
-    }
-]
-
-// Applications currently represented in the recent section of the dock.
-const recentApps = [
-    {
-        id: "chat",
-        name: "Mensajes",
-        icon: "chat"
-    },
-    {
-        id: "notes",
-        name: "Notas",
-        icon: "notes"
-    },
-    {
-        id: "code",
-        name: "Código",
-        icon: "code"
-    }
-]
-
 // Shortcuts and initial grid positions shown on the desktop.
 const desktopShortcutRepeaterItems = [
     {

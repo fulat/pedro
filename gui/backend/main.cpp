@@ -1,4 +1,5 @@
 #include "backend.hpp"
+#include "application/icon/provider.hpp"
 #include "icons.hpp"
 #include "render/info.hpp"
 
@@ -55,6 +56,9 @@ int main(int argc, char* argv[]) {
         QIcon::setThemeName(QStringLiteral("Pedro"));
     }
 
+    // Keeps freedesktop application icons available when a platform theme is absent.
+    QIcon::setFallbackThemeName(QStringLiteral("hicolor"));
+
     /*
      * Backend exposed to QML.
      *
@@ -72,6 +76,9 @@ int main(int argc, char* argv[]) {
      * Pedro icon provider.
      */
     engine.addImageProvider("icons", new Icons);
+
+    // Full-color desktop application icons supplied by GLib application data.
+    engine.addImageProvider("applications", new Pedro::Gui::Backend::Application::Icon::Provider);
 
     /*
      * Quit cleanly if the root QML object cannot

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <pedro/papi/gui/application/manager.hpp>
 #include <pedro/papi/io/bluetooth/manager.hpp>
 #include <pedro/papi/io/network/wifi/manager.hpp>
 #include <pedro/papi/system/system.hpp>
@@ -27,6 +28,9 @@ class Backend final : public QObject {
         Q_PROPERTY(QString documentPath READ documentPath WRITE setDocumentPath NOTIFY documentPathChanged)
         Q_PROPERTY(QString documentText READ documentText NOTIFY documentTextChanged)
         Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY statusMessageChanged)
+        Q_PROPERTY(QVariantList installedApplications READ installedApplications NOTIFY applicationsChanged)
+        Q_PROPERTY(QVariantList pinnedApplications READ pinnedApplications NOTIFY applicationsChanged)
+        Q_PROPERTY(QString applicationError READ applicationError NOTIFY applicationsChanged)
         Q_PROPERTY(bool wifiAvailable READ wifiAvailable NOTIFY wifiChanged)
         Q_PROPERTY(bool wifiEnabled READ wifiEnabled NOTIFY wifiChanged)
         Q_PROPERTY(bool wifiConnected READ wifiConnected NOTIFY wifiChanged)
@@ -57,6 +61,9 @@ class Backend final : public QObject {
         [[nodiscard]] QString documentPath() const;
         [[nodiscard]] QString documentText() const;
         [[nodiscard]] QString statusMessage() const;
+        [[nodiscard]] QVariantList installedApplications() const;
+        [[nodiscard]] QVariantList pinnedApplications() const;
+        [[nodiscard]] QString applicationError() const;
         [[nodiscard]] bool wifiAvailable() const;
         [[nodiscard]] bool wifiEnabled() const;
         [[nodiscard]] bool wifiConnected() const;
@@ -78,6 +85,8 @@ class Backend final : public QObject {
         Q_INVOKABLE void loadDocument();
         Q_INVOKABLE void saveDocument(const QString& contents);
         Q_INVOKABLE void createDirectory(const QString& path);
+        Q_INVOKABLE void refreshApplications();
+        Q_INVOKABLE void setApplicationPinned(const QString& id, bool pinned);
         Q_INVOKABLE void refreshWifi();
         Q_INVOKABLE void setWifiEnabled(bool enabled);
         Q_INVOKABLE void scanWifi();
@@ -90,6 +99,7 @@ class Backend final : public QObject {
         void documentPathChanged();
         void documentTextChanged();
         void statusMessageChanged();
+        void applicationsChanged();
         void wifiChanged();
         void bluetoothChanged();
         void wallpaperChanged();
@@ -99,10 +109,12 @@ class Backend final : public QObject {
         void setStatusMessage(const QString& message);
 
         Pedro::Papi::System system_;
+        Pedro::Papi::Gui::Application::Manager applications_;
         Pedro::Papi::Network::Wifi::Manager wifi_;
         Pedro::Papi::Bluetooth::Manager bluetooth_;
 
         QTimer refreshTimer_;
+        QTimer applicationsRefreshTimer_;
         QTimer wifiRefreshTimer_;
         QTimer bluetoothRefreshTimer_;
 
@@ -117,6 +129,7 @@ class Backend final : public QObject {
         QString memorySummary_;
         QString documentPath_;
         QString documentText_;
+        QString applicationError_;
         QString bluetoothError_;
         QString statusMessage_;
         QString connectedWifiName_;
@@ -134,6 +147,10 @@ class Backend final : public QObject {
         bool bluetoothScanning_{false};
         bool bluetoothRefreshPending_{false};
 
+        bool applicationsRefreshPending_{false};
+
+        QVariantList installedApplications_;
+        QVariantList pinnedApplications_;
         QVariantList wifiNetworks_;
         QVariantList bluetoothDevices_;
 };

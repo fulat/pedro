@@ -13,6 +13,7 @@ import "../scripts/theme.js" as Theme
 
 Rectangle {
     id: root
+    color: "transparent"
 
     property Item backdrop
     property string mode
@@ -24,8 +25,8 @@ Rectangle {
     signal modeRequested(string mode)
 
     visible: mode !== ""
-    width: Math.min(mode === "quick" ? 430 : controlMode ? 408 : 360, availableWidth - 24)
-    height: Math.min(mode === "quick" ? 704 : mode === "wifi" ? 520 : mode === "bluetooth" ? 520 : mode === "sound" ? 92 : 420, availableHeight - 20)
+    width: Math.min(mode === "quick" ? 368 : controlMode ? 352 : 320, availableWidth - 24)
+    height: Math.min(mode === "quick" ? 604 : mode === "wifi" ? 460 : mode === "bluetooth" ? 460 : mode === "sound" ? 84 : 380, availableHeight - 20)
 
     Behavior on height {
         NumberAnimation {
@@ -34,8 +35,9 @@ Rectangle {
         }
     }
 
-    Glass {
+    Liquid {
         anchors.fill: parent
+        frosted: true
         backdrop: root.backdrop
         cornerRadius: 18
     }
@@ -48,7 +50,7 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: root.controlMode ? 16 : 14
+        anchors.margins: root.controlMode ? 14 : 12
         spacing: root.controlMode ? 0 : 10
 
         RowLayout {

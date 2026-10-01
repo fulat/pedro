@@ -15,6 +15,13 @@ namespace Pedro::Papi::Gui::Wallpaper {
     namespace {
 
         std::filesystem::path developmentDirectory() {
+
+            const auto sourceDirectory = qEnvironmentVariable("PEDRO_QML_DIR");
+
+            if (!sourceDirectory.isEmpty()) {
+                return std::filesystem::path(sourceDirectory.toStdString()) / "assets" / "wallpapers";
+            }
+
             return std::filesystem::path(QCoreApplication::applicationDirPath().toStdString()) / "assets" / "wallpapers";
         }
 

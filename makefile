@@ -17,9 +17,10 @@ DEV_CMAKE_ARGS ?=
 
 .DEFAULT_GOAL := image
 
-.PHONY: help host-check configure dev-configure gui-configure gui-build gui GUI dev start qml diagnose compositor build stage verify image clean
+.PHONY: help setup host-check configure dev-configure gui-configure gui-build gui GUI dev start qml diagnose compositor build stage verify image clean
 help:
 	@echo "make            Build build/images/pedro.img"
+	@echo "make setup      Install Pedro development dependencies on Ubuntu"
 	@echo "make start      Incrementally build and launch the Ubuntu-native GUI"
 	@echo "make dev        Same as make start"
 	@echo "make GUI        Same as make start"
@@ -28,6 +29,9 @@ help:
 	@echo "make qml        Relaunch the existing binary with QML loaded from source"
 	@echo "make diagnose   Launch the GUI and print display/rendering diagnostics"
 	@echo "make compositor | build | stage | verify | image | clean"
+setup:
+	./setup.sh
+
 host-check:
 	@if test "$$(uname -s)" != Linux; then \
 		echo "Pedro images require a native Linux host. Run make in Ubuntu/Linux, not macOS."; \

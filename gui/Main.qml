@@ -130,10 +130,12 @@ Components.Application {
         height: 82
         padding: 0
         focus: true
+        popupType: Popup.Item
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        background: Components.Glass {
+        background: Components.Liquid {
             backdrop: wallpaper
+            frosted: false
             cornerRadius: 13
         }
 
@@ -190,24 +192,28 @@ Components.Application {
 
         z: 16
         x: 9
-        width: 76
-        height: Math.min(530, main.height - 100)
+        width: 44
+        // Size to the navigation entries; only compact further when space is limited.
+        height: Math.min(navigationRepeater.count * 30 + Math.max(0, navigationRepeater.count - 1) * navigation.spacing + 20,
+                         Math.max(0, weatherCard.y - topBarItem.height - 24))
 
-        anchors.verticalCenter: main.contentItem.verticalCenter
+        y: Math.max(topBarItem.height + 12, Math.min((main.height - height) / 2, weatherCard.y - height - 12))
 
-        Components.Glass {
+        Components.Liquid {
             anchors.fill: parent
             backdrop: wallpaper
-            cornerRadius: 38
+            cornerRadius: 22
         }
 
         Column {
             id: navigation
 
             anchors.centerIn: parent
-            spacing: Math.max(4, Math.min(9, main.height / 100))
+            spacing: 3
 
             Repeater {
+                id: navigationRepeater
+
                 model: Mocks.osNavigationMenuItems
 
                 delegate: Item {
@@ -217,12 +223,12 @@ Components.Application {
 
                     readonly property bool selected: modelData.id === "home" ? main.panelMode === "" && !main.filesQuickWindowVisible : modelData.id === "files" ? main.filesQuickWindowVisible : main.panelSource === "nav-" + modelData.id
 
-                    width: 60
-                    height: Math.min(48, (sideBarItem.height - 24 - navigation.spacing * 8) / 9)
+                    width: 36
+                    height: Math.max(0, Math.min(30, (sideBarItem.height - 20 - navigation.spacing * Math.max(0, navigationRepeater.count - 1)) / Math.max(1, navigationRepeater.count)))
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: Math.min(47, parent.height)
+                        width: Math.min(30, parent.height)
                         height: width
                         radius: width / 2
                         color: Theme.overlayHover
@@ -237,7 +243,7 @@ Components.Application {
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: Math.min(47, parent.height)
+                        width: Math.min(30, parent.height)
                         height: width
                         radius: width / 2
                         visible: navigationEntry.selected
@@ -257,7 +263,7 @@ Components.Application {
 
                     Navigation.Glyph {
                         anchors.centerIn: parent
-                        width: Math.min(26, navigationEntry.height * 0.58)
+                        width: Math.min(17, navigationEntry.height * 0.58)
                         height: width
                         kind: navigationEntry.modelData.icon
                         controller: mainController
@@ -266,7 +272,7 @@ Components.Application {
 
                     Components.Icon {
                         anchors.centerIn: parent
-                        width: Math.min(26, navigationEntry.height * 0.58)
+                        width: Math.min(17, navigationEntry.height * 0.58)
                         height: width
                         visible: navigationEntry.modelData.icon === "settings" || navigationEntry.modelData.icon === "moon" || navigationEntry.modelData.icon === "brightness" || navigationEntry.modelData.icon === "power"
                         source: visible ? "assets/icons/" + navigationEntry.modelData.icon + ".svg" : ""
@@ -299,62 +305,62 @@ Components.Application {
         id: weatherCard
 
         z: 12
-        width: 190
-        height: 70
+        width: 164
+        height: 56
 
         anchors.left: main.contentItem.left
         anchors.leftMargin: 16
         anchors.bottom: main.contentItem.bottom
-        anchors.bottomMargin: main.width < 900 ? 105 : 18
+        anchors.bottomMargin: main.width < 900 ? 80 : 16
 
-        Components.Glass {
+        Components.Liquid {
             anchors.fill: parent
             backdrop: wallpaper
-            cornerRadius: 35
+            cornerRadius: 28
         }
 
         Rectangle {
-            x: 27
-            y: 16
-            width: 25
-            height: 25
-            radius: 13
+            x: 22
+            y: 12
+            width: 20
+            height: 20
+            radius: 10
             color: Theme.weatherSun
         }
 
         Rectangle {
-            x: 20
-            y: 35
-            width: 42
+            x: 16
+            y: 28
+            width: 34
+            height: 14
+            radius: 7
+            color: Theme.weatherCloud
+        }
+
+        Rectangle {
+            x: 22
+            y: 22
+            width: 20
             height: 17
             radius: 9
             color: Theme.weatherCloud
         }
 
-        Rectangle {
-            x: 27
-            y: 28
-            width: 24
-            height: 20
-            radius: 10
-            color: Theme.weatherCloud
-        }
-
         Text {
-            x: 80
-            y: 9
+            x: 62
+            y: 5
             text: "28°"
             color: Theme.white
-            font.pixelSize: 31
+            font.pixelSize: 26
             font.weight: Font.Light
         }
 
         Text {
-            x: 81
-            y: 44
+            x: 63
+            y: 35
             text: "Santo Domingo"
             color: Theme.weatherPlace
-            font.pixelSize: 13
+            font.pixelSize: 12
         }
     }
 

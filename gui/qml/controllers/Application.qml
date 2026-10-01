@@ -1,6 +1,6 @@
 import QtQuick
+import gui
 import "../scripts/constants.js" as Constants
-import "../scripts/mocks.js" as Mocks
 
 // Owns the graphical shell state and every operation triggered by its views.
 QtObject {
@@ -24,14 +24,13 @@ QtObject {
     property var sideBar
     property var topBar
 
-    property var pinnedApps: Mocks.pinnedApps
-    property var recentApps: Mocks.recentApps
+    readonly property var installedApps: Papi.installedApplications
+    readonly property var pinnedApps: Papi.pinnedApplications
 
-    readonly property real dockIconSize: Math.max(27, Math.min(38, window.width / 42))
-    readonly property real dockTileSize: dockIconSize + 14
-    readonly property real dockSpacing: Math.max(5, Math.min(10, window.width / 160))
-
-    signal applicationRequested(string applicationId)
+    // Logical pixels keep shell controls consistent across screen sizes and DPI.
+    readonly property real dockIconSize: 26
+    readonly property real dockTileSize: 34
+    readonly property real dockSpacing: 4
 
     // Closes the active shell panel.
     function closePanel() {
@@ -49,20 +48,6 @@ QtObject {
         panelAnchorX = anchorX;
         panelSource = source;
         panelMode = name;
-    }
-
-    // Routes a dock activation to the files panel or to an application request.
-    function activateDockApp(app, anchorX) {
-        if (app.id === "files") {
-            togglePanel("files", anchorX, "dock-files");
-            return;
-        }
-
-        if (!pinnedApps.some(pinned => pinned.id === app.id)) {
-            recentApps = [app].concat(recentApps.filter(recent => recent.id !== app.id)).slice(0, 3);
-        }
-
-        applicationRequested(app.id);
     }
 
     // Presents the standalone files window above the shell.

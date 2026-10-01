@@ -61,14 +61,14 @@ Item {
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 62
-        height: 62
+        width: 57
+        height: 57
         kind: shortcut.app ? shortcut.app.icon : ""
     }
 
     Text {
         anchors.top: parent.top
-        anchors.topMargin: 70
+        anchors.topMargin: 65
         anchors.left: parent.left
         anchors.right: parent.right
         text: shortcut.app ? shortcut.app.name : ""

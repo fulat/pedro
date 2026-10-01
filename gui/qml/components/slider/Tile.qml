@@ -12,7 +12,7 @@ Item {
     property url icon
     property real level: 0.5
     Layout.fillWidth: true
-    implicitHeight: 56
+    implicitHeight: 48
 
     RowLayout {
         anchors.fill: parent
@@ -22,14 +22,14 @@ Item {
 
         Icon.Tinted {
             source: root.icon
-            Layout.preferredWidth: 25
-            Layout.preferredHeight: 25
+            Layout.preferredWidth: 22
+            Layout.preferredHeight: 22
         }
         Label {
             Layout.preferredWidth: 64
             text: root.title
             color: Theme.white
-            font.pixelSize: 15
+            font.pixelSize: 14
             font.weight: Font.Medium
         }
         Slider {

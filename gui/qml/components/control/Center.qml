@@ -11,7 +11,7 @@ import "../../scripts/theme.js" as Theme
 
 Item {
     id: root
-    implicitHeight: 660
+    implicitHeight: 568
     property alias notice: controller.notice
     readonly property bool wifiEnabled: Papi.wifiEnabled
     readonly property bool wifiConnected: Papi.wifiConnected
@@ -36,7 +36,7 @@ Item {
                 id: wifiTile
                 title: "Wi-Fi"
                 icon: "../../../assets/icons/wifi.svg"
-                symbolSize: 26
+                symbolSize: 23
                 symbolOffsetY: 1
                 active: Papi.wifiEnabled
                 toggleable: true
@@ -89,7 +89,7 @@ Item {
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 186
+            Layout.preferredHeight: 162
 
             GridLayout {
                 anchors.fill: parent
@@ -146,7 +146,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
-                height: 166
+                height: 142
                 color: Theme.overlayPressed
             }
         }
