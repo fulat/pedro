@@ -14,9 +14,10 @@ Item {
     property Item backdrop
     property var shell
     property bool vertical: false
+    readonly property real horizontalPadding: 16
     property real maximumLength: shell ? (vertical ? shell.height - 32 : shell.width - 32) : 0
 
-    width: vertical ? 48 : Math.min(maximumLength, dockLayout.implicitWidth + 20)
+    width: vertical ? 48 : Math.min(maximumLength, dockLayout.implicitWidth + horizontalPadding * 2)
     height: vertical ? Math.min(maximumLength, dockLayout.implicitHeight + 20) : 48
 
     // Owns the favorite mutation requested by the presentation.
@@ -47,7 +48,7 @@ Item {
         columns: dock.vertical ? 1 : 0
         rows: dock.vertical ? 0 : 1
         spacing: dock.shell ? dock.shell.dockSpacing : 0
-        scale: Math.max(0, Math.min(1, dock.vertical ? (dock.height - 20) / Math.max(1, implicitHeight) : (dock.width - 20) / Math.max(1, implicitWidth)))
+        scale: Math.max(0, Math.min(1, dock.vertical ? (dock.height - 20) / Math.max(1, implicitHeight) : (dock.width - dock.horizontalPadding * 2) / Math.max(1, implicitWidth)))
 
         Repeater {
             model: dock.shell ? dock.shell.pinnedApps : []
