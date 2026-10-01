@@ -22,7 +22,7 @@ Rectangle {
         anchors.fill: parent
         spacing: 0
         Loader {
-            Layout.preferredWidth: 205
+            Layout.preferredWidth: browser.controller && browser.controller.sidebarCollapsed ? 62 : 205
             Layout.fillHeight: true
             source: "sidebar.qml"
             onLoaded: item.controller = Qt.binding(() => browser.controller)

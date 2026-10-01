@@ -69,6 +69,10 @@ ApplicationWindow {
             item.headerOffset = 222;
             item.titleOffset = 88;
             item.titleSize = 16;
+            item.titleInteractive = true;
+            item.titleClicked.connect(() => {
+                if (item.controller) item.controller.sidebarCollapsed = !item.controller.sidebarCollapsed;
+            });
             item.contentMargin = 0;
             item.contentTopGap = 0;
             item.windowRadius = 22;

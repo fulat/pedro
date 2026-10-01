@@ -17,6 +17,8 @@ Window {
     property real headerHeight: 44
     property real titleOffset: 90
     property real titleSize: 13
+    property bool titleInteractive: false
+    signal titleClicked()
     property real contentMargin: 12
     property real contentTopGap: 6
     property real headerOffset: 240
@@ -159,6 +161,15 @@ Window {
                 font.pixelSize: frame.titleSize
                 font.weight: frame.titleSize > 13 ? Font.Bold : Font.Medium
                 elide: Text.ElideRight
+                MouseArea {
+                    objectName: "windowTitleToggle"
+                    enabled: frame.titleInteractive
+                    width: Math.min(parent.width, parent.contentWidth)
+                    height: parent.height
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: frame.titleClicked()
+                }
             }
         }
 
