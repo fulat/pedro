@@ -69,23 +69,13 @@ Item {
         width: dock.shell ? dock.shell.dockTileSize : 0
         height: (dock.shell ? dock.shell.dockTileSize : 0) + 8
 
-        Rectangle {
+        Item {
             id: entryTile
 
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             width: dock.shell ? dock.shell.dockTileSize : 0
             height: width
-            radius: 13
-            color: entryMouse.containsMouse ? Theme.actionHover : "transparent"
-            border.width: entryMouse.containsMouse ? 1 : 0
-            border.color: Theme.cardBorderStrong
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: 140
-                }
-            }
         }
 
         Application.Icon {
@@ -93,6 +83,11 @@ Item {
             width: dock.shell ? dock.shell.dockIconSize : 0
             height: width
             name: entry.app ? entry.app.icon : ""
+            scale: entryMouse.containsMouse ? 1.08 : 1
+
+            Behavior on scale {
+                NumberAnimation { duration: 180; easing.type: Easing.InOutQuad }
+            }
         }
 
         Rectangle {
