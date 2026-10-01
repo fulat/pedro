@@ -10,6 +10,7 @@ Item {
     id: header
     property bool searchExpanded: false
     property bool pathExpanded: false
+    readonly property real locationMinimumWidth: Math.min(220, Math.max(110, width - (searchExpanded ? 220 : 44) - 278))
     readonly property string currentPath: controller && controller.directory ? controller.directory.path || controller.directory.location : ""
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
@@ -54,9 +55,9 @@ Item {
         Rectangle {
             id: location
             objectName: "filesLocation"
-            Layout.minimumWidth: 110
-            Layout.maximumWidth: Math.max(110, Math.min(header.pathExpanded ? 480 : 240, header.width - (header.searchExpanded ? 220 : 44) - 278))
-            Layout.preferredWidth: Math.min(Layout.maximumWidth, Math.max(110, header.pathExpanded ? pathMetrics.advanceWidth + 20 : nameMetrics.advanceWidth + 50))
+            Layout.minimumWidth: header.locationMinimumWidth
+            Layout.maximumWidth: Math.max(header.locationMinimumWidth, Math.min(header.pathExpanded ? 480 : 320, header.width - (header.searchExpanded ? 220 : 44) - 278))
+            Layout.preferredWidth: Math.min(Layout.maximumWidth, Math.max(header.locationMinimumWidth, header.pathExpanded ? pathMetrics.advanceWidth + 20 : nameMetrics.advanceWidth + 50))
             Layout.preferredHeight: 38
             radius: 12
             color: header.colors.card
