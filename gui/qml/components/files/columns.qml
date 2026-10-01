@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls.Basic
 import Pedro.Files 1.0
 import "../desktop" as Desktop
+import "../icon" as Icon
 import "palette.js" as Palette
 
 ScrollView {
@@ -42,7 +43,23 @@ ScrollView {
                     anchors.rightMargin: 9
                     clip: true
                     model: directory.entriesModel
-                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                    ScrollBar.vertical: ScrollBar {
+                        orientation: Qt.Vertical
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: 8
+                        visible: size < 1
+                        policy: ScrollBar.AsNeeded
+                        contentItem: Rectangle {
+                            implicitWidth: 6
+                            implicitHeight: 6
+                            radius: 3
+                            color: "#c2bdba"
+                            opacity: parent.pressed ? 1 : parent.hovered ? 0.9 : 0.7
+                        }
+                        background: Item {}
+                    }
                     delegate: Rectangle {
                         id: row
                         objectName: "filesColumn-" + column.index + "-" + entry.name
@@ -51,7 +68,8 @@ ScrollView {
                         height: 38
                         radius: 7
                         color: column.selected === entry.id || columns.locations[column.index + 1] === entry.url ? columns.colors.selected : "transparent"
-                        Desktop.Icon { x: 8; y: 5; width: 28; height: 28; kind: row.entry.icon || "file" }
+                        Desktop.Icon { x: 8; y: 5; width: 28; height: 28; kind: "folder"; cornerRadius: 2; visible: row.entry.isDirectory }
+                        Icon.Tinted { x: 11; y: 8; width: 22; height: 22; visible: !row.entry.isDirectory; source: (row.entry.icon || "file") + ".svg"; tint: columns.colors.muted }
                         Text { x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; text: row.entry.name; color: columns.colors.ink; font.pixelSize: 12; elide: Text.ElideMiddle }
                         Text { visible: row.entry.isDirectory; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: columns.colors.muted }
                         MouseArea {

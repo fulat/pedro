@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import "../desktop" as Desktop
+import "../icon" as Icon
 import "palette.js" as Palette
 
 Rectangle {
@@ -20,7 +21,18 @@ Rectangle {
         y: 8
         width: 64
         height: 64
-        kind: card.entry.icon || "file"
+        kind: "folder"
+        visible: card.entry.isDirectory
+        cornerRadius: 5
+    }
+    Icon.Tinted {
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: 17
+        width: 46
+        height: 46
+        visible: !card.entry.isDirectory
+        source: (card.entry.icon || "file") + ".svg"
+        tint: card.colors.muted
     }
     Text {
         anchors.left: parent.left

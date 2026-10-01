@@ -22,7 +22,7 @@ Rectangle {
         anchors.fill: parent
         spacing: 0
         Loader {
-            Layout.preferredWidth: browser.controller && browser.controller.sidebarCollapsed ? 62 : 205
+            Layout.preferredWidth: 205
             Layout.fillHeight: true
             source: "sidebar.qml"
             onLoaded: item.controller = Qt.binding(() => browser.controller)
@@ -44,13 +44,34 @@ Rectangle {
             }
             ScrollView {
                 id: contentScroll
-                visible: !browser.controller || browser.controller.viewMode !== "columns"
+                objectName: "filesBodyScroll"
+                visible: !browser.controller || browser.controller.viewMode === "grid" || browser.controller.viewMode === "mixed"
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumHeight: 0
+                Layout.preferredHeight: 0
                 clip: true
                 contentWidth: availableWidth
-                ScrollBar.vertical.policy: ScrollBar.AsNeeded
+                contentHeight: body.implicitHeight
+                ScrollBar.vertical: ScrollBar {
+                        orientation: Qt.Vertical
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: 8
+                        visible: size < 1
+                        policy: ScrollBar.AsNeeded
+                        contentItem: Rectangle {
+                            implicitWidth: 6
+                            implicitHeight: 6
+                            radius: 3
+                            color: "#c2bdba"
+                            opacity: parent.pressed ? 1 : parent.hovered ? 0.9 : 0.7
+                        }
+                        background: Item {}
+                    }
                 ColumnLayout {
+                    id: body
                     width: contentScroll.availableWidth
                     spacing: 12
                     GridView {
@@ -75,7 +96,7 @@ Rectangle {
                         }
                     }
                     Loader {
-                        visible: browser.controller && (browser.controller.viewMode === "list" || browser.controller.viewMode === "mixed" && browser.controller.files.length > 0)
+                        visible: browser.controller && browser.controller.viewMode === "mixed" && browser.controller.files.length > 0
                         Layout.fillWidth: true
                         Layout.preferredHeight: item ? item.implicitHeight : 0
                         source: "table.qml"
@@ -92,6 +113,14 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                     }
                 }
+            }
+            Loader {
+                visible: browser.controller && browser.controller.viewMode === "list"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumHeight: 0
+                source: "table.qml"
+                onLoaded: { item.controller = Qt.binding(() => browser.controller); item.all = true; item.embedded = false; }
             }
             Loader {
                 visible: browser.controller && browser.controller.viewMode === "columns"

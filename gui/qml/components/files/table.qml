@@ -6,14 +6,15 @@ import "../icon" as Icon
 import "../desktop" as Desktop
 import "palette.js" as Palette
 
-Column {
+Item {
     id: table
+    property bool embedded: true
     property bool folders: false
     property bool all: true
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     width: parent.width
-    spacing: 0
+    implicitHeight: embedded ? 33 + fileList.count * 43 : 0
     Row {
         width: parent.width; height: 33
         Repeater {
@@ -22,11 +23,30 @@ Column {
         }
     }
     ListView {
-        objectName: table.folders ? "filesFolderList" : "filesFileList"
+        id: fileList
+        y: 33
+        objectName: table.embedded ? "filesMixedList" : "filesFileList"
         width: table.width
-        height: Math.min(count * 43, 360)
+        height: table.embedded ? count * 43 : Math.max(0, table.height - 33)
+        interactive: !table.embedded
         clip: true
-        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+        ScrollBar.vertical: ScrollBar {
+                        orientation: Qt.Vertical
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: 8
+                        visible: size < 1
+                        policy: ScrollBar.AsNeeded
+                        contentItem: Rectangle {
+                            implicitWidth: 6
+                            implicitHeight: 6
+                            radius: 3
+                            color: "#c2bdba"
+                            opacity: parent.pressed ? 1 : parent.hovered ? 0.9 : 0.7
+                        }
+                        background: Item {}
+                    }
         model: table.controller && table.controller.directory ? (table.all ? table.controller.directory.entriesModel : table.folders ? table.controller.directory.folderModel : table.controller.directory.fileModel) : null
         delegate: Rectangle {
             id: row
@@ -41,7 +61,8 @@ Column {
                 anchors.fill: parent
                 Item {
                     width: table.width * 0.28; height: parent.height
-                    Desktop.Icon { x: 12; anchors.verticalCenter: parent.verticalCenter; width: 32; height: 32; kind: row.modelData.icon || "file" }
+                    Desktop.Icon { x: 12; anchors.verticalCenter: parent.verticalCenter; width: 34; height: 34; cornerRadius: 2; kind: "folder"; visible: row.modelData.isDirectory }
+                    Icon.Tinted { x: 15; anchors.verticalCenter: parent.verticalCenter; width: 25; height: 25; visible: !row.modelData.isDirectory; source: (row.modelData.icon || "file") + ".svg"; tint: table.colors.muted }
                     Text { x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; elide: Text.ElideMiddle; text: row.modelData.name; color: table.colors.ink; font.pixelSize: 12; font.bold: true }
                 }
                 Text { width: table.width * 0.18; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.type; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
