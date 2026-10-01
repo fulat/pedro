@@ -136,12 +136,19 @@ Window {
             height: 12
             radius: 6
             color: parent.control.hovered || parent.control.down ? "#4a4a4f" : parent.tint
+            Behavior on color {
+                ColorAnimation { duration: 180; easing.type: Easing.InOutQuad }
+            }
         }
         Icon.Tinted {
             anchors.centerIn: parent
             width: 15
             height: 15
-            visible: parent.control.hovered || parent.control.down
+            opacity: parent.control.hovered || parent.control.down ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity {
+                NumberAnimation { duration: 180; easing.type: Easing.InOutQuad }
+            }
             source: "window-" + parent.symbol + ".svg"
             tint: parent.tint
         }
