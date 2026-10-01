@@ -25,7 +25,7 @@ ApplicationWindow {
     property alias sideBar: applicationController.sideBar
     property alias topBar: applicationController.topBar
 
-    readonly property bool filesQuickWindowVisible: filesQuickWindow.visible
+    readonly property bool filesQuickWindowVisible: filesWindowLoader.item ? filesWindowLoader.item.visible : false
     readonly property real designAspectRatio: Constants.DESIGN_ASPECT_RATIO
     readonly property real developmentWidth: Screen.desktopAvailableWidth > 0 ? Math.min(1600, Screen.desktopAvailableWidth * 0.82) : 1280
     readonly property real developmentHeight: Screen.desktopAvailableHeight > 0 ? Math.min(developmentWidth / designAspectRatio, Screen.desktopAvailableHeight * 0.82) : developmentWidth / designAspectRatio
@@ -48,45 +48,25 @@ ApplicationWindow {
 
         objectName: "applicationController"
         window: window
-        filesQuickWindow: filesQuickWindow
+        filesQuickWindow: filesWindowLoader.item
     }
 
-    // Provides the secondary files surface managed by the controller.
-    Window {
-        id: filesQuickWindow
+    // All Pedro-owned windows can reuse the same QML window decoration.
+    Loader {
+        id: filesWindowLoader
+        source: "window/frame.qml"
 
-        title: "Archivos · Ventana rápida"
-        color: "transparent"
-        width: window.width
-        height: window.height
-        x: window.x + Math.round((window.width - width) / 2)
-        y: window.y + Math.round((window.height - height) / 2)
-        visible: false
-        transientParent: window
-        flags: Qt.Window | Qt.FramelessWindowHint
-
-        // Sample the backend wallpaper locally: textures cannot cross windows.
-        Image {
-            id: filesBackdrop
-
-            anchors.fill: parent
-            source: Backend.wallpaper
-            fillMode: Image.PreserveAspectCrop
-            smooth: true
-            mipmap: true
-            visible: false
-        }
-
-        Root {
-            anchors.centerIn: parent
-            width: Math.min(760, filesQuickWindow.width - 32)
-            height: Math.min(520, filesQuickWindow.height - 32)
-            availableWidth: filesQuickWindow.width
-            availableHeight: filesQuickWindow.height
-            backdrop: filesBackdrop
-            mode: "files"
-
-            onCloseRequested: filesQuickWindow.close()
+        onLoaded: {
+            item.objectName = "filesQuickWindow";
+            item.title = "Archivos";
+            item.contentSource = Qt.resolvedUrl("files/View.qml");
+            item.transientParent = null;
+            item.width = Math.min(760, window.width * 0.85);
+            item.height = Math.min(520, window.height * 0.85);
+            item.minimumWidth = Math.min(420, item.width);
+            item.minimumHeight = Math.min(320, item.height);
+            item.x = window.x + Math.round((window.width - item.width) / 2);
+            item.y = window.y + Math.round((window.height - item.height) / 2);
         }
     }
 }

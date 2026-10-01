@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import gui
 import "../scripts/constants.js" as Constants
 
@@ -53,7 +54,11 @@ QtObject {
     // Presents the standalone files window above the shell.
     function openFilesQuickWindow() {
         closePanel();
-        filesQuickWindow.show();
+        if (filesQuickWindow.visibility === Window.Minimized) {
+            filesQuickWindow.showNormal();
+        } else {
+            filesQuickWindow.show();
+        }
         filesQuickWindow.raise();
         filesQuickWindow.requestActivate();
     }
