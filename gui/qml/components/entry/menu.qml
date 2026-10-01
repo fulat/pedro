@@ -19,7 +19,7 @@ Controls.Menu {
     signal actionRequested(string action)
 
     width: 304
-    height: Math.min(contentItem.implicitHeight + topPadding + bottomPadding, maximumHeight)
+    height: Math.max(1, Math.min(contentItem.implicitHeight + topPadding + bottomPadding, maximumHeight))
     padding: 6
     popupType: Controls.Popup.Window
     cascade: true
@@ -139,6 +139,8 @@ Controls.Menu {
         id: openWithMenu
         title: qsTranslate("Pedro", "file.menu.open.with")
         width: 210
+        padding: 6
+        height: Math.max(1, Math.min(contentItem.implicitHeight + topPadding + bottomPadding, root.maximumHeight))
         popupType: Controls.Popup.Window
         delegate: Entry {}
         background: Surface {
@@ -214,6 +216,8 @@ Controls.Menu {
         id: compressionMenu
         title: qsTranslate("Pedro", "folder.menu.compress")
         width: 210
+        padding: 6
+        height: Math.max(1, Math.min(contentItem.implicitHeight + topPadding + bottomPadding, root.maximumHeight))
         popupType: Controls.Popup.Window
         delegate: Entry {}
         background: Surface {
@@ -252,6 +256,8 @@ Controls.Menu {
         id: sharingMenu
         title: qsTranslate("Pedro", "folder.menu.share")
         width: 210
+        padding: 6
+        height: Math.max(1, Math.min(contentItem.implicitHeight + topPadding + bottomPadding, root.maximumHeight))
         popupType: Controls.Popup.Window
         delegate: Entry {}
         background: Surface {

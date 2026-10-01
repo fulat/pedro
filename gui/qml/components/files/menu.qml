@@ -12,6 +12,7 @@ Controls.Menu {
     readonly property bool canCreate: !!directory && String(directory.location).startsWith("file:")
     signal informationRequested()
     width: 260
+    height: Math.max(1, contentItem.implicitHeight + topPadding + bottomPadding)
     padding: 6
     popupType: Controls.Popup.Window
     background: Loader {
