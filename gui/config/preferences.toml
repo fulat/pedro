@@ -9,7 +9,7 @@ mode = "dark" # "light" or "dark"
 # Wallpaper configuration for dark themes
 [wallpaper.dark]
 type = "system"
-current = "wallpaper.jpeg"
+current = "wallpaper-car.jpeg"
 
 # Wallpaper configuration for light themes
 [wallpaper.light]
