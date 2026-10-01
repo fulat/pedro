@@ -157,9 +157,10 @@ Window {
             width: 12
             height: 12
             radius: 6
-            color: parent.control.hovered || parent.control.down ? "#4a4a4f" : parent.tint
-            Behavior on color {
-                ColorAnimation { duration: 180; easing.type: Easing.InOutQuad }
+            color: parent.tint
+            opacity: parent.control.hovered || parent.control.down ? 0 : 1
+            Behavior on opacity {
+                NumberAnimation { duration: 180; easing.type: Easing.InOutQuad }
             }
         }
         Icon.Tinted {
