@@ -52,6 +52,7 @@ class Backend final : public QObject {
         Q_PROPERTY(QUrl wallpaper READ wallpaper NOTIFY wallpaperChanged)
         Q_PROPERTY(QString language READ language NOTIFY languageChanged)
         Q_PROPERTY(QString appearanceMode READ appearanceMode NOTIFY appearanceModeChanged)
+        Q_PROPERTY(qreal dockHoverScale READ dockHoverScale NOTIFY dockHoverScaleChanged)
 
     public:
 
@@ -92,6 +93,8 @@ class Backend final : public QObject {
 
         QString appearanceMode() const;
 
+        qreal dockHoverScale() const;
+
         void setDocumentPath(const QString& path);
 
         Q_INVOKABLE void refreshSystem();
@@ -121,6 +124,8 @@ class Backend final : public QObject {
         void languageChanged();
 
         void appearanceModeChanged();
+
+        void dockHoverScaleChanged();
 
     private:
 
@@ -159,6 +164,8 @@ class Backend final : public QObject {
         QString language_;
 
         QString appearanceMode_ = "light";
+
+        qreal dockHoverScale_ = 1.20;
 
         Pedro::Papi::Config::Store configuration_;
 

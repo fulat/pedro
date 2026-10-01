@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <QString>
 
+#include <optional>
+
 namespace Pedro::Papi::Config {
 
     class Store : public QObject {
@@ -19,6 +21,8 @@ namespace Pedro::Papi::Config {
             static QString path(const QString& name);
 
             static QString value(const QString& name, const QString& section, const QString& key);
+
+            static std::optional<double> number(const QString& name, const QString& section, const QString& key);
 
         signals:
             void changed();

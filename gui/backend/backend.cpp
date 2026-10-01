@@ -14,6 +14,7 @@
 #include <QDebug>
 
 #include <cstdlib>
+#include <cmath>
 #include <exception>
 #include <optional>
 #include <utility>
@@ -103,6 +104,11 @@ Backend::Backend(QObject* parent) : QObject(parent) {
     bluetoothRefreshTimer_.start(5000);
 
     const auto reloadConfiguration = [this] {
+        const auto hoverScale = configuration_.number("preferences", "dock", "hoverScale");
+        if (hoverScale && std::isfinite(*hoverScale) && *hoverScale >= 1.0 && *hoverScale <= 1.3 && dockHoverScale_ != *hoverScale) {
+            dockHoverScale_ = *hoverScale;
+            emit dockHoverScaleChanged();
+        }
         const auto mode = configuration_.value("preferences", "appearance", "mode");
         if ((mode == "light" || mode == "dark") && appearanceMode_ != mode) {
             appearanceMode_ = mode;
@@ -539,4 +545,8 @@ QString Backend::language() const {
 
 QString Backend::appearanceMode() const {
     return appearanceMode_;
+}
+
+qreal Backend::dockHoverScale() const {
+    return dockHoverScale_;
 }

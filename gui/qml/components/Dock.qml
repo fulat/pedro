@@ -14,6 +14,7 @@ Item {
     property Item backdrop
     property var shell
     property bool vertical: false
+    property real hoverScale: Backend.dockHoverScale
     readonly property real horizontalPadding: 16
     property real maximumLength: shell ? (vertical ? shell.height - 32 : shell.width - 32) : 0
 
@@ -83,7 +84,7 @@ Item {
             width: dock.shell ? dock.shell.dockIconSize : 0
             height: width
             name: entry.app ? entry.app.icon : ""
-            scale: entryMouse.containsMouse ? 1.08 : 1
+            scale: entryMouse.containsMouse ? dock.hoverScale : 1
 
             Behavior on scale {
                 NumberAnimation { duration: 180; easing.type: Easing.InOutQuad }

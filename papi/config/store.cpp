@@ -56,6 +56,17 @@ namespace Pedro::Papi::Config {
         }
     }
 
+    std::optional<double> Store::number(const QString& name, const QString& section, const QString& key) {
+
+        try {
+            const auto table = toml::parse_file(path(name).toStdString());
+            return table.at_path((section + "." + key).toStdString()).value<double>();
+        } catch (const toml::parse_error& error) {
+            qWarning() << "Pedro configuration:" << error.what();
+            return std::nullopt;
+        }
+    }
+
     void Store::watch() {
 
         if (!watcher.files().isEmpty()) {

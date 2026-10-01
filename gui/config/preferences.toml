@@ -15,3 +15,6 @@ current = "wallpaper.jpeg"
 [wallpaper.light]
 type = "file"
 current = "wallpaper.jpeg"
+
+[dock]
+hoverScale = 1.20 # 1.0 disables zoom; supported range: 1.0–1.3
