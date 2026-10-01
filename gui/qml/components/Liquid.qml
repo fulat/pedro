@@ -10,6 +10,7 @@ Item {
     property Item backdrop
     property real cornerRadius: 16
     property bool frosted: false
+    property real blurAmount: frosted ? 1.0 : Theme.menuBlur
     property point backdropOrigin: Qt.point(0, 0)
 
     // mapToItem does not notify bindings when a popup's ancestors move.
@@ -64,7 +65,7 @@ Item {
         autoPaddingEnabled: false
         shadowEnabled: false
         blurEnabled: true
-        blur: liquid.frosted ? 1.0 : Theme.menuBlur
+        blur: liquid.blurAmount
         blurMax: liquid.frosted ? 64 : 32
         blurMultiplier: liquid.frosted ? 1.6 : 1.0
         saturation: liquid.frosted ? -0.30 : -0.08
@@ -81,7 +82,8 @@ Item {
         anchors.fill: parent
         radius: liquid.cornerRadius
         color: liquid.frosted ? Theme.menuGlassHaze : Theme.liquidHaze
-        border.width: 0
+        border.width: 1
+        border.color: Theme.liquidEdge
         antialiasing: true
     }
 }
