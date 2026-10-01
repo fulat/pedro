@@ -17,7 +17,7 @@ Rectangle {
     TapHandler { onTapped: card.controller.select(card.entry); onDoubleTapped: card.controller.openEntry(card.entry) }
     HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
     Behavior on color { ColorAnimation { duration: 150 } }
-    Desktop.Icon { x: 9; y: 9; width: 54; height: 54; kind: "folder" }
+    Desktop.Icon { x: 9; y: 9; width: 54; height: 54; kind: card.entry.icon || "folder" }
     Text { anchors.right: parent.right; anchors.rightMargin: 12; y: 11; text: "•••"; color: card.colors.ink; font.pixelSize: 12 }
     Column {
         x: 69
@@ -25,7 +25,7 @@ Rectangle {
         width: parent.width - 90
         spacing: 4
         Text { text: card.entry.name; width: parent.width; elide: Text.ElideRight; color: card.colors.ink; font.pixelSize: 12; font.bold: true }
-        Text { text: qsTranslate("Pedro", "files.browser.folder"); color: card.colors.muted; font.pixelSize: 12 }
+        Text { width: parent.width; elide: Text.ElideRight; text: card.entry.isDirectory ? qsTranslate("Pedro", "files.browser.folder") : card.entry.type || ""; color: card.colors.muted; font.pixelSize: 12 }
         Text { text: card.entry.sizeText || ""; color: card.colors.muted; font.pixelSize: 12 }
 
     }

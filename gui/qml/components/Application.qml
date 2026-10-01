@@ -66,8 +66,9 @@ ApplicationWindow {
             item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff");
             item.headerSource = Qt.resolvedUrl("files/header.qml");
             item.headerHeight = 58;
-            item.titleOffset = 118;
-            item.titleSize = 20;
+            item.headerOffset = 190;
+            item.titleOffset = 88;
+            item.titleSize = 16;
             item.contentMargin = 0;
             item.contentTopGap = 0;
             item.windowRadius = 22;

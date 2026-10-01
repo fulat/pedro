@@ -22,11 +22,12 @@ Rectangle {
         anchors.fill: parent
         spacing: 0
         Loader {
-            Layout.preferredWidth: 205
+            Layout.preferredWidth: browser.controller && browser.controller.sidebarCollapsed ? 62 : 205
             Layout.fillHeight: true
             source: "sidebar.qml"
             onLoaded: item.controller = Qt.binding(() => browser.controller)
         }
+        Rectangle { Layout.fillHeight: true; width: 1; color: browser.colors.line }
         ScrollView {
             id: contentScroll
             Layout.fillWidth: true
@@ -53,6 +54,7 @@ Rectangle {
                     Item { Layout.fillWidth: true }
                 }
                 GridView {
+                    visible: !browser.controller || browser.controller.viewMode !== "list"
                     id: folderGrid
                     objectName: "filesFolderGrid"
                     readonly property int columns: browser.width >= 1100 ? 4 : browser.width >= 880 ? 3 : 2
@@ -75,13 +77,39 @@ Rectangle {
                         }
                     }
                 }
+                Loader {
+                    visible: browser.controller && browser.controller.viewMode === "list"
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: visible && item ? item.implicitHeight : 0
+                    source: "table.qml"
+                    onLoaded: { item.controller = Qt.binding(() => browser.controller); item.folders = true; }
+                }
                 Rectangle { Layout.fillWidth: true; height: 1; color: browser.colors.line }
                 Text { text: qsTranslate("Pedro", "files.sample.files") + "  (" + (browser.controller ? browser.controller.files.length : 0) + ")"; color: browser.colors.ink; font.pixelSize: 17; font.bold: true }
                 Loader {
                     Layout.fillWidth: true
                     Layout.preferredHeight: item ? item.implicitHeight : 33
+                    visible: !browser.controller || browser.controller.viewMode !== "grid"
                     source: "table.qml"
                     onLoaded: item.controller = Qt.binding(() => browser.controller)
+                }
+                GridView {
+                    visible: browser.controller && browser.controller.viewMode === "grid"
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.min(Math.ceil(count / folderGrid.columns) * cellHeight, 310)
+                    cellWidth: width / folderGrid.columns
+                    cellHeight: 101
+                    clip: true
+                    model: directory.fileModel
+                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                    delegate: Loader {
+                        id: file
+                        required property var entry
+                        width: folderGrid.cellWidth - 9
+                        height: 92
+                        source: "card.qml"
+                        onLoaded: { item.entry = Qt.binding(() => file.entry); item.controller = Qt.binding(() => browser.controller); }
+                    }
                 }
                 Text {
                     Layout.fillWidth: true

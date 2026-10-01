@@ -27,12 +27,5 @@ Item {
             }
         }
         Item { Layout.fillWidth: true }
-        Text {
-            text: qsTranslate("Pedro", "files.sample.sort") + "  ⌄"
-            color: toolbar.colors.muted
-            font.pixelSize: 12
-        }
-        Loader { source: "button.qml"; onLoaded: item.symbol = "grid" }
-        Loader { source: "button.qml"; onLoaded: item.symbol = "list" }
     }
 }

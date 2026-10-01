@@ -7,6 +7,7 @@ import "palette.js" as Palette
 
 Column {
     id: table
+    property bool folders: false
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     width: parent.width
@@ -19,12 +20,12 @@ Column {
         }
     }
     ListView {
-        objectName: "filesFileList"
+        objectName: table.folders ? "filesFolderList" : "filesFileList"
         width: table.width
         height: Math.min(count * 43, 360)
         clip: true
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-        model: table.controller && table.controller.directory ? table.controller.directory.fileModel : null
+        model: table.controller && table.controller.directory ? (table.folders ? table.controller.directory.folderModel : table.controller.directory.fileModel) : null
         delegate: Rectangle {
             id: row
             required property var entry
@@ -32,7 +33,7 @@ Column {
             width: table.width; height: 43; radius: 9
             color: table.controller && table.controller.selectedEntry.id === modelData.id ? table.colors.selected : table.colors.card
             border.color: table.colors.line
-            TapHandler { onTapped: table.controller.select(row.modelData) }
+            TapHandler { onTapped: table.controller.select(row.modelData); onDoubleTapped: table.controller.openEntry(row.modelData) }
             HoverHandler { cursorShape: Qt.PointingHandCursor }
             Row {
                 anchors.fill: parent

@@ -9,10 +9,10 @@ Rectangle {
     id: sidebar
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
-    color: colors.sidebar
+    color: "transparent"
     ScrollView {
         anchors.fill: parent
-        anchors.margins: 14
+        anchors.margins: sidebar.controller && sidebar.controller.sidebarCollapsed ? 7 : 14
         clip: true
         contentWidth: availableWidth
         Column {
@@ -58,7 +58,7 @@ Rectangle {
                         tint: row.modelData.name === "home" ? sidebar.colors.accent : sidebar.colors.ink
                     }
                     Text {
-                        visible: !row.modelData.divider
+                        visible: !row.modelData.divider && !(sidebar.controller && sidebar.controller.sidebarCollapsed)
                         x: 49
                         anchors.verticalCenter: parent.verticalCenter
                         text: row.modelData.name ? qsTranslate("Pedro", "files.browser." + row.modelData.name) : ""
@@ -69,7 +69,8 @@ Rectangle {
                 }
             }
             Item {
-                width: parent.width; height: 38
+                visible: !(sidebar.controller && sidebar.controller.sidebarCollapsed)
+                width: parent.width; height: visible ? 38 : 0
                 Text { x: 14; y: 9; text: qsTranslate("Pedro", "files.sample.tags"); color: sidebar.colors.muted; font.pixelSize: 13 }
                 Rectangle { anchors.right: parent.right; width: 30; height: 30; radius: 15; color: sidebar.colors.selected; Text { anchors.centerIn: parent; text: "+"; color: sidebar.colors.ink; font.pixelSize: 23 } }
             }
@@ -77,7 +78,8 @@ Rectangle {
                 model: [{name: "work", color: "#13c639"}, {name: "design", color: "#8e22ff"}, {name: "important", color: "#ffa100"}, {name: "personal", color: "#ff6eaa"}]
                 delegate: Item {
                     required property var modelData
-                    width: parent.width; height: 31
+                    visible: !(sidebar.controller && sidebar.controller.sidebarCollapsed)
+                    width: parent.width; height: visible ? 31 : 0
                     Rectangle { x: 15; y: 7; width: 17; height: 17; radius: 9; color: parent.modelData.color }
                     Text { x: 49; anchors.verticalCenter: parent.verticalCenter; text: qsTranslate("Pedro", "files.sample." + parent.modelData.name); color: sidebar.colors.ink; font.pixelSize: 14 }
                 }

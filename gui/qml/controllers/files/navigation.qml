@@ -4,6 +4,8 @@ import QtQuick
 QtObject {
     id: controller
     objectName: "filesController"
+    property bool sidebarCollapsed: false
+    property string viewMode: "mixed"
     property var directory: null
     property var selectedEntry: ({})
     readonly property string title: directory ? directory.place.length ? qsTranslate("Pedro", "files.browser." + directory.place) : directory.name || qsTranslate("Pedro", "files.browser.computer") : ""
