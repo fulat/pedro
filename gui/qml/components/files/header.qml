@@ -19,6 +19,7 @@ Item {
             Loader { source: "button.qml"; onLoaded: { item.symbol = "forward"; item.width = 39; item.enabled = Qt.binding(() => header.controller && header.controller.directory.canGoForward); item.clicked.connect(() => header.controller.forward()); } }
         }
         Rectangle {
+            visible: header.width >= 800
             Layout.preferredWidth: Math.max(105, Math.min(230, header.width * 0.22))
             Layout.preferredHeight: 38
             radius: 12
