@@ -29,6 +29,25 @@ QtObject {
         }
     }
 
+    function containsEntry(item, point) {
+        for (const child of item.children) {
+            if (!child.visible) {
+                continue;
+            }
+            const local = item.mapToItem(child, point.x, point.y);
+            if (child.clip && !child.contains(local)) {
+                continue;
+            }
+            if (child.entry !== undefined && child.entry.id && child.contains(local)) {
+                return true;
+            }
+            if (containsEntry(child, local)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function openPlace(place) {
         selectedEntry = {};
         directory.openPlace(place);

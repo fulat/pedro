@@ -439,6 +439,74 @@ namespace Pedro::Papi::Io::Directory {
         return result;
     }
 
+    void Model::createFolder(const QString& name) {
+
+        create(name, true);
+    }
+
+    void Model::createFile(const QString& name) {
+
+        create(name, false);
+    }
+
+    void Model::create(const QString& name, bool folder) {
+
+        if (!QUrl(state->location).isLocalFile() || name.isEmpty() || name == "." || name == ".." || name.contains('/') || name.contains(QChar::Null)) {
+            return;
+        }
+
+        const auto address = state->location;
+        auto* watcher = new QFutureWatcher<QString>(this);
+        connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher, address] {
+            const auto error = watcher->result();
+            watcher->deleteLater();
+
+            if (state->location != address) {
+                return;
+            }
+
+            if (!error.isEmpty()) {
+                state->error = error;
+                emit contentsChanged();
+            } else {
+                refresh();
+            }
+        });
+
+        watcher->setFuture(QtConcurrent::run([address, name, folder] {
+            auto* parent = g_file_new_for_uri(address.toUtf8().constData());
+            QString failure;
+
+            for (int suffix = 0; suffix < 10000; ++suffix) {
+                const auto candidate = suffix == 0 ? name : name + " " + QString::number(suffix + 1);
+                auto* file = g_file_get_child(parent, candidate.toUtf8().constData());
+                GError* error = nullptr;
+                bool success = false;
+
+                if (folder) {
+                    success = g_file_make_directory(file, nullptr, &error);
+                } else {
+                    auto* stream = g_file_create(file, G_FILE_CREATE_NONE, nullptr, &error);
+                    if (stream) {
+                        success = g_output_stream_close(G_OUTPUT_STREAM(stream), nullptr, &error);
+                        g_object_unref(stream);
+                    }
+                }
+                g_object_unref(file);
+
+                const bool exists = g_error_matches(error, G_IO_ERROR, G_IO_ERROR_EXISTS);
+                failure = error ? QString::fromUtf8(error->message) : QString();
+                g_clear_error(&error);
+
+                if (success || !exists) {
+                    break;
+                }
+            }
+            g_object_unref(parent);
+            return failure;
+        }));
+    }
+
     void Model::openPlace(const QString& place) {
 
         QString address;

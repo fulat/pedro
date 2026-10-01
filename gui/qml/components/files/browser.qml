@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import Pedro.Files 1.0
@@ -7,6 +8,8 @@ import "palette.js" as Palette
 
 Rectangle {
     id: browser
+    objectName: "filesBrowser"
+    readonly property var backgroundContextMenu: backgroundMenu.item
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
     color: colors.surface
@@ -18,10 +21,74 @@ Rectangle {
         onLoaded: item.directory = directory
     }
 
+    function openBackgroundMenu(target, point) {
+        backgroundMenu.item.directory = target;
+        backgroundMenu.item.popup(point.x, point.y);
+    }
+
+    Loader {
+        id: backgroundMenu
+        source: "menu.qml"
+        onLoaded: {
+            item.parent = browser.Window.window.contentItem;
+            item.backdrop = Qt.binding(() => browser.Window.window.entryBackdrop);
+            item.informationRequested.connect(() => information.open());
+        }
+    }
+    Dialog {
+        id: information
+        objectName: "filesDirectoryInformation"
+        parent: browser.Window.window.contentItem
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        width: Math.min(400, parent.width - 32)
+        title: qsTranslate("Pedro", "folder.menu.properties")
+        header: Label {
+            text: information.title
+            color: browser.colors.ink
+            font.pixelSize: 14
+            padding: 16
+        }
+        standardButtons: Dialog.Ok
+        background: Rectangle {
+            color: browser.colors.light ? "#f1f5fb" : "#202b3a"
+            radius: 12
+            border.color: browser.colors.line
+        }
+        contentItem: Label {
+            color: browser.colors.ink
+            text: backgroundMenu.item && backgroundMenu.item.directory
+                ? backgroundMenu.item.directory.name + "\n\n" + (backgroundMenu.item.directory.path || backgroundMenu.item.directory.location)
+                    + "\n\n" + (backgroundMenu.item.directory.folders.length + backgroundMenu.item.directory.files.length) + " " + qsTranslate("Pedro", "files.sample.itemsLabel") : ""
+            wrapMode: Text.WrapAnywhere
+        }
+    }
+    MouseArea {
+        z: 2
+        visible: !browser.controller || browser.controller.viewMode !== "columns"
+        x: sidebarPanel.width + 1
+        y: 55
+        width: parent.width - x
+        height: parent.height - y
+        acceptedButtons: Qt.RightButton
+        onPressed: mouse => {
+            const point = mapToItem(contentLayout, mouse.x, mouse.y);
+            if (browser.controller.containsEntry(contentLayout, point)) {
+                mouse.accepted = false;
+            }
+        }
+        onClicked: mouse => {
+            const point = mapToItem(browser.Window.window.contentItem, mouse.x, mouse.y);
+            browser.openBackgroundMenu(directory, point);
+        }
+    }
+
     RowLayout {
+        id: contentLayout
         anchors.fill: parent
         spacing: 0
         Loader {
+            id: sidebarPanel
             property real sidebarWidth: browser.controller && browser.controller.sidebarCollapsed ? 62 : 205
             Layout.preferredWidth: sidebarWidth
             clip: true
@@ -133,7 +200,10 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 source: "columns.qml"
-                onLoaded: item.controller = Qt.binding(() => browser.controller)
+                onLoaded: {
+                    item.controller = Qt.binding(() => browser.controller);
+                    item.backgroundRequested.connect((target, point) => browser.openBackgroundMenu(target, point));
+                }
             }
         }
     }

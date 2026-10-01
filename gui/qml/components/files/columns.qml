@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Window
 import QtQuick.Controls.Basic
 import Pedro.Files 1.0
 import "palette.js" as Palette
@@ -8,6 +9,7 @@ ScrollView {
     id: columns
     objectName: "filesColumns"
     property var controller
+    signal backgroundRequested(var directory, point position)
     property var locations: controller && controller.directory ? [controller.directory.location] : []
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     clip: true
@@ -43,7 +45,20 @@ ScrollView {
                     target: columns.controller
                     function onSortKeyChanged() { directory.setSort(columns.controller.sortKey); }
                 }
+                MouseArea {
+                    z: 2
+                    anchors.fill: parent
+                    acceptedButtons: Qt.RightButton
+                    onPressed: mouse => {
+                        if (columns.controller.containsEntry(columnList, mapToItem(columnList, mouse.x, mouse.y))) {
+                            mouse.accepted = false;
+                        }
+                    }
+                    onClicked: mouse => columns.backgroundRequested(directory,
+                        mapToItem(columns.Window.window.contentItem, mouse.x, mouse.y))
+                }
                 ListView {
+                    id: columnList
                     anchors.fill: parent
                     anchors.rightMargin: 9
                     clip: true

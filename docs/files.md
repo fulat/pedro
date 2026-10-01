@@ -33,3 +33,7 @@ Las vistas cuadrícula, lista, columnas y mixta se seleccionan mediante un dropd
 El lateral y la posición de las flechas animan juntos durante 240 ms. Contraído, las flechas quedan junto al título, cuyo ancho respeta la traducción. La altura mínima e inicial de Archivos es 720 píxeles, limitada al espacio disponible del display.
 
 Los menús contextuales de carpetas y archivos usan `Popup.Window` de Qt: pueden sobresalir de la ventana que los abrió y Qt gestiona su ubicación en pantalla. Cada popup conserva el Liquid con una textura local del wallpaper configurado, evitando compartir texturas entre ventanas Qt. El límite de altura pertenece al display, no al navegador.
+
+Un clic derecho en el espacio vacío del cuerpo abre el menú Liquid de la carpeta actual; en columnas se utiliza la ubicación de la columna pulsada. Nueva carpeta y Nuevo archivo crean nombres únicos mediante GIO en un worker de Qt Concurrent, sin sobrescribir elementos existentes ni bloquear la UI. Las ubicaciones virtuales deshabilitan la creación. Propiedades muestra el nombre, la ruta o URI y el número de elementos de esa ubicación. Los errores se muestran en el navegador.
+
+El hover de los elementos usa gris translúcido y cursor de manita en cuadrícula, lista y columnas. El azul se reserva para la selección o la columna navegada.

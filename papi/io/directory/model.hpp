@@ -67,6 +67,10 @@ namespace Pedro::Papi::Io::Directory {
 
             Q_INVOKABLE void open(const QString& uri);
 
+            Q_INVOKABLE void createFolder(const QString& name);
+
+            Q_INVOKABLE void createFile(const QString& name);
+
             Q_INVOKABLE void goBack();
 
             Q_INVOKABLE void goForward();
@@ -81,6 +85,8 @@ namespace Pedro::Papi::Io::Directory {
             struct State;
 
             void navigate(const QString& uri, const QString& place, bool record);
+
+            void create(const QString& name, bool folder);
 
             void refresh();
 
