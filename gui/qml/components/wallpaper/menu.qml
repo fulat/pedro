@@ -12,6 +12,7 @@ Controls.Menu {
     property Item backdrop
     property string organization: "grid"
     property bool keepAligned: true
+    property bool canPaste: false
     property string shortcutName
     signal actionRequested(string action)
 
@@ -33,8 +34,9 @@ Controls.Menu {
     component Entry: Controls.MenuItem {
         id: entry
 
-        property string symbol: subMenu === organizationMenu ? "organization" : subMenu === widgetsMenu ? "widgets" : ""
+        property string symbol: subMenu === organizationMenu ? "organization" : ""
         property string shortcutText: ""
+        property bool selectionOption: false
 
         hoverEnabled: true
         implicitHeight: visible ? 34 : 0
@@ -71,11 +73,32 @@ Controls.Menu {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.verticalCenterOffset: 1
                 width: 24
-                text: entry.subMenu ? "›" : entry.checked ? "✓" : entry.shortcutText
+                text: entry.subMenu ? "›" : entry.selectionOption ? "" : entry.checked ? "✓" : entry.shortcutText
                 color: Theme.textMuted
                 font.pixelSize: 12
                 horizontalAlignment: Text.AlignRight
                 opacity: entry.enabled ? 1 : 0.4
+
+                Rectangle {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: entry.selectionOption
+                    width: 16
+                    height: 16
+                    radius: 8
+                    color: entry.checked ? "#3478f6" : "transparent"
+                    border.width: 1
+                    border.color: entry.checked ? "#80b5ff" : Theme.textMuted
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 7
+                        height: 7
+                        radius: 3.5
+                        color: Theme.white
+                        visible: entry.checked
+                    }
+                }
             }
         }
 
@@ -109,6 +132,21 @@ Controls.Menu {
         onTriggered: root.actionRequested("file")
     }
 
+    Entry {
+        text: qsTranslate("Pedro", "folder.menu.paste")
+        symbol: "paste"
+        visible: root.canPaste
+        enabled: root.canPaste
+        onTriggered: root.actionRequested("paste")
+    }
+
+    Divider {}
+    Entry {
+        text: qsTranslate("Pedro", "desktop.menu.select")
+        symbol: "free"
+        onTriggered: root.actionRequested("select")
+    }
+
     Controls.Menu {
         id: organizationMenu
         title: qsTranslate("Pedro", "desktop.menu.organization")
@@ -121,18 +159,21 @@ Controls.Menu {
         Entry {
             text: qsTranslate("Pedro", "desktop.menu.grid")
             symbol: "grid"
+            selectionOption: true
             checked: root.organization === "grid"
             onTriggered: root.actionRequested("grid")
         }
         Entry {
             text: qsTranslate("Pedro", "desktop.menu.stack")
             symbol: "stack"
+            selectionOption: true
             checked: root.organization === "stack"
             onTriggered: root.actionRequested("stack")
         }
         Entry {
             text: qsTranslate("Pedro", "desktop.menu.free")
             symbol: "free"
+            selectionOption: true
             checked: root.organization === "free"
             onTriggered: root.actionRequested("free")
         }
@@ -152,12 +193,10 @@ Controls.Menu {
             symbol: "calendar"
             onTriggered: root.actionRequested("date")
         }
-        Divider {}
         Entry {
-            text: qsTranslate("Pedro", "desktop.menu.align")
-            symbol: "align"
-            checked: root.keepAligned
-            onTriggered: root.actionRequested("align")
+            text: qsTranslate("Pedro", "desktop.menu.size")
+            symbol: "size"
+            onTriggered: root.actionRequested("size")
         }
     }
 
@@ -168,18 +207,9 @@ Controls.Menu {
         onTriggered: root.actionRequested("display")
     }
 
-    Controls.Menu {
-        id: widgetsMenu
-        title: qsTranslate("Pedro", "desktop.menu.widgets")
-        width: 200
-        padding: 6
-        popupType: Controls.Popup.Item
-        delegate: Entry {}
-        background: Glass {}
-        Entry {
-            text: qsTranslate("Pedro", "desktop.menu.weather")
-            symbol: "weather"
-            onTriggered: root.actionRequested("weather")
-        }
+    Entry {
+        text: qsTranslate("Pedro", "desktop.menu.widgets")
+        symbol: "widgets"
+        onTriggered: root.actionRequested("widgets")
     }
 }

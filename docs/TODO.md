@@ -90,6 +90,10 @@ Decisión: unificar preferencias globales relacionadas (idioma, apariencia/theme
 
 Pendiente: conectar la UI de preferencias al zoom del dock. El factor ya es configurable dinámicamente mediante `[dock].hoverScale` en `preferences.toml` y está expuesto a QML; no introducir una segunda fuente de configuración.
 
+### Menú del wallpaper
+
+Pendiente: conectar «Pegar» al portapapeles mediante PAPI y mostrarlo únicamente cuando haya archivos compatibles; implementar selección de todos los elementos, orden por nombre/tipo/fecha/tamaño y acceso a widgets. La presentación está preparada; conservar las acciones existentes de creación y organización sin duplicar la lógica del modelo.
+
 ### Activación de aplicaciones desde el dock
 
 Implementado para el overlay Ubuntu/GNOME: PAPI activa mediante la integración `applications@pedro`, que delega en `Shell.App.activate()`; el clic enfoca/restaura ventanas existentes o abre la aplicación cuando está cerrada. GNOME aporta los indicadores basados en ventanas. La extensión requiere una nueva sesión tras instalarse. Véase [integración GNOME](../gnome/application/readme.md).

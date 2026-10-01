@@ -751,7 +751,7 @@
         <message>
             <source>desktop.menu.organization</source>
             <extracomment>Stable Pedro key: desktop.menu.organization</extracomment>
-            <translation>Organization</translation>
+            <translation>Arrange</translation>
         </message>
         <message>
             <source>desktop.menu.grid</source>
@@ -761,7 +761,7 @@
         <message>
             <source>desktop.menu.stack</source>
             <extracomment>Stable Pedro key: desktop.menu.stack</extracomment>
-            <translation>Stack</translation>
+            <translation>Stacked</translation>
         </message>
         <message>
             <source>desktop.menu.free</source>
@@ -771,17 +771,17 @@
         <message>
             <source>desktop.menu.name</source>
             <extracomment>Stable Pedro key: desktop.menu.name</extracomment>
-            <translation>Group by name</translation>
+            <translation>Sort by name</translation>
         </message>
         <message>
             <source>desktop.menu.type</source>
             <extracomment>Stable Pedro key: desktop.menu.type</extracomment>
-            <translation>Group by type</translation>
+            <translation>Sort by type</translation>
         </message>
         <message>
             <source>desktop.menu.date</source>
             <extracomment>Stable Pedro key: desktop.menu.date</extracomment>
-            <translation>Group by date</translation>
+            <translation>Sort by date</translation>
         </message>
         <message>
             <source>desktop.menu.align</source>
@@ -796,7 +796,7 @@
         <message>
             <source>desktop.menu.widgets</source>
             <extracomment>Stable Pedro key: desktop.menu.widgets</extracomment>
-            <translation>Widgets</translation>
+            <translation>Widget</translation>
         </message>
         <message>
             <source>desktop.menu.weather</source>
@@ -895,6 +895,16 @@
         <message>
             <source>dock.pin</source>
             <translation>Keep in dock</translation>
+        </message>
+        <message>
+            <source>desktop.menu.size</source>
+            <extracomment>Stable Pedro key: desktop.menu.size</extracomment>
+            <translation>Sort by size</translation>
+        </message>
+        <message>
+            <source>desktop.menu.select</source>
+            <extracomment>Stable Pedro key: desktop.menu.select</extracomment>
+            <translation>Select all</translation>
         </message>
     </context>
 </TS>
