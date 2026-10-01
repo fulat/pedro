@@ -244,17 +244,19 @@ QtObject {
         return desktopInitialPosition(index);
     }
 
-    // Fill stack columns from the right edge, scanning each from top to bottom.
+    // Fill stack columns from the inset right edge, scanning each from top to bottom.
     function desktopStackPosition(index) {
         let slot = 0;
-        const columns = Math.max(1, Math.floor(desktopShortcuts.width / desktopShortcuts.cellWidth));
-        const rows = Math.max(1, Math.floor(desktopShortcuts.height / desktopShortcuts.cellHeight));
+        const insetX = desktopInset(desktopShortcuts.width, desktopShortcuts.cellWidth);
+        const insetY = desktopInset(desktopShortcuts.height, desktopShortcuts.cellHeight);
+        const columns = Math.max(1, Math.floor((desktopShortcuts.width - insetX * 2) / desktopShortcuts.cellWidth));
+        const rows = Math.max(1, Math.floor((desktopShortcuts.height - insetY * 2) / desktopShortcuts.cellHeight));
 
         for (let column = 0; column < columns; ++column) {
-            const x = Math.max(0, desktopShortcuts.width - desktopShortcuts.cellWidth * (column + 1));
+            const x = Math.max(insetX, desktopShortcuts.width - insetX - desktopShortcuts.cellWidth * (column + 1));
 
             for (let row = 0; row < rows; ++row) {
-                const y = row * desktopShortcuts.cellHeight;
+                const y = insetY + row * desktopShortcuts.cellHeight;
 
                 if (!desktopPlacementOverlapsShell(x, y, desktopShortcuts.cellWidth, desktopShortcuts.cellHeight)) {
                     if (slot++ === index) {
@@ -264,7 +266,7 @@ QtObject {
             }
         }
 
-        return Qt.point(0, rows * desktopShortcuts.cellHeight);
+        return Qt.point(insetX, insetY + rows * desktopShortcuts.cellHeight);
     }
 
     // Places initial model entries in free desktop cells without filesystem logic.
