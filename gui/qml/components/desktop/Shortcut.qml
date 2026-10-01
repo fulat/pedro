@@ -78,6 +78,14 @@ Item {
         rotation: 8
     }
 
+    function closeMenu() {
+        if (entryLoader.item) entryLoader.item.closeMenu();
+    }
+
+    function activate() {
+        if (entryLoader.item) entryLoader.item.activate();
+    }
+
     function openMenu(localX, localY) {
         const position = mapToItem(entryLoader, localX, localY);
         entryLoader.item.openMenu(position.x, position.y);
@@ -92,6 +100,7 @@ Item {
         height: 57
         source: shortcut.app && shortcut.app.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
         onLoaded: {
+            item.controller = Qt.binding(() => shortcut.shell.controller);
             item.entry = Qt.binding(() => shortcut.app || {});
             item.showName = false;
             item.inputEnabled = false;

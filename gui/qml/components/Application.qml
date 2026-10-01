@@ -22,7 +22,6 @@ ApplicationWindow {
     property alias desktopShortcuts: applicationController.desktopShortcuts
     property alias desktopShortcutRepeater: applicationController.desktopShortcutRepeater
     property alias desktopContextMenu: applicationController.desktopContextMenu
-    property alias folderContextMenu: applicationController.folderContextMenu
     property alias sideBar: applicationController.sideBar
     property alias topBar: applicationController.topBar
     property alias desktopObstacles: applicationController.desktopObstacles

@@ -10,6 +10,12 @@ QtObject {
     required property var window
     required property var filesQuickWindow
 
+    property string pendingFilesLocation: ""
+    property Connections filesConnection: Connections {
+        target: controller.filesQuickWindow || null
+        function onControllerChanged() { controller.applyFilesLocation(); }
+    }
+
     property string panelMode: Constants.PANEL_MODE
     property string panelSource: Constants.PANEL_SOURCE
     property real panelAnchorX: window.width - 190
@@ -32,7 +38,6 @@ QtObject {
     property var desktopShortcuts
     property var desktopShortcutRepeater
     property var desktopContextMenu
-    property var folderContextMenu
     property var sideBar
     property var topBar
     property var desktopObstacles: []
@@ -63,6 +68,27 @@ QtObject {
         panelMode = name;
     }
 
+    function select(entry) {
+        selectOnlyDesktopShortcut(entry.id);
+    }
+
+    function openEntry(entry) {
+        if (!entry.isDirectory || !entry.url) {
+            return;
+        }
+        pendingFilesLocation = String(entry.url);
+        openFilesQuickWindow();
+        applyFilesLocation();
+    }
+
+    function applyFilesLocation() {
+        if (pendingFilesLocation && filesQuickWindow && filesQuickWindow.controller) {
+            filesQuickWindow.controller.selectedEntry = {};
+            filesQuickWindow.controller.directory.open(pendingFilesLocation);
+            pendingFilesLocation = "";
+        }
+    }
+
     // Presents the standalone files window above the shell.
     function openFilesQuickWindow() {
         closePanel();
@@ -85,20 +111,6 @@ QtObject {
     // Opens the desktop context menu at a position constrained to the window.
     function openDesktopShortcutMenu(shortcut, localX, localY, shortcutName) {
         const position = shortcut.mapToItem(window.contentItem, localX, localY);
-
-        if (folderContextMenu) {
-            folderContextMenu.close();
-        }
-
-        if (shortcut.app && folderContextMenu) {
-            desktopContextMenu.close();
-            folderContextMenu.folderName = shortcutName;
-            folderContextMenu.fileMode = !shortcut.app.isDirectory;
-            folderContextMenu.imageFile = shortcut.app.icon === "image";
-            folderContextMenu.popup(Math.max(12, Math.min(window.width - folderContextMenu.width - 12, position.x)),
-                                    Math.max(12, Math.min(window.height - folderContextMenu.height - 12, position.y)));
-            return;
-        }
 
         desktopContextMenu.shortcutName = shortcutName || qsTranslate("Pedro", "desktop.title");
         const menuX = Math.max(12, Math.min(window.width - desktopContextMenu.width - 12, position.x));
@@ -344,9 +356,7 @@ QtObject {
             stackDragPoint = position;
             stackDropTargetId = "";
             desktopContextMenu.close();
-            if (folderContextMenu) {
-                folderContextMenu.close();
-            }
+            shortcut.closeMenu();
             return;
         }
         const items = [];
@@ -368,9 +378,7 @@ QtObject {
         desktopDragAnchor = shortcut;
         desktopDragging = items.length > 0;
         desktopContextMenu.close();
-        if (folderContextMenu) {
-            folderContextMenu.close();
-        }
+        shortcut.closeMenu();
     }
 
     // Moves the selected shortcuts while keeping them inside the desktop area.

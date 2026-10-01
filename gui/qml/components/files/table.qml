@@ -53,12 +53,11 @@ Item {
             width: table.width; height: 43; radius: 9
             color: table.controller && table.controller.selectedEntry.id === modelData.id ? table.colors.selected : hover.hovered ? table.colors.hover : "transparent"
             border.color: "transparent"
-            TapHandler { onTapped: table.controller.select(row.modelData); onDoubleTapped: table.controller.openEntry(row.modelData) }
+            TapHandler { onTapped: entryIcon.item.select(); onDoubleTapped: entryIcon.item.activate() }
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.RightButton
                 onClicked: mouse => {
-                    table.controller.select(row.modelData);
                     const point = row.mapToItem(entryIcon, mouse.x, mouse.y);
                     entryIcon.item.openMenu(point.x, point.y);
                 }
@@ -80,7 +79,7 @@ Item {
                             item.showName = false;
                             item.inputEnabled = false;
                             item.iconSize = 34;
-                            item.actionRequested.connect(action => { if (action === "open") table.controller.openEntry(row.modelData); });
+                            item.controller = Qt.binding(() => table.controller);
                         }
                     }
                     Text { x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; elide: Text.ElideMiddle; text: row.modelData.name; color: table.colors.ink; font.pixelSize: 12; font.bold: true }

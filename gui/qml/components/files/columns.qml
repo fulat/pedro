@@ -28,9 +28,12 @@ ScrollView {
                 required property string modelData
                 required property int index
                 property string selected: ""
-                function openEntry(entry) {
+                function select(entry) {
                     selected = entry.id;
                     columns.controller.select(entry);
+                }
+                function openEntry(entry) {
+                    select(entry);
                     const locations = columns.locations.slice(0, index + 1);
                     if (entry.isDirectory) locations.push(entry.url);
                     columns.locations = locations;
@@ -101,7 +104,7 @@ ScrollView {
                                 item.showName = false;
                                 item.inputEnabled = false;
                                 item.iconSize = 28;
-                                item.actionRequested.connect(action => { if (action === "open") column.openEntry(row.entry); });
+                                item.controller = column;
                             }
                         }
                         Text { x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; text: row.entry.name; color: columns.colors.ink; font.pixelSize: 12; elide: Text.ElideMiddle }
@@ -112,11 +115,10 @@ ScrollView {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
                             onClicked: mouse => {
                                 if (mouse.button === Qt.RightButton) {
-                                    columns.controller.select(row.entry);
                                     const point = row.mapToItem(entryIcon, mouse.x, mouse.y);
                                     entryIcon.item.openMenu(point.x, point.y);
                                 } else {
-                                    column.openEntry(row.entry);
+                                    entryIcon.item.activate();
                                 }
                             }
                         }

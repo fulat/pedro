@@ -174,7 +174,7 @@ QtObject {
     // Treats a primary-button double-click as the shortcut's default request.
     function shortcutDoubleClicked(mouse, moved, shortcut) {
         if (mouse.button === Qt.LeftButton && !moved) {
-            shortcut.menuRequested(mouse.x, mouse.y);
+            shortcut.activate();
         }
     }
 
