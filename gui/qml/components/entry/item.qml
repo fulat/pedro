@@ -41,8 +41,7 @@ Item {
         menu.folderName = entry.name || "";
         menu.fileMode = !folder;
         menu.imageFile = entry.icon === "image";
-        menu.popup(Math.max(8, Math.min(window.width - menu.width - 8, menuPoint.x)),
-                   Math.max(8, Math.min(window.height - menu.height - 8, menuPoint.y)));
+        menu.popup(menuPoint.x, menuPoint.y);
     }
 
     Desktop.Icon {
@@ -80,7 +79,7 @@ Item {
             item.objectName = "entryMenu";
             item.parent = entryItem.Window.window.contentItem;
             item.backdrop = Qt.binding(() => entryItem.backdrop);
-            item.maximumHeight = Qt.binding(() => entryItem.Window.window ? entryItem.Window.window.height - 16 : 600);
+            item.maximumHeight = Qt.binding(() => entryItem.Screen.desktopAvailableHeight > 0 ? entryItem.Screen.desktopAvailableHeight - 16 : 600);
             item.actionRequested.connect(action => entryItem.actionRequested(action));
             Qt.callLater(entryItem.showMenu);
         }

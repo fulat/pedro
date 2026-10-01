@@ -21,14 +21,42 @@ Controls.Menu {
     width: 304
     height: Math.min(contentItem.implicitHeight + topPadding + bottomPadding, maximumHeight)
     padding: 6
-    popupType: Controls.Popup.Item
+    popupType: Controls.Popup.Window
     cascade: true
 
-    background: Components.Liquid {
-        backdrop: root.backdrop
+    background: Surface {
+        sourceBackdrop: root.backdrop
         frosted: true
         blurAmount: 1.0
         cornerRadius: 12
+    }
+
+    component Surface: Components.Liquid {
+        id: surface
+
+        property Item sourceBackdrop
+        backdrop: wallpaper
+
+        Image {
+            id: wallpaper
+            width: surface.sourceBackdrop ? surface.sourceBackdrop.width : surface.width
+            height: surface.sourceBackdrop ? surface.sourceBackdrop.height : surface.height
+            source: surface.sourceBackdrop && surface.sourceBackdrop.source !== undefined
+                ? surface.sourceBackdrop.source : Backend.wallpaper
+            fillMode: Image.PreserveAspectCrop
+            smooth: true
+            mipmap: true
+            visible: false
+        }
+
+        FrameAnimation {
+            running: surface.visible && surface.sourceBackdrop !== null
+            onTriggered: {
+                const origin = surface.mapToItem(surface.sourceBackdrop, 0, 0);
+                wallpaper.x = -Math.max(0, Math.min(origin.x, wallpaper.width - surface.width));
+                wallpaper.y = -Math.max(0, Math.min(origin.y, wallpaper.height - surface.height));
+            }
+        }
     }
 
     delegate: Entry {}
@@ -125,10 +153,10 @@ Controls.Menu {
         id: openWithMenu
         title: qsTranslate("Pedro", "file.menu.open.with")
         width: 210
-        popupType: Controls.Popup.Item
+        popupType: Controls.Popup.Window
         delegate: Entry {}
-        background: Components.Liquid {
-            backdrop: root.backdrop
+        background: Surface {
+            sourceBackdrop: root.backdrop
             frosted: true
             blurAmount: 1.0
             cornerRadius: 12
@@ -200,10 +228,10 @@ Controls.Menu {
         id: compressionMenu
         title: qsTranslate("Pedro", "folder.menu.compress")
         width: 210
-        popupType: Controls.Popup.Item
+        popupType: Controls.Popup.Window
         delegate: Entry {}
-        background: Components.Liquid {
-            backdrop: root.backdrop
+        background: Surface {
+            sourceBackdrop: root.backdrop
             frosted: true
             blurAmount: 1.0
             cornerRadius: 12
@@ -238,10 +266,10 @@ Controls.Menu {
         id: sharingMenu
         title: qsTranslate("Pedro", "folder.menu.share")
         width: 210
-        popupType: Controls.Popup.Item
+        popupType: Controls.Popup.Window
         delegate: Entry {}
-        background: Components.Liquid {
-            backdrop: root.backdrop
+        background: Surface {
+            sourceBackdrop: root.backdrop
             frosted: true
             blurAmount: 1.0
             cornerRadius: 12
