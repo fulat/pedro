@@ -104,9 +104,10 @@ Item {
 
         Desktop.Icon {
             anchors.centerIn: entryTile
-            width: dockIcon.width
+            width: dockIcon.width / 0.78
             height: width
             kind: "folder"
+            cornerRadius: 3
             visible: entry.app.native === true
             scale: dockIcon.scale
         }

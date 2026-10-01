@@ -8,6 +8,7 @@ Item {
 
     property string kind
     property url imageUrl
+    property real cornerRadius: 6
 
     Rectangle {
         visible: desktopIcon.kind === "notes"
@@ -66,7 +67,7 @@ Item {
         y: desktopIcon.height * 0.22
         width: desktopIcon.width * 0.48
         height: desktopIcon.height * 0.19
-        radius: 5
+        radius: Math.min(5, desktopIcon.cornerRadius)
         color: Theme.folderTab
     }
 
@@ -76,7 +77,7 @@ Item {
         y: desktopIcon.height * 0.32
         width: desktopIcon.width * 0.78
         height: desktopIcon.height * 0.52
-        radius: 6
+        radius: desktopIcon.cornerRadius
 
         gradient: Gradient {
             GradientStop {
