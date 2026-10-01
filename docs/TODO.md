@@ -1,55 +1,64 @@
-# Decisiones y trabajo pendiente
+# Estado de implementación y decisiones de Pedro
 
-Registro permanente de decisiones de diseño, mejoras arquitectónicas y funcionalidades definidas para el desarrollo de Pedro.
+Registro permanente del desarrollo. No implica implementar todas las tareas inmediatamente. Añadir decisiones breves en su categoría, sin duplicados.
 
-Este documento no implica implementar inmediatamente todo lo listado. Su propósito es preservar decisiones importantes para retomarlas cuando corresponda. Añadir elementos breves, claros y organizados, revisando los existentes para evitar duplicados.
+`[x]` indica integración confirmada en el código de Pedro; `[ ]` indica trabajo pendiente o parcial. El soporte de Ubuntu/GNOME por sí solo no completa una tarea. Actualizar el estado al implementar y verificar cambios.
 
-### Operaciones asíncronas
+## Pedro Platform Requirements
 
-- Pedro debe evitar bloquear el hilo principal de la interfaz siempre que exista una alternativa asíncrona razonable.
-- Operaciones potencialmente lentas como copiar, mover, comprimir, extraer o descargar archivos deben ejecutarse de forma asíncrona y mostrar progreso en la interfaz.
-- Para operaciones de archivos, priorizar APIs existentes del sistema como GLib/GIO antes de implementar infraestructura propia.
-- La UI debe permanecer interactiva mientras estas operaciones se ejecutan.
-- Cuando sea necesario, modelar las operaciones largas como jobs independientes con estado, progreso, cancelación y manejo de errores.
+### Security & Permissions
 
-### Monitoreo del filesystem
+- [ ] **Keychain** — API Pedro para contraseñas, tokens, llaves y secretos mediante libsecret / GNOME Keyring.
+- [ ] **XDG Portals** — integrar permisos y acceso seguro a recursos sensibles.
+- [ ] **Camera & Microphone Permissions** — solicitudes de acceso y experiencia de consentimiento controlada por Pedro.
+- [ ] **polkit Integration** — autorización de operaciones privilegiadas sin ejecutar Pedro completo como root.
 
-Las vistas de archivos de Pedro deben mantenerse sincronizadas mediante eventos del sistema, no mediante polling periódico ni refrescos por frame.
+### Notifications & Media
 
-Usar preferentemente GLib/GIO (`GFileMonitor`) para observar cambios en directorios.
+- [ ] **Notifications** — integración con Pedro y futuro Notification Center; los avisos locales de UI no constituyen un sistema de notificaciones.
+- [ ] **Media Controls (MPRIS)** — detectar reproductores, Play/Pause/Next/Previous, metadata y activación de su aplicación.
 
-- El escritorio debe mantener un monitor sobre la carpeta Desktop durante la sesión.
-- Pedro Files debe mantener un monitor sobre la carpeta actualmente abierta.
-- Al cambiar de carpeta, reemplazar el monitor correspondiente.
-- Los eventos deben actualizar únicamente los elementos afectados cuando sea posible.
-- Si llegan muchos cambios juntos, agruparlos antes de actualizar la UI para evitar renders innecesarios.
-- El monitoreo debe permanecer invisible para el usuario; no mostrar “Refreshing” salvo que exista una operación excepcionalmente costosa.
+### Screen Capture
 
-Estado: Desktop y Pedro Files enumeran de forma asíncrona y usan `GFileMonitor` con actualizaciones incrementales y agrupación de eventos. Pedro Files reemplaza el monitor al navegar y reconcilia snapshots por URI.
+- [ ] **Screenshot** — captura de pantalla de usuario mediante Wayland/GNOME. Las capturas de verificación de ventanas Qt no implementan esta capacidad.
+- [ ] **Screen Recording** — XDG Portals + PipeWire.
+- [ ] **Screen/Window Capture Permissions** — selección de monitor/ventana y consentimiento del usuario.
 
-### Carpetas estándar del usuario mediante XDG
+### Storage & Filesystem
 
-- Resolver Desktop y las demás carpetas estándar mediante las APIs XDG del usuario activo, preferentemente GLib (`g_get_user_special_dir`). Nunca hardcodear rutas como `/home/<usuario>/Desktop`.
-- Usar el mismo código en development sobre Ubuntu y en la ISO final; no separar la resolución de rutas según el modo de ejecución.
-- Mantener la resolución y las operaciones del filesystem en PAPI/backend. QML debe representar los elementos del modelo.
+- [ ] **Storage & Removable Devices (UDisks2)** — inventario de HDD, SSD, USB, particiones y volúmenes. Parcial: Este equipo enumera montajes GIO; falta integración completa de dispositivos.
+- [ ] **Mount / Unmount / Eject** — acciones para montar, desmontar y expulsar volúmenes.
+- [ ] **Mount / Volume Monitoring** — parcial: GVolumeMonitor actualiza Este equipo ante mount-added/removed/changed; faltan eventos de volúmenes y unidades sin montar.
+- [ ] **General Hardware Detection** — unificar eventos de conexión/desconexión en PAPI; las integraciones específicas de Wi-Fi/Bluetooth no cubren hardware general.
+- [x] **Filesystem Monitoring** — Desktop y Pedro Files usan GFileMonitor, agrupan eventos y actualizan el modelo incrementalmente, sin polling ni refrescos por frame. Files reemplaza el monitor al navegar; el monitoreo permanece invisible. Véanse [Desktop](desktop.md) y [Files](files.md).
+- [ ] **Default Applications / MIME Associations** — Open With, aplicaciones predeterminadas y asociaciones MIME. La clasificación visual de archivos no implementa apertura con aplicaciones.
+- [x] **Carpetas estándar mediante XDG** — Desktop y Files resuelven las carpetas del usuario activo mediante g_get_user_special_dir; la lógica vive en PAPI. El mismo código sirve en desarrollo y producción, sin rutas /home/<usuario> hardcodeadas.
+- [ ] **Operaciones asíncronas completas** — parcial: enumeración, creación de carpetas/archivos y renombrado ya usan APIs asíncronas o workers. Faltan copiar, mover, comprimir, extraer y descargar con progreso, cancelación y errores; modelar jobs independientes cuando corresponda. Priorizar GLib/GIO y mantener interactiva la UI.
 
-Estado: implementado para Desktop. Véase [arquitectura del Desktop](desktop.md).
+### Printers
 
-### Acciones del menú del wallpaper
+- [ ] **Printers / CUPS** — detección, administración, impresión y gestión de colas.
 
-Implementado: creación asíncrona de carpetas y archivos vacíos con nombres únicos y renombrado en línea; modos cuadrícula, libre y pilas expandibles por tipo; control de alineación y persistencia de preferencias y posiciones.
+### Power & Battery
 
-Pendiente: conectar ajustes de pantalla y gestión de widgets; implementar las opciones adicionales de agrupación por nombre y fecha y conectar los selectores de agrupación del menú. Las operaciones de archivos deben seguir en PAPI y utilizar APIs existentes del sistema.
+- [ ] **UPower Integration** — batería, porcentaje, carga/descarga y dispositivos de energía.
+- [ ] **Power Profiles** — consultar/cambiar Power Saver, Balanced y Performance cuando sea soportado mediante power-profiles-daemon, con UI propia de Settings. No implementar CPU governors ni políticas propias salvo necesidad futura específica.
+- [ ] **Night Light** — GNOME/Mutter: On/Off, Sunset to Sunrise, horario manual y temperatura de color. Usar transformación de color del sistema para toda la pantalla, sin filtros visuales propios sobre ventanas.
 
-### Drag and drop de archivos en pilas
+La implementación de energía y Night Light debe ser la misma en Ubuntu development y en la ISO: `Pedro Settings → Pedro Power/Display Backend (PAPI) → GNOME / power-profiles-daemon / Mutter → Linux/hardware`.
 
-Implementado: gesto visual de arrastre en pila, con una representación que sigue al cursor, resaltado de carpetas de destino y retorno al origen al soltar o cancelar, sin modificar la disposición ni las posiciones guardadas. Expandir una pila permite arrastrar sus elementos individuales.
+### Location, Time & Region
 
-Pendiente: conectar el drop a operaciones asíncronas de PAPI para mover archivos y carpetas a un directorio de destino, con validación de destinos, colisiones, errores y progreso. El gesto visual actual no mueve contenido en el filesystem.
+- [ ] **GeoClue Integration** — ubicación para funciones que la requieran.
+- [ ] **Timezone Integration** — detectar/configurar zona horaria automática o manualmente. Mostrar el reloj local no implementa configuración de zona horaria.
+- [ ] **Locale & Region Settings** — parcial: idioma inglés/español dinámico mediante Qt y TOML; faltan UI regional y configuración de formatos de fecha/hora/región del sistema.
 
-### Display, resolución y escala
+### System Configuration
 
-Estado: decisión arquitectónica pendiente de implementación.
+- [ ] **GSettings / dconf Integration** — parcial: aplicaciones usan GSettings para favoritos y el script de apariencia configura GNOME; falta exponer configuración general del sistema mediante PAPI/Settings.
+- [ ] **systemd-logind Integration** — sesiones/seats, suspensión, hibernación, reinicio, apagado y operaciones de login.
+- [ ] **System Logs / Diagnostics** — acceso estructurado a systemd-journald; las estadísticas de sistema existentes no implementan consulta del journal.
+- [ ] **Displays, resolución y escala** — backend y UI de Settings pendientes. Conservar las siguientes decisiones:
 
 Pedro debe utilizar la infraestructura existente de Linux/GNOME/Mutter para detectar y configurar los displays, sin implementar detección de monitores ni modos de video desde cero.
 
@@ -80,48 +89,59 @@ En production:
 Pedro → Mutter → GPU/DRM/KMS → physical display
 ```
 
-### Power profiles y Night Light
+### Architecture Rule
 
-Estado: funcionalidad y decisión arquitectónica pendientes de implementación.
+Pedro debe ocultar las tecnologías internas al usuario final. La UI presenta conceptos Pedro: Passwords / Keychain, Notifications, Privacy, Storage, Printers, Battery, Energy, Displays, Default Apps, Location y Permissions.
 
-Pedro debe reutilizar la infraestructura existente de Ubuntu/GNOME para ahorro de energía y temperatura de color, sin implementar estos sistemas desde cero.
+Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, CUPS, UDisks2, udev, GSettings, GeoClue, polkit, UPower, power-profiles-daemon, Mutter, systemd-logind, GIO y journald. Encapsular estas capacidades detrás de PAPI o backends propios cuando corresponda; evitar dependencias directas de la UI en detalles de GNOME/Linux y sistemas paralelos.
 
-- Consultar y cambiar el perfil activo mediante `power-profiles-daemon` y su interfaz correspondiente: `Power Saver`, `Balanced` y `Performance` cuando el hardware lo soporte.
-- Pedro Settings debe ofrecer su propia UI; el backend de energía en PAPI debe delegar la gestión real al sistema. No implementar manualmente CPU governors ni políticas propias de ahorro salvo una necesidad futura específica.
-- Integrar Night Light mediante la funcionalidad existente de GNOME/Mutter, con controles para On/Off, horario automático `Sunset to Sunrise`, horario manual y temperatura de color de tonos más fríos a más cálidos.
-- Aplicar Night Light mediante la transformación de color del compositor/sistema para afectar toda la pantalla. No superponer filtros visuales propios sobre las ventanas.
-- Mantener la misma implementación durante development sobre Ubuntu y posteriormente en la ISO de Pedro.
+## Desktop y menú del wallpaper
 
-Arquitectura esperada:
+- [x] Crear carpetas y archivos vacíos con nombres únicos de forma asíncrona, con renombrado en línea.
+- [x] Organización cuadrícula, libre y pilas expandibles por tipo; alineación y persistencia de preferencias y posiciones por modo.
+- [x] Barreras de arrastre en Libre y Cuadrícula contra logo, menús, widgets y dock, con margen de 8 px; Cuadrícula busca una celda válida cercana al soltar.
+- [x] Arrastre visual en pilas: representación bajo el cursor, resaltado de destino y retorno sin modificar posiciones; permite arrastrar elementos de pilas expandidas.
+- [ ] Conectar el drop a movimiento asíncrono de archivos/carpetas mediante PAPI, validando destinos, colisiones, errores y progreso. El gesto visual no mueve contenido.
+- [ ] Conectar Pegar al portapapeles PAPI y mostrarlo únicamente con archivos compatibles.
+- [ ] Conectar Seleccionar todo y orden por nombre/tipo/fecha/tamaño del menú del wallpaper; ampliar agrupación por nombre/fecha. El orden de Files no completa estas acciones del Desktop.
+- [ ] Conectar Ajustes de pantalla a la capacidad Displays y la gestión de widgets a su UI; los menús existentes son presentación.
+- [x] Sombra mínima de un píxel únicamente en los nombres del componente compartido de carpetas/archivos, para mejorar contraste sobre wallpapers claros.
 
-```text
-Pedro Settings → Pedro Power/Display Backend (PAPI) → GNOME / power-profiles-daemon / Mutter → Linux/hardware
-```
+## Pedro Files
 
-### Idiomas y configuración centralizada
+- [x] Ventana Qt Quick desde dock/lateral, UI light/dark e inglés/español dividida en componentes.
+- [x] Modelos PAPI e historial independientes por ventana; listados reales, Inicio y carpetas XDG, Este equipo mediante montajes GIO, Papelera mediante GVfs, Favoritos/Recientes mediante registros GTK. La Papelera se abre desde el dock.
+- [x] Vistas cuadrícula, lista, columnas y mixta; orden por nombre, tipo (carpetas primero), tamaño y fecha mediante proxies Qt; scroll del cuerpo completo.
+- [x] Componentes compartidos de carpeta/archivo con selección, doble clic y menú contextual; abrir una carpeta del Desktop presenta Files en su ruta real.
+- [x] Menú del espacio vacío para creación asíncrona y propiedades de la carpeta actual; selección limpia al pulsar fuera; menus contextuales pueden sobresalir de la ventana.
+- [x] Título alterna lateral completo/iconos, animación suave; controles de ventana y resize por bordes/esquinas.
+- [ ] Ajustar ancho del lateral arrastrando la división.
+- [ ] Conectar búsqueda, filtros, etiquetas y edición de marcadores; la presentación existe.
+- [ ] Operaciones de archivos desde Files, incluida restauración/vaciado de Papelera; aplicar los jobs definidos en Storage & Filesystem.
+- [ ] Integrar los backends GIO/GVfs necesarios en la futura sesión de producción.
 
-Implementado: inglés y español mediante catálogos Qt `.ts`/`.qm`, claves semánticas y JSON de referencia; selección dinámica en `[language]` de `preferences.toml`. Configuración TOML centralizada con defaults en `gui/config/` y overrides XDG del usuario en `pedro/`. Véase [idiomas y configuración](language.md).
+Detalle: [Pedro Files](files.md).
 
-Pendiente: herramienta independiente en Node.js para generar catálogos a partir de metadatos y compilar `.ts` a `.qm` mediante las herramientas de Qt; permitir que Pedro importe esos `.qm` externos ya compilados, validando compatibilidad de claves y placeholders. Durante desarrollo, mantener los `.ts` editables; distribuir `.qm` en producción. Los `.qm` generados por el build permanecen en `build/`, no en el source. Implementado: selección dinámica light/dark en `[appearance]` de `preferences.toml`, material liquid por modo y wallpaper correspondiente. Pendiente: selección de temas adicionales. Mantener claves y placeholders equivalentes en ambos idiomas; no volver a introducir textos de UI directamente en español ni configuraciones dentro de los assets.
+## Idiomas, configuración y apariencia
 
-Decisión: unificar preferencias globales relacionadas (idioma, apariencia/theme y wallpaper) en `preferences.toml`, usando secciones TOML. Reservar archivos separados para dominios con responsabilidad propia; preservar ajustes existentes mediante migración.
+- [x] Catálogos Qt inglés/español .ts/.qm, claves semánticas y JSON de referencia; selección dinámica de idioma en preferences.toml.
+- [x] Preferencias globales de idioma, apariencia y wallpaper unificadas en secciones de preferences.toml; defaults en gui/config/ y overrides XDG del usuario en pedro/, con migración de ajustes anteriores.
+- [x] Light/dark dinámicos, material Liquid por modo y wallpaper desde backend.wallpaper; zoom del dock configurable mediante [dock].hoverScale y expuesto a QML.
+- [ ] UI de configuración del zoom del dock; conservar la fuente TOML existente.
+- [ ] Selección de temas adicionales.
+- [ ] Herramienta externa Node.js para generar catálogos desde metadatos y compilar .ts a .qm mediante Qt.
+- [ ] Importar .qm externos con validación de claves y placeholders.
 
-Pendiente: conectar la UI de preferencias al zoom del dock. El factor ya es configurable dinámicamente mediante `[dock].hoverScale` en `preferences.toml` y está expuesto a QML; no introducir una segunda fuente de configuración.
+Mantener equivalencia de claves/placeholders en ambos idiomas. No introducir textos directamente en español ni configuración dentro de assets. Los .ts permanecen editables en desarrollo; distribuir .qm en producción, con artefactos generados bajo build/. Reservar TOML separados para dominios con responsabilidad propia.
 
-### Menú del wallpaper
+Detalle: [idiomas y configuración](language.md).
 
-Pendiente: conectar «Pegar» al portapapeles mediante PAPI y mostrarlo únicamente cuando haya archivos compatibles; implementar selección de todos los elementos, orden por nombre/tipo/fecha/tamaño y acceso a widgets. La presentación está preparada; conservar las acciones existentes de creación y organización sin duplicar la lógica del modelo.
+## Aplicaciones y sesión
 
-### Pedro Files
+- [x] Activación desde el dock en Ubuntu/GNOME mediante PAPI y applications@pedro: Shell.App.activate_full() enfoca/restaura ventanas existentes o inicia la aplicación cerrada; indicadores basados en ventanas de GNOME.
+- [ ] Menú explícito para abrir una nueva ventana.
+- [ ] Distribuir la integración en la futura sesión GNOME de producción cuando se defina su boot/session flow. La integración actual del overlay no confirma el funcionamiento de la ISO.
 
-Implementado: ventana Qt Quick desde el dock y navegación lateral, con UI light/dark e inglés/español dividida en componentes. Cada ventana mantiene un controlador y modelo independientes de PAPI, historial atrás/adelante, listados reales y vistas de cuadrícula, lista, columnas y mixta, sin panel lateral de detalles. Inicio y carpetas estándar usan XDG; Este equipo utiliza montajes GIO; Papelera utiliza GVfs; Favoritos y Recientes consumen los registros compartidos de GTK. Véase [Pedro Files](files.md).
+La extensión requiere una nueva sesión tras instalarse. Mantener Ubuntu/GNOME como gestor de ventanas, sin gestión paralela; el clic normal no debe solicitar otra ventana.
 
-Implementado: orden por nombre, tipo, tamaño y fecha mediante proxies del modelo PAPI.
-
-Pendiente: ajustar el ancho de la navegación lateral mediante arrastre de su división, con posibilidad de reducirla a iconos; búsqueda, filtros, etiquetas, edición de marcadores, apertura de archivos con aplicaciones y operaciones asíncronas de archivos en esta ventana, incluyendo restaurar/vaciar Papelera. Integrar los backends GIO/GVfs requeridos en la futura sesión de producción; no crear sistemas paralelos de filesystem o montaje.
-
-### Activación de aplicaciones desde el dock
-
-Implementado para el overlay Ubuntu/GNOME: PAPI activa mediante la integración `applications@pedro`, que delega en `Shell.App.activate()`; el clic enfoca/restaura ventanas existentes o abre la aplicación cuando está cerrada. GNOME aporta los indicadores basados en ventanas. La extensión requiere una nueva sesión tras instalarse. Véase [integración GNOME](../gnome/application/readme.md).
-
-Pendiente: menú explícito de nueva ventana y distribución de esta integración dentro de la futura sesión GNOME de producción, cuando se defina ese boot/session flow. No convertir los clics normales en solicitudes de nueva ventana ni implementar gestión de ventanas paralela.
+Detalle: [integración GNOME](../gnome/application/readme.md).
