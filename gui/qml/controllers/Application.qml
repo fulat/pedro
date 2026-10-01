@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Window
 import gui
 import "../scripts/constants.js" as Constants
+import "../scripts/desktop/collision.js" as Collision
 
 // Owns the graphical shell state and every operation triggered by its views.
 QtObject {
@@ -424,6 +425,25 @@ QtObject {
 
         movementX = Math.max(-minimumX, Math.min(desktopShortcuts.width - maximumX, movementX));
         movementY = Math.max(-minimumY, Math.min(desktopShortcuts.height - maximumY, movementY));
+
+        if (Backend.desktopModel.organization === "free" || !Backend.desktopModel.keepAligned) {
+            const rectangles = desktopDragItems.map(entry => ({x: entry.item.x, y: entry.item.y,
+                width: entry.item.width, height: entry.item.height}));
+            const obstacles = [];
+            for (const obstacle of desktopObstacles) {
+                if (!obstacle || !obstacle.visible || obstacle.width <= 0 || obstacle.height <= 0) {
+                    continue;
+                }
+                const origin = obstacle.mapToItem(desktopShortcuts, 0, 0);
+                obstacles.push({x: origin.x - 8, y: origin.y - 8,
+                    width: obstacle.width + 16, height: obstacle.height + 16});
+            }
+            const currentX = desktopDragItems[0].item.x - desktopDragItems[0].x;
+            const currentY = desktopDragItems[0].item.y - desktopDragItems[0].y;
+            const allowed = Collision.constrain(rectangles, obstacles, movementX - currentX, movementY - currentY);
+            movementX = currentX + allowed.x;
+            movementY = currentY + allowed.y;
+        }
 
         for (let index = 0; index < desktopDragItems.length; ++index) {
             const entry = desktopDragItems[index];
