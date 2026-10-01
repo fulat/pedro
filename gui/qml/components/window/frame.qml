@@ -124,6 +124,10 @@ Window {
         required property color tint
         required property string symbol
 
+        HoverHandler {
+            cursorShape: Qt.PointingHandCursor
+        }
+
         Rectangle {
             anchors.centerIn: parent
             width: 12
