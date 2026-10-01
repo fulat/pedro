@@ -3,12 +3,18 @@
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
+#include <QDBusConnection>
+#include <QDBusMessage>
+#include <QDBusReply>
+#include <QStringList>
+
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -21,6 +27,26 @@ namespace Pedro::Papi::Gui::Application {
 
         constexpr auto settingsSchema = "org.gnome.shell";
         constexpr auto favoritesKey = "favorite-apps";
+
+        QDBusMessage callShell(const QString& method, const QList<QVariant>& arguments = {}) {
+
+            auto message = QDBusMessage::createMethodCall("org.pedro.Applications", "/org/pedro/Applications", "org.pedro.Applications", method);
+            message.setArguments(arguments);
+            return QDBusConnection::sessionBus().call(message, QDBus::Block, 2000);
+        }
+
+        std::optional<std::unordered_set<std::string>> shellRunning() {
+
+            const QDBusReply<QStringList> reply(callShell("GetRunning"));
+            if (!reply.isValid()) {
+                return std::nullopt;
+            }
+            std::unordered_set<std::string> result;
+            for (const auto& id : reply.value()) {
+                result.insert(id.toStdString());
+            }
+            return result;
+        }
 
         // Releases GLib objects through standard C++ ownership.
         template <typename Type> struct ObjectDeleter {
@@ -296,14 +322,15 @@ namespace Pedro::Papi::Gui::Application {
 
         auto records = applications();
         const auto favorites = favoriteIds();
-        const auto active = processes();
+        const auto windows = shellRunning();
+        const auto active = windows ? Processes{} : processes();
         std::unordered_map<std::string, std::size_t> indexes;
         std::unordered_set<std::string> pinned;
         Snapshot result;
 
         for (auto index = 0U; index < records.size(); ++index) {
             indexes.insert_or_assign(records[index].info.id, index);
-            records[index].info.running = running(records[index], active);
+            records[index].info.running = windows ? windows->count(records[index].info.id) > 0 : running(records[index], active);
         }
 
         for (const auto& id : favorites) {
@@ -328,6 +355,29 @@ namespace Pedro::Papi::Gui::Application {
         }
 
         return result;
+    }
+
+    void Manager::activate(const std::string& id) const {
+
+        if (id.empty()) {
+            throw std::invalid_argument("Application id cannot be empty");
+        }
+        const auto reply = callShell("Activate", {QString::fromStdString(id)});
+        if (reply.type() == QDBusMessage::ReplyMessage) {
+            return;
+        }
+        if (reply.errorName() != "org.freedesktop.DBus.Error.ServiceUnknown" && reply.errorName() != "org.freedesktop.DBus.Error.NameHasNoOwner") {
+            throw std::runtime_error("GNOME application activation failed: " + reply.errorMessage().toStdString());
+        }
+        // Never launch a duplicate when GNOME activation is unavailable.
+        auto application = Object<GDesktopAppInfo>(g_desktop_app_info_new(id.c_str()));
+        if (!application) {
+            throw std::runtime_error("Application is not installed: " + id);
+        }
+        if (running(record(G_APP_INFO(application.get())), processes())) {
+            throw std::runtime_error("Enable Pedro Applications in GNOME and log in again to focus existing windows");
+        }
+        launch(id);
     }
 
     void Manager::launch(const std::string& id) const {

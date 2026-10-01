@@ -12,6 +12,7 @@
 #include <QString>
 #include <QTimer>
 #include <QVariantList>
+#include <QSet>
 #include <QtQmlIntegration/qqmlintegration.h>
 
 #include <memory>
@@ -155,6 +156,8 @@ class Backend final : public QObject {
         QString documentPath_;
         QString documentText_;
         QString applicationError_;
+
+        QSet<QString> activatingApplications_;
         QString bluetoothError_;
         QString statusMessage_;
         QString connectedWifiName_;

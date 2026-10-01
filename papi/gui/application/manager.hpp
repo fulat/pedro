@@ -15,6 +15,8 @@ namespace Pedro::Papi::Gui::Application {
 
             void launch(const std::string& id) const;
 
+            void activate(const std::string& id) const;
+
             void setPinned(const std::string& id, bool pinned) const;
     };
 

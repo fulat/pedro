@@ -313,9 +313,15 @@ void Backend::refreshApplications() {
 
 void Backend::launchApplication(const QString& id) {
 
+    if (activatingApplications_.contains(id)) {
+        return;
+    }
+    activatingApplications_.insert(id);
+
     auto* watcher = new QFutureWatcher<QString>(this);
 
-    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher] {
+    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher, id] {
+        activatingApplications_.remove(id);
         applicationError_ = watcher->result();
         watcher->deleteLater();
         emit applicationsChanged();
@@ -329,7 +335,7 @@ void Backend::launchApplication(const QString& id) {
 
     watcher->setFuture(QtConcurrent::run([id] {
         try {
-            Pedro::Papi::Gui::Application::Manager{}.launch(id.toStdString());
+            Pedro::Papi::Gui::Application::Manager{}.activate(id.toStdString());
             return QString{};
         } catch (const std::exception& error) {
             return QString::fromUtf8(error.what());
