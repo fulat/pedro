@@ -96,7 +96,7 @@ Item {
             anchors.right: dock.vertical ? entryTile.right : undefined
             anchors.horizontalCenter: dock.vertical ? undefined : entryTile.horizontalCenter
             anchors.verticalCenter: dock.vertical ? entryTile.verticalCenter : undefined
-            anchors.bottomMargin: dock.vertical ? 0 : -5
+            anchors.bottomMargin: dock.vertical ? 0 : -2
             anchors.rightMargin: dock.vertical ? 5 : 0
             width: 3
             height: 3
