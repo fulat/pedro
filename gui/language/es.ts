@@ -1626,5 +1626,25 @@
             <extracomment>Stable Pedro key: network.popup.ipCopied</extracomment>
             <translation>Dirección IP copiada</translation>
         </message>
+        <message>
+            <source>shell.notifications.title</source>
+            <extracomment>Stable Pedro key: shell.notifications.title</extracomment>
+            <translation>Notificaciones</translation>
+        </message>
+        <message>
+            <source>shell.notifications.empty</source>
+            <extracomment>Stable Pedro key: shell.notifications.empty</extracomment>
+            <translation>No hay notificaciones</translation>
+        </message>
+        <message>
+            <source>shell.calendar.title</source>
+            <extracomment>Stable Pedro key: shell.calendar.title</extracomment>
+            <translation>Calendario</translation>
+        </message>
+        <message>
+            <source>shell.calendar.pending</source>
+            <extracomment>Stable Pedro key: shell.calendar.pending</extracomment>
+            <translation>Calendario próximamente</translation>
+        </message>
     </context>
 </TS>

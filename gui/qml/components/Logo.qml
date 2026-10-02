@@ -16,6 +16,7 @@ Item {
     property string activeSource: ""
     property alias logoControl: logoButton
     property alias statusControl: statusPill
+    property alias notificationControl: notificationButton
 
     signal panelRequested(string mode, real anchorX, string source)
     signal desktopRequested
@@ -87,8 +88,8 @@ Item {
 
         anchors.top: parent.top
         anchors.topMargin: 10
-        anchors.right: parent.right
-        anchors.rightMargin: 20
+        anchors.right: notificationButton.left
+        anchors.rightMargin: 8
         width: statusRow.width + 16
         height: 30
 
@@ -185,7 +186,7 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: 12
-                    color: dateMouse.containsMouse || root.activeSource === "notifications" ? Theme.actionHover : "transparent"
+                    color: dateMouse.containsMouse || root.activeSource === "calendar" ? Theme.actionHover : "transparent"
                     Behavior on color { ColorAnimation { duration: 140 } }
                 }
                 Quick.Text {
@@ -201,10 +202,36 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: controller.requestPanel("quick", "notifications", dateButton)
+                    onClicked: controller.requestPanel("calendar", "calendar", dateButton)
                 }
             }
 
+        }
+    }
+
+    Item {
+        id: notificationButton
+
+        anchors.top: statusPill.top
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        width: statusPill.height
+        height: statusPill.height
+
+        Liquid {
+            anchors.fill: parent
+            backdrop: root.backdrop
+            cornerRadius: width / 2
+        }
+
+        TopAction {
+            anchors.centerIn: parent
+            icon: "../../assets/icons/bell.svg"
+            description: qsTranslate("Pedro", "shell.notifications.title")
+            highlighted: root.activeSource === "notifications"
+            width: parent.width
+            height: parent.height
+            onActivated: controller.requestPanel("notifications", "notifications", notificationButton)
         }
     }
 

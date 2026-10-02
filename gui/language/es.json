@@ -323,5 +323,9 @@
     "network.popup.showIp": "Mostrar dirección IP",
     "network.popup.hideIp": "Ocultar dirección IP",
     "network.popup.copyIp": "Copiar dirección IP",
-    "network.popup.ipCopied": "Dirección IP copiada"
+    "network.popup.ipCopied": "Dirección IP copiada",
+    "shell.notifications.title": "Notificaciones",
+    "shell.notifications.empty": "No hay notificaciones",
+    "shell.calendar.title": "Calendario",
+    "shell.calendar.pending": "Calendario próximamente"
 }
