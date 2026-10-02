@@ -236,6 +236,8 @@ Item {
             Label {
                 Layout.fillWidth: true
                 Layout.leftMargin: 12
+                topPadding: 4
+                bottomPadding: 0
                 text: detail.title
                 color: Theme.textMuted
                 font.pixelSize: 12
@@ -246,9 +248,9 @@ Item {
                 Layout.alignment: Qt.AlignLeft
                 Layout.maximumWidth: parent.width
                 implicitWidth: valueMetrics.width + 24
-                implicitHeight: valueText.implicitHeight + 12
+                implicitHeight: valueText.implicitHeight + 8
                 radius: height / 2
-                color: copyMouse.pressed ? Theme.overlayPressed : copyMouse.containsMouse ? Theme.overlayHover : "transparent"
+                color: copyMouse.canCopy && copyMouse.pressed ? Theme.overlayPressed : copyMouse.canCopy && copyMouse.containsMouse ? Theme.overlayHover : "transparent"
 
                 Behavior on color {
                     ColorAnimation { duration: 100 }
@@ -266,8 +268,8 @@ Item {
                     anchors.fill: parent
                     anchors.leftMargin: 12
                     anchors.rightMargin: 12
-                    anchors.topMargin: 6
-                    anchors.bottomMargin: 6
+                    anchors.topMargin: 4
+                    anchors.bottomMargin: 4
                     text: detail.revealable && root.ipRevealed && root.ipCopied ? qsTranslate("Pedro", "network.popup.ipCopied") : detail.value
                     horizontalAlignment: detail.revealable && root.ipCopied ? TextEdit.AlignHCenter : TextEdit.AlignLeft
                     color: Theme.white
@@ -292,9 +294,10 @@ Item {
                     id: copyMouse
                     objectName: "ipCopyTarget"
                     anchors.fill: parent
-                    enabled: detail.revealable && root.ipRevealed && root.ipAddress.length > 0
+                    readonly property bool canCopy: detail.revealable && root.ipRevealed && root.ipAddress.length > 0
+                    acceptedButtons: canCopy ? Qt.LeftButton : Qt.NoButton
                     hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
+                    cursorShape: canCopy ? Qt.PointingHandCursor : Qt.ArrowCursor
                     onClicked: detail.copyAddress()
                 }
             }
