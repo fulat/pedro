@@ -72,7 +72,9 @@ Item {
             Slider.Tile {
                 title: qsTranslate("Pedro", "shell.system.brightness")
                 icon: "../../../assets/icons/brightness.svg"
-                level: 0.58
+                interactive: Papi.screenBrightness.available
+                level: Papi.screenBrightness.value / 100
+                onLevelMoved: value => Papi.screenBrightness.setValue(Math.round(value * 100))
             }
             Slider.Tile {
                 title: qsTranslate("Pedro", "shell.sound.title")

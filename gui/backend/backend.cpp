@@ -83,6 +83,10 @@ namespace {
 
 } // namespace
 
+QObject* Backend::screenBrightness() {
+    return &brightness_;
+}
+
 Backend::Backend(QObject* parent) : QObject(parent) {
     auto documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     if (documents.isEmpty() || !QDir(documents).exists()) {

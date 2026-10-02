@@ -11,6 +11,8 @@ Item {
     property string title
     property url icon
     property real level: 0.5
+    property bool interactive: true
+    signal levelMoved(real value)
     Layout.fillWidth: true
     implicitHeight: 48
 
@@ -39,7 +41,9 @@ Item {
             padding: 0
             from: 0
             to: 1
+            enabled: root.interactive
             value: root.level
+            onMoved: root.levelMoved(value)
             background: Rectangle {
                 y: (slider.height - height) / 2
                 width: slider.width
@@ -61,7 +65,8 @@ Item {
                 radius: 5
                 color: Theme.white
             }
-            HoverHandler { cursorShape: Qt.PointingHandCursor }
+            opacity: enabled ? 1 : 0.45
+            HoverHandler { cursorShape: slider.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
         }
     }
 }

@@ -17,12 +17,14 @@
 
 #include <memory>
 #include <pedro/papi/config/store.hpp>
+#include <pedro/papi/display/brightness/manager.h>
 
 class Backend final : public QObject {
         Q_OBJECT
         QML_NAMED_ELEMENT(Papi)
         QML_SINGLETON
         Q_PROPERTY(QAbstractItemModel* desktopModel READ desktopModel CONSTANT)
+        Q_PROPERTY(QObject* screenBrightness READ screenBrightness CONSTANT)
         Q_PROPERTY(bool developmentMode READ developmentMode CONSTANT)
         Q_PROPERTY(QString hostname READ hostname NOTIFY systemChanged)
         Q_PROPERTY(QString kernel READ kernel NOTIFY systemChanged)
@@ -60,6 +62,8 @@ class Backend final : public QObject {
         explicit Backend(QObject* parent = nullptr);
 
         QAbstractItemModel* desktopModel();
+
+        QObject* screenBrightness();
 
         [[nodiscard]] bool developmentMode() const;
         [[nodiscard]] QString hostname() const;
@@ -138,6 +142,8 @@ class Backend final : public QObject {
         Pedro::Papi::Gui::Application::Manager applications_;
         Pedro::Papi::Network::Wifi::Manager wifi_;
         Pedro::Papi::Bluetooth::Manager bluetooth_;
+
+        Pedro::Papi::Display::Brightness::Manager brightness_;
 
         QTimer refreshTimer_;
         QTimer applicationsRefreshTimer_;
