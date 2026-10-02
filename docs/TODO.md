@@ -31,7 +31,6 @@ Registro permanente del desarrollo. No implica implementar todas las tareas inme
 - [ ] **Mount / Volume Monitoring** — parcial: GVolumeMonitor actualiza Este equipo ante mount-added/removed/changed; faltan eventos de volúmenes y unidades sin montar.
 - [ ] **General Hardware Detection** — unificar eventos de conexión/desconexión en PAPI; las integraciones específicas de Wi-Fi/Bluetooth no cubren hardware general.
 - [x] **Filesystem Monitoring** — Desktop y Pedro Files usan GFileMonitor, agrupan eventos y actualizan el modelo incrementalmente, sin polling ni refrescos por frame. Files reemplaza el monitor al navegar; el monitoreo permanece invisible. Véanse [Desktop](desktop.md) y [Files](files.md).
-- [ ] **Default Applications / MIME Associations** — Open With, aplicaciones predeterminadas y asociaciones MIME. La clasificación visual de archivos no implementa apertura con aplicaciones.
 - [x] **Carpetas estándar mediante XDG** — Desktop y Files resuelven las carpetas del usuario activo mediante g_get_user_special_dir; la lógica vive en PAPI. El mismo código sirve en desarrollo y producción, sin rutas /home/<usuario> hardcodeadas.
 - [ ] **Operaciones asíncronas completas** — parcial: enumeración, creación de carpetas/archivos y renombrado ya usan APIs asíncronas o workers. Faltan copiar, mover, comprimir, extraer y descargar con progreso, cancelación y errores; modelar jobs independientes cuando corresponda. Priorizar GLib/GIO y mantener interactiva la UI.
 
@@ -89,11 +88,85 @@ En production:
 Pedro → Mutter → GPU/DRM/KMS → physical display
 ```
 
-### Architecture Rule
+## Pedro User Experience & System Capabilities
+
+### High Priority / Core Experience
+
+- [ ] **Accessibility** — integrar accesibilidad del sistema utilizando la infraestructura existente de Linux/GNOME, incluyendo screen reader, navegación por teclado, zoom, high contrast, sticky keys, slow keys y otras funciones compatibles. Pedro debe proveer su propia UI, sin reinventar AT-SPI/Orca.
+
+- [ ] **Fingerprint / Biometrics** — integrar autenticación biométrica cuando el hardware sea compatible, reutilizando `libfprint` / `fprintd` y la infraestructura de autenticación existente del sistema.
+
+- [ ] **Clipboard History** — crear una experiencia nativa de Pedro para consultar elementos copiados recientemente, incluyendo texto, imágenes, links y otros tipos compatibles. Debe evitar almacenar contenido sensible cuando corresponda.
+
+- [ ] **Drag & Drop Between Applications** — parcial: el Desktop tiene un gesto visual de arrastre en pilas; todavía no transfiere archivos ni datos entre aplicaciones. Garantizar que las aplicaciones Pedro puedan intercambiar archivos y datos mediante drag & drop utilizando los mecanismos estándar de Wayland/Qt/GTK.
+
+- [ ] **Share Sheet** — parcial: los menús de archivos/carpetas presentan Share, sin backend de transferencia. Crear una experiencia centralizada de `Share...` donde una aplicación pueda enviar contenido a otras aplicaciones o acciones compatibles sin implementar su propio menú de compartir.
+
+- [ ] **Unified Open / Save Dialogs** — proveer un File Picker consistente para `Open`, `Save`, `Save As`, uploads y selección de archivos utilizando XDG FileChooser/Portals cuando corresponda.
+
+- [ ] **Application Permissions Dashboard** — crear una vista centralizada de privacidad/permisos donde el usuario pueda revisar y controlar acceso a Camera, Microphone, Location, Screen Capture, Notifications, Files/Folders y otras capacidades sensibles.
+
+- [ ] **Background Applications Control** — permitir ver y controlar qué aplicaciones pueden continuar ejecutándose en background.
+
+- [ ] **Startup Applications / Open at Login** — permitir elegir qué aplicaciones deben iniciarse automáticamente cuando el usuario inicia sesión.
+
+- [ ] **Default Applications / MIME Associations & UI** — Open With y una UI sencilla para elegir navegador, reproductor, editor, mail app y aplicaciones predeterminadas por tipo mediante las asociaciones MIME existentes. La clasificación visual de archivos ya existe; falta integrar su apertura y configuración de asociaciones.
+
+- [ ] **Application Updates** — integrar actualización de aplicaciones desde Pedro App Store o la infraestructura correspondiente, mostrando claramente versiones disponibles y estado de instalación.
+
+- [ ] **System Update UX** — crear una experiencia única de Pedro para actualizaciones del sistema, ocultando detalles técnicos de `apt`, paquetes y otras herramientas subyacentes.
+
+- [ ] **Firmware Updates** — integrar `fwupd`/LVFS cuando el hardware sea compatible y presentar actualizaciones de firmware mediante la UI de Pedro.
+
+- [ ] **Recovery Environment** — proporcionar mecanismos de recuperación de Pedro para reparar el sistema cuando no pueda iniciar correctamente o alguna actualización cause problemas.
+
+- [ ] **Restore Points / System Snapshots** — investigar e implementar una estrategia de snapshots/restauración del sistema cuando la arquitectura de filesystem lo permita. Mantener separado este concepto de backup de archivos personales.
+
+- [ ] **Crash Reporting** — detectar crashes de aplicaciones Pedro y ofrecer una experiencia limpia con opciones como Reopen, View Details y Send Report, utilizando logs, stack traces o minidumps según corresponda.
+
+- [ ] **Global Search** — implementar una búsqueda global estilo Spotlight capaz de encontrar aplicaciones, archivos, configuraciones, acciones del sistema y resultados rápidos.
+
+- [ ] **Searchable Settings** — indexar secciones y acciones de Pedro Settings para que búsquedas como `Wi-Fi`, `Night Light`, `Default Browser`, `Startup Apps`, `Permissions` o `Updates` abran directamente la vista correspondiente.
+
+- [ ] **Quick Look / File Preview** — parcial: los iconos pueden mostrar imágenes locales; falta una experiencia de preview independiente. Permitir previews rápidos de imágenes, PDF, texto, audio, video y otros formatos sin abrir necesariamente la aplicación completa asociada.
+
+- [ ] **Lock Screen / Idle Management** — controlar auto-lock, screen timeout, dimming, comportamiento de tapa y otras políticas de sesión utilizando la infraestructura existente de GNOME/systemd.
+
+- [ ] **Online Accounts** — permitir integrar cuentas externas como Google, Microsoft, Nextcloud u otros proveedores compatibles para reutilizarlas en servicios del sistema.
+
+- [ ] **User Accounts / Profiles** — crear experiencia propia de Pedro para usuarios locales, avatar, nombre, contraseña, permisos y configuración de sesión.
+
+- [ ] **Input Methods / Keyboard Sources** — integrar layouts, idiomas e input methods mediante infraestructura como IBus, sin reinventar métodos de entrada.
+
+### Useful but Lower Priority
+
+Estas funcionalidades deben quedar documentadas como deseables, pero no deben bloquear una primera versión usable de Pedro.
+
+- [ ] **Thumbnail Service** — parcial: existen imágenes locales en iconos; falta un servicio compartido de generación/cache. Investigar un servicio centralizado y cacheado de thumbnails reutilizable por Files, File Picker, Global Search y Quick Look.
+
+- [ ] **Remote / Cloud Filesystems** — parcial: Files enumera ubicaciones mediante GIO; falta UI e integración de acceso/autenticación a recursos remotos. Permitir navegar recursos como SFTP, SMB, WebDAV, Nextcloud, Google Drive u otros mediante GIO/GVfs o integraciones equivalentes.
+
+- [ ] **Pedro Device Sharing** — posibilidad futura de compartir archivos entre dispositivos Pedro mediante una experiencia propia, sin depender de AirDrop.
+
+- [ ] **Clipboard Sync Between Pedro Devices** — posibilidad futura de sincronizar clipboard entre dispositivos autorizados del mismo usuario.
+
+- [ ] **Advanced Backup** — estrategia completa de backup de archivos personales, independiente de System Restore/Snapshots.
+
+- [ ] **Extended File Metadata / Tags** — parcial: Files expone metadata básica y presenta etiquetas como UI. Implementar persistencia/edición de tags, atributos extendidos e información reutilizable por Files y Search.
+
+### Architecture Rules
 
 Pedro debe ocultar las tecnologías internas al usuario final. La UI presenta conceptos Pedro: Passwords / Keychain, Notifications, Privacy, Storage, Printers, Battery, Energy, Displays, Default Apps, Location y Permissions.
 
 Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, CUPS, UDisks2, udev, GSettings, GeoClue, polkit, UPower, power-profiles-daemon, Mutter, systemd-logind, GIO y journald. Encapsular estas capacidades detrás de PAPI o backends propios cuando corresponda; evitar dependencias directas de la UI en detalles de GNOME/Linux y sistemas paralelos.
+
+- Reutilizar servicios y protocolos maduros de Linux/GNOME; no reimplementarlos desde cero.
+- Ocultar también nombres como fprintd, fwupd, IBus, GVfs y XDG Portal en la UI.
+- Las aplicaciones deben consumir la API Pedro equivalente cuando exista, en lugar de acceder directamente a servicios internos.
+- Development y production comparten arquitectura; no crear implementaciones específicas de Ubuntu development que haya que sustituir al crear el ISO.
+- Distinguir System Recovery (reparar un sistema que no arranca), System Restore / Snapshots (restaurar estado del sistema) y User Backup (proteger archivos personales).
+- High Priority / Core Experience define la experiencia objetivo de un sistema operativo de uso general. Useful but Lower Priority puede llegar posteriormente y no debe retrasar innecesariamente una primera versión estable.
+
 
 ## Desktop y menú del wallpaper
 
@@ -117,7 +190,7 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 - [x] Menú del espacio vacío para creación asíncrona y propiedades de la carpeta actual; selección limpia al pulsar fuera; menus contextuales pueden sobresalir de la ventana.
 - [x] Título alterna lateral completo/iconos, animación suave; controles de ventana y resize por bordes/esquinas.
 - [ ] Ajustar ancho del lateral arrastrando la división.
-- [ ] Conectar búsqueda, filtros, etiquetas y edición de marcadores; la presentación existe.
+- [ ] Conectar búsqueda local, filtros y edición de marcadores; la presentación existe. El soporte de etiquetas se registra en Extended File Metadata / Tags.
 - [ ] Operaciones de archivos desde Files, incluida restauración/vaciado de Papelera; aplicar los jobs definidos en Storage & Filesystem.
 - [ ] Integrar los backends GIO/GVfs necesarios en la futura sesión de producción.
 
