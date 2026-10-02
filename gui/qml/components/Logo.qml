@@ -138,8 +138,14 @@ Item {
             Row {
                 y: (statusRow.height - height) / 2
                 spacing: 4
+                Quick.Text {
+                    text: Backend.battery.available ? Backend.battery.value + "%" : "—%"
+                    color: Theme.white
+                    font.pixelSize: 13
+                    font.weight: Font.Medium
+                }
                 Item {
-                    width: 18
+                    width: 23
                     height: 18
                     Icon.Tinted {
                         anchors.fill: parent
@@ -149,7 +155,7 @@ Item {
                         objectName: "batteryChargeFill"
                         x: 3
                         y: 6
-                        width: 10.5 * Math.max(0, Math.min(100, Backend.battery.value)) / 100
+                        width: 15 * Math.max(0, Math.min(100, Backend.battery.value)) / 100
                         height: 6
                         radius: 0.7
                         visible: Backend.battery.available
@@ -157,12 +163,7 @@ Item {
                         Behavior on width { NumberAnimation { duration: 180 } }
                     }
                 }
-                Quick.Text {
-                    text: Backend.battery.available ? Backend.battery.value + "%" : "—%"
-                    color: Theme.white
-                    font.pixelSize: 13
-                    font.weight: Font.Medium
-                }
+
             }
 
             TopAction {
