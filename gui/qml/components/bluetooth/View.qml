@@ -35,6 +35,24 @@ Item {
             Layout.preferredHeight: 52
             spacing: 12
 
+            Rectangle {
+                Layout.preferredWidth: 34
+                Layout.preferredHeight: 34
+                Layout.alignment: Qt.AlignVCenter
+                radius: 17
+                color: Theme.cardSurface
+                border.width: 1
+                border.color: Theme.buttonBorder
+
+                Icon.Tinted {
+                    anchors.centerIn: parent
+                    width: 22
+                    height: 22
+                    source: "../../../assets/icons/bluetooth.svg"
+                    tint: Theme.white
+                }
+            }
+
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 1
@@ -161,27 +179,8 @@ Item {
                 visible: !Papi.bluetoothEnabled || deviceList.count === 0
                 spacing: 6
 
-                Rectangle {
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.preferredWidth: 56
-                    Layout.preferredHeight: 56
-                    radius: width / 2
-                    color: Theme.overlaySubtle
-                    border.width: 1
-                    border.color: Theme.cardBorder
-
-                    Icon.Tinted {
-                        anchors.centerIn: parent
-                        width: 30
-                        height: 30
-                        source: "../../../assets/icons/bluetooth.svg"
-                        tint: Theme.white
-                    }
-                }
-
                 Controls.Label {
                     Layout.fillWidth: true
-                    Layout.topMargin: 6
                     text: !Papi.bluetoothAvailable ? qsTranslate("Pedro", "bluetooth.status.unavailable") : !Papi.bluetoothEnabled ? qsTranslate("Pedro", "bluetooth.status.disabled") : Papi.bluetoothScanning ? qsTranslate("Pedro", "bluetooth.devices.searching") : qsTranslate("Pedro", "bluetooth.devices.empty")
                     color: Theme.white
                     font.pixelSize: 14
