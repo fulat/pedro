@@ -316,5 +316,8 @@
     "settings.network.runDiagnostics": "Ejecutar diagnóstico",
     "settings.network.viewDetails": "Ver detalles",
     "settings.network.diagnosticsPending": "La conexión de red está detectada. Las pruebas de puerta de enlace, Internet y DNS aún no están conectadas.",
-    "settings.network.openSettings": "Ajustes de red…"
+    "settings.network.openSettings": "Ajustes de red…",
+    "network.popup.localIp": "IP local",
+    "network.popup.settings": "Ajustes de red",
+    "network.popup.diagnose": "Diagnosticar conexión"
 }

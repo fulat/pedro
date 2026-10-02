@@ -316,5 +316,8 @@
     "settings.network.runDiagnostics": "Run diagnostics",
     "settings.network.viewDetails": "View Details",
     "settings.network.diagnosticsPending": "Network connection is detected. Gateway, Internet and DNS checks are not connected yet.",
-    "settings.network.openSettings": "Network Settings…"
+    "settings.network.openSettings": "Network Settings…",
+    "network.popup.localIp": "Local IP",
+    "network.popup.settings": "Network settings",
+    "network.popup.diagnose": "Diagnose connection"
 }

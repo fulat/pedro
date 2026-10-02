@@ -1591,5 +1591,20 @@
             <extracomment>Stable Pedro key: settings.network.openSettings</extracomment>
             <translation>Network Settings…</translation>
         </message>
+        <message>
+            <source>network.popup.localIp</source>
+            <extracomment>Stable Pedro key: network.popup.localIp</extracomment>
+            <translation>Local IP</translation>
+        </message>
+        <message>
+            <source>network.popup.settings</source>
+            <extracomment>Stable Pedro key: network.popup.settings</extracomment>
+            <translation>Network settings</translation>
+        </message>
+        <message>
+            <source>network.popup.diagnose</source>
+            <extracomment>Stable Pedro key: network.popup.diagnose</extracomment>
+            <translation>Diagnose connection</translation>
+        </message>
     </context>
 </TS>

@@ -16,7 +16,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 12
+        spacing: 0
 
         Item {
             Layout.fillWidth: true
@@ -29,16 +29,22 @@ Item {
                 spacing: 18
 
                 Rectangle {
+                    Layout.minimumWidth: 52
+                    Layout.maximumWidth: 52
                     Layout.preferredWidth: 52
                     Layout.preferredHeight: 52
                     radius: 26
-                    color: "#28ffffff"
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: "#80686485" }
+                        GradientStop { position: 1; color: "#80534f70" }
+                    }
+                    border.color: "#28ffffff"
 
                     Icon.Tinted {
                         anchors.centerIn: parent
                         width: 28
                         height: 28
-                        source: "../../../assets/icons/share.svg"
+                        source: "../../../assets/icons/network.svg"
                         tint: Theme.white
                     }
                 }
@@ -48,20 +54,22 @@ Item {
                     spacing: 6
 
                     Label {
+                        Layout.fillWidth: true
                         text: Backend.networkConnection.type === "ethernet" ? qsTranslate("Pedro", "settings.network.ethernet") : qsTranslate("Pedro", "network.connection.title")
                         color: Theme.white
-                        font.pixelSize: 17
+                        font.pixelSize: 18
                         font.weight: Font.DemiBold
                     }
 
                     RowLayout {
+                        Layout.alignment: Qt.AlignLeft
                         spacing: 6
 
                         Rectangle {
                             implicitWidth: 9
                             implicitHeight: 9
                             radius: 4.5
-                            color: root.connected ? Theme.statusWifiConnected : Theme.textMuted
+                            color: root.connected ? "#20dda1" : Theme.textMuted
                         }
 
                         Label {
@@ -72,10 +80,20 @@ Item {
                     }
                 }
 
-                Icon.Tinted {
-                    source: "../../../assets/icons/chevron.svg"
-                    Layout.preferredWidth: 14
-                    Layout.preferredHeight: 14
+                Rectangle {
+                    Layout.minimumWidth: 36
+                    Layout.maximumWidth: 36
+                    Layout.preferredWidth: 36
+                    Layout.preferredHeight: 36
+                    radius: 18
+                    color: "#10ffffff"
+
+                    Icon.Tinted {
+                        anchors.centerIn: parent
+                        source: "../../../assets/icons/chevron.svg"
+                        width: 16
+                        height: 16
+                    }
                 }
             }
 
@@ -88,15 +106,26 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 168
+            Layout.topMargin: 10
+            Layout.bottomMargin: 10
+            implicitHeight: 1
+            color: "#18ffffff"
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 180
             radius: 18
-            color: "#14ffffff"
-            border.color: "#20ffffff"
+            color: "#0fffffff"
+            border.color: "#24ffffff"
             antialiasing: true
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 14
+                anchors.leftMargin: 20
+                anchors.rightMargin: 16
+                anchors.topMargin: 8
+                anchors.bottomMargin: 8
                 spacing: 0
 
                 Detail {
@@ -112,7 +141,7 @@ Item {
                 }
 
                 Detail {
-                    title: qsTranslate("Pedro", "settings.network.ip")
+                    title: qsTranslate("Pedro", "network.popup.localIp")
                     value: "—"
                     icon: "../../../assets/icons/location.svg"
                 }
@@ -133,13 +162,18 @@ Item {
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 0
+            Layout.topMargin: 14
+            spacing: 8
 
             Loader {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 48
+                Layout.preferredHeight: 44
                 source: "footer.qml"
-                onLoaded: item.activated.connect(root.settingsRequested)
+                onLoaded: {
+                    item.title = Qt.binding(() => qsTranslate("Pedro", "network.popup.settings"));
+                    item.outlined = true;
+                    item.activated.connect(root.settingsRequested);
+                }
             }
 
             Loader {
@@ -147,9 +181,9 @@ Item {
                 Layout.preferredHeight: 44
                 source: "footer.qml"
                 onLoaded: {
-                    item.title = Qt.binding(() => qsTranslate("Pedro", "settings.network.diagnostics"));
+                    item.title = Qt.binding(() => qsTranslate("Pedro", "network.popup.diagnose"));
                     item.icon = Qt.resolvedUrl("../../../assets/icons/diagnostics.svg");
-                    item.outlined = false;
+                    item.outlined = true;
                     item.activated.connect(root.diagnosticsRequested);
                 }
             }
@@ -165,13 +199,13 @@ Item {
 
         Layout.fillWidth: true
         Layout.fillHeight: true
-        spacing: 18
+        spacing: 28
 
         Icon.Tinted {
             source: detail.icon
             tint: Theme.white
-            Layout.preferredWidth: 20
-            Layout.preferredHeight: 20
+            Layout.preferredWidth: 22
+            Layout.preferredHeight: 22
         }
 
         ColumnLayout {
@@ -181,14 +215,14 @@ Item {
             Label {
                 text: detail.title
                 color: Theme.textMuted
-                font.pixelSize: 11
+                font.pixelSize: 12
             }
 
             Label {
                 Layout.fillWidth: true
                 text: detail.value
                 color: Theme.white
-                font.pixelSize: 13
+                font.pixelSize: 14
                 elide: Text.ElideRight
             }
         }

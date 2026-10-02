@@ -28,7 +28,7 @@ Rectangle {
 
     visible: mode !== ""
     width: Math.min(mode === "network" ? 340 : mode === "quick" ? 368 : controlMode ? 352 : 320, availableWidth - 24)
-    height: Math.min(mode === "quick" ? 604 : mode === "wifi" ? 460 : mode === "bluetooth" ? 460 : mode === "sound" ? 84 : mode === "network" ? 372 : 380, availableHeight - 20)
+    height: Math.min(mode === "quick" ? 604 : mode === "wifi" ? 460 : mode === "bluetooth" ? 460 : mode === "sound" ? 84 : mode === "network" ? 406 : 380, availableHeight - 20)
 
     Behavior on height {
         NumberAnimation {
@@ -41,7 +41,19 @@ Rectangle {
         anchors.fill: parent
         frosted: true
         backdrop: root.backdrop
-        cornerRadius: 18
+        cornerRadius: root.mode === "network" ? 20 : 18
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        visible: root.mode === "network"
+        radius: 20
+        gradient: Gradient {
+            GradientStop { position: 0; color: "#80121a2c" }
+            GradientStop { position: 1; color: "#7817171d" }
+        }
+        border.color: "#50ffffff"
+        antialiasing: true
     }
 
     MouseArea {
@@ -52,7 +64,7 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: root.controlMode ? 14 : 12
+        anchors.margins: root.mode === "network" ? 16 : root.controlMode ? 14 : 12
         spacing: root.controlMode ? 0 : 10
 
         RowLayout {
