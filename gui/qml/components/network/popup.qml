@@ -12,17 +12,18 @@ Item {
     signal settingsRequested
 
     property bool ipRevealed: false
-    property bool ipCopied: false
     property bool menuHovered: false
 
     onMenuHoveredChanged: {
-        if (!menuHovered) {
-            hideIp();
+        if (menuHovered) {
+            revealTimer.stop();
+        } else if (ipRevealed) {
+            revealTimer.restart();
         }
     }
 
     onIpRevealedChanged: {
-        if (ipRevealed) {
+        if (ipRevealed && !menuHovered) {
             revealTimer.restart();
         } else {
             revealTimer.stop();
@@ -33,8 +34,6 @@ Item {
 
     function hideIp() {
         ipRevealed = false;
-        ipCopied = false;
-        copiedTimer.stop();
         revealTimer.stop();
     }
 
@@ -48,12 +47,6 @@ Item {
         id: revealTimer
         interval: 5000
         onTriggered: root.hideIp()
-    }
-
-    Timer {
-        id: copiedTimer
-        interval: 1600
-        onTriggered: root.ipCopied = false
     }
 
     ColumnLayout {
@@ -213,8 +206,6 @@ Item {
             valueText.selectAll();
             valueText.copy();
             valueText.deselect();
-            root.ipCopied = true;
-            copiedTimer.restart();
         }
 
         ColumnLayout {
@@ -232,9 +223,11 @@ Item {
             }
 
             Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: valueText.implicitHeight + 8
-                radius: 6
+                Layout.alignment: Qt.AlignLeft
+                Layout.maximumWidth: parent.width
+                implicitWidth: valueText.contentWidth + 16
+                implicitHeight: valueText.implicitHeight + 12
+                radius: height / 2
                 color: copyMouse.pressed ? Theme.overlayPressed : copyMouse.containsMouse ? Theme.overlayHover : "transparent"
 
                 Behavior on color {
@@ -245,11 +238,16 @@ Item {
                     id: valueText
 
                     anchors.fill: parent
-                    anchors.margins: 4
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    anchors.topMargin: 6
+                    anchors.bottomMargin: 6
                     text: detail.value
                     color: Theme.white
                     font.pixelSize: 14
                     font.weight: Font.Medium
+                    font.family: detail.revealable ? "monospace" : Qt.font({}).family
+                    font.letterSpacing: detail.revealable ? 0.6 : 0
                     readOnly: true
                     textFormat: TextEdit.PlainText
                     wrapMode: TextEdit.NoWrap
@@ -261,8 +259,6 @@ Item {
                     Keys.onReturnPressed: detail.copyAddress()
                     Keys.onEnterPressed: detail.copyAddress()
                     Keys.onSpacePressed: detail.copyAddress()
-                    ToolTip.visible: detail.revealable && root.ipRevealed && (copyMouse.containsMouse || root.ipCopied)
-                    ToolTip.text: qsTranslate("Pedro", root.ipCopied ? "network.popup.ipCopied" : "network.popup.copyIp")
 
                     MouseArea {
                         id: copyMouse
@@ -288,8 +284,6 @@ Item {
             checked: root.ipRevealed
             onClicked: {
                 root.ipRevealed = !root.ipRevealed;
-                root.ipCopied = false;
-                copiedTimer.stop();
             }
             Accessible.name: qsTranslate("Pedro", root.ipRevealed ? "network.popup.hideIp" : "network.popup.showIp")
             ToolTip.visible: hovered
