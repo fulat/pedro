@@ -12,6 +12,7 @@ Item {
     signal settingsRequested
 
     property bool ipRevealed: false
+    property bool ipCopied: false
     property bool menuHovered: false
 
     onMenuHoveredChanged: {
@@ -34,6 +35,8 @@ Item {
 
     function hideIp() {
         ipRevealed = false;
+        ipCopied = false;
+        copiedTimer.stop();
         revealTimer.stop();
     }
 
@@ -47,6 +50,12 @@ Item {
         id: revealTimer
         interval: 5000
         onTriggered: root.hideIp()
+    }
+
+    Timer {
+        id: copiedTimer
+        interval: 1600
+        onTriggered: root.ipCopied = false
     }
 
     ColumnLayout {
@@ -126,7 +135,7 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 120
+            Layout.preferredHeight: 144
             radius: 18
             color: "#0fffffff"
             border.color: "#24ffffff"
@@ -136,9 +145,9 @@ Item {
                 anchors.fill: parent
                 anchors.leftMargin: 14
                 anchors.rightMargin: 16
-                anchors.topMargin: 8
-                anchors.bottomMargin: 8
-                spacing: 0
+                anchors.topMargin: 12
+                anchors.bottomMargin: 12
+                spacing: 8
 
                 Detail {
                     title: qsTranslate("Pedro", "settings.network.connectionName")
@@ -206,6 +215,8 @@ Item {
             valueText.selectAll();
             valueText.copy();
             valueText.deselect();
+            root.ipCopied = true;
+            copiedTimer.restart();
         }
 
         ColumnLayout {
@@ -216,6 +227,7 @@ Item {
 
             Label {
                 Layout.fillWidth: true
+                Layout.leftMargin: 12
                 text: detail.title
                 color: Theme.textMuted
                 font.pixelSize: 12
@@ -225,7 +237,7 @@ Item {
             Rectangle {
                 Layout.alignment: Qt.AlignLeft
                 Layout.maximumWidth: parent.width
-                implicitWidth: valueText.contentWidth + 16
+                implicitWidth: valueText.contentWidth + 24
                 implicitHeight: valueText.implicitHeight + 12
                 radius: height / 2
                 color: copyMouse.pressed ? Theme.overlayPressed : copyMouse.containsMouse ? Theme.overlayHover : "transparent"
@@ -234,12 +246,15 @@ Item {
                     ColorAnimation { duration: 100 }
                 }
 
+                ToolTip.visible: detail.revealable && root.ipRevealed && root.ipCopied
+                ToolTip.text: qsTranslate("Pedro", "network.popup.ipCopied")
+
                 TextEdit {
                     id: valueText
 
                     anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 12
                     anchors.topMargin: 6
                     anchors.bottomMargin: 6
                     text: detail.value
@@ -259,16 +274,16 @@ Item {
                     Keys.onReturnPressed: detail.copyAddress()
                     Keys.onEnterPressed: detail.copyAddress()
                     Keys.onSpacePressed: detail.copyAddress()
+                }
 
-                    MouseArea {
-                        id: copyMouse
-                        objectName: "ipCopyTarget"
-                        anchors.fill: parent
-                        enabled: detail.revealable && root.ipRevealed && root.ipAddress.length > 0
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: detail.copyAddress()
-                    }
+                MouseArea {
+                    id: copyMouse
+                    objectName: "ipCopyTarget"
+                    anchors.fill: parent
+                    enabled: detail.revealable && root.ipRevealed && root.ipAddress.length > 0
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: detail.copyAddress()
                 }
             }
         }
@@ -283,6 +298,8 @@ Item {
             checkable: true
             checked: root.ipRevealed
             onClicked: {
+                root.ipCopied = false;
+                copiedTimer.stop();
                 root.ipRevealed = !root.ipRevealed;
             }
             Accessible.name: qsTranslate("Pedro", root.ipRevealed ? "network.popup.hideIp" : "network.popup.showIp")
