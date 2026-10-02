@@ -192,7 +192,7 @@ Item {
                 Quick.Text {
                     id: dateLabel
                     anchors.centerIn: parent
-                    text: (root.windowWidth >= 970 ? Clock.format(root.currentTime, Backend.language).split("   ")[0] + "  " : "") + Qt.formatTime(root.currentTime, "HH:mm")
+                    text: (root.windowWidth >= 970 ? Clock.format(root.currentTime, Backend.language).split("   ")[0] + "  " : "") + Clock.time(root.currentTime, Backend.language)
                     color: Theme.white
                     font.pixelSize: 13
                     font.weight: Font.Medium
@@ -227,6 +227,7 @@ Item {
         TopAction {
             anchors.centerIn: parent
             icon: "../../assets/icons/bell.svg"
+            iconSize: 14
             description: qsTranslate("Pedro", "shell.notifications.title")
             highlighted: root.activeSource === "notifications"
             width: parent.width
@@ -241,6 +242,7 @@ Item {
         property url icon
         property string description
         property bool highlighted: false
+        property real iconSize: 16
         signal activated
 
         width: 24
@@ -248,7 +250,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            radius: 12
+            radius: Math.min(width, height) / 2
             color: action.highlighted || actionMouse.containsMouse ? Theme.actionHover : "transparent"
 
             Behavior on color {
@@ -260,8 +262,8 @@ Item {
 
         Icon.Tinted {
             anchors.centerIn: parent
-            width: 16
-            height: 16
+            width: action.iconSize
+            height: action.iconSize
             source: action.icon
             tint: Theme.white
         }
