@@ -6,7 +6,6 @@ import QtQuick.Controls.Basic as Controls
 import gui
 import "../../controllers" as Controllers
 import "../icon" as Icon
-import "../option" as Option
 import "../toggle" as Toggle
 import "../../scripts/theme.js" as Theme
 
@@ -242,11 +241,15 @@ Item {
             color: Theme.overlayPressed
         }
 
-        Option.Row {
+        Loader {
+            Layout.fillWidth: true
             Layout.preferredHeight: 40
-            title: qsTranslate("Pedro", "bluetooth.settings.title")
-            icon: "../../../assets/icons/settings.svg"
-            onActivated: root.settingsRequested()
+            source: "../network/footer.qml"
+            onLoaded: {
+                item.title = Qt.binding(() => qsTranslate("Pedro", "bluetooth.settings.title"));
+                item.outlined = true;
+                item.activated.connect(root.settingsRequested);
+            }
         }
     }
 }

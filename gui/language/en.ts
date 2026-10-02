@@ -81,7 +81,7 @@
         <message>
             <source>bluetooth.empty.adapterMissing</source>
             <extracomment>Stable Pedro key: bluetooth.empty.adapterMissing</extracomment>
-            <translation>BlueZ did not detect a Bluetooth adapter.</translation>
+            <translation>No Bluetooth adapter was detected.</translation>
         </message>
         <message>
             <source>bluetooth.empty.disabledHint</source>

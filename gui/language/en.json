@@ -14,7 +14,7 @@
     "bluetooth.devices.empty": "No devices found",
     "bluetooth.devices.searching": "Searching for devices…",
     "bluetooth.devices.title": "Devices",
-    "bluetooth.empty.adapterMissing": "BlueZ did not detect a Bluetooth adapter.",
+    "bluetooth.empty.adapterMissing": "No Bluetooth adapter was detected.",
     "bluetooth.empty.disabledHint": "Turn it on to discover and connect nearby devices.",
     "bluetooth.empty.noDevicesHint": "Make sure nearby devices are on and discoverable.",
     "bluetooth.empty.searchingHint": "Keep nearby devices on and discoverable.",
