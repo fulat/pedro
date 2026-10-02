@@ -323,7 +323,7 @@
     "network.popup.showIp": "Show IP address",
     "network.popup.hideIp": "Hide IP address",
     "network.popup.copyIp": "Copy IP address",
-    "network.popup.ipCopied": "IP address copied",
+    "network.popup.ipCopied": "Copied",
     "shell.notifications.title": "Notifications",
     "shell.notifications.empty": "No notifications yet",
     "shell.calendar.title": "Calendar",

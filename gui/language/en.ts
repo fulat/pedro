@@ -1624,7 +1624,7 @@
         <message>
             <source>network.popup.ipCopied</source>
             <extracomment>Stable Pedro key: network.popup.ipCopied</extracomment>
-            <translation>IP address copied</translation>
+            <translation>Copied</translation>
         </message>
         <message>
             <source>shell.notifications.title</source>

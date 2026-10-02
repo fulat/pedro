@@ -54,8 +54,16 @@ Item {
 
     Timer {
         id: copiedTimer
-        interval: 1600
+        interval: 1000
         onTriggered: root.ipCopied = false
+    }
+
+    TextEdit {
+        id: clipboardText
+        visible: false
+        text: root.ipAddress
+        textFormat: TextEdit.PlainText
+        readOnly: true
     }
 
     ColumnLayout {
@@ -212,9 +220,9 @@ Item {
                 return;
             }
 
-            valueText.selectAll();
-            valueText.copy();
-            valueText.deselect();
+            clipboardText.selectAll();
+            clipboardText.copy();
+            clipboardText.deselect();
             root.ipCopied = true;
             copiedTimer.restart();
         }
@@ -237,7 +245,7 @@ Item {
             Rectangle {
                 Layout.alignment: Qt.AlignLeft
                 Layout.maximumWidth: parent.width
-                implicitWidth: valueText.contentWidth + 24
+                implicitWidth: valueMetrics.width + 24
                 implicitHeight: valueText.implicitHeight + 12
                 radius: height / 2
                 color: copyMouse.pressed ? Theme.overlayPressed : copyMouse.containsMouse ? Theme.overlayHover : "transparent"
@@ -246,8 +254,11 @@ Item {
                     ColorAnimation { duration: 100 }
                 }
 
-                ToolTip.visible: detail.revealable && root.ipRevealed && root.ipCopied
-                ToolTip.text: qsTranslate("Pedro", "network.popup.ipCopied")
+                TextMetrics {
+                    id: valueMetrics
+                    font: valueText.font
+                    text: detail.value
+                }
 
                 TextEdit {
                     id: valueText
@@ -257,7 +268,7 @@ Item {
                     anchors.rightMargin: 12
                     anchors.topMargin: 6
                     anchors.bottomMargin: 6
-                    text: detail.value
+                    text: detail.revealable && root.ipRevealed && root.ipCopied ? qsTranslate("Pedro", "network.popup.ipCopied") : detail.value
                     color: Theme.white
                     font.pixelSize: detail.revealable ? 13 : 14
                     font.weight: Font.Medium
