@@ -46,6 +46,10 @@ Rectangle {
         cornerRadius: 18
     }
 
+    HoverHandler {
+        id: panelHover
+    }
+
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.AllButtons
@@ -130,6 +134,7 @@ Rectangle {
             Loader {
                 source: "network/popup.qml"
                 onLoaded: {
+                    item.menuHovered = Qt.binding(() => panelHover.hovered);
                     item.settingsRequested.connect(root.networkSettingsRequested);
                 }
             }

@@ -13,6 +13,21 @@ Item {
 
     property bool ipRevealed: false
     property bool ipCopied: false
+    property bool menuHovered: false
+
+    onMenuHoveredChanged: {
+        if (!menuHovered) {
+            hideIp();
+        }
+    }
+
+    onIpRevealedChanged: {
+        if (ipRevealed) {
+            revealTimer.restart();
+        } else {
+            revealTimer.stop();
+        }
+    }
     readonly property string ipAddress: Backend.networkConnection.ipAddress
     readonly property string connectionName: Backend.networkConnection.name
 
@@ -20,6 +35,7 @@ Item {
         ipRevealed = false;
         ipCopied = false;
         copiedTimer.stop();
+        revealTimer.stop();
     }
 
     onVisibleChanged: hideIp()
@@ -27,6 +43,12 @@ Item {
     onConnectionNameChanged: hideIp()
 
     readonly property bool connected: Backend.networkConnection.type !== "none"
+
+    Timer {
+        id: revealTimer
+        interval: 5000
+        onTriggered: root.hideIp()
+    }
 
     Timer {
         id: copiedTimer
@@ -209,36 +231,48 @@ Item {
                 font.weight: Font.Medium
             }
 
-            TextEdit {
-                id: valueText
-
+            Rectangle {
                 Layout.fillWidth: true
-                text: detail.value
-                color: Theme.white
-                font.pixelSize: 14
-                font.weight: Font.Medium
-                readOnly: true
-                textFormat: TextEdit.PlainText
-                wrapMode: TextEdit.NoWrap
-                clip: true
-                activeFocusOnTab: detail.revealable && root.ipRevealed
-                Accessible.role: detail.revealable && root.ipRevealed ? Accessible.Button : Accessible.StaticText
-                Accessible.name: detail.revealable && root.ipRevealed ? qsTranslate("Pedro", "network.popup.copyIp") : detail.value
-                Accessible.onPressAction: detail.copyAddress()
-                Keys.onReturnPressed: detail.copyAddress()
-                Keys.onEnterPressed: detail.copyAddress()
-                Keys.onSpacePressed: detail.copyAddress()
-                ToolTip.visible: detail.revealable && root.ipRevealed && (copyMouse.containsMouse || root.ipCopied)
-                ToolTip.text: qsTranslate("Pedro", root.ipCopied ? "network.popup.ipCopied" : "network.popup.copyIp")
+                implicitHeight: valueText.implicitHeight + 8
+                radius: 6
+                color: copyMouse.pressed ? Theme.overlayPressed : copyMouse.containsMouse ? Theme.overlayHover : "transparent"
 
-                MouseArea {
-                    id: copyMouse
-                    objectName: "ipCopyTarget"
+                Behavior on color {
+                    ColorAnimation { duration: 100 }
+                }
+
+                TextEdit {
+                    id: valueText
+
                     anchors.fill: parent
-                    enabled: detail.revealable && root.ipRevealed && root.ipAddress.length > 0
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: detail.copyAddress()
+                    anchors.margins: 4
+                    text: detail.value
+                    color: Theme.white
+                    font.pixelSize: 14
+                    font.weight: Font.Medium
+                    readOnly: true
+                    textFormat: TextEdit.PlainText
+                    wrapMode: TextEdit.NoWrap
+                    clip: true
+                    activeFocusOnTab: detail.revealable && root.ipRevealed
+                    Accessible.role: detail.revealable && root.ipRevealed ? Accessible.Button : Accessible.StaticText
+                    Accessible.name: detail.revealable && root.ipRevealed ? qsTranslate("Pedro", "network.popup.copyIp") : detail.value
+                    Accessible.onPressAction: detail.copyAddress()
+                    Keys.onReturnPressed: detail.copyAddress()
+                    Keys.onEnterPressed: detail.copyAddress()
+                    Keys.onSpacePressed: detail.copyAddress()
+                    ToolTip.visible: detail.revealable && root.ipRevealed && (copyMouse.containsMouse || root.ipCopied)
+                    ToolTip.text: qsTranslate("Pedro", root.ipCopied ? "network.popup.ipCopied" : "network.popup.copyIp")
+
+                    MouseArea {
+                        id: copyMouse
+                        objectName: "ipCopyTarget"
+                        anchors.fill: parent
+                        enabled: detail.revealable && root.ipRevealed && root.ipAddress.length > 0
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: detail.copyAddress()
+                    }
                 }
             }
         }
