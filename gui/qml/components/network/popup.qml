@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
@@ -8,6 +10,7 @@ Item {
     id: root
 
     signal settingsRequested
+    signal diagnosticsRequested
 
     readonly property bool connected: Backend.networkConnection.type !== "none"
 
@@ -15,94 +18,179 @@ Item {
         anchors.fill: parent
         spacing: 12
 
-        RowLayout {
+        Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 48
-            spacing: 12
+            Layout.preferredHeight: 64
 
-            Rectangle {
-                Layout.preferredWidth: 40
-                Layout.preferredHeight: 40
-                radius: 20
-                color: Theme.overlayHover
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 2
+                anchors.rightMargin: 12
+                spacing: 18
+
+                Rectangle {
+                    Layout.preferredWidth: 52
+                    Layout.preferredHeight: 52
+                    radius: 26
+                    color: "#28ffffff"
+
+                    Icon.Tinted {
+                        anchors.centerIn: parent
+                        width: 28
+                        height: 28
+                        source: "../../../assets/icons/share.svg"
+                        tint: Theme.white
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+
+                    Label {
+                        text: Backend.networkConnection.type === "ethernet" ? qsTranslate("Pedro", "settings.network.ethernet") : qsTranslate("Pedro", "network.connection.title")
+                        color: Theme.white
+                        font.pixelSize: 17
+                        font.weight: Font.DemiBold
+                    }
+
+                    RowLayout {
+                        spacing: 6
+
+                        Rectangle {
+                            implicitWidth: 9
+                            implicitHeight: 9
+                            radius: 4.5
+                            color: root.connected ? Theme.statusWifiConnected : Theme.textMuted
+                        }
+
+                        Label {
+                            text: qsTranslate("Pedro", root.connected ? "settings.network.connected" : "settings.network.disconnected")
+                            color: Theme.textMuted
+                            font.pixelSize: 13
+                        }
+                    }
+                }
 
                 Icon.Tinted {
-                    anchors.centerIn: parent
-                    width: 23
-                    height: 23
-                    source: "../../../assets/icons/ethernet.svg"
-                    tint: Theme.white
+                    source: "../../../assets/icons/chevron.svg"
+                    Layout.preferredWidth: 14
+                    Layout.preferredHeight: 14
                 }
             }
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 4
-
-                Label {
-                    text: Backend.networkConnection.type === "ethernet" ? qsTranslate("Pedro", "settings.network.ethernet") : qsTranslate("Pedro", "network.connection.title")
-                    color: Theme.white
-                    font.pixelSize: 17
-                    font.weight: Font.DemiBold
-                }
-
-                RowLayout {
-                    spacing: 6
-
-                    Rectangle {
-                        width: 6
-                        height: 6
-                        radius: 3
-                        color: root.connected ? "#79b994" : Theme.textMuted
-                    }
-
-                    Label {
-                        text: qsTranslate("Pedro", root.connected ? "settings.network.connected" : "settings.network.disconnected")
-                        color: Theme.textMuted
-                        font.pixelSize: 11
-                    }
-                }
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.settingsRequested()
             }
         }
 
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: 1
-            color: Theme.buttonBorder
+            Layout.preferredHeight: 168
+            radius: 18
+            color: "#14ffffff"
+            border.color: "#20ffffff"
+            antialiasing: true
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 14
+                spacing: 0
+
+                Detail {
+                    title: qsTranslate("Pedro", "settings.network.connectionName")
+                    value: Backend.networkConnection.name || "—"
+                    icon: "../../../assets/icons/ethernet.svg"
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 1
+                    color: "#18ffffff"
+                }
+
+                Detail {
+                    title: qsTranslate("Pedro", "settings.network.ip")
+                    value: "—"
+                    icon: "../../../assets/icons/location.svg"
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 1
+                    color: "#18ffffff"
+                }
+
+                Detail {
+                    title: qsTranslate("Pedro", "settings.network.speed")
+                    value: "—"
+                    icon: "../../../assets/icons/speed.svg"
+                }
+            }
         }
 
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            spacing: 6
+            spacing: 0
+
+            Loader {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 48
+                source: "footer.qml"
+                onLoaded: item.activated.connect(root.settingsRequested)
+            }
+
+            Loader {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 44
+                source: "footer.qml"
+                onLoaded: {
+                    item.title = Qt.binding(() => qsTranslate("Pedro", "settings.network.diagnostics"));
+                    item.icon = Qt.resolvedUrl("../../../assets/icons/diagnostics.svg");
+                    item.outlined = false;
+                    item.activated.connect(root.diagnosticsRequested);
+                }
+            }
+        }
+    }
+
+    component Detail: RowLayout {
+        id: detail
+
+        required property string title
+        required property string value
+        required property url icon
+
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        spacing: 18
+
+        Icon.Tinted {
+            source: detail.icon
+            tint: Theme.white
+            Layout.preferredWidth: 20
+            Layout.preferredHeight: 20
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 3
 
             Label {
-                text: qsTranslate("Pedro", "settings.network.connectionName")
+                text: detail.title
                 color: Theme.textMuted
                 font.pixelSize: 11
             }
 
             Label {
                 Layout.fillWidth: true
-                text: Backend.networkConnection.name || qsTranslate("Pedro", "network.connection.none")
+                text: detail.value
                 color: Theme.white
                 font.pixelSize: 13
-                font.weight: Font.Medium
                 elide: Text.ElideRight
             }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 1
-            color: Theme.buttonBorder
-        }
-
-        Loader {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 44
-            source: "footer.qml"
-            onLoaded: item.activated.connect(root.settingsRequested)
         }
     }
 }

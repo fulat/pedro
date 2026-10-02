@@ -91,7 +91,11 @@ ApplicationWindow {
             item.y = window.y + Math.round((window.height - item.height) / 2);
         }
     }
-    function openNetworkSettings() {
+    function openNetworkSettings(page) {
+        if (page && networkWindowLoader.item.contentItem) {
+            networkWindowLoader.item.contentItem.open(page);
+        }
+
         applicationController.closePanel();
         networkWindowLoader.item.showNormal();
         networkWindowLoader.item.raise();

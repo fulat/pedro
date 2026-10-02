@@ -7,29 +7,34 @@ import "../../scripts/theme.js" as Theme
 Rectangle {
     id: root
 
+    property string title: qsTranslate("Pedro", "settings.network.openSettings")
+    property url icon: "../../../assets/icons/settings.svg"
+    property bool outlined: true
+
     signal activated
 
     implicitHeight: 44
-    radius: 9
-    color: mouse.pressed ? Theme.overlayPressed : mouse.containsMouse ? Theme.overlayHover : "transparent"
+    radius: 18
+    border.color: outlined ? "#18ffffff" : "transparent"
+    color: mouse.pressed ? Theme.overlayPressed : mouse.containsMouse ? Theme.overlayHover : outlined ? "#06ffffff" : "transparent"
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 10
-        anchors.rightMargin: 10
-        spacing: 10
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        spacing: 18
 
         Icon.Tinted {
-            source: "../../../assets/icons/settings.svg"
+            source: root.icon
             tint: Theme.white
             Layout.preferredWidth: 18
             Layout.preferredHeight: 18
         }
 
         Label {
-            text: qsTranslate("Pedro", "settings.network.openSettings")
+            text: root.title
             color: Theme.white
-            font.pixelSize: 12
+            font.pixelSize: 13
             Layout.fillWidth: true
         }
 

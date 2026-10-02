@@ -27,6 +27,7 @@ Window {
         NumberAnimation { duration: 240; easing.type: Easing.InOutCubic }
     }
     property real windowRadius: 14
+    readonly property alias contentItem: contentLoader.item
     property url contentSource
     property color surfaceColor: "transparent"
     property color titleColor: Theme.white
