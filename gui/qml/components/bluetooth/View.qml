@@ -35,38 +35,6 @@ Item {
             Layout.preferredHeight: 52
             spacing: 12
 
-            Rectangle {
-                implicitWidth: 34
-                implicitHeight: 34
-                radius: 17
-                color: Theme.cardSurface
-                border.width: 1
-                border.color: Theme.buttonBorder
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: parent.radius
-                    color: backMouse.pressed ? Theme.overlayPressed : backMouse.containsMouse ? Theme.overlayHover : "transparent"
-                }
-
-                Icon.Tinted {
-                    anchors.centerIn: parent
-                    width: 10
-                    height: 16
-                    rotation: 180
-                    source: "../../../assets/icons/chevron.svg"
-                }
-
-                MouseArea {
-                    id: backMouse
-
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.backRequested()
-                }
-            }
-
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 1
