@@ -137,16 +137,20 @@ Item {
 
             Row {
                 y: (statusRow.height - height) / 2
+                height: 24
                 spacing: 4
                 Quick.Text {
+                    height: parent.height
+                    verticalAlignment: Text.AlignVCenter
                     text: Backend.battery.available ? Backend.battery.value + "%" : "—%"
                     color: Theme.white
-                    font.pixelSize: 13
+                    font.pixelSize: 12
                     font.weight: Font.Medium
                 }
                 Item {
                     width: 23
                     height: 18
+                    y: (parent.height - height) / 2
                     Icon.Tinted {
                         anchors.fill: parent
                         source: "../../assets/icons/battery.svg"
