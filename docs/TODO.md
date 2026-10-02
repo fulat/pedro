@@ -41,7 +41,7 @@ Registro permanente del desarrollo. No implica implementar todas las tareas inme
 ### Power & Battery
 
 - [ ] **UPower Integration** — batería, porcentaje, carga/descarga y dispositivos de energía.
-- [ ] **Power Profiles** — consultar/cambiar Power Saver, Balanced y Performance cuando sea soportado mediante power-profiles-daemon, con UI propia de Settings. No implementar CPU governors ni políticas propias salvo necesidad futura específica.
+- [ ] **Power Profiles** — consultar/cambiar Power Saver, Balanced y Performance cuando sea soportado mediante power-profiles-daemon, con UI propia de Settings. No implementar CPU governors ni políticas propias salvo necesidad futura específica. Coordinar el perfil con gaming y restaurar el estado anterior cuando corresponda.
 - [ ] **Night Light** — GNOME/Mutter: On/Off, Sunset to Sunrise, horario manual y temperatura de color. Usar transformación de color del sistema para toda la pantalla, sin filtros visuales propios sobre ventanas.
 
 La implementación de energía y Night Light debe ser la misma en Ubuntu development y en la ISO: `Pedro Settings → Pedro Power/Display Backend (PAPI) → GNOME / power-profiles-daemon / Mutter → Linux/hardware`.
@@ -61,7 +61,7 @@ La implementación de energía y Night Light debe ser la misma en Ubuntu develop
 
 Pedro debe utilizar la infraestructura existente de Linux/GNOME/Mutter para detectar y configurar los displays, sin implementar detección de monitores ni modos de video desde cero.
 
-- Obtener desde Mutter/GNOME las capacidades reales de cada display: resolución actual, nativa/preferida y resoluciones soportadas; refresh rates soportados; escala actual y escalas permitidas; tamaño físico y DPI aproximado cuando estén disponibles.
+- Obtener desde Mutter/GNOME las capacidades reales de cada display: resolución actual, nativa/preferida y resoluciones soportadas; refresh rates soportados, incluidos modos de alta frecuencia cuando el monitor los ofrezca; escala actual y escalas permitidas; tamaño físico y DPI aproximado cuando estén disponibles.
 - Pedro Settings debe presentar esta información mediante su propia UI, con un backend de display en PAPI que delegue la configuración real a Mutter/GNOME.
 - No hardcodear resoluciones ni escalas, ni introducir lógica especial para Parallels, development mode, una VM concreta o un fabricante de monitor. El frontend y la lógica principal deben ser los mismos para displays virtuales y monitores físicos.
 - Priorizar normalmente la resolución nativa/preferida y utilizar scaling para controlar el tamaño visual de la UI, en lugar de reducir la resolución para agrandar los elementos.
@@ -124,13 +124,13 @@ Pedro → Mutter → GPU/DRM/KMS → physical display
 
 - [ ] **Crash Reporting** — detectar crashes de aplicaciones Pedro y ofrecer una experiencia limpia con opciones como Reopen, View Details y Send Report, utilizando logs, stack traces o minidumps según corresponda.
 
-- [ ] **Global Search** — implementar una búsqueda global estilo Spotlight capaz de encontrar aplicaciones, archivos, configuraciones, acciones del sistema y resultados rápidos.
+- [ ] **Global Search** — implementar una búsqueda global estilo Spotlight capaz de encontrar aplicaciones, archivos, configuraciones, acciones del sistema y resultados rápidos. Natural Language Search es una extensión opcional post-MVP descrita más adelante, no un requisito de esta primera búsqueda.
 
 - [ ] **Searchable Settings** — indexar secciones y acciones de Pedro Settings para que búsquedas como `Wi-Fi`, `Night Light`, `Default Browser`, `Startup Apps`, `Permissions` o `Updates` abran directamente la vista correspondiente.
 
 - [ ] **Quick Look / File Preview** — parcial: los iconos pueden mostrar imágenes locales; falta una experiencia de preview independiente. Permitir previews rápidos de imágenes, PDF, texto, audio, video y otros formatos sin abrir necesariamente la aplicación completa asociada.
 
-- [ ] **Lock Screen / Idle Management** — controlar auto-lock, screen timeout, dimming, comportamiento de tapa y otras políticas de sesión utilizando la infraestructura existente de GNOME/systemd.
+- [ ] **Lock Screen / Idle Management** — controlar auto-lock, screen timeout, dimming, comportamiento de tapa y otras políticas de sesión utilizando la infraestructura existente de GNOME/systemd. Inhibir idle, screensaver o suspensión durante juegos activos cuando corresponda.
 
 - [ ] **Online Accounts** — permitir integrar cuentas externas como Google, Microsoft, Nextcloud u otros proveedores compatibles para reutilizarlas en servicios del sistema.
 
@@ -166,7 +166,6 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 - Development y production comparten arquitectura; no crear implementaciones específicas de Ubuntu development que haya que sustituir al crear el ISO.
 - Distinguir System Recovery (reparar un sistema que no arranca), System Restore / Snapshots (restaurar estado del sistema) y User Backup (proteger archivos personales).
 - High Priority / Core Experience define la experiencia objetivo de un sistema operativo de uso general. Useful but Lower Priority puede llegar posteriormente y no debe retrasar innecesariamente una primera versión estable.
-
 
 ## Desktop y menú del wallpaper
 
@@ -219,3 +218,154 @@ Detalle: [idiomas y configuración](language.md).
 La extensión requiere una nueva sesión tras instalarse. Mantener Ubuntu/GNOME como gestor de ventanas, sin gestión paralela; el clic normal no debe solicitar otra ventana.
 
 Detalle: [integración GNOME](../gnome/application/readme.md).
+
+
+## Pedro Terminal
+
+Pedro debe tener una aplicación Terminal propia, visualmente sencilla, ligera y consistente con la experiencia de Pedro.
+
+La intención NO es crear un emulador de terminal desde cero.
+
+- [ ] **Pedro Terminal** — pendiente: el icono de terminal no constituye una aplicación propia. Crear la aplicación Terminal propia de Pedro utilizando Qt6/QML para la experiencia visual.
+- [ ] **Terminal Engine** — utilizar `QTermWidget` o una alternativa Qt equivalente y madura para resolver PTY, terminal emulation, ANSI sequences, cursor, scrollback, resize, input/output y ejecución del shell.
+- [ ] **Zsh as Default Interactive Shell** — utilizar Zsh como experiencia interactiva predeterminada de Pedro, manteniendo Bash disponible para compatibilidad y usuarios que lo prefieran.
+- [ ] **Oh My Zsh Integration & Version Policy** — incluir una versión controlada y validada por release de Pedro, sin depender de configuración manual ni auto-updates externos que produzcan cambios inesperados.
+- [ ] **Pedro Zsh Configuration** — crear configuración propia de Pedro sobre Zsh/Oh My Zsh sin eliminar la posibilidad de que usuarios avanzados modifiquen `~/.zshrc`.
+- [ ] **Syntax Highlighting** — comandos válidos, inválidos, paths, argumentos y otros tokens deben mostrar highlighting mediante herramientas maduras del ecosistema Zsh.
+- [ ] **Autosuggestions** — mostrar sugerencias mientras el usuario escribe utilizando historial y completions.
+- [ ] **Tab Completion** — proporcionar autocompletado potente mediante el sistema de completion de Zsh.
+- [ ] **Pedro Terminal Theme** — crear un prompt/theme propio, minimalista y visualmente consistente con Pedro.
+- [ ] **Terminal Tabs** — soportar múltiples sesiones independientes mediante tabs sin llenar la interfaz de controles innecesarios.
+- [ ] **Real Clear / Scrollback Clear** — permitir una acción/shortcut que limpie realmente el terminal y el scrollback visible.
+- [ ] **Terminal Search** — permitir buscar texto dentro de la sesión.
+- [ ] **Shell Choice** — permitir posteriormente elegir Zsh, Bash u otros shells compatibles si están instalados.
+
+La experiencia visual debe permanecer minimalista. Pedro Terminal debe ocultar complejidad técnica innecesaria y utilizar el shell Unix/Linux real debajo.
+
+Arquitectura esperada:
+
+`Pedro Terminal QML -> integración Qt del motor maduro -> PTY / Zsh -> Oh My Zsh / Pedro configuration -> Linux`
+
+Validar la compatibilidad del motor elegido con Qt6/QML; QTermWidget es un candidato, no una integración ya confirmada.
+
+---
+
+## Pedro Gaming Platform
+
+Pedro debe ofrecer una experiencia gaming integrada y sencilla para que el usuario no tenga que entender manualmente drivers, Vulkan, PRIME, GameMode, Proton, Wine prefixes u otros detalles propios del stack Linux.
+
+La prioridad es:
+
+1. juegos nativos de Pedro/Linux;
+2. Steam + Proton para juegos Windows;
+3. Wine únicamente como infraestructura secundaria cuando sea necesario para gaming.
+
+No convertir Wine en una capa general visible para ejecutar aplicaciones normales de Windows.
+
+### Graphics & Drivers
+
+- [ ] **GPU Detection** — detectar automáticamente GPUs NVIDIA, AMD e Intel.
+- [ ] **GPU Driver Management** — garantizar que se utilice el driver gráfico correcto para el hardware detectado reutilizando la infraestructura de Ubuntu/Linux.
+- [ ] **NVIDIA Driver Support** — integrar correctamente drivers NVIDIA compatibles con la release de Ubuntu utilizada por Pedro.
+- [ ] **AMD Graphics Support** — utilizar correctamente kernel, Mesa y drivers AMD existentes.
+- [ ] **Intel Graphics Support** — utilizar correctamente kernel, Mesa y drivers Intel existentes.
+- [ ] **Vulkan Support** — garantizar que Vulkan loader, drivers y capacidades correspondientes estén correctamente disponibles cuando el hardware lo soporte.
+- [ ] **Vulkan Capability Detection** — consultar en runtime la versión/capabilities soportadas en lugar de hardcodear una única versión Vulkan para todo Pedro.
+- [ ] **OpenGL Compatibility** — conservar soporte correcto para aplicaciones/juegos que dependan de OpenGL.
+
+Pedro no debe implementar drivers gráficos propios.
+
+### Steam / Proton
+
+- [ ] **Steam Compatibility** — garantizar que Steam funcione como una aplicación normal de Pedro.
+- [ ] **Proton Gaming Support** — permitir que Steam utilice Proton para ejecutar juegos Windows compatibles.
+- [ ] **Transparent Proton UX** — el usuario debería poder instalar un juego y presionar `Play` sin tener que configurar manualmente Wine, Proton prefixes, DXVK o variables internas.
+- [ ] **Wine Gaming Fallback** — mantener Wine disponible únicamente cuando sea necesario para gaming fuera de Steam u otros casos específicos.
+- [ ] **Gaming Compatibility Metadata** — permitir que Pedro App Store pueda indicar posteriormente si un juego es `Pedro Native`, `Linux Native`, `Proton Compatible` o requiere otra capa de compatibilidad.
+
+### Game Performance
+
+La coordinación con perfiles de energía se registra en **Power Profiles**; la inhibición de idle, screensaver y suspensión, en **Lock Screen / Idle Management**.
+
+
+- [ ] **GameMode Integration** — integrar Feral GameMode para optimizaciones temporales mientras un juego está activo.
+- [ ] **Automatic Gaming Performance Mode** — permitir que Pedro active automáticamente optimizaciones apropiadas al iniciar un juego y restaure el estado anterior al cerrarlo.
+- [ ] **Per-Game Performance Profile** — permitir configurar opciones de rendimiento de forma individual por juego.
+- [ ] **Process / I/O Optimization** — aprovechar GameMode y servicios existentes para prioridad de CPU, I/O y scheduler cuando sea apropiado.
+
+### Hybrid GPU
+
+- [ ] **Hybrid GPU Detection** — detectar laptops/equipos con iGPU + GPU dedicada.
+- [ ] **Automatic GPU Selection** — permitir que Pedro seleccione automáticamente la GPU apropiada.
+- [ ] **Per-App / Per-Game GPU Selection** — permitir elegir entre `Automatic`, `Integrated` y `Dedicated GPU`.
+- [ ] **PRIME / Render Offload Integration** — reutilizar PRIME, `DRI_PRIME`, NVIDIA Render Offload y mecanismos Linux existentes; no inventar un sistema propio.
+
+### Displays for Gaming
+
+Los modos de alta frecuencia (120, 144, 165 Hz u otros soportados) pertenecen a **Displays, resolución y escala**, sin hardcodear modos.
+
+
+- [ ] **Variable Refresh Rate / Adaptive Sync** — exponer VRR cuando Mutter, GPU, driver y monitor lo soporten.
+- [ ] **HDR Support** — investigar e integrar HDR cuando la release concreta de Mutter/Linux/drivers utilizada por Pedro lo soporte con suficiente estabilidad.
+- [ ] **Per-Game Display Preferences** — considerar en el futuro preferencias de display específicas por juego cuando tenga sentido.
+
+### Controllers
+
+- [ ] **Game Controller Support** — soportar controles Xbox, PlayStation y gamepads genéricos utilizando la infraestructura de input existente en Linux.
+- [ ] **USB / Bluetooth Controllers** — detectar controles conectados mediante USB o Bluetooth.
+- [ ] **Controller Information** — mostrar información disponible como dispositivo conectado y batería cuando el hardware/driver lo permita.
+
+### Pedro Native Gaming
+
+La integración de juegos con PAPI/SDK y su distribución se registra en **Pedro SDK / PAPI** y **Pedro Package Format**, respectivamente.
+
+
+- [ ] **Game Engine Target Support** — preparar documentación/APIs para que engines como Unreal, Unity, Godot u otros puedan eventualmente ofrecer `Pedro` como target de exportación.
+- [ ] **Native Vulkan/Linux Foundation** — un juego Pedro nativo debe poder utilizar APIs estándar como Vulkan/OpenGL/SDL y agregar integración Pedro mediante el SDK cuando sea necesario.
+
+Arquitectura:
+
+`Pedro Game / Steam -> Vulkan/OpenGL -> Mesa/NVIDIA/Intel/AMD drivers -> GPU`
+
+Para juegos Windows:
+
+`Steam -> Proton -> DXVK/VKD3D/Wine components -> Vulkan -> Linux drivers -> GPU`
+
+Pedro debe ocultar esta complejidad al usuario final.
+
+---
+
+## Pedro Developer Experience
+
+No convertir el ISO base en una distribución llena de toolchains innecesarios.
+
+La prioridad es que instalar herramientas de desarrollo sea extremadamente sencillo.
+
+- [ ] **Pedro Package Manager (`pkg`) / Simple Installation** — crear una interfaz propia de Pedro encima de APT/repositorios compatibles, con comandos sencillos como:
+  - `pkg add gcc`
+  - `pkg add clang`
+  - `pkg add node`
+  - `pkg add python`
+  - `pkg add cmake`
+- [ ] **Repository Abstraction** — el usuario no debe necesitar conocer APT, repositorios Debian/Ubuntu, PPAs u otros detalles cuando exista una operación equivalente de Pedro.
+- [ ] **Version Policy** — Pedro puede definir versiones recomendadas/compatibles de herramientas por release.
+- [ ] **Developer Tool Discovery** — si el usuario intenta utilizar una herramienta que no está instalada, Pedro puede ofrecer instalarla mediante `pkg`.
+- [ ] **Pedro SDK / PAPI** — parcial: PAPI ya expone capacidades a la GUI; falta un SDK público y su integración/documentación para aplicaciones y juegos nativos.
+- [ ] **Pedro Package Format** — definir empaquetado propio para aplicaciones y juegos Pedro, conservando Ubuntu/Debian como base interna.
+
+No preinstalar Node.js, Python SDKs, Docker, Podman, Rust, Go, Java y otros toolchains solamente por ser populares. Deben poder instalarse fácilmente cuando sean necesarios.
+
+---
+
+## Pedro Intelligent Search — Optional / Post-MVP
+
+Esta funcionalidad es deseable pero NO debe bloquear una primera versión estable de Pedro.
+
+No se busca crear un asistente general equivalente a ChatGPT, Codex, Siri o Cortana.
+
+El objetivo es extender Pedro Global Search/Spotlight para que pueda entender consultas naturales y encontrar información local del sistema de forma inteligente.
+
+- [ ] **Natural Language Search** — permitir búsquedas como:
+  - `muéstrame la última factura de Con Edison`
+  - `¿dónde guardé el contrato del apartamento?`
+  - `muéstrame PDFs sobre impuestos`
