@@ -40,19 +40,7 @@ Rectangle {
         anchors.fill: parent
         frosted: true
         backdrop: root.backdrop
-        cornerRadius: root.mode === "network" ? 20 : 18
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        visible: root.mode === "network"
-        radius: 20
-        gradient: Gradient {
-            GradientStop { position: 0; color: "#80121a2c" }
-            GradientStop { position: 1; color: "#7817171d" }
-        }
-        border.color: "#50ffffff"
-        antialiasing: true
+        cornerRadius: 18
     }
 
     MouseArea {
