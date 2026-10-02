@@ -83,6 +83,10 @@ namespace {
 
 } // namespace
 
+QObject* Backend::battery() {
+    return &battery_;
+}
+
 QObject* Backend::audioVolume() {
     return &volume_;
 }

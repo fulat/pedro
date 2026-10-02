@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick as Quick
 import QtQuick.Controls.Basic
-import QtQuick.Effects
 
 import "../controllers" as Controllers
 import "icon" as Icon
@@ -120,105 +119,20 @@ Item {
                 color: Theme.dividerBright
             }
 
-            Item {
-                id: notificationsButton
-                width: 24
-                height: 24
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 12
-                    color: notificationMouse.containsMouse ? Theme.actionHover : "transparent"
-
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: 140
-                        }
-                    }
-                }
-
-                Canvas {
-                    id: notificationCanvas
-                    scale: 0.74
-                    anchors.centerIn: parent
-                    width: 21
-                    height: 23
-                    onPaint: controller.paintNotification(notificationCanvas)
-                }
-
-                Rectangle {
-                    width: 5
-                    height: 5
-                    radius: 3
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    anchors.rightMargin: 2
-                    anchors.topMargin: 4
-                    color: Theme.notificationAccent
-                }
-
-                MouseArea {
-                    id: notificationMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: controller.requestPanel("quick", "notifications", notificationsButton)
-                }
+            TopAction {
+                id: controlButton
+                icon: "../../assets/icons/menu.svg"
+                description: qsTranslate("Pedro", "shell.panel.system")
+                highlighted: root.activeSource === "control"
+                onActivated: controller.requestPanel("quick", "control", controlButton)
             }
 
-            Rectangle {
-                id: controlButton
-                width: 22
-                height: 22
-                y: (statusRow.height - height) / 2
-                radius: 11
-                color: controlMouse.containsMouse ? Theme.controlOrbHover : Theme.controlOrbBackground
-                border.width: 1
-                border.color: Theme.controlOrbBorder
-
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 140
-                    }
-                }
-
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 16
-                    height: 16
-                    radius: 8
-                    gradient: Gradient {
-                        GradientStop {
-                            position: 0
-                            color: Theme.controlOrbTop
-                        }
-                        GradientStop {
-                            position: 0.48
-                            color: Theme.controlOrbMiddle
-                        }
-                        GradientStop {
-                            position: 1
-                            color: Theme.controlOrbBottom
-                        }
-                    }
-
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: 9
-                        height: 9
-                        radius: 5
-                        color: Theme.controlOrbCenter
-                        border.color: Theme.controlOrbHighlight
-                    }
-                }
-
-                MouseArea {
-                    id: controlMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: controller.requestPanel("quick", "control", controlButton)
-                }
+            TopAction {
+                id: bluetoothButton
+                icon: "../../assets/icons/bluetooth.svg"
+                description: qsTranslate("Pedro", "bluetooth.title")
+                highlighted: root.activeSource === "bluetooth"
+                onActivated: controller.requestPanel("bluetooth", "bluetooth", bluetoothButton)
             }
 
             TopAction {
@@ -229,70 +143,49 @@ Item {
                 onActivated: controller.requestPanel("wifi", "wifi", wifiButton)
             }
 
-            Quick.Text {
-                visible: root.windowWidth >= 760
+            Row {
                 y: (statusRow.height - height) / 2
-                text: "87%"
-                color: Theme.white
-                font.pixelSize: 13
-                font.weight: Font.Medium
-            }
-
-            Quick.Text {
-                visible: root.windowWidth >= 970
-                y: (statusRow.height - height) / 2
-                text: Clock.format(root.currentTime, Backend.language).split("   ")[0]
-                color: Theme.white
-                font.pixelSize: 13
-                font.weight: Font.Medium
-            }
-
-            Quick.Text {
-                y: (statusRow.height - height) / 2
-                text: Qt.formatTime(root.currentTime, "HH:mm")
-                color: Theme.white
-                font.pixelSize: 13
-                font.weight: Font.DemiBold
-            }
-
-            Rectangle {
-                id: profileButton
-                width: 22
-                height: 22
-                y: (statusRow.height - height) / 2
-                radius: 11
-                color: profileMouse.containsMouse ? Theme.profileHover : Theme.profileBackground
-                border.width: 1
-                border.color: Theme.profileBorder
-
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 140
-                    }
+                spacing: 4
+                Icon.Tinted {
+                    width: 18
+                    height: 18
+                    source: "../../assets/icons/battery.svg"
                 }
+                Quick.Text {
+                    text: Backend.battery.available ? Backend.battery.value + "%" : "—%"
+                    color: Theme.white
+                    font.pixelSize: 13
+                    font.weight: Font.Medium
+                }
+            }
 
-                Image {
+            Item {
+                id: dateButton
+                width: dateLabel.implicitWidth + 12
+                height: 24
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 12
+                    color: dateMouse.containsMouse || root.activeSource === "notifications" ? Theme.actionHover : "transparent"
+                    Behavior on color { ColorAnimation { duration: 140 } }
+                }
+                Quick.Text {
+                    id: dateLabel
                     anchors.centerIn: parent
-                    width: 16
-                    height: 16
-                    source: "../../assets/logo.png"
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
-                    layer.enabled: true
-                    layer.effect: MultiEffect {
-                        colorization: 1
-                        colorizationColor: Theme.white
-                    }
+                    text: (root.windowWidth >= 970 ? Clock.format(root.currentTime, Backend.language).split("   ")[0] + "  " : "") + Qt.formatTime(root.currentTime, "HH:mm")
+                    color: Theme.white
+                    font.pixelSize: 13
+                    font.weight: Font.Medium
                 }
-
                 MouseArea {
-                    id: profileMouse
+                    id: dateMouse
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: controller.requestPanel("quick", "profile", profileButton)
+                    onClicked: controller.requestPanel("quick", "notifications", dateButton)
                 }
             }
+
         }
     }
 
