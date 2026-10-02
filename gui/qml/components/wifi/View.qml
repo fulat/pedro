@@ -86,6 +86,7 @@ Item {
             }
 
             Toggle.Switch {
+                visible: Papi.wifiAvailable
                 interactive: Papi.wifiAvailable
                 active: Papi.wifiAvailable && Papi.wifiEnabled
                 onToggled: state => Papi.setWifiEnabled(state)
