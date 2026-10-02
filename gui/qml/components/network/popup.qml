@@ -135,7 +135,7 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 144
+            Layout.preferredHeight: 128
             radius: 18
             color: "#0fffffff"
             border.color: "#24ffffff"
@@ -145,9 +145,9 @@ Item {
                 anchors.fill: parent
                 anchors.leftMargin: 14
                 anchors.rightMargin: 16
-                anchors.topMargin: 12
-                anchors.bottomMargin: 12
-                spacing: 8
+                anchors.topMargin: 8
+                anchors.bottomMargin: 8
+                spacing: 6
 
                 Detail {
                     title: qsTranslate("Pedro", "settings.network.connectionName")
