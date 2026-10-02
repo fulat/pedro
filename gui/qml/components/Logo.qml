@@ -120,14 +120,6 @@ Item {
             }
 
             TopAction {
-                id: controlButton
-                icon: "../../assets/icons/menu.svg"
-                description: qsTranslate("Pedro", "shell.panel.system")
-                highlighted: root.activeSource === "control"
-                onActivated: controller.requestPanel("quick", "control", controlButton)
-            }
-
-            TopAction {
                 id: bluetoothButton
                 icon: "../../assets/icons/bluetooth.svg"
                 description: qsTranslate("Pedro", "bluetooth.title")
@@ -146,10 +138,24 @@ Item {
             Row {
                 y: (statusRow.height - height) / 2
                 spacing: 4
-                Icon.Tinted {
+                Item {
                     width: 18
                     height: 18
-                    source: "../../assets/icons/battery.svg"
+                    Icon.Tinted {
+                        anchors.fill: parent
+                        source: "../../assets/icons/battery.svg"
+                    }
+                    Rectangle {
+                        objectName: "batteryChargeFill"
+                        x: 3
+                        y: 6
+                        width: 10.5 * Math.max(0, Math.min(100, Backend.battery.value)) / 100
+                        height: 6
+                        radius: 0.7
+                        visible: Backend.battery.available
+                        color: Theme.white
+                        Behavior on width { NumberAnimation { duration: 180 } }
+                    }
                 }
                 Quick.Text {
                     text: Backend.battery.available ? Backend.battery.value + "%" : "—%"
@@ -157,6 +163,14 @@ Item {
                     font.pixelSize: 13
                     font.weight: Font.Medium
                 }
+            }
+
+            TopAction {
+                id: controlButton
+                icon: "../../assets/icons/menu.svg"
+                description: qsTranslate("Pedro", "shell.panel.system")
+                highlighted: root.activeSource === "control"
+                onActivated: controller.requestPanel("quick", "control", controlButton)
             }
 
             Item {

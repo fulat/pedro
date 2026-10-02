@@ -38,7 +38,7 @@ Components.Application {
     desktopContextMenu: wallpaperMenuLoader.item
     sideBar: sideBarItem
     topBar: topBarItem
-    desktopObstacles: [topBarItem.logoControl, topBarItem.statusControl, sideBarItem, weatherCard, dock, panelLoader]
+    desktopObstacles: [topBarItem.logoControl, topBarItem.statusControl, sideBarItem, weatherCard, dock]
 
     // -------------------------------------------------------------------------
     // Wallpaper

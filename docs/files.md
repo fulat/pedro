@@ -53,3 +53,5 @@ En organización Libre y Cuadrícula, el arrastre del Desktop resuelve colisione
 Libre, Cuadrícula y Pila mantienen un margen de 8 px respecto a los bordes del escritorio. Cuadrícula aplica las mismas barreras durante el arrastre y, al soltar, busca la celda válida más cercana a la posición alcanzada, evitando el shell y los elementos ocupados. El margen también se aplica al restaurar posiciones guardadas.
 
 Las celdas del Desktop separan el tamaño del elemento (106 × 102 px) del paso de colocación (114 × 110 px), dejando 8 px entre áreas seleccionables en Cuadrícula y Pila. El ajuste a cuadrícula conserva esa separación respecto a elementos ocupados. Las posiciones guardadas de Cuadrícula que ya no respetan el gap se presentan en una celda válida cercana; Libre permite superposición.
+
+Los popups temporales del menú del sistema no forman parte de las barreras del Desktop: se superponen sin reajustar posiciones de archivos o carpetas. Los controles permanentes de la barra, logo, dock y widgets conservan sus barreras.

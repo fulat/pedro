@@ -44,7 +44,7 @@ Registro permanente del desarrollo. No implica implementar todas las tareas inme
 
 - [x] **Screen Brightness** — slider conectado a PAPI y GNOME SettingsDaemon Power por D-Bus asíncrono; escucha PropertiesChanged para cambios del teclado, agrupa escrituras y se desactiva si el sistema no expone control de brillo. Verificado con servicio D-Bus de prueba; el display virtual actual no permite validar brillo físico.
 
-- [ ] **UPower Integration** — parcial: barra superior lee presencia y porcentaje del DisplayDevice mediante D-Bus asíncrono y eventos. Faltan estado de carga/descarga, dispositivos de energía y UI completa.
+- [ ] **UPower Integration** — parcial: barra superior representa el nivel con relleno proporcional y lee presencia y porcentaje del DisplayDevice mediante D-Bus asíncrono y eventos. Faltan estado de carga/descarga, dispositivos de energía y UI completa.
 - [ ] **Power Profiles** — consultar/cambiar Power Saver, Balanced y Performance cuando sea soportado mediante power-profiles-daemon, con UI propia de Settings. No implementar CPU governors ni políticas propias salvo necesidad futura específica. Coordinar el perfil con gaming y restaurar el estado anterior cuando corresponda.
 - [ ] **Night Light** — GNOME/Mutter: On/Off, Sunset to Sunrise, horario manual y temperatura de color. Usar transformación de color del sistema para toda la pantalla, sin filtros visuales propios sobre ventanas.
 
