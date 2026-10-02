@@ -12,6 +12,8 @@ Item {
     property url icon
     property real level: 0.5
     property bool interactive: true
+    property bool iconInteractive: false
+    signal iconClicked()
     signal levelMoved(real value)
     Layout.fillWidth: true
     implicitHeight: 48
@@ -26,6 +28,12 @@ Item {
             source: root.icon
             Layout.preferredWidth: 22
             Layout.preferredHeight: 22
+            MouseArea {
+                anchors.fill: parent
+                enabled: root.iconInteractive && root.interactive
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.iconClicked()
+            }
         }
         Label {
             Layout.preferredWidth: 64

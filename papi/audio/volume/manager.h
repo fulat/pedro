@@ -29,6 +29,8 @@ namespace Pedro::Papi::Audio::Volume {
 
             Q_INVOKABLE void setValue(int percentage);
 
+            Q_INVOKABLE void toggleMuted();
+
         signals:
             void changed();
 
@@ -48,6 +50,7 @@ namespace Pedro::Papi::Audio::Volume {
             bool refreshPending = false;
             int percentage = 0;
             int requested = -1;
+            int requestedMute = -1;
             QString failure;
     };
 }

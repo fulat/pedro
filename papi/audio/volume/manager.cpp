@@ -52,7 +52,7 @@ namespace Pedro::Papi::Audio::Volume {
                 return;
             }
             updates.start();
-            if (requested >= 0) {
+            if (requested >= 0 || requestedMute >= 0) {
                 debounce.start();
             }
         });
@@ -113,8 +113,22 @@ namespace Pedro::Papi::Audio::Volume {
         debounce.start();
     }
 
+    void Manager::toggleMuted() {
+        if (!supported) {
+            return;
+        }
+        requestedMute = requestedMute >= 0 ? !requestedMute : !silent;
+        debounce.start();
+    }
+
     void Manager::write() {
-        if (!supported || requested < 0 || writer.state() != QProcess::NotRunning) {
+        if (!supported || (requested < 0 && requestedMute < 0) || writer.state() != QProcess::NotRunning) {
+            return;
+        }
+        if (requestedMute >= 0) {
+            writer.setArguments({"set-mute", "@DEFAULT_AUDIO_SINK@", QString::number(requestedMute)});
+            requestedMute = -1;
+            writer.start();
             return;
         }
         const auto value = requested;
