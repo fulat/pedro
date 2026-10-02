@@ -1276,5 +1276,320 @@
             <extracomment>Stable Pedro key: network.connection.none</extracomment>
             <translation>Sin conexión activa</translation>
         </message>
+        <message>
+            <source>settings.network.title</source>
+            <extracomment>Stable Pedro key: settings.network.title</extracomment>
+            <translation>Red</translation>
+        </message>
+        <message>
+            <source>settings.network.home</source>
+            <extracomment>Stable Pedro key: settings.network.home</extracomment>
+            <translation>Resumen</translation>
+        </message>
+        <message>
+            <source>settings.network.wifi</source>
+            <extracomment>Stable Pedro key: settings.network.wifi</extracomment>
+            <translation>Wi-Fi</translation>
+        </message>
+        <message>
+            <source>settings.network.ethernet</source>
+            <extracomment>Stable Pedro key: settings.network.ethernet</extracomment>
+            <translation>Ethernet</translation>
+        </message>
+        <message>
+            <source>settings.network.vpn</source>
+            <extracomment>Stable Pedro key: settings.network.vpn</extracomment>
+            <translation>VPN</translation>
+        </message>
+        <message>
+            <source>settings.network.proxy</source>
+            <extracomment>Stable Pedro key: settings.network.proxy</extracomment>
+            <translation>Proxy</translation>
+        </message>
+        <message>
+            <source>settings.network.advanced</source>
+            <extracomment>Stable Pedro key: settings.network.advanced</extracomment>
+            <translation>Avanzado</translation>
+        </message>
+        <message>
+            <source>settings.network.diagnostics</source>
+            <extracomment>Stable Pedro key: settings.network.diagnostics</extracomment>
+            <translation>Diagnóstico de red</translation>
+        </message>
+        <message>
+            <source>settings.network.unavailable</source>
+            <extracomment>Stable Pedro key: settings.network.unavailable</extracomment>
+            <translation>No disponible</translation>
+        </message>
+        <message>
+            <source>settings.network.off</source>
+            <extracomment>Stable Pedro key: settings.network.off</extracomment>
+            <translation>Desactivado</translation>
+        </message>
+        <message>
+            <source>settings.network.connected</source>
+            <extracomment>Stable Pedro key: settings.network.connected</extracomment>
+            <translation>Conectado</translation>
+        </message>
+        <message>
+            <source>settings.network.disconnected</source>
+            <extracomment>Stable Pedro key: settings.network.disconnected</extracomment>
+            <translation>Desconectado</translation>
+        </message>
+        <message>
+            <source>settings.network.notIntegrated</source>
+            <extracomment>Stable Pedro key: settings.network.notIntegrated</extracomment>
+            <translation>Aún sin configurar en Pedro</translation>
+        </message>
+        <message>
+            <source>settings.network.advancedHint</source>
+            <extracomment>Stable Pedro key: settings.network.advancedHint</extracomment>
+            <translation>IP, DNS, compartir y hardware</translation>
+        </message>
+        <message>
+            <source>settings.network.current</source>
+            <extracomment>Stable Pedro key: settings.network.current</extracomment>
+            <translation>Red actual</translation>
+        </message>
+        <message>
+            <source>settings.network.available</source>
+            <extracomment>Stable Pedro key: settings.network.available</extracomment>
+            <translation>Redes disponibles</translation>
+        </message>
+        <message>
+            <source>settings.network.secured</source>
+            <extracomment>Stable Pedro key: settings.network.secured</extracomment>
+            <translation>Red protegida</translation>
+        </message>
+        <message>
+            <source>settings.network.openNetwork</source>
+            <extracomment>Stable Pedro key: settings.network.openNetwork</extracomment>
+            <translation>Red abierta</translation>
+        </message>
+        <message>
+            <source>settings.network.known</source>
+            <extracomment>Stable Pedro key: settings.network.known</extracomment>
+            <translation>Redes conocidas</translation>
+        </message>
+        <message>
+            <source>settings.network.networkDetails</source>
+            <extracomment>Stable Pedro key: settings.network.networkDetails</extracomment>
+            <translation>Detalles de la red</translation>
+        </message>
+        <message>
+            <source>settings.network.autoConnect</source>
+            <extracomment>Stable Pedro key: settings.network.autoConnect</extracomment>
+            <translation>Conectar automáticamente</translation>
+        </message>
+        <message>
+            <source>settings.network.metered</source>
+            <extracomment>Stable Pedro key: settings.network.metered</extracomment>
+            <translation>Conexión de uso medido</translation>
+        </message>
+        <message>
+            <source>settings.network.forget</source>
+            <extracomment>Stable Pedro key: settings.network.forget</extracomment>
+            <translation>Olvidar red</translation>
+        </message>
+        <message>
+            <source>settings.network.pending</source>
+            <extracomment>Stable Pedro key: settings.network.pending</extracomment>
+            <translation>Controles de vista previa. Aplicar estos ajustes estará disponible en una próxima actualización.</translation>
+        </message>
+        <message>
+            <source>settings.network.status</source>
+            <extracomment>Stable Pedro key: settings.network.status</extracomment>
+            <translation>Estado</translation>
+        </message>
+        <message>
+            <source>settings.network.connectionName</source>
+            <extracomment>Stable Pedro key: settings.network.connectionName</extracomment>
+            <translation>Nombre de conexión</translation>
+        </message>
+        <message>
+            <source>settings.network.speed</source>
+            <extracomment>Stable Pedro key: settings.network.speed</extracomment>
+            <translation>Velocidad del enlace</translation>
+        </message>
+        <message>
+            <source>settings.network.ip</source>
+            <extracomment>Stable Pedro key: settings.network.ip</extracomment>
+            <translation>Dirección IP</translation>
+        </message>
+        <message>
+            <source>settings.network.automatic</source>
+            <extracomment>Stable Pedro key: settings.network.automatic</extracomment>
+            <translation>Configuración automática</translation>
+        </message>
+        <message>
+            <source>settings.network.vpnHint</source>
+            <extracomment>Stable Pedro key: settings.network.vpnHint</extracomment>
+            <translation>Mantén tu conexión privada con una VPN guardada.</translation>
+        </message>
+        <message>
+            <source>settings.network.addVpn</source>
+            <extracomment>Stable Pedro key: settings.network.addVpn</extracomment>
+            <translation>Añadir VPN</translation>
+        </message>
+        <message>
+            <source>settings.network.vpnName</source>
+            <extracomment>Stable Pedro key: settings.network.vpnName</extracomment>
+            <translation>Mi VPN</translation>
+        </message>
+        <message>
+            <source>settings.network.import</source>
+            <extracomment>Stable Pedro key: settings.network.import</extracomment>
+            <translation>Importar configuración</translation>
+        </message>
+        <message>
+            <source>settings.network.savedVpn</source>
+            <extracomment>Stable Pedro key: settings.network.savedVpn</extracomment>
+            <translation>Conexiones VPN guardadas</translation>
+        </message>
+        <message>
+            <source>settings.network.connect</source>
+            <extracomment>Stable Pedro key: settings.network.connect</extracomment>
+            <translation>Conectar</translation>
+        </message>
+        <message>
+            <source>settings.network.disconnect</source>
+            <extracomment>Stable Pedro key: settings.network.disconnect</extracomment>
+            <translation>Desconectar</translation>
+        </message>
+        <message>
+            <source>settings.network.removeVpn</source>
+            <extracomment>Stable Pedro key: settings.network.removeVpn</extracomment>
+            <translation>Eliminar VPN</translation>
+        </message>
+        <message>
+            <source>settings.network.automaticMode</source>
+            <extracomment>Stable Pedro key: settings.network.automaticMode</extracomment>
+            <translation>Automático</translation>
+        </message>
+        <message>
+            <source>settings.network.manual</source>
+            <extracomment>Stable Pedro key: settings.network.manual</extracomment>
+            <translation>Manual</translation>
+        </message>
+        <message>
+            <source>settings.network.pac</source>
+            <extracomment>Stable Pedro key: settings.network.pac</extracomment>
+            <translation>URL de configuración</translation>
+        </message>
+        <message>
+            <source>settings.network.host</source>
+            <extracomment>Stable Pedro key: settings.network.host</extracomment>
+            <translation>Servidor</translation>
+        </message>
+        <message>
+            <source>settings.network.port</source>
+            <extracomment>Stable Pedro key: settings.network.port</extracomment>
+            <translation>Puerto</translation>
+        </message>
+        <message>
+            <source>settings.network.apply</source>
+            <extracomment>Stable Pedro key: settings.network.apply</extracomment>
+            <translation>Aplicar</translation>
+        </message>
+        <message>
+            <source>settings.network.ipSettings</source>
+            <extracomment>Stable Pedro key: settings.network.ipSettings</extracomment>
+            <translation>IPv4 / IPv6</translation>
+        </message>
+        <message>
+            <source>settings.network.dns</source>
+            <extracomment>Stable Pedro key: settings.network.dns</extracomment>
+            <translation>DNS</translation>
+        </message>
+        <message>
+            <source>settings.network.routes</source>
+            <extracomment>Stable Pedro key: settings.network.routes</extracomment>
+            <translation>Rutas</translation>
+        </message>
+        <message>
+            <source>settings.network.sharing</source>
+            <extracomment>Stable Pedro key: settings.network.sharing</extracomment>
+            <translation>Hotspot / Compartir Internet</translation>
+        </message>
+        <message>
+            <source>settings.network.airplane</source>
+            <extracomment>Stable Pedro key: settings.network.airplane</extracomment>
+            <translation>Modo avión</translation>
+        </message>
+        <message>
+            <source>settings.network.hardware</source>
+            <extracomment>Stable Pedro key: settings.network.hardware</extracomment>
+            <translation>Detalles del hardware</translation>
+        </message>
+        <message>
+            <source>settings.network.dhcp</source>
+            <extracomment>Stable Pedro key: settings.network.dhcp</extracomment>
+            <translation>Automático (DHCP)</translation>
+        </message>
+        <message>
+            <source>settings.network.subnet</source>
+            <extracomment>Stable Pedro key: settings.network.subnet</extracomment>
+            <translation>Subred</translation>
+        </message>
+        <message>
+            <source>settings.network.gateway</source>
+            <extracomment>Stable Pedro key: settings.network.gateway</extracomment>
+            <translation>Puerta de enlace</translation>
+        </message>
+        <message>
+            <source>settings.network.mac</source>
+            <extracomment>Stable Pedro key: settings.network.mac</extracomment>
+            <translation>Dirección MAC</translation>
+        </message>
+        <message>
+            <source>settings.network.interface</source>
+            <extracomment>Stable Pedro key: settings.network.interface</extracomment>
+            <translation>Interfaz / Hardware</translation>
+        </message>
+        <message>
+            <source>settings.network.networkConnected</source>
+            <extracomment>Stable Pedro key: settings.network.networkConnected</extracomment>
+            <translation>Red conectada</translation>
+        </message>
+        <message>
+            <source>settings.network.gatewayReachable</source>
+            <extracomment>Stable Pedro key: settings.network.gatewayReachable</extracomment>
+            <translation>Puerta de enlace accesible</translation>
+        </message>
+        <message>
+            <source>settings.network.internet</source>
+            <extracomment>Stable Pedro key: settings.network.internet</extracomment>
+            <translation>Internet disponible</translation>
+        </message>
+        <message>
+            <source>settings.network.dnsWorking</source>
+            <extracomment>Stable Pedro key: settings.network.dnsWorking</extracomment>
+            <translation>DNS funcionando</translation>
+        </message>
+        <message>
+            <source>settings.network.notChecked</source>
+            <extracomment>Stable Pedro key: settings.network.notChecked</extracomment>
+            <translation>Sin comprobar</translation>
+        </message>
+        <message>
+            <source>settings.network.runDiagnostics</source>
+            <extracomment>Stable Pedro key: settings.network.runDiagnostics</extracomment>
+            <translation>Ejecutar diagnóstico</translation>
+        </message>
+        <message>
+            <source>settings.network.viewDetails</source>
+            <extracomment>Stable Pedro key: settings.network.viewDetails</extracomment>
+            <translation>Ver detalles</translation>
+        </message>
+        <message>
+            <source>settings.network.diagnosticsPending</source>
+            <extracomment>Stable Pedro key: settings.network.diagnosticsPending</extracomment>
+            <translation>La conexión de red está detectada. Las pruebas de puerta de enlace, Internet y DNS aún no están conectadas.</translation>
+        </message>
+        <message>
+            <source>settings.network.openSettings</source>
+            <extracomment>Stable Pedro key: settings.network.openSettings</extracomment>
+            <translation>Ajustes de red…</translation>
+        </message>
     </context>
 </TS>

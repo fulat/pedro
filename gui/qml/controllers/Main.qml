@@ -111,6 +111,7 @@ QtObject {
         item.availableHeight = Qt.binding(() => view.height - topBar.barHeight);
         item.closeRequested.connect(view.controller.closePanel);
         item.modeRequested.connect(mode => view.panelMode = mode);
+        item.networkSettingsRequested.connect(() => view.openNetworkSettings());
     }
 
     // Starts selection or grouped dragging for one desktop shortcut.

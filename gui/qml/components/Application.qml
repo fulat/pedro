@@ -91,4 +91,29 @@ ApplicationWindow {
             item.y = window.y + Math.round((window.height - item.height) / 2);
         }
     }
+    function openNetworkSettings() {
+        applicationController.closePanel();
+        networkWindowLoader.item.showNormal();
+        networkWindowLoader.item.raise();
+        networkWindowLoader.item.requestActivate();
+    }
+
+    Loader {
+        id: networkWindowLoader
+        source: "window/frame.qml"
+        onLoaded: {
+            item.objectName = "networkSettingsWindow";
+            item.title = Qt.binding(() => qsTranslate("Pedro", "settings.network.title"));
+            item.contentSource = Qt.resolvedUrl("network/view.qml");
+            item.surfaceColor = "#dd15191f";
+            item.windowRadius = 22;
+            item.contentMargin = 0;
+            item.width = Math.min(840, Screen.desktopAvailableWidth * 0.9);
+            item.height = Math.min(660, Screen.desktopAvailableHeight * 0.85);
+            item.minimumWidth = Math.min(650, item.width);
+            item.minimumHeight = Math.min(440, item.height);
+            item.x = window.x + (window.width - item.width) / 2;
+            item.y = window.y + (window.height - item.height) / 2;
+        }
+    }
 }

@@ -21,6 +21,7 @@ Rectangle {
     property int availableHeight
     readonly property bool controlMode: mode === "quick" || mode === "wifi" || mode === "bluetooth" || mode === "sound" || mode === "network"
 
+    signal networkSettingsRequested
     signal closeRequested
     signal modeRequested(string mode)
 
@@ -88,6 +89,12 @@ Rectangle {
             }
         }
 
+        Button {
+            visible: root.mode === "wifi" || root.mode === "network"
+            text: qsTranslate("Pedro", "settings.network.openSettings")
+            onClicked: root.networkSettingsRequested()
+        }
+
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -106,7 +113,7 @@ Rectangle {
                     id: control
                     width: controlScroll.availableWidth
                     height: Math.max(controlScroll.availableHeight, implicitHeight)
-                    onSettingsRequested: root.modeRequested("about")
+                    onSettingsRequested: root.networkSettingsRequested()
                     onWifiRequested: root.modeRequested(Backend.networkConnection.type === "wifi" || (Backend.networkConnection.type === "none" && Backend.wifiAvailable) ? "wifi" : "network")
                     onBluetoothRequested: root.modeRequested("bluetooth")
                 }
