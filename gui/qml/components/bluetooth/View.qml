@@ -12,7 +12,7 @@ import "../../scripts/theme.js" as Theme
 Item {
     id: root
 
-    implicitHeight: 52 + 1 + (Papi.bluetoothEnabled ? 36 : 0) + (Papi.bluetoothEnabled && Papi.bluetoothDevices.length > 0 ? Math.min(Papi.bluetoothDevices.length, 4) * 52 : 156) + 1 + 40 + 20
+    implicitHeight: 52 + 1 + (Papi.bluetoothEnabled ? 36 : 0) + (Papi.bluetoothEnabled && Papi.bluetoothDevices.length > 0 ? Math.min(Papi.bluetoothDevices.length, 4) * 52 : 156) + 40 + 16
 
     signal backRequested
     signal settingsRequested
@@ -234,12 +234,6 @@ Item {
                     wrapMode: Text.Wrap
                 }
             }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 1
-            color: Theme.overlayPressed
         }
 
         Loader {
