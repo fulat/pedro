@@ -223,7 +223,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: false
             Layout.alignment: Qt.AlignVCenter
-            spacing: 7
+            spacing: 2
 
             Label {
                 Layout.fillWidth: true
