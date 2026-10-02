@@ -11,6 +11,14 @@ Item {
 
     signal settingsRequested
 
+    property bool ipRevealed: false
+    readonly property string ipAddress: Backend.networkConnection.ipAddress
+    readonly property string connectionName: Backend.networkConnection.name
+
+    onVisibleChanged: ipRevealed = false
+    onIpAddressChanged: ipRevealed = false
+    onConnectionNameChanged: ipRevealed = false
+
     readonly property bool connected: Backend.networkConnection.type !== "none"
 
     ColumnLayout {
@@ -33,11 +41,9 @@ Item {
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40
                     radius: 20
-                    gradient: Gradient {
-                        GradientStop { position: 0; color: "#80686485" }
-                        GradientStop { position: 1; color: "#80534f70" }
-                    }
-                    border.color: "#28ffffff"
+                    color: Theme.cardSurface
+                    border.width: 1
+                    border.color: root.connected ? Theme.cardBorderStrong : Theme.cardBorder
 
                     Icon.Tinted {
                         anchors.centerIn: parent
@@ -91,7 +97,7 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 150
+            Layout.preferredHeight: 100
             radius: 18
             color: "#0fffffff"
             border.color: "#24ffffff"
@@ -119,20 +125,9 @@ Item {
 
                 Detail {
                     title: qsTranslate("Pedro", "network.popup.localIp")
-                    value: "—"
+                    value: root.ipAddress.length === 0 ? "—" : root.ipRevealed ? root.ipAddress : "********"
                     icon: "../../../assets/icons/location.svg"
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: 1
-                    color: "#18ffffff"
-                }
-
-                Detail {
-                    title: qsTranslate("Pedro", "settings.network.speed")
-                    value: "—"
-                    icon: "../../../assets/icons/speed.svg"
+                    revealable: true
                 }
             }
         }
@@ -161,6 +156,7 @@ Item {
         required property string title
         required property string value
         required property url icon
+        property bool revealable: false
 
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -189,6 +185,40 @@ Item {
                 color: Theme.white
                 font.pixelSize: 14
                 elide: Text.ElideRight
+            }
+        }
+
+        ToolButton {
+            id: revealButton
+
+            visible: detail.revealable
+            enabled: root.ipAddress.length > 0
+            Layout.preferredWidth: 32
+            Layout.preferredHeight: 32
+            checkable: true
+            checked: root.ipRevealed
+            onClicked: root.ipRevealed = !root.ipRevealed
+            Accessible.name: qsTranslate("Pedro", root.ipRevealed ? "network.popup.hideIp" : "network.popup.showIp")
+            ToolTip.visible: hovered
+            ToolTip.text: Accessible.name
+
+            contentItem: Item {
+                Icon.Tinted {
+                    anchors.centerIn: parent
+                    width: 20
+                    height: 20
+                    source: root.ipRevealed ? "../../../assets/icons/eye.svg" : "../../../assets/icons/hidden.svg"
+                    tint: Theme.textMuted
+                }
+            }
+
+            background: Rectangle {
+                radius: 16
+                color: revealButton.down ? Theme.overlayPressed : revealButton.hovered ? Theme.overlayHover : "transparent"
+            }
+
+            HoverHandler {
+                cursorShape: revealButton.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             }
         }
     }

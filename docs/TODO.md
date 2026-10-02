@@ -58,7 +58,7 @@ La implementación de energía y Night Light debe ser la misma en Ubuntu develop
 
 ### System Configuration
 
-- [ ] **Network Connection UI** — parcial: PAPI detecta la conexión principal de NetworkManager por D-Bus/eventos y distingue Wi-Fi, Ethernet, otras redes y ausencia de conexión. La barra abre Wi-Fi o una vista de red con nombre real; Wi-Fi sin adaptador no se puede activar. Ventana Network Settings reutiliza el frame Qt Quick, con vistas Wi-Fi, Ethernet, VPN, Proxy, Advanced y Diagnostics, en inglés/español. Switch Wi-Fi y estado/redes disponibles son reales; formularios avanzados, VPN/Proxy y diagnósticos están en vista previa con aplicación desactivada. Faltan escritura de perfiles, conexión/olvido de redes, métricas Ethernet, VPN/Proxy y pruebas de conectividad. Véase [Network Settings](network.md).
+- [ ] **Network Connection UI** — parcial: PAPI detecta la conexión principal de NetworkManager por D-Bus/eventos y distingue Wi-Fi, Ethernet, otras redes y ausencia de conexión. La barra abre Wi-Fi o una vista de red con nombre real; Wi-Fi sin adaptador no se puede activar. Ventana Network Settings reutiliza el frame Qt Quick, con vistas Wi-Fi, Ethernet, VPN, Proxy, Advanced y Diagnostics, en inglés/español. Switch Wi-Fi y estado/redes disponibles son reales; formularios avanzados, VPN/Proxy y diagnósticos están en vista previa con aplicación desactivada. El popup Ethernet muestra IP real (IPv4 o IPv6 de NetworkManager), oculta por defecto con un ojo para revelarla. Faltan escritura de perfiles, conexión/olvido de redes, velocidad Ethernet, VPN/Proxy y pruebas de conectividad. Véase [Network Settings](network.md).
 
 - [ ] **GSettings / dconf Integration** — parcial: aplicaciones usan GSettings para favoritos y el script de apariencia configura GNOME; falta exponer configuración general del sistema mediante PAPI/Settings.
 - [ ] **systemd-logind Integration** — sesiones/seats, suspensión, hibernación, reinicio, apagado y operaciones de login.
@@ -378,4 +378,4 @@ El objetivo es extender Pedro Global Search/Spotlight para que pueda entender co
 
 ### Menús rápidos del escritorio
 
-- Mantener paneles compactos en píxeles lógicos, con Liquid compartido: Ethernet 300 × 300; Bluetooth/Wi-Fi 304 de ancho y altura según estado/lista, limitada a cuatro filas antes de desplazar. Control Center 328 de ancho y altura derivada del contenido; System 288 × 288. Priorizar reducir espacio sobrante frente a encoger texto y conservar listas desplazables.
+- Mantener paneles compactos en píxeles lógicos, con Liquid compartido: Ethernet 300 × 250; Bluetooth/Wi-Fi 304 de ancho y altura según estado/lista, limitada a cuatro filas antes de desplazar. Control Center 328 de ancho y altura derivada del contenido; System 288 × 288. Priorizar reducir espacio sobrante frente a encoger texto y conservar listas desplazables.

@@ -319,5 +319,7 @@
     "settings.network.openSettings": "Ajustes de red…",
     "network.popup.localIp": "IP local",
     "network.popup.settings": "Ajustes de red",
-    "network.popup.diagnose": "Diagnosticar conexión"
+    "network.popup.diagnose": "Diagnosticar conexión",
+    "network.popup.showIp": "Mostrar dirección IP",
+    "network.popup.hideIp": "Ocultar dirección IP"
 }

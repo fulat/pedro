@@ -1606,5 +1606,15 @@
             <extracomment>Stable Pedro key: network.popup.diagnose</extracomment>
             <translation>Diagnose connection</translation>
         </message>
+        <message>
+            <source>network.popup.showIp</source>
+            <extracomment>Stable Pedro key: network.popup.showIp</extracomment>
+            <translation>Show IP address</translation>
+        </message>
+        <message>
+            <source>network.popup.hideIp</source>
+            <extracomment>Stable Pedro key: network.popup.hideIp</extracomment>
+            <translation>Hide IP address</translation>
+        </message>
     </context>
 </TS>
