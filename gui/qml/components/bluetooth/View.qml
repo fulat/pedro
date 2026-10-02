@@ -13,6 +13,8 @@ import "../../scripts/theme.js" as Theme
 Item {
     id: root
 
+    implicitHeight: 52 + 1 + (Papi.bluetoothEnabled ? 36 : 0) + (Papi.bluetoothEnabled && Papi.bluetoothDevices.length > 0 ? Math.min(Papi.bluetoothDevices.length, 4) * 52 : 156) + 1 + 40 + 20
+
     signal backRequested
     signal settingsRequested
     signal deviceRequested(string name)
@@ -31,13 +33,13 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 64
+            Layout.preferredHeight: 52
             spacing: 12
 
             Rectangle {
-                implicitWidth: 42
-                implicitHeight: 42
-                radius: 21
+                implicitWidth: 34
+                implicitHeight: 34
+                radius: 17
                 color: Theme.cardSurface
                 border.width: 1
                 border.color: Theme.buttonBorder
@@ -74,7 +76,7 @@ Item {
                     Layout.fillWidth: true
                     text: qsTranslate("Pedro", "bluetooth.title")
                     color: Theme.white
-                    font.pixelSize: 20
+                    font.pixelSize: 16
                     font.weight: Font.DemiBold
                 }
 
@@ -82,7 +84,7 @@ Item {
                     Layout.fillWidth: true
                     text: !Papi.bluetoothAvailable ? qsTranslate("Pedro", "bluetooth.status.unavailableShort") : Papi.bluetoothEnabled ? qsTranslate("Pedro", "bluetooth.status.active") : qsTranslate("Pedro", "bluetooth.status.off")
                     color: Theme.textMuted
-                    font.pixelSize: 9
+                    font.pixelSize: 11
                     elide: Text.ElideRight
                 }
             }
@@ -102,7 +104,7 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 44
+            Layout.preferredHeight: 36
             visible: Papi.bluetoothEnabled
             spacing: 8
 
@@ -188,13 +190,13 @@ Item {
             ColumnLayout {
                 anchors.centerIn: parent
                 width: parent.width
-                visible: deviceList.count === 0
-                spacing: 10
+                visible: !Papi.bluetoothEnabled || deviceList.count === 0
+                spacing: 6
 
                 Rectangle {
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.preferredWidth: 106
-                    Layout.preferredHeight: 106
+                    Layout.preferredWidth: 56
+                    Layout.preferredHeight: 56
                     radius: width / 2
                     color: Theme.overlaySubtle
                     border.width: 1
@@ -202,8 +204,8 @@ Item {
 
                     Icon.Tinted {
                         anchors.centerIn: parent
-                        width: 54
-                        height: 54
+                        width: 30
+                        height: 30
                         source: "../../../assets/icons/bluetooth.svg"
                         tint: Theme.white
                     }
@@ -214,7 +216,7 @@ Item {
                     Layout.topMargin: 6
                     text: !Papi.bluetoothAvailable ? qsTranslate("Pedro", "bluetooth.status.unavailable") : !Papi.bluetoothEnabled ? qsTranslate("Pedro", "bluetooth.status.disabled") : Papi.bluetoothScanning ? qsTranslate("Pedro", "bluetooth.devices.searching") : qsTranslate("Pedro", "bluetooth.devices.empty")
                     color: Theme.white
-                    font.pixelSize: 17
+                    font.pixelSize: 14
                     font.weight: Font.DemiBold
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
@@ -241,7 +243,7 @@ Item {
         }
 
         Option.Row {
-            Layout.preferredHeight: 62
+            Layout.preferredHeight: 40
             title: qsTranslate("Pedro", "bluetooth.settings.title")
             icon: "../../../assets/icons/settings.svg"
             onActivated: root.settingsRequested()

@@ -11,7 +11,7 @@ import "../../scripts/theme.js" as Theme
 
 Item {
     id: root
-    implicitHeight: 568
+    implicitHeight: content.implicitHeight
     property alias notice: controller.notice
     readonly property bool wifiEnabled: Papi.wifiEnabled
     readonly property bool wifiConnected: Papi.wifiConnected
@@ -26,6 +26,7 @@ Item {
     }
 
     ColumnLayout {
+        id: content
         anchors.fill: parent
         spacing: 4
 
@@ -95,7 +96,7 @@ Item {
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 162
+            Layout.preferredHeight: 144
 
             GridLayout {
                 anchors.fill: parent
@@ -104,6 +105,7 @@ Item {
                 rowSpacing: 0
 
                 Toggle.Tile {
+                    Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.focus.title")
                     subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/moon.svg"
@@ -111,6 +113,7 @@ Item {
                     onActivated: controller.showNotice(qsTranslate("Pedro", "shell.focus.preview"))
                 }
                 Toggle.Tile {
+                    Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.system.powerSaving.title")
                     subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/leaf.svg"
@@ -118,6 +121,7 @@ Item {
                     onActivated: controller.showNotice(qsTranslate("Pedro", "shell.system.powerSaving.pending"))
                 }
                 Toggle.Tile {
+                    Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.display.title")
                     subtitle: active ? qsTranslate("Pedro", "shell.display.connected") : qsTranslate("Pedro", "shell.display.disconnected")
                     icon: "../../../assets/icons/display.svg"
@@ -125,6 +129,7 @@ Item {
                     onActivated: controller.showNotice(qsTranslate("Pedro", "shell.display.pending"))
                 }
                 Toggle.Tile {
+                    Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.nightLight.title")
                     subtitle: active ? qsTranslate("Pedro", "shell.nightLight.automatic") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/brightness.svg"
@@ -132,6 +137,7 @@ Item {
                     onActivated: controller.showNotice(qsTranslate("Pedro", "shell.nightLight.pending"))
                 }
                 Toggle.Tile {
+                    Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.keyboard.title")
                     subtitle: qsTranslate("Pedro", "shell.keyboard.layout")
                     icon: "../../../assets/icons/keyboard.svg"
@@ -140,6 +146,7 @@ Item {
                     onActivated: controller.showNotice(qsTranslate("Pedro", "shell.keyboard.pending"))
                 }
                 Toggle.Tile {
+                    Layout.preferredHeight: 48
                     symbolColor: Theme.controlSymbol
                     title: qsTranslate("Pedro", "shell.camera.title")
                     subtitle: active ? qsTranslate("Pedro", "shell.camera.enabled") : qsTranslate("Pedro", "shell.camera.disabled")
@@ -152,7 +159,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
-                height: 142
+                height: 124
                 color: Theme.overlayPressed
             }
         }

@@ -23,7 +23,7 @@ Rectangle {
 
     signal activated(string name)
 
-    implicitHeight: 68
+    implicitHeight: 52
     radius: 9
     color: mouse.pressed ? Theme.overlayPressed
                          : mouse.containsMouse ? Theme.overlayHover : "transparent"
@@ -35,8 +35,8 @@ Rectangle {
         spacing: 12
 
         Rectangle {
-            Layout.preferredWidth: 46
-            Layout.preferredHeight: 46
+            Layout.preferredWidth: 34
+            Layout.preferredHeight: 34
             radius: width / 2
             color: Theme.cardSurface
             border.width: 1
@@ -44,8 +44,8 @@ Rectangle {
 
             Icon.Tinted {
                 anchors.centerIn: parent
-                width: 27
-                height: 27
+                width: 22
+                height: 22
                 source: root.iconSource
                 tint: Theme.white
             }

@@ -10,7 +10,7 @@ Rectangle {
     property string label
     property string value
     Layout.fillWidth: true
-    implicitHeight: 58
+    implicitHeight: 52
     radius: 7
     color: Theme.overlayHover
     border.color: Theme.shortcutHover

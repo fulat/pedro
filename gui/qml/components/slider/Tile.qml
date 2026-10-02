@@ -16,7 +16,7 @@ Item {
     signal iconClicked()
     signal levelMoved(real value)
     Layout.fillWidth: true
-    implicitHeight: 48
+    implicitHeight: 40
 
     RowLayout {
         anchors.fill: parent

@@ -26,8 +26,11 @@ Rectangle {
     signal modeRequested(string mode)
 
     visible: mode !== ""
-    width: Math.min(mode === "network" ? 316 : mode === "quick" ? 368 : controlMode ? 352 : 320, availableWidth - 24)
-    height: Math.min(mode === "quick" ? 604 : mode === "wifi" ? 460 : mode === "bluetooth" ? 460 : mode === "sound" ? 84 : mode === "network" ? 354 : 380, availableHeight - 20)
+    implicitWidth: Math.max(0, Math.min(mode === "network" ? 300 : mode === "quick" ? 328 : controlMode ? 304 : mode === "system" ? 288 : 320, availableWidth - 24))
+    implicitHeight: Math.max(0, Math.min(mode === "quick" ? control.implicitHeight + 24 : mode === "wifi" ? wifi.implicitHeight + 24 : mode === "bluetooth" ? bluetooth.implicitHeight + 24 : mode === "sound" ? 76 : mode === "network" ? 300 : mode === "system" ? 288 : 380, availableHeight - 20))
+
+    width: implicitWidth
+    height: implicitHeight
 
     Behavior on height {
         NumberAnimation {
@@ -51,8 +54,8 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: root.mode === "network" ? 16 : root.controlMode ? 14 : 12
-        spacing: root.controlMode ? 0 : 10
+        anchors.margins: 12
+        spacing: root.controlMode ? 0 : 8
 
         RowLayout {
             Layout.fillWidth: true
@@ -113,10 +116,12 @@ Rectangle {
                 }
             }
             Wifi.View {
+                id: wifi
                 onSettingsRequested: root.networkSettingsRequested()
                 onBackRequested: root.modeRequested("quick")
             }
             Bluetooth.View {
+                id: bluetooth
                 onBackRequested: root.modeRequested("quick")
                 onSettingsRequested: control.notice = qsTranslate("Pedro", "bluetooth.settings.pending")
                 onDeviceRequested: name => control.notice = name

@@ -12,17 +12,17 @@ Item {
     signal playRequested()
     signal nextRequested()
     Layout.fillWidth: true
-    Layout.preferredHeight: 100
+    Layout.preferredHeight: 88
 
     ColumnLayout {
         anchors.fill: parent
         spacing: 5
         RowLayout {
             Layout.fillWidth: true
-            spacing: 10
+            spacing: 6
             Rectangle {
-                implicitWidth: 56
-                implicitHeight: 56
+                implicitWidth: 44
+                implicitHeight: 44
                 radius: 8
                 color: Theme.mediaArtworkBackground
                 clip: true
@@ -38,15 +38,19 @@ Item {
             }
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.minimumWidth: 105
+                Layout.minimumWidth: 0
                 spacing: 2
                 Controls.Label {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
                     text: "Blinding Lights"
                     color: Theme.white
                     font.pixelSize: 15
                     font.weight: Font.Medium
                 }
                 Controls.Label {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
                     text: "The Weeknd"
                     color: Theme.textMuted
                     font.pixelSize: 13

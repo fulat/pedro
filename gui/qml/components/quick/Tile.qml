@@ -24,7 +24,7 @@ Rectangle {
     signal toggleRequested(bool state)
     signal detailsRequested
     Layout.fillWidth: true
-    implicitHeight: 58
+    implicitHeight: 52
     radius: 9
     color: mouse.pressed ? Theme.overlayPressed : root.hovered ? Theme.overlayHover : "transparent"
 

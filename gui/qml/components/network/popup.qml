@@ -19,7 +19,7 @@ Item {
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 64
+            Layout.preferredHeight: 52
 
             RowLayout {
                 anchors.fill: parent
@@ -28,11 +28,11 @@ Item {
                 spacing: 18
 
                 Rectangle {
-                    Layout.minimumWidth: 52
-                    Layout.maximumWidth: 52
-                    Layout.preferredWidth: 52
-                    Layout.preferredHeight: 52
-                    radius: 26
+                    Layout.minimumWidth: 40
+                    Layout.maximumWidth: 40
+                    Layout.preferredWidth: 40
+                    Layout.preferredHeight: 40
+                    radius: 20
                     gradient: Gradient {
                         GradientStop { position: 0; color: "#80686485" }
                         GradientStop { position: 1; color: "#80534f70" }
@@ -41,8 +41,8 @@ Item {
 
                     Icon.Tinted {
                         anchors.centerIn: parent
-                        width: 28
-                        height: 28
+                        width: 23
+                        height: 23
                         source: "../../../assets/icons/ethernet.svg"
                         tint: Theme.white
                     }
@@ -56,7 +56,7 @@ Item {
                         Layout.fillWidth: true
                         text: Backend.networkConnection.type === "ethernet" ? qsTranslate("Pedro", "settings.network.ethernet") : qsTranslate("Pedro", "network.connection.title")
                         color: Theme.white
-                        font.pixelSize: 18
+                        font.pixelSize: 16
                         font.weight: Font.DemiBold
                     }
 
@@ -91,7 +91,7 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 180
+            Layout.preferredHeight: 150
             radius: 18
             color: "#0fffffff"
             border.color: "#24ffffff"
@@ -99,7 +99,7 @@ Item {
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.leftMargin: 20
+                anchors.leftMargin: 14
                 anchors.rightMargin: 16
                 anchors.topMargin: 8
                 anchors.bottomMargin: 8
@@ -139,12 +139,12 @@ Item {
 
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.topMargin: 14
+            Layout.topMargin: 12
             spacing: 8
 
             Loader {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 44
+                Layout.preferredHeight: 40
                 source: "footer.qml"
                 onLoaded: {
                     item.title = Qt.binding(() => qsTranslate("Pedro", "network.popup.settings"));
@@ -164,7 +164,7 @@ Item {
 
         Layout.fillWidth: true
         Layout.fillHeight: true
-        spacing: 28
+        spacing: 18
 
         Icon.Tinted {
             source: detail.icon

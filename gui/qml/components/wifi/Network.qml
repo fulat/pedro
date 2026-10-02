@@ -14,7 +14,7 @@ Rectangle {
     required property bool secured
     required property bool connected
 
-    implicitHeight: 58
+    implicitHeight: 52
     radius: 9
     color: connected ? Theme.wifiConnectedSurface : "transparent"
     border.width: connected ? 1 : 0
@@ -34,8 +34,8 @@ Rectangle {
 
         Icon.Tinted {
             source: "../../../assets/icons/wifi.svg"
-            Layout.preferredWidth: 27
-            Layout.preferredHeight: 27
+            Layout.preferredWidth: 23
+            Layout.preferredHeight: 23
             tint: Theme.white
         }
 

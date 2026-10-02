@@ -12,6 +12,8 @@ import "../../scripts/theme.js" as Theme
 Item {
     id: root
 
+    implicitHeight: 52 + 1 + 36 + (Papi.wifiAvailable && Papi.wifiEnabled && Papi.wifiNetworks.length > 0 ? Math.min(Papi.wifiNetworks.length, 4) * 54 : 180) + 1 + 40 + 20
+
     signal backRequested
     signal settingsRequested
 
@@ -28,13 +30,13 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 58
+            Layout.preferredHeight: 52
             spacing: 12
 
             Rectangle {
-                implicitWidth: 42
-                implicitHeight: 42
-                radius: 21
+                implicitWidth: 34
+                implicitHeight: 34
+                radius: 17
                 color: Theme.cardSurface
                 border.width: 1
                 border.color: Theme.buttonBorder
@@ -70,7 +72,7 @@ Item {
                     Layout.fillWidth: true
                     text: qsTranslate("Pedro", "network.wifi.title")
                     color: Theme.white
-                    font.pixelSize: 20
+                    font.pixelSize: 16
                     font.weight: Font.DemiBold
                 }
 
@@ -78,7 +80,7 @@ Item {
                     Layout.fillWidth: true
                     text: !Papi.wifiAvailable ? qsTranslate("Pedro", "network.wifi.empty.unavailableTitle") : Papi.wifiConnected ? Papi.connectedWifiName : Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.status.disconnected") : qsTranslate("Pedro", "bluetooth.status.off")
                     color: Papi.wifiConnected ? Theme.statusWifiConnected : Theme.textMuted
-                    font.pixelSize: 9
+                    font.pixelSize: 11
                     elide: Text.ElideRight
                 }
             }
@@ -98,7 +100,7 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 42
+            Layout.preferredHeight: 36
             spacing: 8
 
             Controls.Label {
@@ -189,29 +191,29 @@ Item {
 
                 Item {
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.preferredWidth: 112
-                    Layout.preferredHeight: 98
+                    Layout.preferredWidth: 60
+                    Layout.preferredHeight: 52
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 104
-                        height: 104
+                        width: 56
+                        height: 56
                         radius: width / 2
                         color: Theme.wifiGlowInner
                     }
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 78
-                        height: 78
+                        width: 44
+                        height: 44
                         radius: width / 2
                         color: Theme.wifiGlowOuter
                     }
 
                     Icon.Tinted {
                         anchors.centerIn: parent
-                        width: 78
-                        height: 78
+                        width: 44
+                        height: 44
                         source: "../../../assets/icons/wifi-off.svg"
                         tint: Theme.white
                     }
@@ -221,7 +223,7 @@ Item {
                     Layout.fillWidth: true
                     text: !Papi.wifiAvailable ? qsTranslate("Pedro", "network.wifi.empty.unavailableTitle") : !Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.empty.disabledTitle") : Papi.wifiError !== "" ? qsTranslate("Pedro", "network.wifi.empty.loadFailed") : qsTranslate("Pedro", "network.wifi.empty.noNetworks")
                     color: Theme.white
-                    font.pixelSize: 17
+                    font.pixelSize: 14
                     font.weight: Font.DemiBold
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
@@ -276,7 +278,7 @@ Item {
 
         Loader {
             Layout.fillWidth: true
-            Layout.preferredHeight: 44
+            Layout.preferredHeight: 40
             source: "../network/footer.qml"
             onLoaded: item.activated.connect(root.settingsRequested)
         }

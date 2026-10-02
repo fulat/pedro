@@ -8,7 +8,7 @@ import "../../scripts/theme.js" as Theme
 Item {
     ColumnLayout {
         anchors.fill: parent
-        spacing: 9
+        spacing: 6
 
         Label {
             Layout.fillWidth: true
@@ -20,8 +20,8 @@ Item {
         GridLayout {
             Layout.fillWidth: true
             columns: 2
-            columnSpacing: 10
-            rowSpacing: 10
+            columnSpacing: 8
+            rowSpacing: 8
             Metric.Card { label: qsTranslate("Pedro", "system.metrics.cpu"); value: Papi.cpuUsage < 0 ? qsTranslate("Pedro", "system.metrics.measuring") : Papi.cpuUsage.toFixed(1) + "%" }
             Metric.Card { label: qsTranslate("Pedro", "system.metrics.memory"); value: Papi.memoryUsage.toFixed(1) + "%" }
             Metric.Card { label: qsTranslate("Pedro", "system.metrics.uptime"); value: Papi.uptime }
@@ -36,7 +36,7 @@ Item {
             font.pixelSize: 12
             wrapMode: Text.Wrap
         }
-        Label { text: Papi.memorySummary; color: Theme.textMuted; font.pixelSize: 11 }
+        Label { Layout.fillWidth: true; wrapMode: Text.Wrap; text: Papi.memorySummary; color: Theme.textMuted; font.pixelSize: 11 }
         Item { Layout.fillHeight: true }
         Label {
             Layout.fillWidth: true

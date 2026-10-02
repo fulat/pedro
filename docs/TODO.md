@@ -375,3 +375,7 @@ El objetivo es extender Pedro Global Search/Spotlight para que pueda entender co
   - `muéstrame la última factura de Con Edison`
   - `¿dónde guardé el contrato del apartamento?`
   - `muéstrame PDFs sobre impuestos`
+
+### Menús rápidos del escritorio
+
+- Mantener paneles compactos en píxeles lógicos, con Liquid compartido: Ethernet 300 × 300; Bluetooth/Wi-Fi 304 de ancho y altura según estado/lista, limitada a cuatro filas antes de desplazar. Control Center 328 de ancho y altura derivada del contenido; System 288 × 288. Priorizar reducir espacio sobrante frente a encoger texto y conservar listas desplazables.
