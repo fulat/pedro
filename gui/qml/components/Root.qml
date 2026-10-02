@@ -21,14 +21,13 @@ Rectangle {
     property int availableHeight
     readonly property bool controlMode: mode === "quick" || mode === "wifi" || mode === "bluetooth" || mode === "sound" || mode === "network"
 
-    signal networkDiagnosticsRequested
     signal networkSettingsRequested
     signal closeRequested
     signal modeRequested(string mode)
 
     visible: mode !== ""
-    width: Math.min(mode === "network" ? 340 : mode === "quick" ? 368 : controlMode ? 352 : 320, availableWidth - 24)
-    height: Math.min(mode === "quick" ? 604 : mode === "wifi" ? 460 : mode === "bluetooth" ? 460 : mode === "sound" ? 84 : mode === "network" ? 406 : 380, availableHeight - 20)
+    width: Math.min(mode === "network" ? 316 : mode === "quick" ? 368 : controlMode ? 352 : 320, availableWidth - 24)
+    height: Math.min(mode === "quick" ? 604 : mode === "wifi" ? 460 : mode === "bluetooth" ? 460 : mode === "sound" ? 84 : mode === "network" ? 354 : 380, availableHeight - 20)
 
     Behavior on height {
         NumberAnimation {
@@ -139,7 +138,6 @@ Rectangle {
                 source: "network/popup.qml"
                 onLoaded: {
                     item.settingsRequested.connect(root.networkSettingsRequested);
-                    item.diagnosticsRequested.connect(root.networkDiagnosticsRequested);
                 }
             }
         }

@@ -10,7 +10,6 @@ Item {
     id: root
 
     signal settingsRequested
-    signal diagnosticsRequested
 
     readonly property bool connected: Backend.networkConnection.type !== "none"
 
@@ -79,28 +78,6 @@ Item {
                         }
                     }
                 }
-
-                Rectangle {
-                    Layout.minimumWidth: 36
-                    Layout.maximumWidth: 36
-                    Layout.preferredWidth: 36
-                    Layout.preferredHeight: 36
-                    radius: 18
-                    color: "#10ffffff"
-
-                    Icon.Tinted {
-                        anchors.centerIn: parent
-                        source: "../../../assets/icons/chevron.svg"
-                        width: 16
-                        height: 16
-                    }
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.settingsRequested()
             }
         }
 
@@ -173,18 +150,6 @@ Item {
                     item.title = Qt.binding(() => qsTranslate("Pedro", "network.popup.settings"));
                     item.outlined = true;
                     item.activated.connect(root.settingsRequested);
-                }
-            }
-
-            Loader {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 44
-                source: "footer.qml"
-                onLoaded: {
-                    item.title = Qt.binding(() => qsTranslate("Pedro", "network.popup.diagnose"));
-                    item.icon = Qt.resolvedUrl("../../../assets/icons/diagnostics.svg");
-                    item.outlined = true;
-                    item.activated.connect(root.diagnosticsRequested);
                 }
             }
         }

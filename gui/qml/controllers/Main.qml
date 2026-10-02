@@ -112,7 +112,6 @@ QtObject {
         item.closeRequested.connect(view.controller.closePanel);
         item.modeRequested.connect(mode => view.panelMode = mode);
         item.networkSettingsRequested.connect(() => view.openNetworkSettings());
-        item.networkDiagnosticsRequested.connect(() => view.openNetworkSettings("diagnostics"));
     }
 
     // Starts selection or grouped dragging for one desktop shortcut.
