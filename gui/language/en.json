@@ -321,5 +321,7 @@
     "network.popup.settings": "Network settings",
     "network.popup.diagnose": "Diagnose connection",
     "network.popup.showIp": "Show IP address",
-    "network.popup.hideIp": "Hide IP address"
+    "network.popup.hideIp": "Hide IP address",
+    "network.popup.copyIp": "Copy IP address",
+    "network.popup.ipCopied": "IP address copied"
 }

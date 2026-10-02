@@ -12,14 +12,27 @@ Item {
     signal settingsRequested
 
     property bool ipRevealed: false
+    property bool ipCopied: false
     readonly property string ipAddress: Backend.networkConnection.ipAddress
     readonly property string connectionName: Backend.networkConnection.name
 
-    onVisibleChanged: ipRevealed = false
-    onIpAddressChanged: ipRevealed = false
-    onConnectionNameChanged: ipRevealed = false
+    function hideIp() {
+        ipRevealed = false;
+        ipCopied = false;
+        copiedTimer.stop();
+    }
+
+    onVisibleChanged: hideIp()
+    onIpAddressChanged: hideIp()
+    onConnectionNameChanged: hideIp()
 
     readonly property bool connected: Backend.networkConnection.type !== "none"
+
+    Timer {
+        id: copiedTimer
+        interval: 1600
+        onTriggered: root.ipCopied = false
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -81,6 +94,7 @@ Item {
                             text: qsTranslate("Pedro", root.connected ? "settings.network.connected" : "settings.network.disconnected")
                             color: Theme.textMuted
                             font.pixelSize: 13
+                            font.weight: Font.Medium
                         }
                     }
                 }
@@ -97,7 +111,7 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 100
+            Layout.preferredHeight: 120
             radius: 18
             color: "#0fffffff"
             border.color: "#24ffffff"
@@ -169,22 +183,63 @@ Item {
             Layout.preferredHeight: 22
         }
 
+        function copyAddress() {
+            if (!revealable || !root.ipRevealed || !root.ipAddress.length) {
+                return;
+            }
+
+            valueText.selectAll();
+            valueText.copy();
+            valueText.deselect();
+            root.ipCopied = true;
+            copiedTimer.restart();
+        }
+
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 3
+            Layout.fillHeight: false
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 7
 
             Label {
+                Layout.fillWidth: true
                 text: detail.title
                 color: Theme.textMuted
                 font.pixelSize: 12
+                font.weight: Font.Medium
             }
 
-            Label {
+            TextEdit {
+                id: valueText
+
                 Layout.fillWidth: true
                 text: detail.value
                 color: Theme.white
                 font.pixelSize: 14
-                elide: Text.ElideRight
+                font.weight: Font.Medium
+                readOnly: true
+                textFormat: TextEdit.PlainText
+                wrapMode: TextEdit.NoWrap
+                clip: true
+                activeFocusOnTab: detail.revealable && root.ipRevealed
+                Accessible.role: detail.revealable && root.ipRevealed ? Accessible.Button : Accessible.StaticText
+                Accessible.name: detail.revealable && root.ipRevealed ? qsTranslate("Pedro", "network.popup.copyIp") : detail.value
+                Accessible.onPressAction: detail.copyAddress()
+                Keys.onReturnPressed: detail.copyAddress()
+                Keys.onEnterPressed: detail.copyAddress()
+                Keys.onSpacePressed: detail.copyAddress()
+                ToolTip.visible: detail.revealable && root.ipRevealed && (copyMouse.containsMouse || root.ipCopied)
+                ToolTip.text: qsTranslate("Pedro", root.ipCopied ? "network.popup.ipCopied" : "network.popup.copyIp")
+
+                MouseArea {
+                    id: copyMouse
+                    objectName: "ipCopyTarget"
+                    anchors.fill: parent
+                    enabled: detail.revealable && root.ipRevealed && root.ipAddress.length > 0
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: detail.copyAddress()
+                }
             }
         }
 
@@ -197,7 +252,11 @@ Item {
             Layout.preferredHeight: 32
             checkable: true
             checked: root.ipRevealed
-            onClicked: root.ipRevealed = !root.ipRevealed
+            onClicked: {
+                root.ipRevealed = !root.ipRevealed;
+                root.ipCopied = false;
+                copiedTimer.stop();
+            }
             Accessible.name: qsTranslate("Pedro", root.ipRevealed ? "network.popup.hideIp" : "network.popup.showIp")
             ToolTip.visible: hovered
             ToolTip.text: Accessible.name

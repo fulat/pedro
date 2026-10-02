@@ -1616,5 +1616,15 @@
             <extracomment>Stable Pedro key: network.popup.hideIp</extracomment>
             <translation>Ocultar dirección IP</translation>
         </message>
+        <message>
+            <source>network.popup.copyIp</source>
+            <extracomment>Stable Pedro key: network.popup.copyIp</extracomment>
+            <translation>Copiar dirección IP</translation>
+        </message>
+        <message>
+            <source>network.popup.ipCopied</source>
+            <extracomment>Stable Pedro key: network.popup.ipCopied</extracomment>
+            <translation>Dirección IP copiada</translation>
+        </message>
     </context>
 </TS>

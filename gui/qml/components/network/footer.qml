@@ -35,6 +35,7 @@ Rectangle {
             text: root.title
             color: Theme.white
             font.pixelSize: 13
+            font.weight: Font.Medium
             Layout.fillWidth: true
         }
 
