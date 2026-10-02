@@ -34,15 +34,15 @@ Item {
             spacing: 0
             Quick.Tile {
                 id: wifiTile
-                title: qsTranslate("Pedro", "network.wifi.title")
-                icon: "../../../assets/icons/wifi.svg"
+                title: Papi.networkConnection.type === "ethernet" ? "Ethernet" : Papi.networkConnection.type === "wifi" || (Papi.networkConnection.type === "none" && Papi.wifiAvailable) ? qsTranslate("Pedro", "network.wifi.title") : qsTranslate("Pedro", "network.connection.title")
+                icon: Papi.networkConnection.type === "ethernet" ? "../../../assets/icons/ethernet.svg" : "../../../assets/icons/wifi.svg"
                 symbolSize: 23
                 symbolOffsetY: 1
-                active: Papi.wifiEnabled
-                toggleable: true
+                active: Papi.networkConnection.type === "ethernet" || (Papi.wifiAvailable && Papi.wifiEnabled)
+                toggleable: Papi.wifiAvailable && (Papi.networkConnection.type === "wifi" || Papi.networkConnection.type === "none")
                 externallyManaged: true
-                subtitle: Papi.wifiConnected ? Papi.connectedWifiName + " · Conectado" : Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.status.disconnected") : qsTranslate("Pedro", "bluetooth.status.off")
-                statusColor: root.wifiConnected ? Theme.statusConnected : active ? Theme.statusActive : Theme.statusInactive
+                subtitle: Papi.networkConnection.type === "ethernet" ? Papi.networkConnection.name : !Papi.wifiAvailable ? qsTranslate("Pedro", "bluetooth.status.unavailableShort") : Papi.wifiConnected ? Papi.connectedWifiName + " · Conectado" : Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.status.disconnected") : qsTranslate("Pedro", "bluetooth.status.off")
+                statusColor: Papi.wifiConnected ? Theme.statusConnected : active ? Theme.statusActive : Theme.statusInactive
                 onToggleRequested: state => controller.setWifiEnabled(state)
                 onActivated: controller.requestWifi()
             }

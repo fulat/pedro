@@ -129,10 +129,10 @@ Item {
 
             TopAction {
                 id: wifiButton
-                icon: "../../assets/icons/wifi.svg"
-                description: qsTranslate("Pedro", "network.wifi.title")
+                icon: Backend.networkConnection.type === "ethernet" ? "../../assets/icons/ethernet.svg" : "../../assets/icons/wifi.svg"
+                description: Backend.networkConnection.type === "wifi" || (Backend.networkConnection.type === "none" && Backend.wifiAvailable) ? qsTranslate("Pedro", "network.wifi.title") : qsTranslate("Pedro", "network.connection.title")
                 highlighted: root.activeSource === "wifi"
-                onActivated: controller.requestPanel("wifi", "wifi", wifiButton)
+                onActivated: controller.requestPanel(Backend.networkConnection.type === "wifi" || (Backend.networkConnection.type === "none" && Backend.wifiAvailable) ? "wifi" : "network", "wifi", wifiButton)
             }
 
             Row {

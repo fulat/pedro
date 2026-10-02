@@ -58,6 +58,8 @@ La implementación de energía y Night Light debe ser la misma en Ubuntu develop
 
 ### System Configuration
 
+- [ ] **Network Connection UI** — parcial: PAPI detecta la conexión principal de NetworkManager por D-Bus/eventos y distingue Wi-Fi, Ethernet, otras redes y ausencia de conexión. La barra abre Wi-Fi o una vista de red con nombre real; Wi-Fi sin adaptador no se puede activar. Falta configuración completa de Ethernet y otros tipos de red.
+
 - [ ] **GSettings / dconf Integration** — parcial: aplicaciones usan GSettings para favoritos y el script de apariencia configura GNOME; falta exponer configuración general del sistema mediante PAPI/Settings.
 - [ ] **systemd-logind Integration** — sesiones/seats, suspensión, hibernación, reinicio, apagado y operaciones de login.
 - [ ] **System Logs / Diagnostics** — acceso estructurado a systemd-journald; las estadísticas de sistema existentes no implementan consulta del journal.

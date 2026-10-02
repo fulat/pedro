@@ -251,5 +251,7 @@
     "files.view.grid": "Grid",
     "files.view.list": "List",
     "files.view.columns": "Columns",
-    "files.view.mixed": "Mixed"
+    "files.view.mixed": "Mixed",
+    "network.connection.title": "Network",
+    "network.connection.none": "No active connection"
 }

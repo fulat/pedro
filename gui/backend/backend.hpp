@@ -20,6 +20,7 @@
 #include <pedro/papi/display/brightness/manager.h>
 #include <pedro/papi/audio/volume/manager.h>
 #include <pedro/papi/power/battery/manager.h>
+#include <pedro/papi/network/connection/manager.h>
 
 class Backend final : public QObject {
         Q_OBJECT
@@ -29,6 +30,7 @@ class Backend final : public QObject {
         Q_PROPERTY(QObject* screenBrightness READ screenBrightness CONSTANT)
         Q_PROPERTY(QObject* audioVolume READ audioVolume CONSTANT)
         Q_PROPERTY(QObject* battery READ battery CONSTANT)
+        Q_PROPERTY(QObject* networkConnection READ networkConnection CONSTANT)
         Q_PROPERTY(bool developmentMode READ developmentMode CONSTANT)
         Q_PROPERTY(QString hostname READ hostname NOTIFY systemChanged)
         Q_PROPERTY(QString kernel READ kernel NOTIFY systemChanged)
@@ -72,6 +74,8 @@ class Backend final : public QObject {
         QObject* audioVolume();
 
         QObject* battery();
+
+        QObject* networkConnection();
 
         [[nodiscard]] bool developmentMode() const;
         [[nodiscard]] QString hostname() const;
@@ -154,6 +158,7 @@ class Backend final : public QObject {
         Pedro::Papi::Display::Brightness::Manager brightness_;
         Pedro::Papi::Audio::Volume::Manager volume_;
         Pedro::Papi::Power::Battery::Manager battery_;
+        Pedro::Papi::Network::Connection::Manager connection_;
 
         QTimer refreshTimer_;
         QTimer applicationsRefreshTimer_;

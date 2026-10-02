@@ -251,5 +251,7 @@
     "files.view.grid": "Cuadrícula",
     "files.view.list": "Lista",
     "files.view.columns": "Columnas",
-    "files.view.mixed": "Mixta"
+    "files.view.mixed": "Mixta",
+    "network.connection.title": "Red",
+    "network.connection.none": "Sin conexión activa"
 }

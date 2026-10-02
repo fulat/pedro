@@ -1266,5 +1266,15 @@
             <extracomment>Stable Pedro key: files.view.mixed</extracomment>
             <translation>Mixed</translation>
         </message>
+        <message>
+            <source>network.connection.title</source>
+            <extracomment>Stable Pedro key: network.connection.title</extracomment>
+            <translation>Network</translation>
+        </message>
+        <message>
+            <source>network.connection.none</source>
+            <extracomment>Stable Pedro key: network.connection.none</extracomment>
+            <translation>No active connection</translation>
+        </message>
     </context>
 </TS>

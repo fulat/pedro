@@ -83,6 +83,10 @@ namespace {
 
 } // namespace
 
+QObject* Backend::networkConnection() {
+    return &connection_;
+}
+
 QObject* Backend::battery() {
     return &battery_;
 }
@@ -418,6 +422,10 @@ void Backend::refreshWifi() {
 }
 
 void Backend::setWifiEnabled(bool enabled) {
+    if (!wifiAvailable_) {
+        return;
+    }
+
     try {
         wifi_.setEnabled(enabled);
         refreshWifi();

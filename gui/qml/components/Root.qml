@@ -19,7 +19,7 @@ Rectangle {
     property string mode
     property int availableWidth
     property int availableHeight
-    readonly property bool controlMode: mode === "quick" || mode === "wifi" || mode === "bluetooth" || mode === "sound"
+    readonly property bool controlMode: mode === "quick" || mode === "wifi" || mode === "bluetooth" || mode === "sound" || mode === "network"
 
     signal closeRequested
     signal modeRequested(string mode)
@@ -91,7 +91,7 @@ Rectangle {
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: root.mode === "files" ? 1 : root.mode === "about" ? 2 : root.mode === "quick" ? 3 : root.mode === "wifi" ? 4 : root.mode === "bluetooth" ? 5 : root.mode === "sound" ? 6 : 0
+            currentIndex: root.mode === "files" ? 1 : root.mode === "about" ? 2 : root.mode === "quick" ? 3 : root.mode === "wifi" ? 4 : root.mode === "bluetooth" ? 5 : root.mode === "sound" ? 6 : root.mode === "network" ? 7 : 0
 
             System.View {}
             Files.View {}
@@ -107,7 +107,7 @@ Rectangle {
                     width: controlScroll.availableWidth
                     height: Math.max(controlScroll.availableHeight, implicitHeight)
                     onSettingsRequested: root.modeRequested("about")
-                    onWifiRequested: root.modeRequested("wifi")
+                    onWifiRequested: root.modeRequested(Backend.networkConnection.type === "wifi" || (Backend.networkConnection.type === "none" && Backend.wifiAvailable) ? "wifi" : "network")
                     onBluetoothRequested: root.modeRequested("bluetooth")
                 }
             }
@@ -120,6 +120,20 @@ Rectangle {
                 onDeviceRequested: name => control.notice = name
             }
             Sound.View {}
+            ColumnLayout {
+                Label {
+                    text: Backend.networkConnection.type === "ethernet" ? "Ethernet" : qsTranslate("Pedro", "network.connection.title")
+                    color: Theme.white
+                    font.pixelSize: 20
+                }
+                Label {
+                    text: Backend.networkConnection.name || qsTranslate("Pedro", "network.connection.none")
+                    color: Theme.textMuted
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                }
+                Item { Layout.fillHeight: true }
+            }
         }
     }
 }
