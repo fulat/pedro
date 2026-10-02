@@ -269,6 +269,7 @@ Item {
                     anchors.topMargin: 6
                     anchors.bottomMargin: 6
                     text: detail.revealable && root.ipRevealed && root.ipCopied ? qsTranslate("Pedro", "network.popup.ipCopied") : detail.value
+                    horizontalAlignment: detail.revealable && root.ipCopied ? TextEdit.AlignHCenter : TextEdit.AlignLeft
                     color: Theme.white
                     font.pixelSize: detail.revealable ? 13 : 14
                     font.weight: Font.Medium
