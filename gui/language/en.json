@@ -80,7 +80,7 @@
     "shell.display.connected": "Connected",
     "shell.display.disconnected": "Disconnected",
     "shell.display.pending": "Display detection is still pending",
-    "shell.display.title": "External display",
+    "shell.display.title": "Displays",
     "shell.focus.enabled": "On",
     "shell.focus.preview": "Focus mode is a preview",
     "shell.focus.title": "Focus mode",

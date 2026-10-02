@@ -411,7 +411,7 @@
         <message>
             <source>shell.display.title</source>
             <extracomment>Stable Pedro key: shell.display.title</extracomment>
-            <translation>Pantalla externa</translation>
+            <translation>Pantallas</translation>
         </message>
         <message>
             <source>shell.focus.enabled</source>
@@ -576,7 +576,7 @@
         <message>
             <source>shell.system.powerSaving.title</source>
             <extracomment>Stable Pedro key: shell.system.powerSaving.title</extracomment>
-            <translation>Ahorro de energía</translation>
+            <translation>Ahorro</translation>
         </message>
         <message>
             <source>system.errors.information</source>

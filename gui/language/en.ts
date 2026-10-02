@@ -411,7 +411,7 @@
         <message>
             <source>shell.display.title</source>
             <extracomment>Stable Pedro key: shell.display.title</extracomment>
-            <translation>External display</translation>
+            <translation>Displays</translation>
         </message>
         <message>
             <source>shell.focus.enabled</source>
