@@ -44,7 +44,7 @@ Item {
                         anchors.centerIn: parent
                         width: 28
                         height: 28
-                        source: "../../../assets/icons/network.svg"
+                        source: "../../../assets/icons/ethernet.svg"
                         tint: Theme.white
                     }
                 }
@@ -131,7 +131,7 @@ Item {
                 Detail {
                     title: qsTranslate("Pedro", "settings.network.connectionName")
                     value: Backend.networkConnection.name || "—"
-                    icon: "../../../assets/icons/ethernet.svg"
+                    icon: "../../../assets/icons/link.svg"
                 }
 
                 Rectangle {
