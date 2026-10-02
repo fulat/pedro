@@ -51,8 +51,8 @@ Item {
                 title: qsTranslate("Pedro", "bluetooth.title")
                 subtitle: !Papi.bluetoothAvailable ? qsTranslate("Pedro", "bluetooth.status.unavailableShort") : active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                 icon: "../../../assets/icons/bluetooth.svg"
-                active: Papi.bluetoothEnabled
-                toggleable: true
+                active: Papi.bluetoothAvailable && Papi.bluetoothEnabled
+                toggleable: Papi.bluetoothAvailable
                 externallyManaged: true
                 statusColor: active ? Theme.statusActive : Theme.statusInactive
                 onToggleRequested: state => controller.setBluetoothEnabled(state)

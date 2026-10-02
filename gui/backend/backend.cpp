@@ -490,6 +490,10 @@ void Backend::refreshBluetooth() {
 }
 
 void Backend::setBluetoothEnabled(bool enabled) {
+    if (!bluetoothAvailable_) {
+        return;
+    }
+
     try {
         bluetooth_.setEnabled(enabled);
         refreshBluetooth();

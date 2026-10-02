@@ -88,7 +88,8 @@ Item {
             }
 
             Toggle.Switch {
-                active: Papi.bluetoothEnabled
+                interactive: Papi.bluetoothAvailable
+                active: Papi.bluetoothAvailable && Papi.bluetoothEnabled
                 onToggled: state => Papi.setBluetoothEnabled(state)
             }
         }

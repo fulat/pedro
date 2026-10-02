@@ -98,7 +98,8 @@ Rectangle {
         }
 
         Toggle.Switch {
-            active: root.active
+            interactive: root.toggleable
+            active: root.toggleable && root.active
             onToggled: state => controller.setActive(state)
         }
 
