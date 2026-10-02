@@ -76,7 +76,7 @@ Item {
 
                 Controls.Label {
                     Layout.fillWidth: true
-                    text: Papi.wifiConnected ? Papi.connectedWifiName + " · Conectado" : Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.status.disconnected") : qsTranslate("Pedro", "bluetooth.status.off")
+                    text: !Papi.wifiAvailable ? qsTranslate("Pedro", "network.wifi.empty.unavailableTitle") : Papi.wifiConnected ? Papi.connectedWifiName : Papi.wifiEnabled ? qsTranslate("Pedro", "network.wifi.status.disconnected") : qsTranslate("Pedro", "bluetooth.status.off")
                     color: Papi.wifiConnected ? Theme.statusWifiConnected : Theme.textMuted
                     font.pixelSize: 9
                     elide: Text.ElideRight
@@ -85,7 +85,7 @@ Item {
 
             Toggle.Switch {
                 interactive: Papi.wifiAvailable
-                active: Papi.wifiEnabled
+                active: Papi.wifiAvailable && Papi.wifiEnabled
                 onToggled: state => Papi.setWifiEnabled(state)
             }
         }
@@ -119,7 +119,7 @@ Item {
             Controls.Button {
                 id: scanButton
 
-                enabled: !Papi.wifiScanning
+                enabled: Papi.wifiAvailable && Papi.wifiEnabled && !Papi.wifiScanning
                 text: Papi.wifiScanning ? qsTranslate("Pedro", "common.searching") : qsTranslate("Pedro", "common.search")
                 onClicked: controller.scanRequested()
 
@@ -247,59 +247,7 @@ Item {
                     wrapMode: Text.Wrap
                 }
 
-                Rectangle {
-                    id: settingsButton
 
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: 8
-                    Layout.preferredWidth: 218
-                    Layout.preferredHeight: 40
-                    radius: height / 2
-                    color: Theme.cardSurface
-                    border.width: 1
-                    border.color: Theme.buttonBorder
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: parent.radius
-                        color: settingsMouse.pressed ? Theme.overlayPressed : settingsMouse.containsMouse ? Theme.overlayHover : "transparent"
-                    }
-
-                    RowLayout {
-                        anchors.centerIn: parent
-                        spacing: 9
-
-                        Icon.Tinted {
-                            source: "../../../assets/icons/settings.svg"
-                            Layout.preferredWidth: 18
-                            Layout.preferredHeight: 18
-                            tint: Theme.white
-                        }
-
-                        Controls.Label {
-                            text: qsTranslate("Pedro", "network.settings.title")
-                            color: Theme.white
-                            font.pixelSize: 11
-                            font.weight: Font.Medium
-                        }
-
-                        Controls.Label {
-                            text: "↗"
-                            color: Theme.white
-                            font.pixelSize: 17
-                            font.weight: Font.Medium
-                        }
-                    }
-
-                    MouseArea {
-                        id: settingsMouse
-
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.settingsRequested()
-                    }
-                }
             }
 
             Controls.BusyIndicator {
@@ -319,6 +267,18 @@ Item {
                 color: Theme.textMuted
                 font.pixelSize: 10
             }
+        }
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 1
+            color: Theme.buttonBorder
+        }
+
+        Loader {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 44
+            source: "../network/footer.qml"
+            onLoaded: item.activated.connect(root.settingsRequested)
         }
     }
 }

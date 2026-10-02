@@ -27,7 +27,7 @@ Rectangle {
 
     visible: mode !== ""
     width: Math.min(mode === "quick" ? 368 : controlMode ? 352 : 320, availableWidth - 24)
-    height: Math.min(mode === "quick" ? 604 : mode === "wifi" ? 460 : mode === "bluetooth" ? 460 : mode === "sound" ? 84 : 380, availableHeight - 20)
+    height: Math.min(mode === "quick" ? 604 : mode === "wifi" ? 460 : mode === "bluetooth" ? 460 : mode === "sound" ? 84 : mode === "network" ? 230 : 380, availableHeight - 20)
 
     Behavior on height {
         NumberAnimation {
@@ -89,12 +89,6 @@ Rectangle {
             }
         }
 
-        Button {
-            visible: root.mode === "wifi" || root.mode === "network"
-            text: qsTranslate("Pedro", "settings.network.openSettings")
-            onClicked: root.networkSettingsRequested()
-        }
-
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -119,6 +113,7 @@ Rectangle {
                 }
             }
             Wifi.View {
+                onSettingsRequested: root.networkSettingsRequested()
                 onBackRequested: root.modeRequested("quick")
             }
             Bluetooth.View {
@@ -127,19 +122,9 @@ Rectangle {
                 onDeviceRequested: name => control.notice = name
             }
             Sound.View {}
-            ColumnLayout {
-                Label {
-                    text: Backend.networkConnection.type === "ethernet" ? "Ethernet" : qsTranslate("Pedro", "network.connection.title")
-                    color: Theme.white
-                    font.pixelSize: 20
-                }
-                Label {
-                    text: Backend.networkConnection.name || qsTranslate("Pedro", "network.connection.none")
-                    color: Theme.textMuted
-                    Layout.fillWidth: true
-                    wrapMode: Text.Wrap
-                }
-                Item { Layout.fillHeight: true }
+            Loader {
+                source: "network/popup.qml"
+                onLoaded: item.settingsRequested.connect(root.networkSettingsRequested)
             }
         }
     }

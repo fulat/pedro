@@ -2,6 +2,10 @@
 
 Ventana propia de Pedro accesible mediante «Network Settings…» en los menús de red y desde el botón de ajustes del control center. Reutiliza `window/frame.qml`: controles de ventana, movimiento y resize existentes, Liquid frosted y superficie oscura de transparencia moderada. La ventana existente se vuelve a presentar al abrir ajustes, conservando su navegación.
 
+## Popup de acceso rápido
+
+El icono de red de la barra superior abre un popup, no la ventana Settings. Según la conexión detectada, muestra Wi-Fi o Ethernet. Ethernet presenta estado y nombre reales; Wi-Fi conserva su interruptor, búsqueda y lista de redes. Ambos muestran siempre al pie el acceso a Network Settings, separado por una línea sutil. La configuración extensa permanece en la ventana Settings. Conectar a una red Wi-Fi desde la lista todavía requiere integrar activación y credenciales mediante PAPI/NetworkManager.
+
 ## Navegación
 
 ```text
