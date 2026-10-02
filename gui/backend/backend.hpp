@@ -18,6 +18,7 @@
 #include <memory>
 #include <pedro/papi/config/store.hpp>
 #include <pedro/papi/display/brightness/manager.h>
+#include <pedro/papi/audio/volume/manager.h>
 
 class Backend final : public QObject {
         Q_OBJECT
@@ -25,6 +26,7 @@ class Backend final : public QObject {
         QML_SINGLETON
         Q_PROPERTY(QAbstractItemModel* desktopModel READ desktopModel CONSTANT)
         Q_PROPERTY(QObject* screenBrightness READ screenBrightness CONSTANT)
+        Q_PROPERTY(QObject* audioVolume READ audioVolume CONSTANT)
         Q_PROPERTY(bool developmentMode READ developmentMode CONSTANT)
         Q_PROPERTY(QString hostname READ hostname NOTIFY systemChanged)
         Q_PROPERTY(QString kernel READ kernel NOTIFY systemChanged)
@@ -64,6 +66,8 @@ class Backend final : public QObject {
         QAbstractItemModel* desktopModel();
 
         QObject* screenBrightness();
+
+        QObject* audioVolume();
 
         [[nodiscard]] bool developmentMode() const;
         [[nodiscard]] QString hostname() const;
@@ -144,6 +148,7 @@ class Backend final : public QObject {
         Pedro::Papi::Bluetooth::Manager bluetooth_;
 
         Pedro::Papi::Display::Brightness::Manager brightness_;
+        Pedro::Papi::Audio::Volume::Manager volume_;
 
         QTimer refreshTimer_;
         QTimer applicationsRefreshTimer_;

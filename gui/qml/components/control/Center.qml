@@ -79,7 +79,9 @@ Item {
             Slider.Tile {
                 title: qsTranslate("Pedro", "shell.sound.title")
                 icon: "../../../assets/icons/speaker.svg"
-                level: 0.62
+                interactive: Papi.audioVolume.available
+                level: Papi.audioVolume.muted ? 0 : Papi.audioVolume.value / 100
+                onLevelMoved: value => Papi.audioVolume.setValue(Math.round(value * 100))
             }
         }
 

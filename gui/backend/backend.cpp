@@ -83,6 +83,10 @@ namespace {
 
 } // namespace
 
+QObject* Backend::audioVolume() {
+    return &volume_;
+}
+
 QObject* Backend::screenBrightness() {
     return &brightness_;
 }
