@@ -48,7 +48,7 @@ Item {
 
     Timer {
         id: revealTimer
-        interval: 5000
+        interval: 2000
         onTriggered: root.hideIp()
     }
 
