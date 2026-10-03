@@ -27,7 +27,7 @@ Rectangle {
 
     visible: mode !== ""
     implicitWidth: Math.max(0, Math.min(mode === "network" ? 300 : mode === "quick" ? 328 : controlMode ? 304 : mode === "system" ? 288 : 320, availableWidth - 24))
-    implicitHeight: Math.max(0, Math.min(mode === "quick" ? control.implicitHeight + 24 : mode === "wifi" ? wifi.implicitHeight + 24 : mode === "bluetooth" ? bluetooth.implicitHeight + 24 : mode === "sound" ? 76 : mode === "network" ? 270 : mode === "system" ? 288 : mode === "notifications" || mode === "calendar" ? 180 : 380, availableHeight - 20))
+    implicitHeight: Math.max(0, Math.min(mode === "quick" ? control.implicitHeight + 24 : mode === "wifi" ? wifi.implicitHeight + 24 : mode === "bluetooth" ? bluetooth.implicitHeight + 24 : mode === "sound" ? 76 : mode === "network" ? 254 : mode === "system" ? 288 : mode === "notifications" || mode === "calendar" ? 180 : 380, availableHeight - 20))
 
     width: implicitWidth
     height: implicitHeight

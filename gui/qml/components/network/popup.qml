@@ -76,24 +76,22 @@ Item {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.leftMargin: 2
-                anchors.rightMargin: 12
-                spacing: 18
+                spacing: 12
 
                 Rectangle {
-                    Layout.minimumWidth: 40
-                    Layout.maximumWidth: 40
-                    Layout.preferredWidth: 40
-                    Layout.preferredHeight: 40
-                    radius: 20
+                    Layout.minimumWidth: 34
+                    Layout.maximumWidth: 34
+                    Layout.preferredWidth: 34
+                    Layout.preferredHeight: 34
+                    radius: 17
                     color: Theme.cardSurface
                     border.width: 1
                     border.color: root.connected ? Theme.cardBorderStrong : Theme.cardBorder
 
                     Icon.Tinted {
                         anchors.centerIn: parent
-                        width: 23
-                        height: 23
+                        width: 22
+                        height: 22
                         source: "../../../assets/icons/ethernet.svg"
                         tint: Theme.white
                     }
@@ -101,7 +99,7 @@ Item {
 
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 6
+                    spacing: 1
 
                     Label {
                         Layout.fillWidth: true
@@ -116,16 +114,16 @@ Item {
                         spacing: 6
 
                         Rectangle {
-                            implicitWidth: 9
-                            implicitHeight: 9
-                            radius: 4.5
+                            implicitWidth: 7
+                            implicitHeight: 7
+                            radius: 3.5
                             color: root.connected ? "#20dda1" : Theme.textMuted
                         }
 
                         Label {
                             text: qsTranslate("Pedro", root.connected ? "settings.network.connected" : "settings.network.disconnected")
                             color: Theme.textMuted
-                            font.pixelSize: 13
+                            font.pixelSize: 11
                             font.weight: Font.Medium
                         }
                     }
@@ -135,15 +133,15 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.topMargin: 10
-            Layout.bottomMargin: 10
+            Layout.topMargin: 4
+            Layout.bottomMargin: 4
             implicitHeight: 1
             color: "#18ffffff"
         }
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 120
+            Layout.preferredHeight: 112
             radius: 18
             color: "#0fffffff"
             border.color: "#24ffffff"
@@ -211,8 +209,8 @@ Item {
         Icon.Tinted {
             source: detail.icon
             tint: Theme.white
-            Layout.preferredWidth: 22
-            Layout.preferredHeight: 22
+            Layout.preferredWidth: 20
+            Layout.preferredHeight: 20
         }
 
         function copyAddress() {
@@ -240,7 +238,7 @@ Item {
                 bottomPadding: 0
                 text: detail.title
                 color: Theme.textMuted
-                font.pixelSize: 12
+                font.pixelSize: 11
                 font.weight: Font.Medium
             }
 
@@ -273,7 +271,7 @@ Item {
                     text: detail.revealable && root.ipRevealed && root.ipCopied ? qsTranslate("Pedro", "network.popup.ipCopied") : detail.value
                     horizontalAlignment: detail.revealable && root.ipCopied ? TextEdit.AlignHCenter : TextEdit.AlignLeft
                     color: Theme.white
-                    font.pixelSize: detail.revealable ? 13 : 14
+                    font.pixelSize: detail.revealable ? 12 : 13
                     font.weight: Font.Medium
                     font.family: detail.revealable ? "monospace" : Qt.font({}).family
                     font.letterSpacing: detail.revealable ? 0.6 : 0
