@@ -39,13 +39,14 @@ ApplicationWindow {
     readonly property real dockTileSize: applicationController.dockTileSize
     readonly property real dockSpacing: applicationController.dockSpacing
 
-    flags: Qt.Window | Qt.WindowStaysOnBottomHint
+    flags: Qt.Window | Qt.WindowStaysOnBottomHint | (Backend.developmentMode ? 0 : Qt.FramelessWindowHint)
     title: qsTranslate("Pedro", "shell.productName")
-    visibility: Backend.developmentMode ? Window.Windowed : Window.FullScreen
+    // Cover the screen without fullscreen focus/occlusion semantics.
+    visibility: Window.Windowed
     color: Theme.desktopBackground
     visible: true
-    width: Backend.developmentMode ? developmentWidth : Constants.DEVELOPMENT_WIDTH
-    height: Backend.developmentMode ? developmentHeight : Constants.DEVELOPMENT_HEIGHT
+    width: Backend.developmentMode ? developmentWidth : Screen.width
+    height: Backend.developmentMode ? developmentHeight : Screen.height
     minimumWidth: Backend.developmentMode ? Constants.MINIMUM_WIDTH : 0
     minimumHeight: Backend.developmentMode ? Constants.MINIMUM_HEIGHT : 0
 
