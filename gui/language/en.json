@@ -350,5 +350,8 @@
     "capture.none": "None",
     "capture.defaultMicrophone": "System microphone",
     "capture.microphoneNote": "Audio recording coming soon",
-    "capture.close": "Close"
+    "capture.close": "Close",
+    "capture.microphones": "Microphones",
+    "capture.pointer": "Pointer",
+    "capture.audio": "Audio"
 }

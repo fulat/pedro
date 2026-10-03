@@ -8,6 +8,7 @@
 #include <QQuickWindow>
 #include <QTest>
 
+#include <functional>
 #include <iostream>
 #include <memory>
 
@@ -103,11 +104,58 @@ int main(int argc, char** argv) {
     if (manager.captured != QRect(285, 220, 500, 350)) {
         return 1;
     }
+    for (const auto& mode : {QStringLiteral("Screen"), QStringLiteral("Area"), QStringLiteral("Image"), QStringLiteral("Video")}) {
+        auto* button = item->findChild<QQuickItem*>("capture" + mode);
+        if (!button) {
+            std::cerr << "FAIL: mode lookup " << mode.toStdString() << "\n";
+            return 1;
+        }
+        const auto point = button->mapToScene(QPointF(button->width() / 2, button->height() / 2)).toPoint();
+        QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, point);
+        QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, point);
+        if (!button->property("checked").toBool()) {
+            std::cerr << "FAIL: repeated mode selection\n";
+            return 1;
+        }
+    }
     auto* options = item->findChild<QObject*>("captureOptions");
     if (!options || !QMetaObject::invokeMethod(options, "open")) {
         return 1;
     }
     QTest::qWait(50);
+    std::function<QQuickItem*(QQuickItem*, const QString&)> findEntry = [&](QQuickItem* parent, const QString& name) -> QQuickItem* {
+        if (parent->objectName() == name) {
+            return parent;
+        }
+        for (auto* child : parent->childItems()) {
+            if (auto* found = findEntry(child, name)) {
+                return found;
+            }
+        }
+        return nullptr;
+    };
+    auto* timer = findEntry(window.contentItem(), QStringLiteral("captureTimer10"));
+    if (!timer) {
+        std::cerr << "FAIL: timer lookup\n";
+        return 1;
+    }
+    QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, timer->mapToScene(QPointF(timer->width() / 2, timer->height() / 2)).toPoint());
+    if (item->property("delay").toInt() != 10 || !options->property("visible").toBool()) {
+        std::cerr << "FAIL: persistent options selection\n";
+        return 1;
+    }
+    auto* microphones = item->findChild<QObject*>("captureMicrophones");
+    auto* microphoneEntry = findEntry(window.contentItem(), QStringLiteral("captureMicrophonesEntry"));
+    if (!microphones || !microphoneEntry) {
+        return 1;
+    }
+    QTest::mouseMove(&window, microphoneEntry->mapToScene(QPointF(microphoneEntry->width() / 2, microphoneEntry->height() / 2)).toPoint());
+    QTest::qWait(400);
+    if (!microphones->property("visible").toBool()) {
+        std::cerr << "FAIL: microphones hover submenu\n";
+        return 1;
+    }
+    QMetaObject::invokeMethod(microphones, "close");
     QMetaObject::invokeMethod(options, "close");
     QTest::qWait(150);
     auto* toolbar = item->findChild<QQuickItem*>("captureToolbar");
@@ -125,7 +173,7 @@ int main(int argc, char** argv) {
     if (manager.shown) {
         return 1;
     }
-    std::cout << "PASS: all four edges, corner resizing, moving and minimum selection size, monitor geometry, toolbar drag and Escape\n";
+    std::cout << "PASS: all four edges, corner resizing, moving and minimum selection size, monitor geometry, toolbar drag, exclusive modes, persistent options, microphone hover and Escape\n";
 }
 
 #include "resize.moc"

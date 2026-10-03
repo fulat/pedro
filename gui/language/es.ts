@@ -1761,5 +1761,20 @@
             <extracomment>Stable Pedro key: capture.close</extracomment>
             <translation>Cerrar</translation>
         </message>
+        <message>
+            <source>capture.microphones</source>
+            <extracomment>Stable Pedro key: capture.microphones</extracomment>
+            <translation>Micrófonos</translation>
+        </message>
+        <message>
+            <source>capture.pointer</source>
+            <extracomment>Stable Pedro key: capture.pointer</extracomment>
+            <translation>Cursor</translation>
+        </message>
+        <message>
+            <source>capture.audio</source>
+            <extracomment>Stable Pedro key: capture.audio</extracomment>
+            <translation>Audio</translation>
+        </message>
     </context>
 </TS>

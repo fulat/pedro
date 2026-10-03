@@ -173,36 +173,40 @@ Item {
                 }
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 30; color: Theme.dividerSoft }
                 Action {
+                    objectName: "captureScreen"
                     text: qsTranslate("Pedro", "capture.screen")
                     symbol: "../../../assets/icons/capture/screen.svg"
                     showText: true
                     stacked: true
-                    checkable: true; checked: !root.area
+                    checked: !root.area
                     onClicked: root.area = false
                 }
                 Action {
+                    objectName: "captureArea"
                     text: qsTranslate("Pedro", "capture.area")
                     symbol: "../../../assets/icons/selection.svg"
                     showText: true
                     stacked: true
-                    checkable: true; checked: root.area
+                    checked: root.area
                     onClicked: root.area = true
                 }
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
                 Action {
+                    objectName: "captureImage"
                     text: qsTranslate("Pedro", "capture.image")
                     symbol: "../../../assets/icons/capture/camera.svg"
                     showText: true
                     stacked: true
-                    checkable: true; checked: !root.video
+                    checked: !root.video
                     onClicked: root.video = false
                 }
                 Action {
+                    objectName: "captureVideo"
                     text: qsTranslate("Pedro", "capture.video")
                     symbol: "../../../assets/icons/capture/video.svg"
                     showText: true
                     stacked: true
-                    checkable: true; checked: root.video
+                    checked: root.video
                     onClicked: root.video = true
                 }
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
@@ -221,41 +225,46 @@ Item {
                             model: [0, 3, 5, 10]
                             delegate: Option {
                                 required property int modelData
+                                objectName: "captureTimer" + modelData
                                 text: modelData === 0 ? qsTranslate("Pedro", "capture.noDelay") : modelData + " s"
                                 checkable: true
                                 checked: root.delay === modelData
-                                onTriggered: root.delay = modelData
+                                onChosen: root.delay = modelData
                             }
                         }
-                        MenuSeparator {}
+                        Divider {}
+                        Heading { text: qsTranslate("Pedro", "capture.pointer") }
                         Option {
                             text: qsTranslate("Pedro", "capture.cursor")
                             checkable: true
                             checked: root.cursor
-                            onTriggered: root.cursor = !root.cursor
+                            onChosen: root.cursor = !root.cursor
                         }
-                        MenuSeparator {}
-                        Menu {
-                            title: qsTranslate("Pedro", "capture.microphone")
+                        Divider {}
+                        Heading { text: qsTranslate("Pedro", "capture.audio") }
+                        GlassMenu {
+                            objectName: "captureMicrophones"
+                            title: qsTranslate("Pedro", "capture.microphones")
                             width: 250
                             padding: 6
                             popupType: Popup.Item
                             background: Components.Liquid { backdrop: root.backdrop; frosted: true; cornerRadius: 12 }
                             delegate: Option {}
                             Heading { text: qsTranslate("Pedro", "capture.preview") }
-                            Option { text: qsTranslate("Pedro", "capture.none"); checkable: true; checked: !root.microphone; onTriggered: root.microphone = false }
-                            Option { text: qsTranslate("Pedro", "capture.defaultMicrophone"); checkable: true; checked: root.microphone; onTriggered: root.microphone = true }
-                            MenuSeparator {}
+                            Option { text: qsTranslate("Pedro", "capture.none"); checkable: true; checked: !root.microphone; onChosen: root.microphone = false }
+                            Option { microphoneIcon: true; text: qsTranslate("Pedro", "capture.defaultMicrophone"); checkable: true; checked: root.microphone; onChosen: root.microphone = true }
+                            Divider {}
                             Heading { text: qsTranslate("Pedro", "capture.microphoneNote") }
                         }
                     }
                 }
                 Action {
                     text: root.video ? qsTranslate("Pedro", "capture.record") : qsTranslate("Pedro", "capture.take")
-                    symbol: root.video ? "../../../assets/icons/capture/video.svg" : "../../../assets/icons/capture/camera.svg"
+                    symbol: root.video ? "../../../assets/icons/capture/record.svg" : "../../../assets/icons/capture/camera.svg"
                     showText: true
                     accent: true
-                    Layout.preferredWidth: 132
+                    Layout.preferredWidth: 124
+                    Layout.preferredHeight: 40
                     enabled: !root.capture.busy
                     onClicked: root.submit()
                 }
@@ -293,26 +302,56 @@ Item {
     component Heading: MenuItem {
         id: heading
         enabled: false
-        implicitHeight: 30
-        contentItem: Text { text: heading.text; color: Theme.textMuted; font.pixelSize: 11; wrapMode: Text.WordWrap }
+        implicitHeight: 32
+        leftPadding: 12
+        topPadding: 8
+        contentItem: Text { text: heading.text; color: Theme.textMuted; font.pixelSize: 12; font.weight: Font.DemiBold; wrapMode: Text.WordWrap }
         background: Item {}
+    }
+
+    component Divider: MenuSeparator {
+        topPadding: 6
+        bottomPadding: 6
+        contentItem: Rectangle { implicitHeight: 1; color: Theme.dividerBright }
     }
 
     component Option: MenuItem {
         id: option
+        property bool microphoneIcon: false
+        objectName: subMenu ? "captureMicrophonesEntry" : ""
+        signal chosen()
+        hoverEnabled: true
+        Keys.onSpacePressed: event => { if (!subMenu) { chosen(); event.accepted = true; } }
+        Keys.onReturnPressed: event => { if (!subMenu) { chosen(); event.accepted = true; } }
+        MouseArea {
+            id: optionMouse
+            anchors.fill: parent
+            enabled: !option.subMenu
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: option.chosen()
+        }
         implicitHeight: 34
         leftPadding: 12
         rightPadding: 12
         indicator: Item {}
         arrow: Item {}
         contentItem: Item {
-            Text { anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter; text: option.text; color: Theme.white; font.pixelSize: 13 }
+            Text { anchors.left: parent.left; anchors.leftMargin: option.microphoneIcon || option.subMenu ? 27 : 0; anchors.verticalCenter: parent.verticalCenter; text: option.text; color: Theme.white; font.pixelSize: 13 }
             Icon.Tinted {
-                visible: !!option.subMenu
-                anchors.right: parent.right
+                visible: option.microphoneIcon || !!option.subMenu
+                anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 width: 18; height: 18
                 source: "../../../assets/icons/capture/microphone.svg"
+            }
+            Text {
+                visible: !!option.subMenu
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                text: "›"
+                font.pixelSize: 22
+                color: Theme.textMuted
             }
             Rectangle {
                 visible: option.checkable
@@ -325,7 +364,7 @@ Item {
                 Rectangle { anchors.centerIn: parent; width: 6; height: 6; radius: 3; visible: option.checked; color: Theme.textMuted }
             }
         }
-        background: Rectangle { radius: 6; color: option.hovered || option.highlighted ? "#18ffffff" : "transparent" }
+        background: Rectangle { radius: 6; color: optionMouse.containsMouse || option.hovered || option.highlighted ? "#18ffffff" : "transparent" }
     }
 
     component Action: Button {
@@ -335,6 +374,7 @@ Item {
         property bool accent: false
         property bool stacked: false
         property bool circular: false
+        hoverEnabled: true
         Accessible.name: text
         contentItem: Item {
             implicitWidth: action.stacked ? Math.max(label.implicitWidth, 64) : (action.symbol.toString().length > 0 ? 25 : 0) + (action.showText ? label.implicitWidth : 0)
@@ -362,10 +402,10 @@ Item {
         background: Rectangle {
             implicitWidth: action.stacked ? action.contentItem.implicitWidth + 16 : action.showText ? action.contentItem.implicitWidth + 22 : 36
             implicitHeight: action.stacked ? 46 : 36
-            radius: action.circular || action.accent ? height / 2 : 11
+            radius: action.circular ? height / 2 : action.accent ? 12 : 11
             border.width: action.accent || action.circular ? 1 : 0
-            border.color: Theme.cardBorderStrong
-            color: action.down ? "#26ffffff" : action.checked ? "#18ffffff" : action.hovered ? "#14ffffff" : action.accent || action.circular ? "#0cffffff" : "transparent"
+            border.color: action.accent ? (action.hovered ? "#88ffffff" : "#55ffffff") : Theme.cardBorderStrong
+            color: action.down ? "#32ffffff" : action.hovered ? "#26ffffff" : action.accent ? "#24ffffff" : action.checked ? "#18ffffff" : action.circular ? "#0cffffff" : "transparent"
             Behavior on color { ColorAnimation { duration: 100 } }
         }
         ToolTip.visible: hovered && !showText
