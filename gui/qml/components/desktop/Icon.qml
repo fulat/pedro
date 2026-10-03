@@ -13,7 +13,7 @@ Item {
     Image {
         visible: desktopIcon.kind === "notes" || desktopIcon.kind === "file"
         anchors.fill: parent
-        source: "../../../assets/icons/document.svg"
+        source: "image://icons/original/document.svg"
         sourceSize: Qt.size(Math.ceil(desktopIcon.width * Math.max(1, Screen.devicePixelRatio) * 2),
             Math.ceil(desktopIcon.height * Math.max(1, Screen.devicePixelRatio) * 2))
         fillMode: Image.PreserveAspectFit
