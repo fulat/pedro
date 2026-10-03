@@ -1666,5 +1666,15 @@
             <extracomment>Stable Pedro key: keyboard.configuration.pending</extracomment>
             <translation>La configuración de teclado estará disponible aquí.</translation>
         </message>
+        <message>
+            <source>shell.capture.title</source>
+            <extracomment>Stable Pedro key: shell.capture.title</extracomment>
+            <translation>Captura</translation>
+        </message>
+        <message>
+            <source>shell.capture.subtitle</source>
+            <extracomment>Stable Pedro key: shell.capture.subtitle</extracomment>
+            <translation>Imagen o vídeo</translation>
+        </message>
     </context>
 </TS>

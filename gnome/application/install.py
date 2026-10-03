@@ -15,7 +15,10 @@ def main():
     uuid = 'applications@pedro'
     destination = data / 'gnome-shell/extensions' / uuid
     destination.mkdir(parents=True, exist_ok=True)
-    for name in ('extension.js', 'metadata.json'):
+    files = ('extension.js', 'metadata.json')
+    changed = any((destination / name).is_file() and (destination / name).read_bytes() !=
+        (Path(__file__).parent / name).read_bytes() for name in files)
+    for name in files:
         shutil.copyfile(Path(__file__).parent / name, destination / name)
     settings = Gio.Settings.new('org.gnome.shell')
     enabled = settings.get_strv('enabled-extensions')
@@ -33,6 +36,8 @@ def main():
     print(f'Installed: {destination}')
     if result.returncode != 0 or 'true' not in result.stdout:
         print('GNOME must discover the new extension: log out and back in once.')
+    if changed:
+        print('Updated GNOME integration: log out and back in to load the new code.')
     if settings.get_boolean('disable-user-extensions'):
         print('GNOME user extensions are disabled; enable them to use this integration.')
 

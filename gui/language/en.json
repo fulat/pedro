@@ -331,5 +331,7 @@
     "shell.battery.title": "Battery",
     "keyboard.settings": "Keyboard Settings",
     "keyboard.empty": "No keyboards configured",
-    "keyboard.configuration.pending": "Keyboard configuration will be available here."
+    "keyboard.configuration.pending": "Keyboard configuration will be available here.",
+    "shell.capture.title": "Capture",
+    "shell.capture.subtitle": "Screenshot or video"
 }

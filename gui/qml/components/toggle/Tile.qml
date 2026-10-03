@@ -18,6 +18,7 @@ Rectangle {
     property color inactiveColor: Theme.white
     property color symbolColor: root.active ? root.activeColor : root.inactiveColor
 
+    property bool navigable: true
     property bool active: false
     property bool toggleable: Papi.bluetoothAvailable
 
@@ -74,6 +75,7 @@ Rectangle {
             }
         }
         Icon.Tinted {
+            visible: root.navigable
             source: "../../../assets/icons/chevron.svg"
             Layout.preferredWidth: 7
             Layout.preferredHeight: 11

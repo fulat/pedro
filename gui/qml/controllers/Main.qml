@@ -7,6 +7,11 @@ QtObject {
     id: root
     required property var view
 
+    property Timer captureTransition: Timer {
+        interval: 100
+        onTriggered: Backend.capture.open()
+    }
+
     property Timer menuTransition: Timer {
         interval: 100
         property string menuMode
@@ -122,6 +127,11 @@ QtObject {
         item.availableWidth = Qt.binding(() => view.width);
         item.availableHeight = Qt.binding(() => view.height - topBar.barHeight);
         item.closeRequested.connect(view.controller.closePanel);
+        item.captureRequested.connect(() => {
+            menuTransition.stop();
+            view.controller.closePanel();
+            captureTransition.restart();
+        });
         item.modeRequested.connect(mode => view.panelMode = mode);
         item.topMenuRequested.connect(mode => {
             const bluetooth = mode === "bluetooth";

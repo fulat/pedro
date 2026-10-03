@@ -25,6 +25,7 @@ Rectangle {
     signal closeRequested
     signal modeRequested(string mode)
     signal topMenuRequested(string mode)
+    signal captureRequested()
 
     visible: mode !== ""
     implicitWidth: Math.max(0, Math.min(mode === "battery" ? 240 : mode === "network" ? 300 : mode === "quick" ? 352 : controlMode ? 304 : mode === "system" ? 288 : 320, availableWidth - 24))
@@ -119,6 +120,7 @@ Rectangle {
                     height: Math.max(controlScroll.availableHeight, implicitHeight)
                     onSettingsRequested: root.networkSettingsRequested()
                     onWifiRequested: root.topMenuRequested(Backend.networkConnection.type === "wifi" || (Backend.networkConnection.type === "none" && Backend.wifiAvailable) ? "wifi" : "network")
+                    onCaptureRequested: root.captureRequested()
                     onKeyboardRequested: root.modeRequested("keyboard")
                     onBluetoothRequested: root.topMenuRequested("bluetooth")
                 }

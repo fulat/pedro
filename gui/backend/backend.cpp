@@ -95,6 +95,10 @@ QObject* Backend::powerSaving() {
     return &profile_;
 }
 
+QObject* Backend::capture() {
+    return &capture_;
+}
+
 QObject* Backend::keyboard() {
     return &keyboard_;
 }

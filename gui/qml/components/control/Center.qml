@@ -16,6 +16,7 @@ Item {
     readonly property bool wifiConnected: Papi.wifiConnected
     signal settingsRequested
     signal wifiRequested
+    signal captureRequested
     signal keyboardRequested
     signal bluetoothRequested
 
@@ -131,6 +132,7 @@ Item {
                 Toggle.Tile {
                     Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.focus.title")
+                    navigable: false
                     subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: active ? "../../../assets/icons/crescent.svg" : "../../../assets/icons/moon.svg"
                     activeColor: Theme.focusActive
@@ -142,6 +144,7 @@ Item {
                 Toggle.Tile {
                     Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.system.powerSaving.title")
+                    navigable: false
                     subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/leaf.svg"
                     activeColor: Theme.batteryHealthy
@@ -161,6 +164,7 @@ Item {
                 Toggle.Tile {
                     Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.nightLight.title")
+                    navigable: false
                     subtitle: active ? qsTranslate("Pedro", "shell.nightLight.automatic") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/brightness.svg"
                     active: Papi.nightLight.active
@@ -181,10 +185,13 @@ Item {
                 Toggle.Tile {
                     Layout.preferredHeight: 48
                     symbolColor: Theme.controlSymbol
-                    title: qsTranslate("Pedro", "shell.camera.title")
-                    subtitle: active ? qsTranslate("Pedro", "shell.camera.enabled") : qsTranslate("Pedro", "shell.camera.disabled")
+                    title: qsTranslate("Pedro", "shell.capture.title")
+                    navigable: false
+                    toggleable: false
+                    enabled: !Papi.capture.busy
+                    subtitle: qsTranslate("Pedro", "shell.capture.subtitle")
                     icon: "../../../assets/icons/camera.svg"
-                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.camera.pending"))
+                    onActivated: root.captureRequested()
                 }
             }
 
@@ -201,6 +208,15 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             color: Theme.overlayPressed
+        }
+
+        Text {
+            Layout.fillWidth: true
+            visible: Papi.capture.error.length > 0
+            text: Papi.capture.error
+            color: Theme.textMuted
+            font.pixelSize: 12
+            wrapMode: Text.WordWrap
         }
 
         Media.Card {

@@ -17,3 +17,5 @@ make gnome
 La primera instalación requiere cerrar sesión y volver a entrar para que GNOME descubra la extensión. No reiniciar ni reemplazar el compositor desde Pedro. El instalador respeta XDG_DATA_HOME y conserva las demás extensiones. Actualizaciones del JavaScript también pueden requerir una nueva sesión. La metadata declara la versión de GNOME verificada; versiones futuras requieren revisar compatibilidad.
 
 Esta integración pertenece a la experiencia overlay GNOME. El pipeline actual de imagen con compositor propio tiene otra arquitectura y no se modifica ni se considera equivalente a esta sesión.
+
+`SetCaptureVisible(b) → b` abre o cierra la barra nativa de captura de GNOME. Reutiliza `Main.screenshotUI` con sus opciones de imagen y grabación; no toma capturas ni inicia grabaciones automáticamente. PAPI `Gui::Capture::Manager::open()` hace la solicitud asíncrona después de cerrar el menú de Pedro.
