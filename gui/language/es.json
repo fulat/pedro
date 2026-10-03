@@ -328,5 +328,8 @@
     "shell.notifications.empty": "No hay notificaciones",
     "shell.calendar.title": "Calendario",
     "shell.calendar.pending": "Calendario próximamente",
-    "shell.battery.title": "Batería"
+    "shell.battery.title": "Batería",
+    "keyboard.settings": "Ajustes de teclado",
+    "keyboard.empty": "No hay teclados configurados",
+    "keyboard.configuration.pending": "La configuración de teclado estará disponible aquí."
 }

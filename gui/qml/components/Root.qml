@@ -19,7 +19,7 @@ Rectangle {
     property string mode
     property int availableWidth
     property int availableHeight
-    readonly property bool controlMode: mode === "quick" || mode === "wifi" || mode === "bluetooth" || mode === "sound" || mode === "network"
+    readonly property bool controlMode: mode === "quick" || mode === "wifi" || mode === "bluetooth" || mode === "sound" || mode === "network" || mode === "keyboard" || mode === "keyboardSettings"
 
     signal networkSettingsRequested
     signal closeRequested
@@ -27,7 +27,7 @@ Rectangle {
 
     visible: mode !== ""
     implicitWidth: Math.max(0, Math.min(mode === "battery" ? 240 : mode === "network" ? 300 : mode === "quick" ? 352 : controlMode ? 304 : mode === "system" ? 288 : 320, availableWidth - 24))
-    implicitHeight: Math.max(0, Math.min(mode === "battery" ? 140 : mode === "quick" ? control.implicitHeight + 24 : mode === "wifi" ? wifi.implicitHeight + 24 : mode === "bluetooth" ? bluetooth.implicitHeight + 24 : mode === "sound" ? 76 : mode === "network" ? 254 : mode === "system" ? 288 : mode === "notifications" || mode === "calendar" ? 180 : 380, availableHeight - 20))
+    implicitHeight: Math.max(0, Math.min(mode === "battery" ? 140 : mode === "quick" ? control.implicitHeight + 24 : mode === "wifi" ? wifi.implicitHeight + 24 : mode === "bluetooth" ? bluetooth.implicitHeight + 24 : mode === "sound" ? 76 : mode === "keyboard" ? keyboard.item ? keyboard.item.implicitHeight + 24 : 240 : mode === "keyboardSettings" ? 260 : mode === "network" ? 254 : mode === "system" ? 288 : mode === "notifications" || mode === "calendar" ? 180 : 380, availableHeight - 20))
 
     width: implicitWidth
     height: implicitHeight
@@ -101,7 +101,7 @@ Rectangle {
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: root.mode === "files" ? 1 : root.mode === "about" ? 2 : root.mode === "quick" ? 3 : root.mode === "wifi" ? 4 : root.mode === "bluetooth" ? 5 : root.mode === "sound" ? 6 : root.mode === "network" ? 7 : root.mode === "notifications" ? 8 : root.mode === "calendar" ? 9 : root.mode === "battery" ? 10 : 0
+            currentIndex: root.mode === "files" ? 1 : root.mode === "about" ? 2 : root.mode === "quick" ? 3 : root.mode === "wifi" ? 4 : root.mode === "bluetooth" ? 5 : root.mode === "sound" ? 6 : root.mode === "network" ? 7 : root.mode === "notifications" ? 8 : root.mode === "calendar" ? 9 : root.mode === "battery" ? 10 : root.mode === "keyboard" ? 11 : root.mode === "keyboardSettings" ? 12 : 0
 
             System.View {}
             Files.View {}
@@ -118,6 +118,7 @@ Rectangle {
                     height: Math.max(controlScroll.availableHeight, implicitHeight)
                     onSettingsRequested: root.networkSettingsRequested()
                     onWifiRequested: root.modeRequested(Backend.networkConnection.type === "wifi" || (Backend.networkConnection.type === "none" && Backend.wifiAvailable) ? "wifi" : "network")
+                    onKeyboardRequested: root.modeRequested("keyboard")
                     onBluetoothRequested: root.modeRequested("bluetooth")
                 }
             }
@@ -155,6 +156,21 @@ Rectangle {
                 wrapMode: Text.Wrap
             }
             Item {}
+            Loader {
+                id: keyboard
+                source: "keyboard/view.qml"
+                onLoaded: {
+                    item.backRequested.connect(() => root.modeRequested("quick"));
+                    item.settingsRequested.connect(() => root.modeRequested("keyboardSettings"));
+                }
+            }
+            Loader {
+                source: "keyboard/view.qml"
+                onLoaded: {
+                    item.configuration = true;
+                    item.backRequested.connect(() => root.modeRequested("keyboard"));
+                }
+            }
         }
     }
 }

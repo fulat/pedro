@@ -1651,5 +1651,20 @@
             <extracomment>Stable Pedro key: shell.battery.title</extracomment>
             <translation>Battery</translation>
         </message>
+        <message>
+            <source>keyboard.settings</source>
+            <extracomment>Stable Pedro key: keyboard.settings</extracomment>
+            <translation>Keyboard Settings</translation>
+        </message>
+        <message>
+            <source>keyboard.empty</source>
+            <extracomment>Stable Pedro key: keyboard.empty</extracomment>
+            <translation>No keyboards configured</translation>
+        </message>
+        <message>
+            <source>keyboard.configuration.pending</source>
+            <extracomment>Stable Pedro key: keyboard.configuration.pending</extracomment>
+            <translation>Keyboard configuration will be available here.</translation>
+        </message>
     </context>
 </TS>

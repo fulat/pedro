@@ -93,6 +93,7 @@ packages=(
     # PAPI controls system audio through wpctl and watches changes with pw-mon.
     wireplumber pipewire-bin
     libwayland-dev wayland-protocols libxkbcommon-dev libegl-dev
+    xkb-data
     qt6-qpa-plugins qt6-wayland qgnomeplatform-qt6
     qml6-module-qtqml qml6-module-qtqml-workerscript
     qml6-module-qtquick qml6-module-qtquick-window

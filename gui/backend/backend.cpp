@@ -95,6 +95,10 @@ QObject* Backend::powerSaving() {
     return &profile_;
 }
 
+QObject* Backend::keyboard() {
+    return &keyboard_;
+}
+
 QObject* Backend::nightLight() {
     return &night_;
 }

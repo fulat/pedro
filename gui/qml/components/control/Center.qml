@@ -16,6 +16,7 @@ Item {
     readonly property bool wifiConnected: Papi.wifiConnected
     signal settingsRequested
     signal wifiRequested
+    signal keyboardRequested
     signal bluetoothRequested
 
     // Connects control-center actions to backend and navigation behavior.
@@ -171,11 +172,11 @@ Item {
                 Toggle.Tile {
                     Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.keyboard.title")
-                    subtitle: qsTranslate("Pedro", "shell.keyboard.layout")
+                    subtitle: Papi.keyboard.layouts.length > 0 ? Papi.keyboard.layouts[0].name : qsTranslate("Pedro", "keyboard.empty")
                     icon: "../../../assets/icons/keyboard.svg"
                     active: true
                     toggleable: false
-                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.keyboard.pending"))
+                    onActivated: root.keyboardRequested()
                 }
                 Toggle.Tile {
                     Layout.preferredHeight: 48
