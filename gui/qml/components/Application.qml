@@ -66,6 +66,12 @@ ApplicationWindow {
         onLoaded: window.configureFilesWindow(item)
     }
 
+    function captureWindows() {
+        return [filesWindowLoader].concat(folderWindows)
+            .map(loader => loader.item)
+            .filter(item => item && item.visible && item.visibility !== Window.Minimized);
+    }
+
     function configureFilesWindow(item) {
         item.objectName = "filesQuickWindow";
         item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));

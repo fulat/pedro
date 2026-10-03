@@ -353,5 +353,8 @@
     "capture.close": "Cerrar",
     "capture.microphones": "Micrófonos",
     "capture.pointer": "Cursor",
-    "capture.audio": "Audio"
+    "capture.audio": "Audio",
+    "capture.window": "Ventana",
+    "capture.chooseWindow": "Elige un Quick Window",
+    "capture.noWindows": "Abre un Quick Window primero"
 }

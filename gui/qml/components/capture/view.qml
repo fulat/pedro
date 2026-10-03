@@ -14,6 +14,9 @@ Item {
     property point screenOrigin
     property rect screenGeometry: Qt.rect(Screen.virtualX, Screen.virtualY, Screen.width, Screen.height)
     property rect region: Qt.rect(width * 0.25, height * 0.25, width * 0.5, height * 0.5)
+    property var quickWindows: []
+    property var selectedWindow: null
+    property bool windowMode: false
     property bool area: true
     property bool video: false
     property bool cursor: false
@@ -25,18 +28,22 @@ Item {
     Keys.onEscapePressed: capture.close()
 
     function submit() {
-        const selected = area ? Qt.rect(screenOrigin.x + region.x, screenOrigin.y + region.y, region.width, region.height) : screenGeometry;
+        if (windowMode && (!selectedWindow || !selectedWindow.visible)) {
+            windows.open();
+            return;
+        }
+        const selected = windowMode ? Qt.rect(selectedWindow.x, selectedWindow.y, selectedWindow.width, selectedWindow.height) : area ? Qt.rect(screenOrigin.x + region.x, screenOrigin.y + region.y, region.width, region.height) : screenGeometry;
         capture.take(Qt.rect(Math.round(selected.x), Math.round(selected.y), Math.round(selected.width), Math.round(selected.height)), video, cursor, delay);
     }
 
     MouseArea {
         anchors.fill: parent
         visible: root.capture.visible
-        cursorShape: root.area ? Qt.CrossCursor : Qt.ArrowCursor
+        cursorShape: root.area && !root.windowMode ? Qt.CrossCursor : Qt.ArrowCursor
         property point start
         onPressed: mouse => { start = Qt.point(mouse.x, mouse.y); }
         onPositionChanged: mouse => {
-            if (pressed && root.area) {
+            if (pressed && root.area && !root.windowMode) {
                 const x = Math.max(0, Math.min(start.x, mouse.x));
                 const y = Math.max(0, Math.min(start.y, mouse.y));
                 root.region = Qt.rect(x, y, Math.max(24, Math.min(root.width, Math.max(start.x, mouse.x)) - x), Math.max(24, Math.min(root.height, Math.max(start.y, mouse.y)) - y));
@@ -46,7 +53,7 @@ Item {
 
     Item {
         id: selection
-        visible: root.capture.visible && root.area
+        visible: root.capture.visible && root.area && !root.windowMode
         x: root.region.x
         y: root.region.y
         width: root.region.width
@@ -173,25 +180,6 @@ Item {
                 }
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 30; color: Theme.dividerSoft }
                 Action {
-                    objectName: "captureScreen"
-                    text: qsTranslate("Pedro", "capture.screen")
-                    symbol: "../../../assets/icons/capture/screen.svg"
-                    showText: true
-                    stacked: true
-                    checked: !root.area
-                    onClicked: root.area = false
-                }
-                Action {
-                    objectName: "captureArea"
-                    text: qsTranslate("Pedro", "capture.area")
-                    symbol: "../../../assets/icons/selection.svg"
-                    showText: true
-                    stacked: true
-                    checked: root.area
-                    onClicked: root.area = true
-                }
-                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
-                Action {
                     objectName: "captureImage"
                     text: qsTranslate("Pedro", "capture.image")
                     symbol: "../../../assets/icons/capture/camera.svg"
@@ -208,6 +196,57 @@ Item {
                     stacked: true
                     checked: root.video
                     onClicked: root.video = true
+                }
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
+                Action {
+                    objectName: "captureScreen"
+                    text: qsTranslate("Pedro", "capture.screen")
+                    symbol: "../../../assets/icons/capture/screen.svg"
+                    showText: true
+                    stacked: true
+                    checked: !root.area && !root.windowMode
+                    onClicked: { root.windowMode = false; root.area = false; }
+                }
+                Action {
+                    objectName: "captureArea"
+                    text: qsTranslate("Pedro", "capture.area")
+                    symbol: "../../../assets/icons/selection.svg"
+                    showText: true
+                    stacked: true
+                    checked: root.area && !root.windowMode
+                    onClicked: { root.windowMode = false; root.area = true; }
+                }
+                Action {
+                    objectName: "captureWindow"
+                    text: qsTranslate("Pedro", "capture.window")
+                    symbol: "../../../assets/icons/capture/window.svg"
+                    showText: true
+                    stacked: true
+                    checked: root.windowMode
+                    onClicked: windows.open()
+                    GlassMenu {
+                        id: windows
+                        objectName: "captureWindows"
+                        y: -height - 8
+                        Heading { text: qsTranslate("Pedro", "capture.chooseWindow") }
+                        Heading { visible: root.quickWindows.length === 0; text: qsTranslate("Pedro", "capture.noWindows") }
+                        Repeater {
+                            model: root.quickWindows
+                            delegate: Option {
+                                required property var modelData
+                                text: modelData.controller && modelData.controller.directory && modelData.controller.directory.path
+                                    ? modelData.controller.directory.path.split("/").filter(part => part.length).pop() || modelData.title
+                                    : modelData.title
+                                checkable: true
+                                checked: root.windowMode && root.selectedWindow === modelData
+                                onChosen: {
+                                    root.selectedWindow = modelData;
+                                    root.windowMode = true;
+                                    windows.close();
+                                }
+                            }
+                        }
+                    }
                 }
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
                 Action {
@@ -265,7 +304,7 @@ Item {
                     circular: true
                     Layout.preferredWidth: 42
                     Layout.preferredHeight: 42
-                    enabled: !root.capture.busy
+                    enabled: !root.capture.busy && (!root.windowMode || (root.selectedWindow && root.selectedWindow.visible))
                     onClicked: root.submit()
                 }
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 30; color: Theme.dividerSoft }

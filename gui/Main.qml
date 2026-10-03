@@ -462,6 +462,7 @@ Components.Application {
         source: "qml/components/capture/view.qml"
         onLoaded: {
             item.capture = Backend.capture;
+            item.quickWindows = Qt.binding(() => main.captureWindows());
             item.backdrop = wallpaper;
             item.screenOrigin = Qt.binding(() => Qt.point(main.x, main.y));
         }

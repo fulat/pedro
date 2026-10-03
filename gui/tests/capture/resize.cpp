@@ -104,6 +104,14 @@ int main(int argc, char** argv) {
     if (manager.captured != QRect(285, 220, 500, 350)) {
         return 1;
     }
+    item->setProperty("selectedWindow", QVariant::fromValue(static_cast<QObject*>(&window)));
+    item->setProperty("windowMode", true);
+    QMetaObject::invokeMethod(item.get(), "submit");
+    if (manager.captured != QRect(window.x(), window.y(), window.width(), window.height())) {
+        std::cerr << "FAIL: selected window geometry\n";
+        return 1;
+    }
+    item->setProperty("windowMode", false);
     for (const auto& mode : {QStringLiteral("Screen"), QStringLiteral("Area"), QStringLiteral("Image"), QStringLiteral("Video")}) {
         auto* button = item->findChild<QQuickItem*>("capture" + mode);
         if (!button) {

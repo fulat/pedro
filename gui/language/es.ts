@@ -1776,5 +1776,20 @@
             <extracomment>Stable Pedro key: capture.audio</extracomment>
             <translation>Audio</translation>
         </message>
+        <message>
+            <source>capture.window</source>
+            <extracomment>Stable Pedro key: capture.window</extracomment>
+            <translation>Ventana</translation>
+        </message>
+        <message>
+            <source>capture.chooseWindow</source>
+            <extracomment>Stable Pedro key: capture.chooseWindow</extracomment>
+            <translation>Elige un Quick Window</translation>
+        </message>
+        <message>
+            <source>capture.noWindows</source>
+            <extracomment>Stable Pedro key: capture.noWindows</extracomment>
+            <translation>Abre un Quick Window primero</translation>
+        </message>
     </context>
 </TS>
