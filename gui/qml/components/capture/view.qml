@@ -12,6 +12,7 @@ Item {
     property var capture: Backend.capture
     property Item backdrop
     property point screenOrigin
+    property rect screenGeometry: Qt.rect(Screen.virtualX, Screen.virtualY, Screen.width, Screen.height)
     property rect region: Qt.rect(width * 0.25, height * 0.25, width * 0.5, height * 0.5)
     property bool area: true
     property bool video: false
@@ -23,8 +24,8 @@ Item {
     Keys.onEscapePressed: capture.close()
 
     function submit() {
-        const selected = area ? region : Qt.rect(0, 0, width, height);
-        capture.take(Qt.rect(Math.round(screenOrigin.x + selected.x), Math.round(screenOrigin.y + selected.y), Math.round(selected.width), Math.round(selected.height)), video, cursor, delay);
+        const selected = area ? Qt.rect(screenOrigin.x + region.x, screenOrigin.y + region.y, region.width, region.height) : screenGeometry;
+        capture.take(Qt.rect(Math.round(selected.x), Math.round(selected.y), Math.round(selected.width), Math.round(selected.height)), video, cursor, delay);
     }
 
     MouseArea {
@@ -130,74 +131,138 @@ Item {
 
     Rectangle {
         id: toolbar
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 28
+        objectName: "captureToolbar"
+        x: (root.width - width) / 2
+        y: root.height - height - 28
         width: Math.min(root.width - 24, controls.implicitWidth + 24)
-        height: controls.implicitHeight + 20
+        height: contents.implicitHeight + 20
         radius: 20
         color: "transparent"
         Components.Liquid { anchors.fill: parent; backdrop: root.backdrop; frosted: true; cornerRadius: 20 }
         Rectangle { anchors.fill: parent; radius: 20; color: Theme.menuBackground; opacity: 0.55 }
-        RowLayout {
-            id: controls
-            anchors.centerIn: parent
-            spacing: 6
-            Action {
-                visible: !root.capture.recording
-                text: "×"
-                onClicked: root.capture.close()
-            }
-            Action {
-                visible: !root.capture.recording
-                text: qsTranslate("Pedro", "capture.screen")
-                checkable: true; checked: !root.area
-                onClicked: root.area = false
-            }
-            Action {
-                visible: !root.capture.recording
-                text: qsTranslate("Pedro", "capture.area")
-                checkable: true; checked: root.area
-                onClicked: root.area = true
-            }
-            Rectangle { visible: !root.capture.recording; Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
-            Action {
-                visible: !root.capture.recording
-                text: root.video ? qsTranslate("Pedro", "capture.video") : qsTranslate("Pedro", "capture.image")
-                onClicked: root.video = !root.video
-            }
-            Action {
-                visible: !root.capture.recording
-                text: qsTranslate("Pedro", "capture.options")
-                onClicked: options.open()
-                Menu {
-                    id: options
-                    y: -height - 8
-                    background: Rectangle {
-                        implicitWidth: 190
-                        radius: 14
-                        color: Theme.menuBackground
-                        border.color: Theme.cardBorder
+
+        ColumnLayout {
+            id: contents
+            anchors.fill: parent
+            anchors.margins: 10
+            spacing: 8
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 26
+                RowLayout {
+                    anchors.fill: parent
+                    spacing: 8
+                    Item {
+                        Layout.preferredWidth: 14
+                        Layout.preferredHeight: 14
+                        Repeater {
+                            model: 6
+                            delegate: Rectangle {
+                                required property int index
+                                x: index % 2 * 6
+                                y: Math.floor(index / 2) * 5
+                                width: 2
+                                height: 2
+                                radius: 1
+                                color: Theme.statusInactive
+                            }
+                        }
                     }
-                    MenuItem { palette.text: Theme.white; text: qsTranslate("Pedro", "capture.cursor"); checkable: true; checked: root.cursor; onTriggered: root.cursor = !root.cursor }
-                    MenuSeparator {}
-                    Repeater {
-                        model: [0, 3, 5]
-                        delegate: MenuItem {
-                            palette.text: Theme.white
-                            required property int modelData
-                            text: modelData === 0 ? qsTranslate("Pedro", "capture.noDelay") : modelData + " s"
-                            checkable: true; checked: root.delay === modelData
-                            onTriggered: root.delay = modelData
+                    Text {
+                        Layout.fillWidth: true
+                        text: (root.area ? qsTranslate("Pedro", "capture.area") : qsTranslate("Pedro", "capture.screen")) + " · " + Math.round(root.area ? root.region.width : root.screenGeometry.width) + " × " + Math.round(root.area ? root.region.height : root.screenGeometry.height)
+                        color: Theme.textMuted
+                        font.pixelSize: 11
+                    }
+                    Text {
+                        text: root.delay > 0 ? root.delay + " s" : ""
+                        color: Theme.textMuted
+                        font.pixelSize: 11
+                    }
+                    Action {
+                        text: "×"
+                        showText: true
+                        Layout.preferredWidth: 26
+                        Layout.preferredHeight: 26
+                        onClicked: root.capture.close()
+                    }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.rightMargin: 34
+                    cursorShape: Qt.SizeAllCursor
+                    drag.target: toolbar
+                    drag.minimumX: 12
+                    drag.maximumX: Math.max(12, root.width - toolbar.width - 12)
+                    drag.minimumY: 12
+                    drag.maximumY: Math.max(12, root.height - toolbar.height - 12)
+                }
+            }
+            RowLayout {
+                id: controls
+                Layout.alignment: Qt.AlignHCenter
+                spacing: 5
+                Action {
+                    text: qsTranslate("Pedro", "capture.screen")
+                    symbol: "../../../assets/icons/display.svg"
+                    checkable: true; checked: !root.area
+                    onClicked: root.area = false
+                }
+                Action {
+                    text: qsTranslate("Pedro", "capture.area")
+                    symbol: "../../../assets/icons/selection.svg"
+                    checkable: true; checked: root.area
+                    onClicked: root.area = true
+                }
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
+                Action {
+                    text: qsTranslate("Pedro", "capture.image")
+                    symbol: "../../../assets/icons/image.svg"
+                    checkable: true; checked: !root.video
+                    onClicked: root.video = false
+                }
+                Action {
+                    text: qsTranslate("Pedro", "capture.video")
+                    symbol: "../../../assets/icons/video.svg"
+                    checkable: true; checked: root.video
+                    onClicked: root.video = true
+                }
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
+                Action {
+                    text: qsTranslate("Pedro", "capture.options")
+                    symbol: "../../../assets/icons/settings.svg"
+                    onClicked: options.open()
+                    Menu {
+                        id: options
+                        y: -height - 8
+                        background: Rectangle {
+                            implicitWidth: 190
+                            radius: 14
+                            color: Theme.menuBackground
+                            border.color: Theme.cardBorder
+                        }
+                        MenuItem { palette.text: Theme.white; text: qsTranslate("Pedro", "capture.cursor"); checkable: true; checked: root.cursor; onTriggered: root.cursor = !root.cursor }
+                        MenuSeparator {}
+                        Repeater {
+                            model: [0, 3, 5]
+                            delegate: MenuItem {
+                                palette.text: Theme.white
+                                required property int modelData
+                                text: modelData === 0 ? qsTranslate("Pedro", "capture.noDelay") : modelData + " s"
+                                checkable: true; checked: root.delay === modelData
+                                onTriggered: root.delay = modelData
+                            }
                         }
                     }
                 }
-            }
-            Action {
-                text: root.capture.recording ? qsTranslate("Pedro", "capture.stop") : root.video ? qsTranslate("Pedro", "capture.record") : qsTranslate("Pedro", "capture.take")
-                enabled: !root.capture.busy
-                onClicked: root.capture.recording ? root.capture.stop() : root.submit()
-                background: Rectangle { implicitWidth: Math.max(72, parent.contentItem.implicitWidth + 20); implicitHeight: 36; radius: 12; color: root.capture.recording ? Theme.notificationMuted : Theme.overlayPressed }
+                Action {
+                    text: root.video ? qsTranslate("Pedro", "capture.record") : qsTranslate("Pedro", "capture.take")
+                    symbol: root.video ? "../../../assets/icons/video.svg" : "../../../assets/icons/image.svg"
+                    showText: true
+                    accent: true
+                    enabled: !root.capture.busy
+                    onClicked: root.submit()
+                }
             }
         }
     }
@@ -215,20 +280,43 @@ Item {
 
     component Action: Button {
         id: action
-        contentItem: Text {
-            text: action.text
-            color: Theme.white
-            font.pixelSize: 12
-            font.weight: Font.Medium
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+        property url symbol
+        property bool showText: false
+        property bool accent: false
+        Accessible.name: text
+        contentItem: Item {
+            implicitWidth: row.implicitWidth
+            implicitHeight: 20
+            RowLayout {
+                id: row
+                anchors.centerIn: parent
+                spacing: 7
+                Icon.Tinted {
+                    visible: action.symbol.toString().length > 0
+                    source: action.symbol
+                    Layout.preferredWidth: 18
+                    Layout.preferredHeight: 18
+                }
+                Text {
+                    visible: action.showText
+                    text: action.text
+                    color: Theme.white
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                }
+            }
         }
         background: Rectangle {
-            implicitWidth: Math.max(34, action.contentItem.implicitWidth + 20)
+            implicitWidth: action.showText ? action.contentItem.implicitWidth + 22 : 36
             implicitHeight: 36
-            radius: 12
-            color: action.down || action.checked ? Theme.overlayPressed : action.hovered ? Theme.overlayHover : "transparent"
+            radius: 11
+            border.width: action.accent ? 1 : 0
+            border.color: Theme.cardBorderStrong
+            color: action.down || action.checked ? Theme.overlayPressed : action.hovered || action.accent ? Theme.overlayHover : "transparent"
         }
+        ToolTip.visible: hovered && !showText
+        ToolTip.delay: 400
+        ToolTip.text: text
         HoverHandler { cursorShape: action.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
     }
 }
