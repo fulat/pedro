@@ -59,14 +59,18 @@ Rectangle {
                 color: Theme.white
                 font.pixelSize: root.title.length > 16 ? 12 : 13
                 font.weight: Font.Medium
-                elide: Text.ElideRight
+                fontSizeMode: Text.HorizontalFit
+                minimumPixelSize: 10
+                elide: Text.ElideNone
+                wrapMode: Text.WordWrap
             }
             Label {
                 Layout.fillWidth: true
                 text: root.subtitle
                 color: Theme.textMuted
                 font.pixelSize: 12
-                elide: Text.ElideRight
+                elide: Text.ElideNone
+                wrapMode: Text.WordWrap
             }
         }
         Icon.Tinted {
