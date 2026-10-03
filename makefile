@@ -1,11 +1,10 @@
-# Thin developer interface. CMake owns the build and image pipeline.
-# The image pipeline stages Linux ownership and therefore runs through sudo.
+# CMake owns compilation and the OS image pipeline.
 BUILD_DIR := build
-CACHE_FILE := $(BUILD_DIR)/CMakeCache.txt
-DEV_BUILD_DIR := $(BUILD_DIR)/dev
-DEV_CACHE_FILE := $(DEV_BUILD_DIR)/CMakeCache.txt
-GUI_EXECUTABLE := $(DEV_BUILD_DIR)/gui/pedro-gui
-COMPOSITOR_BUILD_DIR := $(BUILD_DIR)/compositor
+GUI_BUILD_DIR := $(BUILD_DIR)/dev
+FULL_BUILD_DIR := $(BUILD_DIR)/all
+GUI_EXECUTABLE := $(GUI_BUILD_DIR)/gui/pedro-gui
+JOBS ?= 4
+DEV_CMAKE_ARGS ?=
 
 ifeq ($(shell id -u),0)
 SUDO :=
@@ -13,67 +12,53 @@ else
 SUDO := sudo
 endif
 
-DEV_CMAKE_ARGS ?=
-
 .DEFAULT_GOAL := image
+.PHONY: help setup gnome host-check config build gui-config gui-build gui dev qml diagnose compositor image-config stage verify image clean
 
-.PHONY: help setup host-check configure dev-configure gui-configure gui-build gui GUI dev start qml diagnose compositor build stage verify image clean
 help:
-	@echo "make            Build build/images/pedro.img"
-	@echo "make setup      Install Pedro development dependencies on Ubuntu"
-	@echo "make start      Incrementally build and launch the Ubuntu-native GUI"
-	@echo "make dev        Same as make start"
-	@echo "make GUI        Same as make start"
-	@echo "make gui-build  Build only PAPI and the GUI in build/dev"
-	@echo "make gnome      Install Pedro application activation in GNOME"
-	@echo "make gui        Same as make start"
-	@echo "make qml        Relaunch the existing binary with QML loaded from source"
-	@echo "make diagnose   Launch the GUI and print display/rendering diagnostics"
-	@echo "make compositor | build | stage | verify | image | clean"
+	@echo "make gui | dev   Compile and open the GUI"
+	@echo "make gui-config  Configure GUI development in build/dev"
+	@echo "make gui-build   Compile PAPI and GUI only"
+	@echo "make config      Configure all development components in build/all"
+	@echo "make build       Compile PAPI, GUI, compositor and installer"
+	@echo "make qml         Open the existing GUI binary with source QML"
+	@echo "make diagnose    Compile and open the GUI with rendering diagnostics"
+	@echo "make compositor  Compile and run the compositor"
+	@echo "make setup       Install Ubuntu development dependencies"
+	@echo "make gnome       Install the Pedro GNOME integration"
+	@echo "make image       Build build/images/pedro.img (also the default)"
+	@echo "make image-config | stage | verify | clean"
+
 setup:
 	./setup.sh
 
-.PHONY: gnome
 gnome:
 	python3 gnome/application/install.py
 
-host-check:
-	@if test "$$(uname -s)" != Linux; then \
-		echo "Pedro images require a native Linux host. Run make in Ubuntu/Linux, not macOS."; \
+# $(1): output directory; $(2): privilege prefix; $(3): CMake options.
+# Never silently delete a build directory belonging to a different checkout.
+define configure
+	@if test -f "$(1)/CMakeCache.txt" && ! grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$(CURDIR)" "$(1)/CMakeCache.txt"; then \
+		echo "$(1) belongs to a different source path; clean that directory before continuing."; \
 		exit 1; \
 	fi
+	$(2) cmake -S . -B "$(1)" -G Ninja $(3)
+endef
 
-configure: host-check
-	@if test -f "$(CACHE_FILE)" && ! grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$(CURDIR)" "$(CACHE_FILE)"; then \
-		echo "Removing stale build cache created for a different source path."; \
-		$(SUDO) rm -rf "$(BUILD_DIR)"; \
-	fi
-	$(SUDO) cmake -S . -B "$(BUILD_DIR)" -G Ninja -DPEDRO_BUILD_IMAGE=ON
+gui-config:
+	$(call configure,$(GUI_BUILD_DIR),,-DPEDRO_BUILD_IMAGE=OFF -DPEDRO_BUILD_COMPOSITOR=OFF -DPEDRO_BUILD_INSTALLER=OFF $(DEV_CMAKE_ARGS))
 
-dev-configure:
-	@if test -f "$(DEV_CACHE_FILE)" && ! grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$(CURDIR)" "$(DEV_CACHE_FILE)"; then \
-		echo "build/dev belongs to a different source path; remove it before continuing."; \
-		exit 1; \
-	fi
-	cmake -S . -B "$(DEV_BUILD_DIR)" -G Ninja \
-		-DPEDRO_BUILD_IMAGE=OFF \
-		-DPEDRO_BUILD_COMPOSITOR=OFF \
-		-DPEDRO_BUILD_INSTALLER=OFF \
-		$(DEV_CMAKE_ARGS)
+gui-build: gui-config
+	cmake --build "$(GUI_BUILD_DIR)" --target pedro_gui --parallel $(JOBS)
 
-gui-configure: dev-configure
+gui dev: gui-config
+	cmake --build "$(GUI_BUILD_DIR)" --target pedro-gui-run --parallel $(JOBS)
 
-gui-build: dev-configure
-	cmake --build "$(DEV_BUILD_DIR)" --target pedro_gui --parallel 4
+config:
+	$(call configure,$(FULL_BUILD_DIR),,-DPEDRO_BUILD_IMAGE=OFF -DPEDRO_BUILD_COMPOSITOR=ON -DPEDRO_BUILD_INSTALLER=ON $(DEV_CMAKE_ARGS))
 
-gui: gui-build
-	cmake --build "$(DEV_BUILD_DIR)" --target pedro-gui-run
-
-dev: gui
-
-start: gui
-
-GUI: gui
+build: config
+	cmake --build "$(FULL_BUILD_DIR)" --parallel $(JOBS)
 
 qml:
 	@test -x "$(GUI_EXECUTABLE)" || { echo "Run 'make gui-build' once before 'make qml'."; exit 1; }
@@ -83,22 +68,21 @@ diagnose: gui-build
 	PEDRO_DEVELOPMENT_MODE=1 PEDRO_RENDER_DIAGNOSTICS=1 QSG_INFO=1 \
 		PEDRO_QML_DIR="$(CURDIR)/gui" "$(GUI_EXECUTABLE)"
 
-compositor:
-	cmake -S . -B "$(COMPOSITOR_BUILD_DIR)" -G Ninja \
-		-DPEDRO_BUILD_IMAGE=OFF -DPEDRO_BUILD_COMPOSITOR=ON -DPEDRO_BUILD_INSTALLER=OFF
-	cmake --build "$(COMPOSITOR_BUILD_DIR)" --target pedro_compositor
-	"$(COMPOSITOR_BUILD_DIR)/compositor/pedro-compositor"
-build: configure
-	$(SUDO) cmake --build "$(BUILD_DIR)" --parallel 4
+compositor: config
+	cmake --build "$(FULL_BUILD_DIR)" --target pedro_compositor --parallel $(JOBS)
+	"$(FULL_BUILD_DIR)/compositor/pedro-compositor"
 
-stage: configure
-	$(SUDO) cmake --build "$(BUILD_DIR)" --target pedro-stage --parallel 4
+host-check:
+	@if test "$$(uname -s)" != Linux; then \
+		echo "Pedro images require a native Linux host. Run make in Ubuntu/Linux, not macOS."; \
+		exit 1; \
+	fi
 
-verify: configure
-	$(SUDO) cmake --build "$(BUILD_DIR)" --target pedro-verify --parallel 4
+image-config: host-check
+	$(call configure,$(BUILD_DIR),$(SUDO),-DPEDRO_BUILD_IMAGE=ON -DPEDRO_BUILD_COMPOSITOR=ON -DPEDRO_BUILD_INSTALLER=ON)
 
-image: configure
-	$(SUDO) cmake --build "$(BUILD_DIR)" --target pedro-image --parallel 4
+stage verify image: image-config
+	$(SUDO) cmake --build "$(BUILD_DIR)" --target pedro-$@ --parallel $(JOBS)
 
 clean:
 	$(SUDO) rm -rf "$(BUILD_DIR)"

@@ -126,4 +126,4 @@ cmake -S "$sourceDirectory" \
     -DPEDRO_BUILD_IMAGE=OFF \
     -DPEDRO_BUILD_COMPOSITOR=ON \
     -DPEDRO_BUILD_INSTALLER=ON
-echo "Pedro development dependencies are ready. Run 'make start' for the GUI or 'make' for the image."
+echo "Pedro development dependencies are ready. Run 'make gui' for the GUI or 'make' for the image."

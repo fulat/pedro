@@ -11,7 +11,7 @@ OS image pipeline:
 
 ```sh
 make setup
-make start
+make gui
 ```
 
 `make setup` runs `setup.sh` on Ubuntu. It updates APT, enables `universe`
@@ -24,12 +24,14 @@ development packages. It resolves the complete package list before installing,
 then verifies the CMake dependencies for GUI, PAPI, compositor, and installer
 in `build/setup`, with the image pipeline disabled. It does not access `core/`.
 
-`make start` configures `build/dev` with `PEDRO_BUILD_IMAGE=OFF`, incrementally
+`make gui` configures `build/dev` with `PEDRO_BUILD_IMAGE=OFF`, incrementally
 builds PAPI and `pedro-gui`, and launches the GUI in a desktop window. It does
 not need root, read or copy `core/`, stage a root filesystem, or build an image.
 It uses Ubuntu's standard Qt 6 CMake packages, so no Qt path variable is needed.
-`make dev`, `make GUI`, and `make gui` are equivalent aliases. `make gui-build`
-performs the build without launching.
+`make dev` runs the same GUI development loop. `make gui-config` configures it,
+and `make gui-build` compiles it without launching. `make config` and `make build`
+configure and compile all development components (PAPI, GUI, compositor, installer)
+in `build/all`, with the image pipeline disabled.
 
 During development the executable loads `gui/Main.qml` directly from the source
 tree. After the first build, `make qml` relaunches the existing executable
@@ -183,12 +185,15 @@ locally to VNC port 5901. Secure Boot must be disabled. A successful test shows
 ## Application development
 
 ```sh
-make gui-build                   # incrementally compiles PAPI + GUI into build/dev/
+make gui-config                  # configures GUI development in build/dev/
+make gui-build                   # incrementally compiles PAPI + GUI only
 make gui                         # compiles and opens Pedro's GUI
 make dev                         # same Ubuntu-native development loop
 make qml                         # relaunches with source QML; no build step
 make diagnose                    # launches GUI and logs the rendering pipeline
-make compositor                  # Linux; run nested in an existing desktop
+make config                      # configures all development components in build/all/
+make build                       # compiles all components; does not create an image
+make compositor                  # compiles and runs the compositor
 ```
 
 These targets configure with `PEDRO_BUILD_IMAGE=OFF`. They do not inspect or
@@ -216,8 +221,9 @@ bytes live on the local Linux filesystem. The image pipeline detects Parallels,
 9p, VirtualBox, and VMware shared filesystems and stops before staging instead
 of failing during kernel-package extraction.
 
-`make build`, `make stage`, `make verify`, and `make image` wrap the
-corresponding CMake targets; use a root shell for staging/image commands.
+`make image-config`, `make stage`, `make verify`, and `make image` use the
+OS image configuration under `build/`; these commands handle sudo when needed.
+`make build` uses the separate development configuration under `build/all`.
 `make clean` removes generated output only (root may be needed after staging).
 
 ## Milestone limits
