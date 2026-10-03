@@ -247,11 +247,21 @@ QtObject {
             const member = group.members.indexOf(entry.id);
             if (member !== -1) {
                 return {key: group.key, count: group.members.length, leader: member === 0,
-                    visible: member === 0 || expanded, expanded: expanded, slot: slot + (expanded ? member : 0)};
+                    visible: member === 0 || expanded, expanded: expanded, slot: slot + (expanded ? member + (group.members.length > 1 ? 1 : 0) : 0)};
             }
-            slot += expanded ? group.members.length : 1;
+            slot += expanded ? group.members.length + (group.members.length > 1 ? 1 : 0) : 1;
         }
         return {key: "file", count: 1, leader: true, visible: true, expanded: false, slot: slot};
+    }
+
+    function stackIndicatorEntry(group) {
+        for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+            const item = desktopShortcutRepeater.itemAt(index);
+            if (item && item.app.id === group.members[0]) {
+                return {id: item.app.id, icon: item.app.icon, isDirectory: item.app.isDirectory};
+            }
+        }
+        return {id: group.members[0], icon: group.key, isDirectory: group.key === "folder"};
     }
 
     function toggleStack(entry) {

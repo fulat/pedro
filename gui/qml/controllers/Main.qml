@@ -116,6 +116,9 @@ QtObject {
 
     // Starts selection or grouped dragging for one desktop shortcut.
     function shortcutPressed(mouse, mouseArea, shortcut) {
+        if (shortcut.stackIndicator) {
+            return;
+        }
         mouseArea.moved = false;
         mouseArea.pressedX = mouse.x;
         mouseArea.pressedY = mouse.y;
@@ -163,9 +166,13 @@ QtObject {
 
     // Handles shortcut selection and context-menu clicks.
     function shortcutClicked(mouse, moved, shortcut) {
+        if (shortcut.stackIndicator) {
+            if (mouse.button === Qt.LeftButton) view.controller.toggleStack(shortcut.app);
+            return;
+        }
         if (mouse.button === Qt.RightButton) {
             shortcut.menuRequested(mouse.x, mouse.y);
-        } else if (!moved && Backend.desktopModel.organization === "stack" && shortcut.stack.leader && shortcut.stack.count > 1) {
+        } else if (!moved && Backend.desktopModel.organization === "stack" && shortcut.stack.leader && shortcut.stack.count > 1 && !shortcut.stack.expanded) {
             view.controller.toggleStack(shortcut.app);
         } else if (!moved && !(mouse.modifiers & Qt.ControlModifier)) {
             view.controller.selectOnlyDesktopShortcut(shortcut.app.id);
@@ -174,7 +181,7 @@ QtObject {
 
     // Treats a primary-button double-click as the shortcut's default request.
     function shortcutDoubleClicked(mouse, moved, shortcut) {
-        if (mouse.button === Qt.LeftButton && !moved) {
+        if (mouse.button === Qt.LeftButton && !moved && !shortcut.stackIndicator) {
             shortcut.activate();
         }
     }

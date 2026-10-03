@@ -203,8 +203,8 @@ context.Backend.desktopModel.groups = [{key: "text", members: [dragged.app.id, s
 context.expandedDesktopStacks = ["text"];
 const beforeStackSort = saved.length;
 Controller.sortDesktop();
-assert(near(dragged.y, 48) && second.y > dragged.y && near(dragged.x, second.x),
-    "Sorting expanded stack members respects the model order and menu edge");
+assert(near(dragged.y, 158) && second.y > dragged.y && near(dragged.x, second.x),
+    "Expanded members appear below the separate stack indicator");
 assert(saved.length === beforeStackSort, "Sorting stacks preserves individual free/grid layout records");
 print("Expanded stack sorting: passed; " + checks + " total checks");
 
@@ -261,3 +261,21 @@ context.stackDropTargetId = "target";
 Controller.cancelDesktopDrag();
 assert(moves.length === 1 && shortcuts[0].x === 120 && !context.stackDropTargetId, "Cancel restores original positions without moving into the hovered folder");
 print("Desktop drag cancellation: passed");
+
+const shellFunctions = GLib.file_get_contents(ARGV[1].replace("Application.qml", "Main.qml"))[1];
+const shellSource = new TextDecoder().decode(shellFunctions);
+const interactions = shellSource.match(/^    function [\s\S]*?^    }/gm).join("\n");
+const calls = [];
+const shellContext = {Qt: {LeftButton: 1, RightButton: 2, ControlModifier: 4},
+    Backend: {desktopModel: {organization: "stack"}},
+    view: {controller: {toggleStack: () => calls.push("toggle"), selectOnlyDesktopShortcut: () => calls.push("select")}}};
+const Shell = new Function("context", "with (context) {" + interactions + "\nreturn {shortcutClicked, shortcutDoubleClicked};}")(shellContext);
+const indicator = {stackIndicator: true, app: {id: "leader"}};
+Shell.shortcutClicked({button: 2}, false, indicator);
+assert(calls.length === 0, "Expanded stack indicator ignores right click");
+Shell.shortcutClicked({button: 1}, false, indicator);
+assert(calls.join() === "toggle", "Stack indicator only toggles expansion");
+const member = {stackIndicator: false, app: {id: "leader"}, stack: {leader: true, count: 2, expanded: true}};
+Shell.shortcutClicked({button: 1, modifiers: 0}, false, member);
+assert(calls.join() === "toggle,select", "Expanded first folder acts as a real member rather than the stack toggle");
+print("Separate stack indicator interactions: passed");

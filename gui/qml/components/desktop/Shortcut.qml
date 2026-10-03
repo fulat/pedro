@@ -13,6 +13,7 @@ Item {
     required property real cellWidth
     required property real cellHeight
     property var app
+    property bool stackIndicator: false
     property bool selected: false
     readonly property var stack: shell.controller.stackInfo(app)
     readonly property bool stacked: Backend.desktopModel.organization === "stack"
@@ -56,8 +57,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: 12
-        color: shell.controller.stackDropTargetId === shortcut.app.id ? "#405b99dd" : shortcut.selected ? Theme.shortcutSelected : shortcutMouse.containsMouse ? Theme.shortcutHover : "transparent"
-        border.width: shortcut.selected || shell.controller.stackDropTargetId === shortcut.app.id ? 1 : 0
+        color: shortcut.stackIndicator ? "transparent" : shell.controller.stackDropTargetId === shortcut.app.id ? "#405b99dd" : shortcut.selected ? Theme.shortcutSelected : shortcutMouse.containsMouse ? Theme.shortcutHover : "transparent"
+        border.width: !shortcut.stackIndicator && (shortcut.selected || shell.controller.stackDropTargetId === shortcut.app.id) ? 1 : 0
         border.color: Theme.shortcutSelectedBorder
 
         Behavior on color {
@@ -68,7 +69,7 @@ Item {
     }
 
     Rectangle {
-        visible: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1
+        visible: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && (shortcut.stackIndicator || !shortcut.stack.expanded)
         width: 42
         height: 38
         radius: 5
@@ -77,6 +78,7 @@ Item {
         x: (parent.width - width) / 2 + 5
         y: 10
         rotation: 8
+        opacity: shortcut.stackIndicator ? 0.35 : 1
     }
 
     function closeMenu() {
@@ -99,6 +101,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         width: 57
         height: 57
+        opacity: shortcut.stackIndicator ? 0.35 : 1
         source: shortcut.app && shortcut.app.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
         onLoaded: {
             item.controller = Qt.binding(() => shortcut.shell.controller);
@@ -110,7 +113,7 @@ Item {
     }
 
     Item {
-        visible: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1
+        visible: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && (shortcut.stackIndicator || !shortcut.stack.expanded)
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.rightMargin: 12
@@ -142,8 +145,8 @@ Item {
         anchors.topMargin: 65
         anchors.left: parent.left
         anchors.right: parent.right
-        visible: shell.controller.renamingDesktopId !== shortcut.app.id
-        text: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && !shortcut.stack.expanded
+        visible: shortcut.stackIndicator || shell.controller.renamingDesktopId !== shortcut.app.id
+        text: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && (shortcut.stackIndicator || !shortcut.stack.expanded)
             ? shell.controller.stackLabel(shortcut.stack.key) : shortcut.app ? shortcut.app.name : ""
         color: Theme.white
         style: Text.Outline
@@ -162,7 +165,7 @@ Item {
         anchors.right: parent.right
         z: 5
         height: 28
-        visible: shortcut.app && shell.controller.renamingDesktopId === shortcut.app.id
+        visible: !shortcut.stackIndicator && shortcut.app && shell.controller.renamingDesktopId === shortcut.app.id
         readOnly: shell.controller.renamingDesktopBusy
         color: Theme.white
         selectionColor: "#805b99dd"

@@ -111,6 +111,23 @@ Components.Application {
             }
         }
 
+        Repeater {
+            model: Backend.desktopModel.organization === "stack" ? Backend.desktopModel.groups : []
+            delegate: Desktop.Shortcut {
+                required property var modelData
+                shell: main
+                controller: mainController
+                cellWidth: desktopShortcutsArea.itemWidth
+                cellHeight: desktopShortcutsArea.itemHeight
+                stackIndicator: true
+                app: main.controller.stackIndicatorEntry(modelData)
+                visible: modelData.members.length > 1 && stack.expanded
+                readonly property point indicatorPosition: main.controller.desktopStackPosition(stack.slot - 1)
+                x: indicatorPosition.x
+                y: indicatorPosition.y
+            }
+        }
+
         Item {
             id: stackDragPreview
             z: 100

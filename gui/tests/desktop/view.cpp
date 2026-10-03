@@ -136,6 +136,9 @@ int main(int argc, char** argv) {
         QHash<QString, int> stackSlots;
         int slot = 0;
         for (const auto& group : model.groups()) {
+            if (group.toMap().value("members").toStringList().size() > 1) {
+                ++slot;
+            }
             for (const auto& id : group.toMap().value("members").toStringList()) {
                 stackSlots.insert(id, slot++);
             }
