@@ -9,7 +9,7 @@ QtObject {
 
     property Timer captureTransition: Timer {
         interval: 100
-        onTriggered: Backend.capture.open()
+        onTriggered: Backend.capture.recording ? Backend.capture.stop() : Backend.capture.open()
     }
 
     property Timer menuTransition: Timer {

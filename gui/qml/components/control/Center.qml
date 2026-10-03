@@ -188,8 +188,8 @@ Item {
                     title: qsTranslate("Pedro", "shell.capture.title")
                     navigable: false
                     toggleable: false
-                    enabled: !Papi.capture.busy
-                    subtitle: qsTranslate("Pedro", "shell.capture.subtitle")
+                    enabled: !Backend.capture.busy
+                    subtitle: Backend.capture.recording ? qsTranslate("Pedro", "capture.stop") : qsTranslate("Pedro", "shell.capture.subtitle")
                     icon: "../../../assets/icons/camera.svg"
                     onActivated: root.captureRequested()
                 }
@@ -212,8 +212,8 @@ Item {
 
         Text {
             Layout.fillWidth: true
-            visible: Papi.capture.error.length > 0
-            text: Papi.capture.error
+            visible: Backend.capture.error.length > 0
+            text: Backend.capture.error
             color: Theme.textMuted
             font.pixelSize: 12
             wrapMode: Text.WordWrap

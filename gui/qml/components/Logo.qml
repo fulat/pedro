@@ -108,6 +108,20 @@ Item {
             spacing: 4
 
             TopAction {
+                visible: Backend.capture.recording
+                iconSize: 0
+                description: qsTranslate("Pedro", "capture.stop")
+                onActivated: Backend.capture.stop()
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 9
+                    height: 9
+                    radius: 2
+                    color: Theme.notificationMuted
+                }
+            }
+
+            TopAction {
                 id: searchButton
                 icon: "../../assets/icons/search.svg"
                 description: qsTranslate("Pedro", "common.search")

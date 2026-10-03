@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDBusConnection>
 #include <QElapsedTimer>
+#include <QStandardPaths>
 #include <QThread>
 
 #include <iostream>
@@ -17,14 +18,23 @@ class Bridge final : public QObject {
         bool allowed = true;
 
     public slots:
-        bool SetCaptureVisible(bool visible) {
+        bool Capture(int, int, int width, int height, bool video, bool, const QString& filename, QString& saved) {
             ++calls;
-            return visible && allowed;
+            saved = filename + (video ? ".webm" : "");
+            return allowed && width > 0 && height > 0;
+        }
+
+        bool StopCapture() {
+            return allowed;
         }
 };
 
 int main(int argc, char** argv) {
+    qputenv("XDG_CONFIG_HOME", argv[1]);
     QCoreApplication application(argc, argv);
+    if (!QStandardPaths::writableLocation(QStandardPaths::PicturesLocation).startsWith(QString::fromLocal8Bit(argv[1]))) {
+        return 1;
+    }
     auto bus = QDBusConnection::sessionBus();
     Bridge bridge;
     if (!bus.registerService("org.pedro.Applications") || !bus.registerObject("/org/pedro/Applications", &bridge, QDBusConnection::ExportAllSlots)) {
@@ -41,21 +51,36 @@ int main(int argc, char** argv) {
         return !manager.busy();
     };
     manager.open();
+    if (!manager.visible() || bridge.calls != 0) {
+        return 1;
+    }
+    const QRect region(10, 20, 300, 200);
+    manager.take(region, false, false, 0);
+    manager.take(region, false, false, 0);
+    if (!wait() || bridge.calls != 1 || !manager.error().isEmpty() || manager.visible() || !manager.file().endsWith(".png")) {
+        return 1;
+    }
     manager.open();
-    if (!wait() || bridge.calls != 1 || !manager.error().isEmpty()) {
+    manager.take(region, true, true, 0);
+    if (!wait() || !manager.recording() || !manager.file().endsWith(".webm")) {
+        return 1;
+    }
+    manager.stop();
+    if (!wait() || manager.recording()) {
         return 1;
     }
     bridge.allowed = false;
     manager.open();
-    if (!wait() || manager.error().isEmpty()) {
+    manager.take(region, false, false, 0);
+    if (!wait() || manager.error().isEmpty() || !manager.visible()) {
         return 1;
     }
     bus.unregisterService("org.pedro.Applications");
-    manager.open();
+    manager.take(region, false, false, 0);
     if (!wait() || manager.error().isEmpty()) {
         return 1;
     }
-    std::cout << "PASS: capture launch, duplicate requests and bridge errors\n";
+    std::cout << "PASS: Pedro toolbar state, image/video capture, stop, duplicate requests and errors\n";
 }
 
 #include "check.moc"

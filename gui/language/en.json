@@ -333,5 +333,15 @@
     "keyboard.empty": "No keyboards configured",
     "keyboard.configuration.pending": "Keyboard configuration will be available here.",
     "shell.capture.title": "Capture",
-    "shell.capture.subtitle": "Screenshot or video"
+    "shell.capture.subtitle": "Screenshot or video",
+    "capture.screen": "Screen",
+    "capture.area": "Area",
+    "capture.video": "Video",
+    "capture.image": "Image",
+    "capture.options": "Options",
+    "capture.cursor": "Show Pointer",
+    "capture.noDelay": "No Timer",
+    "capture.stop": "Stop",
+    "capture.record": "Record",
+    "capture.take": "Capture"
 }

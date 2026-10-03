@@ -1,16 +1,48 @@
 #include "manager.h"
 
+#include <QDateTime>
 #include <QDBusConnection>
 #include <QDBusMessage>
+#include <QDBusError>
+#include <QDBusServiceWatcher>
 #include <QDBusPendingCallWatcher>
-#include <QDBusPendingReply>
+#include <QDir>
+#include <QStandardPaths>
+#include <QTimer>
 
 namespace Pedro::Papi::Gui::Capture {
     Manager::Manager(QObject* parent) : QObject(parent) {
+        auto bus = QDBusConnection::sessionBus();
+        bus.connect("org.pedro.Applications", "/org/pedro/Applications", "org.pedro.Applications", "CaptureStopped", this, SLOT(recordingStopped(QString)));
+        auto* watcher = new QDBusServiceWatcher("org.pedro.Applications", bus, QDBusServiceWatcher::WatchForUnregistration, this);
+        connect(watcher, &QDBusServiceWatcher::serviceUnregistered, this, [this] {
+            if (running) {
+                recordingStopped(tr("The recording service disconnected."));
+            }
+        });
+    }
+
+    void Manager::recordingStopped(const QString& error) {
+        running = false;
+        failure = error;
+        shown = !failure.isEmpty();
+        emit changed();
     }
 
     bool Manager::busy() const {
         return pending;
+    }
+
+    bool Manager::visible() const {
+        return shown;
+    }
+
+    bool Manager::recording() const {
+        return running;
+    }
+
+    QString Manager::file() const {
+        return destination;
     }
 
     QString Manager::error() const {
@@ -18,24 +50,71 @@ namespace Pedro::Papi::Gui::Capture {
     }
 
     void Manager::open() {
-        if (pending) {
+        if (pending || running) {
+            return;
+        }
+        failure.clear();
+        shown = true;
+        emit changed();
+    }
+
+    void Manager::close() {
+        shown = false;
+        emit changed();
+    }
+
+    void Manager::take(const QRect& area, bool video, bool cursor, int delay) {
+        if (pending || running || !shown || area.width() <= 0 || area.height() <= 0) {
             return;
         }
 
+        const auto base = QStandardPaths::writableLocation(video ? QStandardPaths::MoviesLocation : QStandardPaths::PicturesLocation);
+        const auto directory = QDir(base).filePath(video ? "Screencasts" : "Screenshots");
+        if (base.isEmpty() || !QDir().mkpath(directory)) {
+            failure = tr("Could not create the capture folder.");
+            emit changed();
+            return;
+        }
+
+        auto name = QStringLiteral("Pedro-%1").arg(QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss-zzz"));
+        if (!video) {
+            name += QStringLiteral(".png");
+        }
+        destination = QDir(directory).filePath(name);
+        pending = true;
+        shown = false;
+        failure.clear();
+        emit changed();
+        // Let the selection and toolbar disappear before sampling the desktop.
+        QTimer::singleShot(qBound(0, delay, 10) * 1000 + 200, this, [this, area, video, cursor] { finish("Capture", {area.x(), area.y(), area.width(), area.height(), video, cursor, destination}); });
+    }
+
+    void Manager::stop() {
+        if (!running || pending) {
+            return;
+        }
         pending = true;
         failure.clear();
         emit changed();
-        auto message = QDBusMessage::createMethodCall("org.pedro.Applications", "/org/pedro/Applications", "org.pedro.Applications", "SetCaptureVisible");
-        message << true;
+        finish("StopCapture", {});
+    }
+
+    void Manager::finish(const QString& method, const QList<QVariant>& arguments) {
+        auto message = QDBusMessage::createMethodCall("org.pedro.Applications", "/org/pedro/Applications", "org.pedro.Applications", method);
+        message.setArguments(arguments);
         auto* watcher = new QDBusPendingCallWatcher(QDBusConnection::sessionBus().asyncCall(message), this);
-        connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher* call) {
-            QDBusPendingReply<bool> reply = *call;
+        connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, method, arguments](QDBusPendingCallWatcher* call) {
+            const auto reply = call->reply();
             call->deleteLater();
             pending = false;
-            if (reply.isError()) {
-                failure = reply.error().message();
-            } else if (!reply.value()) {
-                failure = tr("Screen capture is unavailable while another capture is in progress.");
+            if (reply.type() == QDBusMessage::ErrorMessage || !reply.arguments().value(0).toBool()) {
+                failure = reply.type() == QDBusMessage::ErrorMessage ? QDBusError(reply).message() : tr("Screen capture failed.");
+                shown = !running;
+            } else {
+                running = method == "Capture" && arguments.value(4).toBool();
+                if (method == "Capture") {
+                    destination = reply.arguments().value(1).toString();
+                }
             }
             emit changed();
         });

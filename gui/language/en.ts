@@ -1676,5 +1676,55 @@
             <extracomment>Stable Pedro key: shell.capture.subtitle</extracomment>
             <translation>Screenshot or video</translation>
         </message>
+        <message>
+            <source>capture.screen</source>
+            <extracomment>Stable Pedro key: capture.screen</extracomment>
+            <translation>Screen</translation>
+        </message>
+        <message>
+            <source>capture.area</source>
+            <extracomment>Stable Pedro key: capture.area</extracomment>
+            <translation>Area</translation>
+        </message>
+        <message>
+            <source>capture.video</source>
+            <extracomment>Stable Pedro key: capture.video</extracomment>
+            <translation>Video</translation>
+        </message>
+        <message>
+            <source>capture.image</source>
+            <extracomment>Stable Pedro key: capture.image</extracomment>
+            <translation>Image</translation>
+        </message>
+        <message>
+            <source>capture.options</source>
+            <extracomment>Stable Pedro key: capture.options</extracomment>
+            <translation>Options</translation>
+        </message>
+        <message>
+            <source>capture.cursor</source>
+            <extracomment>Stable Pedro key: capture.cursor</extracomment>
+            <translation>Show Pointer</translation>
+        </message>
+        <message>
+            <source>capture.noDelay</source>
+            <extracomment>Stable Pedro key: capture.noDelay</extracomment>
+            <translation>No Timer</translation>
+        </message>
+        <message>
+            <source>capture.stop</source>
+            <extracomment>Stable Pedro key: capture.stop</extracomment>
+            <translation>Stop</translation>
+        </message>
+        <message>
+            <source>capture.record</source>
+            <extracomment>Stable Pedro key: capture.record</extracomment>
+            <translation>Record</translation>
+        </message>
+        <message>
+            <source>capture.take</source>
+            <extracomment>Stable Pedro key: capture.take</extracomment>
+            <translation>Capture</translation>
+        </message>
     </context>
 </TS>

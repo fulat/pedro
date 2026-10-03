@@ -11,4 +11,12 @@ c++ -std=c++17 -fPIC -I "$sourceDirectory" -I "$taskDirectory" \
     "$sourceDirectory/papi/gui/capture/manager.cpp" "$taskDirectory/moc.cpp" \
     "${flags[@]}" -o "$taskDirectory/check"
 # Never opens the real capture UI or changes the user's session.
-dbus-run-session -- "$taskDirectory/check"
+cat > "$taskDirectory/user-dirs.dirs" <<EOF
+XDG_PICTURES_DIR="$taskDirectory/Pictures"
+XDG_VIDEOS_DIR="$taskDirectory/Videos"
+EOF
+dbus-run-session -- "$taskDirectory/check" "$taskDirectory"
+
+python3 "$sourceDirectory/gui/tests/capture/bridge.py" \
+    "$sourceDirectory/gnome/application/extension.js" "$taskDirectory/bridge.js"
+gjs -m "$taskDirectory/bridge.js" "$taskDirectory/fixture.png"

@@ -457,6 +457,17 @@ Components.Application {
     }
 
     Loader {
+        z: 100
+        anchors.fill: parent
+        source: "qml/components/capture/view.qml"
+        onLoaded: {
+            item.capture = Backend.capture;
+            item.backdrop = wallpaper;
+            item.screenOrigin = Qt.binding(() => Qt.point(main.x, main.y));
+        }
+    }
+
+    Loader {
         id: panelLoader
 
         z: 30

@@ -333,5 +333,15 @@
     "keyboard.empty": "No hay teclados configurados",
     "keyboard.configuration.pending": "La configuración de teclado estará disponible aquí.",
     "shell.capture.title": "Captura",
-    "shell.capture.subtitle": "Imagen o vídeo"
+    "shell.capture.subtitle": "Imagen o vídeo",
+    "capture.screen": "Pantalla",
+    "capture.area": "Área",
+    "capture.video": "Vídeo",
+    "capture.image": "Imagen",
+    "capture.options": "Opciones",
+    "capture.cursor": "Mostrar cursor",
+    "capture.noDelay": "Sin temporizador",
+    "capture.stop": "Detener",
+    "capture.record": "Grabar",
+    "capture.take": "Capturar"
 }
