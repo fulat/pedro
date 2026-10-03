@@ -56,7 +56,7 @@ namespace Pedro::Papi::Io::Desktop {
 
             Q_INVOKABLE void renameEntry(const QString& id, const QString& name);
 
-            Q_INVOKABLE void savePosition(const QString& id, double x, double y);
+            Q_INVOKABLE void savePosition(const QString& id, double x, double y, bool manual = false);
 
         signals:
             void errorChanged();

@@ -661,7 +661,9 @@ QtObject {
             placement.item.initialPosition = Qt.point(placement.x, placement.y);
             placement.item.x = placement.x;
             placement.item.y = placement.y;
-            Backend.desktopModel.savePosition(placement.item.app.id, placement.x, placement.y);
+            const original = desktopDragItems.find(entry => entry.item === placement.item);
+            const moved = original && (placement.x !== original.x || placement.y !== original.y);
+            Backend.desktopModel.savePosition(placement.item.app.id, placement.x, placement.y, !!moved);
         }
     }
 
@@ -685,7 +687,8 @@ QtObject {
                     entry.item.y = entry.y;
                 }
                 entry.item.initialPosition = Qt.point(entry.item.x, entry.item.y);
-                Backend.desktopModel.savePosition(entry.item.app.id, entry.item.x, entry.item.y);
+                Backend.desktopModel.savePosition(entry.item.app.id, entry.item.x, entry.item.y,
+                    entry.item.x !== entry.x || entry.item.y !== entry.y);
             }
         } else {
             snapDesktopDragToGrid();

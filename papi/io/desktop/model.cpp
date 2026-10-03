@@ -685,7 +685,7 @@ namespace Pedro::Papi::Io::Desktop {
         emit operationFailed(QStringLiteral("The desktop entry no longer exists"));
     }
 
-    void Model::savePosition(const QString& id, double x, double y) {
+    void Model::savePosition(const QString& id, double x, double y, bool manual) {
 
         if (organization() == "stack" || !std::isfinite(x) || !std::isfinite(y) || x < 0 || y < 0) {
             return;
@@ -699,6 +699,15 @@ namespace Pedro::Papi::Io::Desktop {
 
                 if (!identity.isEmpty()) {
                     state->positions.setValue(prefix + positionKey(identity), QPointF(x, y));
+                }
+                // A manual move becomes this icon's new baseline for sort undo.
+                if (manual && !sortKey().isEmpty()) {
+                    auto snapshot = state->positions.value("organization/undo/positions").toMap();
+                    snapshot.insert(prefix + positionKey(id), QPointF(x, y));
+                    if (!identity.isEmpty()) {
+                        snapshot.insert(prefix + positionKey(identity), QPointF(x, y));
+                    }
+                    state->positions.setValue("organization/undo/positions", snapshot);
                 }
                 apply(id, entry);
                 return;

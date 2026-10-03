@@ -124,6 +124,17 @@ int main(int argc, char** argv) {
     }
     require(restoredPosition, "Disabling sort should restore the original manual position across criterion changes");
     model.sort("size");
+    model.savePosition(id, 450, 350, true);
+    model.sort("type");
+    model.sort("type");
+    for (int row = 0; row < model.rowCount(); ++row) {
+        const auto entry = entryAt(model, row);
+        if (entry.value("id") == id) {
+            const auto position = entry.value("position").toMap();
+            require(position.value("x") == 450 && position.value("y") == 350, "Manual move during sorting must become the restored position");
+        }
+    }
+    model.sort("size");
     QFile added(model.directory() + "/new.txt");
     require(added.open(QIODevice::WriteOnly), "Cannot create monitored file");
     added.write(QByteArray(10000, 'x'));

@@ -90,7 +90,7 @@ const context = {
     Grid,
     Qt: {point: (x, y) => ({x, y})},
     Backend: {desktopModel: {organization: "grid", keepAligned: true,
-        savePosition: (id, x, y) => saved.push({id, x, y})}},
+        savePosition: (id, x, y, manual) => saved.push({id, x, y, manual})}},
     desktopShortcuts: {width: 1280, height: 720, cellWidth: 114, cellHeight: 110, cellGap: 8},
     desktopShortcutRepeater: {count: 0, itemAt: index => shortcuts[index]},
     desktopObstacles: [],
@@ -122,6 +122,7 @@ context.desktopDragItems = [{item: dragged, x: 122, y: 118}];
 Controller.snapDesktopDragToGrid();
 assert(near(dragged.x, 1166) && near(dragged.y, 48), "Controller drops icon immediately below status menus");
 assert(saved.length === 1 && near(saved[0].y, 48), "Controller persists obstacle-relative coordinates");
+assert(saved[0].manual === true, "Grid drag updates the manual baseline");
 assert(!context.desktopDragging, "Controller ends drag before assigning final coordinates");
 
 context.desktopObstacles = [logo].map(obstacle);
@@ -147,6 +148,7 @@ context.desktopDragItems = [{item: dragged, x: 100, y: 100}];
 Controller.endDesktopDrag();
 assert(near(dragged.x, 321.5) && near(dragged.y, 234.5), "Free mode retains exact dropped coordinates");
 assert(near(saved[saved.length - 1].x, 321.5), "Free mode persists exact coordinates");
+assert(saved[saved.length - 1].manual === true, "Free drag updates the manual baseline");
 context.Backend.desktopModel.organization = "grid";
 context.Backend.desktopModel.keepAligned = false;
 dragged.x = 333.5;
@@ -185,6 +187,7 @@ context.desktopDragging = false;
 const oldSavedCount = saved.length;
 Controller.sortDesktop();
 assert(context.Backend.desktopModel.organization === "free", "Explicit sorting preserves free organization");
+assert(saved.slice(oldSavedCount).every(position => !position.manual), "Automatic sorting does not replace manual baselines");
 assert(saved.length === oldSavedCount + shortcuts.length, "Sorting persists every icon in the active layout");
 assert(dragged.x >= second.x && (dragged.x > second.x || dragged.y < second.y), "Icon positions follow the ordered model");
 assert(!Grid.intersects(dragged, second, 8 - 0.000001), "Sorted icons preserve grid spacing");
