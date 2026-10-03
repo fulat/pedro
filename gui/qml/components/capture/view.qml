@@ -86,27 +86,41 @@ Item {
             }
         }
         Repeater {
-            model: 4
+            model: 8
             delegate: Rectangle {
                 id: handle
                 required property int index
-                x: index % 2 ? selection.width - 4 : -4
-                y: index > 1 ? selection.height - 4 : -4
-                width: 8; height: 8; radius: 4
+                readonly property bool leftEdge: index === 0 || index === 2 || index === 4
+                readonly property bool rightEdge: index === 1 || index === 3 || index === 5
+                readonly property bool topEdge: index === 0 || index === 1 || index === 6
+                readonly property bool bottomEdge: index === 2 || index === 3 || index === 7
+                x: leftEdge ? -4 : rightEdge ? selection.width - 4 : selection.width / 2 - 4
+                y: topEdge ? -4 : bottomEdge ? selection.height - 4 : selection.height / 2 - 4
+                width: 8
+                height: 8
+                radius: 4
                 color: Theme.white
                 MouseArea {
                     anchors.fill: parent
                     anchors.margins: -6
-                    cursorShape: handle.index === 0 || handle.index === 3 ? Qt.SizeFDiagCursor : Qt.SizeBDiagCursor
+                    cursorShape: handle.index >= 6 ? Qt.SizeVerCursor : handle.index >= 4 ? Qt.SizeHorCursor : handle.index === 0 || handle.index === 3 ? Qt.SizeFDiagCursor : Qt.SizeBDiagCursor
                     property rect original
-                    onPressed: original = root.region
+                    property point start
+                    onPressed: mouse => {
+                        original = root.region;
+                        start = mapToItem(root, mouse.x, mouse.y);
+                    }
                     onPositionChanged: mouse => {
-                        if (!pressed) return;
+                        if (!pressed) {
+                            return;
+                        }
                         const point = mapToItem(root, mouse.x, mouse.y);
-                        const left = handle.index % 2 ? original.x : Math.max(0, Math.min(original.x + original.width - 24, point.x));
-                        const top = handle.index > 1 ? original.y : Math.max(0, Math.min(original.y + original.height - 24, point.y));
-                        const right = handle.index % 2 ? Math.min(root.width, Math.max(original.x + 24, point.x)) : original.x + original.width;
-                        const bottom = handle.index > 1 ? Math.min(root.height, Math.max(original.y + 24, point.y)) : original.y + original.height;
+                        const dx = point.x - start.x;
+                        const dy = point.y - start.y;
+                        const left = handle.leftEdge ? Math.max(0, Math.min(original.x + original.width - 24, original.x + dx)) : original.x;
+                        const top = handle.topEdge ? Math.max(0, Math.min(original.y + original.height - 24, original.y + dy)) : original.y;
+                        const right = handle.rightEdge ? Math.min(root.width, Math.max(original.x + 24, original.x + original.width + dx)) : original.x + original.width;
+                        const bottom = handle.bottomEdge ? Math.min(root.height, Math.max(original.y + 24, original.y + original.height + dy)) : original.y + original.height;
                         root.region = Qt.rect(left, top, right - left, bottom - top);
                     }
                 }
