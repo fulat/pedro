@@ -13,6 +13,7 @@ Controls.Menu {
     property real maximumHeight: 600
     property string folderName
     property bool canPaste: false
+    property int selectionCount: 1
     property bool fileMode: false
     property bool imageFile: false
 
@@ -54,7 +55,7 @@ Controls.Menu {
         property string shortcutText: ""
 
         hoverEnabled: true
-        visible: subMenu !== openWithMenu || root.fileMode
+        visible: subMenu !== openWithMenu || (root.fileMode && root.selectionCount <= 1)
         implicitHeight: visible ? 34 : 0
         leftPadding: 12
         rightPadding: 12
@@ -122,14 +123,14 @@ Controls.Menu {
     }
 
     Entry {
-        visible: !root.fileMode
+        visible: !root.fileMode && root.selectionCount <= 1
         text: qsTranslate("Pedro", "folder.menu.open.tab")
         symbol: "tab"
         onTriggered: root.actionRequested("tab")
     }
 
     Entry {
-        visible: !root.fileMode
+        visible: !root.fileMode && root.selectionCount <= 1
         text: qsTranslate("Pedro", "folder.menu.open.window")
         symbol: "window"
         onTriggered: root.actionRequested("window")
@@ -157,7 +158,7 @@ Controls.Menu {
     }
 
     Entry {
-        visible: root.fileMode
+        visible: root.fileMode && root.selectionCount <= 1
         text: qsTranslate("Pedro", "file.menu.preview")
         symbol: "eye"
         shortcutText: "Espacio"
@@ -189,6 +190,7 @@ Controls.Menu {
 
     Divider {}
     Entry {
+        visible: root.selectionCount <= 1
         text: qsTranslate("Pedro", "folder.menu.rename")
         symbol: "rename"
         shortcutText: "F2"
@@ -196,7 +198,7 @@ Controls.Menu {
     }
 
     Entry {
-        visible: root.fileMode
+        visible: root.fileMode && root.selectionCount <= 1
         text: qsTranslate("Pedro", "file.menu.duplicate")
         symbol: "copy"
         shortcutText: "Ctrl+D"
@@ -275,18 +277,18 @@ Controls.Menu {
     }
 
     Entry {
-        visible: root.fileMode && root.imageFile
+        visible: root.fileMode && root.imageFile && root.selectionCount <= 1
         text: qsTranslate("Pedro", "file.menu.wallpaper")
         symbol: "image"
         onTriggered: root.actionRequested("wallpaper")
     }
 
     Divider {
-        visible: !root.fileMode
+        visible: !root.fileMode && root.selectionCount <= 1
         height: visible ? implicitHeight : 0
     }
     Entry {
-        visible: !root.fileMode
+        visible: !root.fileMode && root.selectionCount <= 1
         text: qsTranslate("Pedro", "folder.menu.terminal")
         symbol: "terminal"
         onTriggered: root.actionRequested("terminal")

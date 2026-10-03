@@ -41,7 +41,7 @@ Item {
         if (!Window.window) {
             return;
         }
-        select();
+        if (interaction.item) interaction.item.select(true);
         contextRequested();
         menuPoint = mapToItem(Window.window.contentItem, x, y);
         if (menuLoader.item) {
@@ -57,6 +57,7 @@ Item {
         if (!window || !menu) {
             return;
         }
+        menu.selectionCount = controller && controller.selectedDesktopIds ? controller.selectedDesktopIds.length : 1;
         menu.folderName = entry.name || "";
         menu.fileMode = !folder;
         menu.imageFile = entry.icon === "image";

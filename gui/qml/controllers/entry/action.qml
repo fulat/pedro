@@ -5,9 +5,9 @@ QtObject {
     property var entry
     property var owner
 
-    function select() {
+    function select(contextMenu = false) {
         if (owner) {
-            owner.select(entry);
+            owner.select(entry, contextMenu);
         }
     }
 

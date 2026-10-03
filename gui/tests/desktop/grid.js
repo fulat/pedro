@@ -101,7 +101,7 @@ const context = {
     stackDragPending: false
 };
 const Controller = new Function("context", "with (context) {\n" + functions
-    + "\nreturn {snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, sortDesktop, endDesktopDrag};\n}")(context);
+    + "\nreturn {select, wallpaperAction, snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, sortDesktop, endDesktopDrag};\n}")(context);
 
 function obstacle(rectangle) {
     return {width: rectangle.width - 16, height: rectangle.height - 16, visible: true,
@@ -205,3 +205,14 @@ assert(near(dragged.y, 48) && second.y > dragged.y && near(dragged.x, second.x),
     "Sorting expanded stack members respects the model order and menu edge");
 assert(saved.length === beforeStackSort, "Sorting stacks preserves individual free/grid layout records");
 print("Expanded stack sorting: passed; " + checks + " total checks");
+
+Controller.wallpaperAction("select");
+assert(context.selectedDesktopIds.length === shortcuts.length, "Select all includes every desktop entry");
+Controller.select(dragged.app, true);
+assert(context.selectedDesktopIds.length === shortcuts.length, "Context menu preserves a selected group");
+Controller.select({id: "outside"}, true);
+assert(context.selectedDesktopIds.length === 1 && context.selectedDesktopIds[0] === "outside", "Context menu on an unselected entry replaces selection");
+Controller.wallpaperAction("select");
+Controller.select(dragged.app);
+assert(context.selectedDesktopIds.length === 1, "Normal click still selects a single entry");
+print("Desktop context selection: passed");

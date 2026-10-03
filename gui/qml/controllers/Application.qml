@@ -70,7 +70,10 @@ QtObject {
         panelMode = name;
     }
 
-    function select(entry) {
+    function select(entry, contextMenu = false) {
+        if (contextMenu && isDesktopShortcutSelected(entry.id)) {
+            return;
+        }
         selectOnlyDesktopShortcut(entry.id);
     }
 
