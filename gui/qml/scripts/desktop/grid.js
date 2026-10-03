@@ -98,3 +98,25 @@ function placement(bounds, obstacles, occupied, items, target, cellWidth, cellHe
 
     return best;
 }
+
+// Stack columns run right to left; each free vertical segment starts at its barrier.
+function stack(bounds, obstacles, itemWidth, itemHeight, cellWidth, cellHeight, gap) {
+    const result = [];
+    const right = bounds.x + bounds.width;
+
+    for (let x = right - itemWidth; x >= bounds.x; x -= cellWidth) {
+        const column = {x: x, y: bounds.y, width: itemWidth, height: bounds.height};
+        const segments = regions(column, obstacles, itemWidth, itemHeight).sort((first, second) => first.y - second.y);
+
+        for (const segment of segments) {
+            for (let y = segment.y; y + itemHeight <= segment.y + segment.height + 0.000001; y += cellHeight) {
+                const rectangle = {x: x, y: y, width: itemWidth, height: itemHeight};
+                if (!result.some(other => intersects(rectangle, other, gap - 0.000001))) {
+                    result.push(rectangle);
+                }
+            }
+        }
+    }
+
+    return result;
+}

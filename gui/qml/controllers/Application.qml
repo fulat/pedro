@@ -300,29 +300,15 @@ QtObject {
         return desktopInitialPosition(index);
     }
 
-    // Fill stack columns from the inset right edge, scanning each from top to bottom.
+    // Fill stack columns from each free segment below the shell controls.
     function desktopStackPosition(index) {
-        let slot = 0;
-        const insetX = desktopInset(desktopShortcuts.width, desktopItemWidth());
-        const insetY = desktopInset(desktopShortcuts.height, desktopItemHeight());
-        const columns = Math.max(1, Math.floor((desktopShortcuts.width - insetX * 2 + desktopGap()) / desktopShortcuts.cellWidth));
-        const rows = Math.max(1, Math.floor((desktopShortcuts.height - insetY * 2 + desktopGap()) / desktopShortcuts.cellHeight));
+        const bounds = desktopGridBounds();
+        const positions = Grid.stack(bounds, desktopObstacleRectangles(), desktopItemWidth(), desktopItemHeight(),
+            desktopShortcuts.cellWidth, desktopShortcuts.cellHeight, desktopGap());
+        const position = positions[index];
 
-        for (let column = 0; column < columns; ++column) {
-            const x = Math.max(insetX, desktopShortcuts.width - insetX - desktopItemWidth() - desktopShortcuts.cellWidth * column);
-
-            for (let row = 0; row < rows; ++row) {
-                const y = insetY + row * desktopShortcuts.cellHeight;
-
-                if (!desktopPlacementOverlapsShell(x, y, desktopItemWidth(), desktopItemHeight())) {
-                    if (slot++ === index) {
-                        return Qt.point(x, y);
-                    }
-                }
-            }
-        }
-
-        return Qt.point(insetX, insetY + rows * desktopShortcuts.cellHeight);
+        return position ? Qt.point(position.x, position.y)
+            : Qt.point(bounds.x, bounds.y + bounds.height + desktopGap());
     }
 
     // Places initial model entries in free desktop cells without filesystem logic.

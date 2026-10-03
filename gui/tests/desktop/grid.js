@@ -6,7 +6,7 @@ if (!loaded) {
     throw new Error("Cannot read desktop grid source");
 }
 const source = ByteArray.toString(contents).replace(/^\.pragma library\s*/, "");
-const Grid = new Function(source + "\nreturn {regions, candidates, placement, intersects};")();
+const Grid = new Function(source + "\nreturn {regions, candidates, placement, intersects, stack};")();
 const bounds = {x: 8, y: 8, width: 1264, height: 704};
 const item = {width: 106, height: 102, column: 0, row: 0};
 const logo = {x: 10, y: -2, width: 52, height: 52};
@@ -101,7 +101,7 @@ const context = {
     stackDragPending: false
 };
 const Controller = new Function("context", "with (context) {\n" + functions
-    + "\nreturn {snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, endDesktopDrag};\n}")(context);
+    + "\nreturn {snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, endDesktopDrag};\n}")(context);
 
 function obstacle(rectangle) {
     return {width: rectangle.width - 16, height: rectangle.height - 16, visible: true,
@@ -155,3 +155,23 @@ context.desktopDragItems = [{item: dragged, x: 100, y: 100}];
 Controller.endDesktopDrag();
 assert(near(dragged.x, 333.5) && near(dragged.y, 222.5), "Grid without Keep aligned still allows unsnapped drops");
 print("Desktop controller: integration checks passed; " + checks + " total checks");
+
+const stacks = Grid.stack(bounds, [logo, menu, notification], 106, 102, 114, 110, 8);
+assert(near(stacks[0].x, 1166) && near(stacks[0].y, 48), "Stacks start immediately below top menus");
+assert(near(stacks[1].x, stacks[0].x) && near(stacks[1].y - stacks[0].y, 110), "Stacks continue down before moving left");
+const clearStacks = Grid.stack(bounds, [], 106, 102, 114, 110, 8);
+assert(near(clearStacks[0].y, 8), "Unblocked stack column starts at screen inset");
+for (let index = 0; index < stacks.length; ++index) {
+    assert(![logo, menu, notification].some(obstacle => Grid.intersects(stacks[index], obstacle, -0.000001)), "Stack avoids shell");
+    assert(!stacks.slice(0, index).some(other => Grid.intersects(stacks[index], other, 8 - 0.000001)), "Stacks preserve icon spacing");
+}
+const sidebar = {x: 1150, y: 220, width: 130, height: 80};
+const segmented = Grid.stack(bounds, [menu, notification, sidebar], 106, 102, 114, 110, 8);
+assert(segmented.some(position => near(position.x, 1166) && near(position.y, 300)), "Stack restarts immediately below a mid-column obstacle");
+context.desktopObstacles = [logo, menu, notification].map(obstacle);
+context.Backend.desktopModel.organization = "stack";
+const beforeStack = saved.length;
+const firstStack = Controller.desktopStackPosition(0);
+assert(near(firstStack.x, 1166) && near(firstStack.y, 48), "Controller uses menu edge for first stack");
+assert(saved.length === beforeStack, "Stack placement does not overwrite saved individual positions");
+print("Stack placement: passed; " + checks + " total checks");
