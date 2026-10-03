@@ -91,6 +91,10 @@ QObject* Backend::networkConnection() {
     return &connection_;
 }
 
+QObject* Backend::windowGlass() {
+    return &glass_;
+}
+
 QObject* Backend::battery() {
     return &battery_;
 }

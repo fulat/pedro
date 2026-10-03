@@ -27,19 +27,6 @@ int main(int argc, char* argv[]) {
 #if defined(Q_OS_LINUX)
     const auto plugins = QLibraryInfo::path(QLibraryInfo::PluginsPath);
 
-    // GNOME development windows need global coordinates to sample the wallpaper
-    // behind their frosted glass. Native Wayland does not expose those coordinates.
-    // Respect explicit platform selection, including Pedro's Wayland service.
-    const bool gnomeWayland = qEnvironmentVariable("XDG_SESSION_TYPE") == "wayland"
-        && qEnvironmentVariable("XDG_CURRENT_DESKTOP").contains("GNOME", Qt::CaseInsensitive);
-
-    if (gnomeWayland && qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM")
-        && !qEnvironmentVariableIsEmpty("DISPLAY")
-        && QFileInfo::exists(QDir(plugins).filePath(QStringLiteral("platforms/libqxcb.so")))) {
-        qputenv("QT_QPA_PLATFORM", "xcb");
-        qInfo() << "Pedro development: using XWayland for moving wallpaper glass.";
-    }
-
     const auto hasGnomeTheme = QFileInfo::exists(QDir(plugins).filePath(QStringLiteral("platformthemes/libqgnomeplatformtheme.so")));
 
     const auto hasGnomeDecoration = QFileInfo::exists(QDir(plugins).filePath(QStringLiteral("wayland-decoration-client/"

@@ -70,18 +70,8 @@ ApplicationWindow {
         item.objectName = "filesQuickWindow";
         item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
         item.contentSource = Qt.resolvedUrl("files/browser.qml");
-        item.wallpaperWindow = window;
-        item.backdropWindows = Qt.binding(() => window.fileWindowOrder.slice(0, window.fileWindowOrder.indexOf(item)));
-        window.raiseFileWindow(item);
-        item.activeChanged.connect(() => {
-            if (item.active) window.raiseFileWindow(item);
-        });
-        item.visibleChanged.connect(() => {
-            if (item.visible) window.raiseFileWindow(item);
-        });
-        item.closing.connect(() => {
-            window.fileWindowOrder = window.fileWindowOrder.filter(candidate => candidate !== item);
-        });
+        Backend.windowGlass.registerTitle(item.title);
+        item.titleChanged.connect(() => Backend.windowGlass.registerTitle(item.title));
         item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff");
         item.headerSource = Qt.resolvedUrl("files/header.qml");
         item.headerHeight = 58;
@@ -131,13 +121,6 @@ ApplicationWindow {
                 item.requestActivate();
             }
         }
-    }
-
-    property var fileWindowOrder: []
-
-    function raiseFileWindow(item) {
-        if (fileWindowOrder[fileWindowOrder.length - 1] === item) return;
-        fileWindowOrder = fileWindowOrder.filter(candidate => candidate !== item).concat([item]);
     }
 
     property var activeFilesWindow: null

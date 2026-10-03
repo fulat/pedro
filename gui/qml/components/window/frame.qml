@@ -12,7 +12,7 @@ Window {
     id: frame
 
     readonly property var controller: contentLoader.item ? contentLoader.item.controller || null : null
-    readonly property Item entryBackdrop: windowBackdrop.item
+    readonly property Item entryBackdrop: null
     property url headerSource
     property real headerHeight: 44
     property real titleOffset: 90
@@ -31,11 +31,6 @@ Window {
     property url contentSource
     property color surfaceColor: "transparent"
     property color glassTint: Backend.appearanceMode === "light" ? Theme.menuGlassLightHaze : Theme.menuGlassHaze
-    property Window wallpaperWindow
-    property var backdropWindows: []
-    // Wayland does not expose global top-level positions to clients. Keep native
-    // transparency there instead of drawing a wallpaper sample that cannot track moves.
-    readonly property bool canTrackWallpaper: !Qt.platform.pluginName.startsWith("wayland")
     property color titleColor: Theme.white
     readonly property real resizeBorder: 7
     readonly property real resizeCorner: 18
@@ -79,21 +74,10 @@ Window {
             autoPaddingEnabled: false
         }
 
-        Loader {
-            id: windowBackdrop
-            source: "backdrop.qml"
-            visible: false
-            onLoaded: {
-                item.owner = frame;
-                item.desktopWindow = Qt.binding(() => frame.wallpaperWindow);
-                item.windows = Qt.binding(() => frame.backdropWindows);
-                item.enabled = Qt.binding(() => frame.canTrackWallpaper);
-            }
-        }
-
         Components.Liquid {
             anchors.fill: parent
-            backdrop: frame.canTrackWallpaper ? windowBackdrop.item : null
+            // The compositor blurs the actual scene beneath this native window.
+            backdrop: null
             frosted: true
             tintColor: frame.glassTint
             cornerRadius: frame.maximized ? 0 : frame.windowRadius
