@@ -122,7 +122,16 @@ QtObject {
 
     function wallpaperAction(action) {
         desktopOperationError = "";
-        if (action === "folder") {
+        if (action === "select") {
+            const selected = [];
+            for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+                const item = desktopShortcutRepeater.itemAt(index);
+                if (item && item.app) {
+                    selected.push(item.app.id);
+                }
+            }
+            selectedDesktopIds = selected;
+        } else if (action === "folder") {
             Backend.desktopModel.createFolder(qsTranslate("Pedro", "desktop.menu.folder"));
         } else if (action === "file") {
             Backend.desktopModel.createFile(qsTranslate("Pedro", "desktop.menu.file"));
