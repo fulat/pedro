@@ -32,7 +32,7 @@ Las demás acciones sobre archivos del menú contextual, los ajustes de pantalla
 
 PAPI guarda el modo de organización y la preferencia de alineación en la configuración del usuario. QML decide únicamente la disposición visual.
 
-- **Cuadrícula:** restaura las posiciones guardadas para este modo y coloca los elementos nuevos en celdas disponibles. «Mantener alineado» controla si los arrastres se ajustan a la cuadrícula.
+- **Cuadrícula:** restaura las posiciones guardadas para este modo y coloca los elementos nuevos en celdas disponibles. «Mantener alineado» controla si los arrastres se ajustan a la cuadrícula. Las celdas parten de los bordes de las zonas libres entre controles fijos, con 8 px de separación del shell: junto al logo o al menú conservan la primera fila de pantalla; debajo parten del borde inferior del control, sin saltar una fila completa. En zonas sin obstáculos se conserva el origen de pantalla. El arrastre múltiple conserva los desplazamientos relativos en celdas y busca una colocación válida para toda la selección.
 - **Libre:** conserva coordenadas exactas al soltar, sin ajustarlas a celdas. Mantiene los límites de la pantalla y evita superponer elementos a los controles del shell.
 - **Pila:** el modelo aporta grupos por tipo (carpetas, imágenes, documentos, audio, vídeo y otros archivos). La UI coloca las pilas junto al borde derecho, de arriba hacia abajo, evitando los controles del shell y continuando en columnas hacia la izquierda cuando sea necesario. Muestra representantes con contadores; un clic expande o contrae cada pila. Este modo no sobrescribe las posiciones individuales ni permite arrastrar las pilas. Al volver a libre se recuperan las posiciones individuales guardadas.
 
@@ -51,3 +51,11 @@ Cuadrícula y libre mantienen registros de posiciones independientes. Antes de c
 Validado en Ubuntu con una carpeta XDG de prueba cuyo nombre contiene espacios: carga inicial, clasificación de carpetas e imágenes, exclusión de ocultos, creación, modificación, renombrado, eliminación, movimientos hacia dentro y fuera del Desktop, ráfagas de 40 archivos, actualizaciones sin reset y destrucción con operaciones pendientes. La misma prueba se ejecuta con y sin development mode.
 
 La compatibilidad de rutas utiliza el mismo código en ambos modos. Esto no constituye una prueba de arranque de la ISO.
+
+La geometría de la cuadrícula y su integración con el controlador se comprueban sin modificar el Desktop del usuario:
+
+```bash
+gjs gui/tests/desktop/grid.js gui/qml/scripts/desktop/grid.js gui/qml/controllers/Application.qml
+```
+
+Estas pruebas cubren controles superiores, dock, widgets, cambios de tamaño, arrastre múltiple, espacio ocupado, restauración y persistencia de coordenadas, así como la conservación del modo libre. No sustituyen una comprobación visual en una sesión Qt.

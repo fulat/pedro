@@ -3,6 +3,7 @@ import QtQuick.Window
 import gui
 import "../scripts/constants.js" as Constants
 import "../scripts/desktop/collision.js" as Collision
+import "../scripts/desktop/grid.js" as Grid
 
 // Owns the graphical shell state and every operation triggered by its views.
 QtObject {
@@ -263,17 +264,14 @@ QtObject {
             return Qt.point(x, y);
         }
 
-        const insetX = desktopInset(desktopShortcuts.width, desktopItemWidth());
-        const insetY = desktopInset(desktopShortcuts.height, desktopItemHeight());
         let closest = null;
         let distance = Number.MAX_VALUE;
-        for (let candidateY = insetY; candidateY + desktopItemHeight() <= desktopShortcuts.height - insetY; candidateY += desktopShortcuts.cellHeight) {
-            for (let candidateX = insetX; candidateX + desktopItemWidth() <= desktopShortcuts.width - insetX; candidateX += desktopShortcuts.cellWidth) {
-                const candidateDistance = Math.pow(candidateX - x, 2) + Math.pow(candidateY - y, 2);
-                if (candidateDistance < distance && available(candidateX, candidateY)) {
-                    closest = Qt.point(candidateX, candidateY);
-                    distance = candidateDistance;
-                }
+
+        for (const candidate of desktopGridCandidates()) {
+            const candidateDistance = Math.pow(candidate.x - x, 2) + Math.pow(candidate.y - y, 2);
+            if (candidateDistance < distance && available(candidate.x, candidate.y)) {
+                closest = Qt.point(candidate.x, candidate.y);
+                distance = candidateDistance;
             }
         }
         return closest || desktopInitialPosition(index);
@@ -290,9 +288,12 @@ QtObject {
             const x = Math.max(insetX, Math.min(entry.position.x, desktopShortcuts.width - desktopItemWidth() - insetX));
             const y = Math.max(insetY, Math.min(entry.position.y, desktopShortcuts.height - desktopItemHeight() - insetY));
 
+            if (Backend.desktopModel.organization === "grid") {
+                return desktopSpacedPosition(x, y, index);
+            }
+
             if (!desktopPlacementOverlapsShell(x, y, desktopItemWidth(), desktopItemHeight())) {
-                return Backend.desktopModel.organization === "grid"
-                    ? desktopSpacedPosition(x, y, index) : Qt.point(x, y);
+                return Qt.point(x, y);
             }
         }
 
@@ -326,6 +327,36 @@ QtObject {
 
     // Places initial model entries in free desktop cells without filesystem logic.
     function desktopInitialPosition(index, ignoreSaved = false) {
+        if (Backend.desktopModel.organization === "grid") {
+            const candidates = desktopGridCandidates().sort((first, second) => first.y - second.y || first.x - second.x);
+
+            for (const candidate of candidates) {
+                const rectangle = {x: candidate.x, y: candidate.y, width: desktopItemWidth(), height: desktopItemHeight()};
+                let reserved = false;
+
+                for (let itemIndex = 0; itemIndex < desktopShortcutRepeater.count; ++itemIndex) {
+                    const item = desktopShortcutRepeater.itemAt(itemIndex);
+                    if (!item || !item.visible) {
+                        continue;
+                    }
+
+                    const saved = item.app ? item.app.position : null;
+                    const previous = itemIndex < index ? item.initialPosition || Qt.point(item.x, item.y) : null;
+                    if ((!ignoreSaved && saved && Grid.intersects(rectangle,
+                                {x: saved.x, y: saved.y, width: desktopItemWidth(), height: desktopItemHeight()}, desktopGap()))
+                            || (previous && Grid.intersects(rectangle,
+                                {x: previous.x, y: previous.y, width: desktopItemWidth(), height: desktopItemHeight()}, desktopGap()))) {
+                        reserved = true;
+                        break;
+                    }
+                }
+
+                if (!reserved) {
+                    return Qt.point(candidate.x, candidate.y);
+                }
+            }
+        }
+
         let slot = 0;
         const insetX = desktopInset(desktopShortcuts.width, desktopItemWidth());
         const insetY = desktopInset(desktopShortcuts.height, desktopItemHeight());
@@ -497,15 +528,7 @@ QtObject {
 
         const rectangles = desktopDragItems.map(entry => ({x: entry.item.x, y: entry.item.y,
             width: entry.item.width, height: entry.item.height}));
-        const obstacles = [];
-        for (const obstacle of desktopObstacles) {
-            if (!obstacle || !obstacle.visible || obstacle.width <= 0 || obstacle.height <= 0) {
-                continue;
-            }
-            const origin = obstacle.mapToItem(desktopShortcuts, 0, 0);
-            obstacles.push({x: origin.x - 8, y: origin.y - 8,
-                width: obstacle.width + 16, height: obstacle.height + 16});
-        }
+        const obstacles = desktopObstacleRectangles();
         const currentX = desktopDragItems[0].item.x - desktopDragItems[0].x;
         const currentY = desktopDragItems[0].item.y - desktopDragItems[0].y;
         const allowed = Collision.constrain(rectangles, obstacles, movementX - currentX, movementY - currentY);
@@ -520,9 +543,9 @@ QtObject {
         }
     }
 
-    // Reports whether a proposed shortcut position overlaps fixed shell chrome.
-    function desktopPlacementOverlapsShell(itemX, itemY, itemWidth, itemHeight) {
-        const clearance = 8;
+    // Uses the same clearance for collision barriers and local grid boundaries.
+    function desktopObstacleRectangles() {
+        const rectangles = [];
 
         for (const obstacle of desktopObstacles) {
             if (!obstacle || !obstacle.visible || obstacle.width <= 0 || obstacle.height <= 0) {
@@ -530,14 +553,30 @@ QtObject {
             }
 
             const position = obstacle.mapToItem(desktopShortcuts, 0, 0);
-
-            if (itemX < position.x + obstacle.width + clearance && itemX + itemWidth > position.x - clearance
-                    && itemY < position.y + obstacle.height + clearance && itemY + itemHeight > position.y - clearance) {
-                return true;
-            }
+            rectangles.push({x: position.x - 8, y: position.y - 8,
+                width: obstacle.width + 16, height: obstacle.height + 16});
         }
 
-        return false;
+        return rectangles;
+    }
+
+    function desktopGridBounds() {
+        const insetX = desktopInset(desktopShortcuts.width, desktopItemWidth());
+        const insetY = desktopInset(desktopShortcuts.height, desktopItemHeight());
+
+        return {x: insetX, y: insetY, width: desktopShortcuts.width - insetX * 2,
+            height: desktopShortcuts.height - insetY * 2};
+    }
+
+    function desktopGridCandidates() {
+        return Grid.candidates(desktopGridBounds(), desktopObstacleRectangles(),
+            desktopItemWidth(), desktopItemHeight(), desktopShortcuts.cellWidth, desktopShortcuts.cellHeight);
+    }
+
+    // Reports whether a proposed shortcut position overlaps fixed shell chrome.
+    function desktopPlacementOverlapsShell(itemX, itemY, itemWidth, itemHeight) {
+        const rectangle = {x: itemX, y: itemY, width: itemWidth, height: itemHeight};
+        return desktopObstacleRectangles().some(obstacle => Grid.intersects(rectangle, obstacle, 0));
     }
 
     // Snaps a grouped drag to the nearest free set of desktop grid cells.
@@ -546,99 +585,38 @@ QtObject {
             return;
         }
 
-        const insetX = desktopInset(desktopShortcuts.width, desktopDragAnchor.width);
-        const insetY = desktopInset(desktopShortcuts.height, desktopDragAnchor.height);
-        const maximumColumn = Math.max(0, Math.floor((desktopShortcuts.width - desktopDragAnchor.width - insetX * 2) / desktopShortcuts.cellWidth));
-        const maximumRow = Math.max(0, Math.floor((desktopShortcuts.height - desktopDragAnchor.height - insetY * 2) / desktopShortcuts.cellHeight));
-        // Distribute leftover space between the inset screen edges.
-        const cellWidth = maximumColumn > 0 ? (desktopShortcuts.width - desktopDragAnchor.width - insetX * 2) / maximumColumn : desktopShortcuts.cellWidth;
-        const cellHeight = maximumRow > 0 ? (desktopShortcuts.height - desktopDragAnchor.height - insetY * 2) / maximumRow : desktopShortcuts.cellHeight;
+        const anchor = desktopDragItems.find(entry => entry.item === desktopDragAnchor) || desktopDragItems[0];
+        const entries = [anchor].concat(desktopDragItems.filter(entry => entry !== anchor));
         const occupied = [];
-        const cells = [];
-        let anchorCell = null;
 
         for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
             const shortcut = desktopShortcutRepeater.itemAt(index);
 
-            if (shortcut && !isDesktopShortcutSelected(shortcut.app.id)) {
-                occupied.push(shortcut);
+            if (shortcut && shortcut.visible && !isDesktopShortcutSelected(shortcut.app.id)) {
+                occupied.push({x: shortcut.x, y: shortcut.y, width: shortcut.width, height: shortcut.height});
             }
         }
 
-        for (let index = 0; index < desktopDragItems.length; ++index) {
-            const entry = desktopDragItems[index];
-            const cell = {
-                item: entry.item,
-                column: Math.round((entry.x - insetX) / cellWidth),
-                row: Math.round((entry.y - insetY) / cellHeight)
-            };
+        // Retain the spacing of the grid where this selection started.
+        let origin = {cellWidth: desktopShortcuts.cellWidth, cellHeight: desktopShortcuts.cellHeight};
+        let originDistance = Infinity;
 
-            cells.push(cell);
-
-            if (entry.item === desktopDragAnchor) {
-                anchorCell = cell;
+        for (const candidate of desktopGridCandidates()) {
+            const distance = Math.pow(candidate.x - anchor.x, 2) + Math.pow(candidate.y - anchor.y, 2);
+            if (distance < originDistance) {
+                origin = candidate;
+                originDistance = distance;
             }
         }
 
-        if (!anchorCell) {
-            anchorCell = cells[0];
-        }
-
-        const preferredColumn = Math.round((desktopDragAnchor.x - insetX) / cellWidth);
-        const preferredRow = Math.round((desktopDragAnchor.y - insetY) / cellHeight);
-        const horizontalDirection = Math.sign(preferredColumn - anchorCell.column);
-        const verticalDirection = Math.sign(preferredRow - anchorCell.row);
-        let bestPlacement = null;
-        let bestDistance = Number.MAX_VALUE;
-        let bestDirectionPenalty = Number.MAX_VALUE;
-
-        for (let row = 0; row <= maximumRow; ++row) {
-            for (let column = 0; column <= maximumColumn; ++column) {
-                const columnOffset = column - anchorCell.column;
-                const rowOffset = row - anchorCell.row;
-                const placement = [];
-                const placementCells = {};
-                let valid = true;
-
-                for (let index = 0; index < cells.length; ++index) {
-                    const cell = cells[index];
-                    const targetColumn = cell.column + columnOffset;
-                    const targetRow = cell.row + rowOffset;
-                    const targetX = insetX + targetColumn * cellWidth;
-                    const targetY = insetY + targetRow * cellHeight;
-                    const key = targetColumn + ":" + targetRow;
-
-                    const overlapsShortcut = occupied.some(shortcut => targetX < shortcut.x + shortcut.width + desktopGap()
-                            && targetX + cell.item.width + desktopGap() > shortcut.x && targetY < shortcut.y + shortcut.height + desktopGap()
-                            && targetY + cell.item.height + desktopGap() > shortcut.y);
-
-                    if (targetColumn < 0 || targetRow < 0 || targetX + cell.item.width > desktopShortcuts.width - insetX || targetY + cell.item.height > desktopShortcuts.height - insetY || desktopPlacementOverlapsShell(targetX, targetY, cell.item.width, cell.item.height) || overlapsShortcut || placementCells[key]) {
-                        valid = false;
-                        break;
-                    }
-
-                    placementCells[key] = true;
-                    placement.push({
-                        item: cell.item,
-                        x: targetX,
-                        y: targetY
-                    });
-                }
-
-                if (!valid) {
-                    continue;
-                }
-
-                const distance = Math.pow(insetX + column * cellWidth - desktopDragAnchor.x, 2) + Math.pow(insetY + row * cellHeight - desktopDragAnchor.y, 2);
-                const directionPenalty = (horizontalDirection !== 0 && (column - preferredColumn) * horizontalDirection < 0 ? 1 : 0) + (verticalDirection !== 0 && (row - preferredRow) * verticalDirection < 0 ? 1 : 0);
-
-                if (distance < bestDistance || (distance === bestDistance && directionPenalty < bestDirectionPenalty)) {
-                    bestDistance = distance;
-                    bestDirectionPenalty = directionPenalty;
-                    bestPlacement = placement;
-                }
-            }
-        }
+        const cells = entries.map(entry => ({width: entry.item.width, height: entry.item.height,
+            column: Math.round((entry.x - anchor.x) / origin.cellWidth),
+            row: Math.round((entry.y - anchor.y) / origin.cellHeight)}));
+        const result = Grid.placement(desktopGridBounds(), desktopObstacleRectangles(), occupied, cells,
+            {x: desktopDragAnchor.x, y: desktopDragAnchor.y},
+            desktopShortcuts.cellWidth, desktopShortcuts.cellHeight, desktopGap());
+        let bestPlacement = result ? result.map((position, index) => ({item: entries[index].item,
+            x: position.x, y: position.y})) : null;
 
         if (!bestPlacement) {
             bestPlacement = desktopDragItems.map(entry => ({
