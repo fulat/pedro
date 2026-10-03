@@ -155,7 +155,7 @@ Item {
                         font.weight: Font.Medium
                     }
                     Item {
-                        width: 24
+                        width: 27
                         height: 18
                         y: (parent.height - height) / 2
                         Icon.Tinted {
@@ -167,7 +167,7 @@ Item {
                             objectName: "batteryChargeFill"
                             x: 3
                             y: 5
-                            width: 15 * Math.max(0, Math.min(100, Backend.battery.value)) / 100
+                            width: 18 * Math.max(0, Math.min(100, Backend.battery.value)) / 100
                             height: 8
                             radius: 1.75
                             visible: Backend.battery.available
@@ -176,7 +176,7 @@ Item {
                             Behavior on width { NumberAnimation { duration: 180 } }
                         }
                         Image {
-                            x: 6.5
+                            x: 8
                             y: 3
                             width: 8
                             height: 12
