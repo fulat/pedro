@@ -259,7 +259,7 @@ Item {
 
         TopAction {
             anchors.centerIn: parent
-            icon: "../../assets/icons/bell.svg"
+            icon: Backend.focusMode.active ? "../../assets/icons/silent.svg" : "../../assets/icons/bell.svg"
             iconSize: 14
             description: qsTranslate("Pedro", "shell.notifications.title")
             highlighted: root.activeSource === "notifications"
