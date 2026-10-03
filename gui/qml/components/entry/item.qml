@@ -65,6 +65,26 @@ Item {
         menu.popup(menuPoint.x, menuPoint.y);
     }
 
+    DropArea {
+        anchors.fill: parent
+        enabled: entryItem.folder
+        keys: ["text/uri-list"]
+        onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, entryItem.entry.url); }
+        onDropped: drop => {
+            if (Backend.fileTransfer.canMove(drop.urls, entryItem.entry.url)) {
+                Backend.fileTransfer.move(drop.urls, entryItem.entry.url);
+                drop.accept(Qt.MoveAction);
+            }
+        }
+        Rectangle {
+            anchors.fill: parent
+            visible: parent.containsDrag
+            radius: 8
+            color: "#305b99dd"
+            border.color: "#805b99dd"
+        }
+    }
+
     Desktop.Icon {
         width: entryItem.iconSize
         height: width

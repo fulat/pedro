@@ -14,6 +14,18 @@ Rectangle {
     readonly property var controller: controllerLoader.item
     color: colors.surface
 
+    DropArea {
+        anchors.fill: parent
+        keys: ["text/uri-list"]
+        onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, directory.location); }
+        onDropped: drop => {
+            if (Backend.fileTransfer.canMove(drop.urls, directory.location)) {
+                Backend.fileTransfer.move(drop.urls, directory.location);
+                drop.accept(Qt.MoveAction);
+            }
+        }
+    }
+
     Directory { id: directory; objectName: "filesDirectory" }
     Loader {
         id: controllerLoader

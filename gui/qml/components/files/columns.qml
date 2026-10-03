@@ -44,6 +44,18 @@ ScrollView {
                     id: directory
                     Component.onCompleted: { open(column.modelData); setSort(columns.controller.sortKey); }
                 }
+                DropArea {
+                    anchors.fill: parent
+                    enabled: true
+                    keys: ["text/uri-list"]
+                    onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, directory.location); }
+                    onDropped: drop => {
+                        if (Backend.fileTransfer.canMove(drop.urls, directory.location)) {
+                            Backend.fileTransfer.move(drop.urls, directory.location);
+                            drop.accept(Qt.MoveAction);
+                        }
+                    }
+                }
                 Connections {
                     target: columns.controller
                     function onSortKeyChanged() { directory.setSort(columns.controller.sortKey); }

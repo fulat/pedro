@@ -203,7 +203,7 @@ Item {
         onPressed: mouse => controller.shortcutPressed(mouse, shortcutMouse, shortcut)
         onPositionChanged: mouse => controller.shortcutPositionChanged(mouse, pressedButtons, shortcutMouse, shortcut)
         onReleased: mouse => controller.shortcutReleased(mouse)
-        onCanceled: shell.controller.endDesktopDrag()
+        onCanceled: shell.controller.cancelDesktopDrag()
         onClicked: mouse => controller.shortcutClicked(mouse, moved, shortcut)
         onDoubleClicked: mouse => controller.shortcutDoubleClicked(mouse, moved, shortcut)
     }

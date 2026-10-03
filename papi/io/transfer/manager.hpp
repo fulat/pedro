@@ -1,38 +1,37 @@
 #pragma once
 
-#include <pedro/papi/io/transfer/manager.hpp>
-
 #include <QObject>
 #include <QUrl>
 #include <QVariantList>
 
-namespace Pedro::Papi::Gui::Clipboard {
+namespace Pedro::Papi::Io::Transfer {
 
     class Manager final : public QObject {
             Q_OBJECT
-            Q_PROPERTY(bool canPaste READ canPaste NOTIFY changed)
             Q_PROPERTY(bool busy READ busy NOTIFY changed)
 
         public:
 
             explicit Manager(QObject* parent = nullptr);
 
-            bool canPaste() const;
-
             bool busy() const;
 
-            Q_INVOKABLE void copy(const QVariantList& urls, bool cut = false);
+            Q_INVOKABLE bool canMove(const QVariantList& urls, const QUrl& destination) const;
 
-            Q_INVOKABLE void paste(const QUrl& destination);
+            Q_INVOKABLE void move(const QVariantList& urls, const QUrl& destination);
+
+            void transfer(const QVariantList& urls, const QUrl& destination, bool cut);
 
         signals:
             void changed();
 
             void failed(const QString& message);
 
+            void finished(const QString& error);
+
         private:
 
-            Pedro::Papi::Io::Transfer::Manager transfer;
+            bool transferring = false;
     };
 
 }

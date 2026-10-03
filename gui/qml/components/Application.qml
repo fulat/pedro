@@ -39,6 +39,7 @@ ApplicationWindow {
     readonly property real dockTileSize: applicationController.dockTileSize
     readonly property real dockSpacing: applicationController.dockSpacing
 
+    flags: Qt.Window | Qt.WindowStaysOnBottomHint
     title: qsTranslate("Pedro", "shell.productName")
     visibility: Backend.developmentMode ? Window.Windowed : Window.FullScreen
     color: Theme.desktopBackground
@@ -103,10 +104,17 @@ ApplicationWindow {
             onLoaded: {
                 window.configureFilesWindow(item);
                 item.objectName = "desktopFolderWindow";
+                item.activeChanged.connect(() => {
+                    if (item.active) window.activeFilesWindow = item;
+                });
                 if (item.controller) {
                     item.controller.directory.open(location);
                 }
-                item.closing.connect(() => Qt.callLater(() => folderWindowLoader.destroy()));
+                item.closing.connect(() => {
+                    if (window.activeFilesWindow === item) window.activeFilesWindow = null;
+                    window.folderWindows = window.folderWindows.filter(loader => loader !== folderWindowLoader);
+                    Qt.callLater(() => folderWindowLoader.destroy());
+                });
                 item.show();
                 item.raise();
                 item.requestActivate();
@@ -114,8 +122,38 @@ ApplicationWindow {
         }
     }
 
+    property var activeFilesWindow: null
+    Connections {
+        target: filesWindowLoader.item
+        function onActiveChanged() {
+            if (filesWindowLoader.item.active) window.activeFilesWindow = filesWindowLoader.item;
+        }
+    }
+
+    function keepFileWindowActive() {
+        if (activeFilesWindow && activeFilesWindow.visible) {
+            activeFilesWindow.requestActivate();
+        }
+    }
+
+    property var folderWindows: []
+
     function openFolderWindow(location) {
-        return folderWindowComponent.createObject(window, {location: location});
+        const loader = folderWindowComponent.createObject(window, {location: location});
+        folderWindows = folderWindows.concat([loader]);
+        return loader;
+    }
+
+    function fileDropWindowAt(point) {
+        const candidates = [filesWindowLoader].concat(folderWindows);
+        for (const loader of candidates) {
+            const item = loader && loader.item;
+            if (item && item.visible && point.x >= item.x && point.x <= item.x + item.width
+                    && point.y >= item.y && point.y <= item.y + item.height) {
+                return item;
+            }
+        }
+        return null;
     }
 
     function openNetworkSettings(page) {

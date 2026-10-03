@@ -4,11 +4,9 @@
 #include <QGuiApplication>
 #include <QMimeData>
 #include <QFileInfo>
-#include <QFutureWatcher>
-#include <QtConcurrentRun>
 
 #include <algorithm>
-#include <filesystem>
+#include <memory>
 
 namespace Pedro::Papi::Gui::Clipboard {
 
@@ -36,16 +34,18 @@ namespace Pedro::Papi::Gui::Clipboard {
     }
 
     Manager::Manager(QObject* parent) : QObject(parent) {
+        connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::changed, this, &Manager::changed);
+        connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::failed, this, &Manager::failed);
         connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, this, &Manager::changed);
     }
 
     bool Manager::canPaste() const {
         const auto urls = files();
-        return !transferring && !urls.isEmpty() && std::all_of(urls.cbegin(), urls.cend(), [](const auto& url) { return url.isLocalFile() && QFileInfo::exists(url.toLocalFile()); });
+        return !transfer.busy() && !urls.isEmpty() && std::all_of(urls.cbegin(), urls.cend(), [](const auto& url) { return url.isLocalFile() && QFileInfo::exists(url.toLocalFile()); });
     }
 
     bool Manager::busy() const {
-        return transferring;
+        return transfer.busy();
     }
 
     void Manager::copy(const QVariantList& values, bool cut) {
@@ -76,48 +76,18 @@ namespace Pedro::Papi::Gui::Clipboard {
         const auto* mime = QGuiApplication::clipboard()->mimeData();
         const auto original = mime->data("x-special/gnome-copied-files");
         const bool cut = original.startsWith("cut\n");
-        transferring = true;
-        emit changed();
-        auto* watcher = new QFutureWatcher<QString>(this);
-        connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher, cut, original, urls] {
-            const auto error = watcher->result();
-            watcher->deleteLater();
-            transferring = false;
-            if (!error.isEmpty()) {
-                emit failed(error);
-            } else if (cut && files() == urls && QGuiApplication::clipboard()->mimeData()->data("x-special/gnome-copied-files") == original) {
+        auto connection = std::make_shared<QMetaObject::Connection>();
+        *connection = connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::finished, this, [this, cut, original, urls, connection](const QString& error) {
+            disconnect(*connection);
+            if (error.isEmpty() && cut && files() == urls && QGuiApplication::clipboard()->mimeData()->data("x-special/gnome-copied-files") == original) {
                 QGuiApplication::clipboard()->clear();
             }
-            emit changed();
         });
-        watcher->setFuture(QtConcurrent::run([urls, destination, cut] {
-            namespace fs = std::filesystem;
-            try {
-                const fs::path folder(destination.toLocalFile().toStdString());
-                for (const auto& url : urls) {
-                    const fs::path source(url.toLocalFile().toStdString());
-                    auto target = folder / source.filename();
-                    // Never overwrite existing files or recurse into the source folder.
-                    const auto canonicalSource = fs::weakly_canonical(source);
-                    const auto canonicalFolder = fs::weakly_canonical(folder);
-                    auto relative = canonicalFolder.lexically_relative(canonicalSource);
-                    if (fs::is_directory(source) && (relative.empty() || *relative.begin() != "..")) {
-                        return QStringLiteral("Cannot paste a folder inside itself");
-                    }
-                    int suffix = 2;
-                    while (fs::exists(target) || fs::is_symlink(target)) {
-                        target = folder / (source.stem().string() + " (" + std::to_string(suffix++) + ")" + source.extension().string());
-                    }
-                    fs::copy(source, target, fs::copy_options::recursive | fs::copy_options::copy_symlinks);
-                    if (cut) {
-                        fs::remove_all(source);
-                    }
-                }
-            } catch (const fs::filesystem_error& error) {
-                return QString::fromUtf8(error.what());
-            }
-            return QString();
-        }));
+        QVariantList values;
+        for (const auto& url : urls) {
+            values.append(url);
+        }
+        transfer.transfer(values, destination, cut);
     }
 
 }

@@ -30,6 +30,7 @@ QtObject {
     property var desktopDragItems: []
     property var desktopDragAnchor: null
     property point desktopDragOrigin: Qt.point(0, 0)
+    property bool externalDesktopDrag: false
     property bool desktopDragging: false
     property bool stackDragPending: false
     property bool stackDragActive: false
@@ -75,6 +76,26 @@ QtObject {
             return;
         }
         selectOnlyDesktopShortcut(entry.id);
+    }
+
+    property Timer resizeTimer: Timer {
+        interval: 100
+        onTriggered: {
+            if (controller.desktopDragging || controller.stackDragPending) {
+                restart();
+            } else if (controller.desktopShortcutRepeater) {
+                controller.arrangeDesktop();
+            }
+        }
+    }
+    property Connections viewportConnection: Connections {
+        target: controller.desktopShortcuts || null
+        function onWidthChanged() { controller.resizeTimer.restart(); }
+        function onHeightChanged() { controller.resizeTimer.restart(); }
+    }
+    property Connections transferConnection: Connections {
+        target: Backend.fileTransfer || null
+        function onFailed(message) { controller.desktopOperationError = message; }
     }
 
     property Connections clipboardConnection: Connections {
@@ -528,10 +549,89 @@ QtObject {
         selectedDesktopIds = selected;
     }
 
+    function draggedDesktopUrls() {
+        if (stackDragPending && stackDragSource) {
+            return contextEntries(stackDragSource.app).map(entry => entry.url);
+        }
+        return desktopDragItems.map(entry => entry.item.app.url);
+    }
+
+    function updateDesktopDropTarget(shortcut, localX, localY) {
+        const point = shortcut.mapToItem(desktopShortcuts, localX, localY);
+        const urls = draggedDesktopUrls();
+        stackDropTargetId = "";
+        for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+            const candidate = desktopShortcutRepeater.itemAt(index);
+            if (!candidate || !candidate.visible || !candidate.app.isDirectory
+                    || urls.indexOf(candidate.app.url) !== -1
+                    || (candidate.stack && candidate.stacked && candidate.stack.leader && candidate.stack.count > 1 && !candidate.stack.expanded)) {
+                continue;
+            }
+            if (point.x >= candidate.x && point.x <= candidate.x + candidate.width
+                    && point.y >= candidate.y && point.y <= candidate.y + candidate.height
+                    && Backend.fileTransfer.canMove(urls, candidate.app.url)) {
+                stackDropTargetId = candidate.app.id;
+                break;
+            }
+        }
+        const globalPoint = shortcut.mapToGlobal(localX, localY);
+        if (window.fileDropWindowAt && window.fileDropWindowAt(globalPoint)) {
+            externalDesktopDrag = true;
+            Backend.dragFiles(shortcut, urls);
+            externalDesktopDrag = false;
+            for (const entry of desktopDragItems) {
+                if (entry.item) {
+                    entry.item.x = entry.x;
+                    entry.item.y = entry.y;
+                    entry.item.initialPosition = Qt.point(entry.x, entry.y);
+                }
+            }
+            desktopDragging = false;
+            desktopDragItems = [];
+            desktopDragAnchor = null;
+            stackDragPending = false;
+            stackDragActive = false;
+            stackDragSource = null;
+            stackDropTargetId = "";
+            return true;
+        }
+        return false;
+    }
+
+    function dropDesktopIntoFolder() {
+        if (!stackDropTargetId) {
+            return false;
+        }
+        const urls = draggedDesktopUrls();
+        for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+            const candidate = desktopShortcutRepeater.itemAt(index);
+            if (candidate && candidate.app.id === stackDropTargetId && Backend.fileTransfer.canMove(urls, candidate.app.url)) {
+                Backend.fileTransfer.move(urls, candidate.app.url);
+                for (const entry of desktopDragItems) {
+                    entry.item.x = entry.x;
+                    entry.item.y = entry.y;
+                    entry.item.initialPosition = Qt.point(entry.x, entry.y);
+                }
+                desktopDragging = false;
+                desktopDragItems = [];
+                desktopDragAnchor = null;
+                stackDragPending = false;
+                stackDragActive = false;
+                stackDragSource = null;
+                stackDropTargetId = "";
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Captures the selected shortcuts before a grouped desktop drag.
     function beginDesktopDrag(shortcut, localX, localY) {
         if (renamingDesktopId.length > 0) {
             return;
+        }
+        if (window.keepFileWindowActive) {
+            Qt.callLater(window.keepFileWindowActive);
         }
         const position = shortcut.mapToItem(desktopShortcuts, localX, localY);
         if (Backend.desktopModel.organization === "stack") {
@@ -572,25 +672,16 @@ QtObject {
         if (stackDragPending) {
             stackDragActive = true;
             stackDragPoint = shortcut.mapToItem(desktopShortcuts, localX, localY);
-            stackDropTargetId = "";
-            for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
-                const candidate = desktopShortcutRepeater.itemAt(index);
-                if (!candidate || !candidate.visible || candidate === stackDragSource || !candidate.app.isDirectory
-                        || (candidate.stack.leader && candidate.stack.count > 1 && !candidate.stack.expanded)) {
-                    continue;
-                }
-                if (stackDragPoint.x >= candidate.x && stackDragPoint.x <= candidate.x + candidate.width
-                        && stackDragPoint.y >= candidate.y && stackDragPoint.y <= candidate.y + candidate.height) {
-                    stackDropTargetId = candidate.app.id;
-                    break;
-                }
-            }
+            updateDesktopDropTarget(shortcut, localX, localY);
             return;
         }
         if (!desktopDragging || desktopDragItems.length === 0) {
             return;
         }
 
+        if (updateDesktopDropTarget(shortcut, localX, localY)) {
+            return;
+        }
         const position = shortcut.mapToItem(desktopShortcuts, localX, localY);
         let movementX = position.x - desktopDragOrigin.x;
         let movementY = position.y - desktopDragOrigin.y;
@@ -727,8 +818,32 @@ QtObject {
         }
     }
 
+    function cancelDesktopDrag() {
+        if (externalDesktopDrag) {
+            return;
+        }
+        for (const entry of desktopDragItems) {
+            entry.item.x = entry.x;
+            entry.item.y = entry.y;
+            entry.item.initialPosition = Qt.point(entry.x, entry.y);
+        }
+        desktopDragging = false;
+        desktopDragItems = [];
+        desktopDragAnchor = null;
+        stackDragPending = false;
+        stackDragActive = false;
+        stackDragSource = null;
+        stackDropTargetId = "";
+    }
+
     // Completes a desktop drag and clears its transient state.
     function endDesktopDrag() {
+        if (externalDesktopDrag) {
+            return;
+        }
+        if (dropDesktopIntoFolder()) {
+            return;
+        }
         if (stackDragPending) {
             stackDragActive = false;
             if (stackDragSource) {
@@ -756,6 +871,7 @@ QtObject {
         desktopDragging = false;
         desktopDragAnchor = null;
         desktopDragItems = [];
+        stackDropTargetId = "";
     }
 
     // Keeps the clock state out of the visual component.

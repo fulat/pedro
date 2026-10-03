@@ -4,6 +4,10 @@
 #include <pedro/papi/utils/utils.hpp>
 #include <pedro/papi/gui/wallpapers/wallpaper.hpp>
 
+#include <QDrag>
+#include <QMimeData>
+#include <QQuickItem>
+#include <QQuickWindow>
 #include <QDir>
 #include <QFutureWatcher>
 #include <QStandardPaths>
@@ -593,4 +597,24 @@ qreal Backend::dockHoverScale() const {
 
 QObject* Backend::clipboard() {
     return &clipboard_;
+}
+
+QObject* Backend::fileTransfer() {
+    return &transfer_;
+}
+
+int Backend::dragFiles(QObject* source, const QVariantList& values) {
+    auto* item = qobject_cast<QQuickItem*>(source);
+    if (!item || !item->window()) {
+        return Qt::IgnoreAction;
+    }
+    auto* mime = new QMimeData;
+    QList<QUrl> urls;
+    for (const auto& value : values) {
+        urls.append(value.toUrl());
+    }
+    mime->setUrls(urls);
+    QDrag drag(item->window());
+    drag.setMimeData(mime);
+    return drag.exec(Qt::MoveAction, Qt::MoveAction);
 }

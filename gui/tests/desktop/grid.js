@@ -98,10 +98,12 @@ const context = {
     desktopDragAnchor: null,
     desktopDragging: true,
     selectedDesktopIds: [],
+    externalDesktopDrag: false,
+    stackDropTargetId: "",
     stackDragPending: false
 };
 const Controller = new Function("context", "with (context) {\n" + functions
-    + "\nreturn {contextEntries, entryAction, select, wallpaperAction, snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, sortDesktop, endDesktopDrag};\n}")(context);
+    + "\nreturn {cancelDesktopDrag, arrangeDesktop, dropDesktopIntoFolder, contextEntries, entryAction, select, wallpaperAction, snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, sortDesktop, endDesktopDrag};\n}")(context);
 
 function obstacle(rectangle) {
     return {width: rectangle.width - 16, height: rectangle.height - 16, visible: true,
@@ -239,3 +241,23 @@ context.Backend.desktopModel.organization = "free";
 context.selectedDesktopIds = shortcuts.slice(0, 2).map(item => item.app.id);
 assert(Controller.contextEntries(shortcuts[0].app).length === 2, "Group context actions use the full selection");
 print("Desktop stack opening: 1000 independent folder and file requests passed");
+
+const moves = [];
+context.Backend.fileTransfer = {canMove: () => true, move: (urls, target) => moves.push({urls, target})};
+shortcuts.splice(0, shortcuts.length,
+    {app: {id: "file", url: "file:///file"}, x: 400, y: 200},
+    {app: {id: "target", url: "file:///folder", isDirectory: true}, x: 600, y: 200});
+context.desktopShortcutRepeater.count = shortcuts.length;
+context.desktopDragItems = [{item: shortcuts[0], x: 100, y: 200}];
+context.stackDropTargetId = "target";
+assert(Controller.dropDesktopIntoFolder(), "Dropping on a folder performs a move");
+assert(moves.length === 1 && moves[0].urls[0] === "file:///file" && moves[0].target === "file:///folder", "Drop includes dragged file and folder destination");
+assert(shortcuts[0].x === 100 && context.desktopDragItems.length === 0, "Folder drop restores source layout and clears drag state");
+print("Desktop folder drop: passed");
+
+context.desktopDragItems = [{item: shortcuts[0], x: 120, y: 220}];
+shortcuts[0].x = 400;
+context.stackDropTargetId = "target";
+Controller.cancelDesktopDrag();
+assert(moves.length === 1 && shortcuts[0].x === 120 && !context.stackDropTargetId, "Cancel restores original positions without moving into the hovered folder");
+print("Desktop drag cancellation: passed");

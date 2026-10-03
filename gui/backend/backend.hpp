@@ -4,6 +4,7 @@
 #include <pedro/papi/io/bluetooth/manager.hpp>
 #include <pedro/papi/io/desktop/model.hpp>
 #include <pedro/papi/gui/clipboard/manager.hpp>
+#include <pedro/papi/io/transfer/manager.hpp>
 #include <pedro/papi/io/network/wifi/manager.hpp>
 #include <pedro/papi/system/system.hpp>
 #include <pedro/papi/utils/utils.hpp>
@@ -29,6 +30,7 @@ class Backend final : public QObject {
         QML_SINGLETON
         Q_PROPERTY(QAbstractItemModel* desktopModel READ desktopModel CONSTANT)
         Q_PROPERTY(QObject* clipboard READ clipboard CONSTANT)
+        Q_PROPERTY(QObject* fileTransfer READ fileTransfer CONSTANT)
         Q_PROPERTY(QObject* screenBrightness READ screenBrightness CONSTANT)
         Q_PROPERTY(QObject* audioVolume READ audioVolume CONSTANT)
         Q_PROPERTY(QObject* battery READ battery CONSTANT)
@@ -72,6 +74,10 @@ class Backend final : public QObject {
         QAbstractItemModel* desktopModel();
 
         QObject* clipboard();
+
+        QObject* fileTransfer();
+
+        Q_INVOKABLE int dragFiles(QObject* source, const QVariantList& urls);
 
         QObject* screenBrightness();
 
@@ -158,6 +164,8 @@ class Backend final : public QObject {
         void setStatusMessage(const QString& message);
 
         Pedro::Papi::Gui::Clipboard::Manager clipboard_;
+
+        Pedro::Papi::Io::Transfer::Manager transfer_;
 
         std::unique_ptr<Pedro::Papi::Io::Desktop::Model> desktop_;
 

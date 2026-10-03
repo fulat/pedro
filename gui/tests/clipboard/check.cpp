@@ -64,5 +64,29 @@ int main(int argc, char** argv) {
     mime->setUrls({QUrl("https://example.com/file")});
     QGuiApplication::clipboard()->setMimeData(mime);
     require(!manager.canPaste(), "Web links must not enable file paste");
+    Pedro::Papi::Io::Transfer::Manager transfer;
+    const QVariantList moving{QUrl::fromLocalFile(root + "/destination/note.txt")};
+    const auto destination = QUrl::fromLocalFile(root + "/destination/folder");
+    require(!transfer.canMove({folder}, folder), "A folder cannot be dropped inside itself");
+    require(!transfer.canMove(moving, QUrl::fromLocalFile(root + "/destination")), "Dropping into the same parent must be rejected");
+    require(transfer.canMove(moving, destination), "Files can be dropped into a different folder");
+    QGuiApplication::clipboard()->setText("keep this clipboard");
+    transfer.move(moving, destination);
+    QElapsedTimer timer;
+    timer.start();
+    while (transfer.busy() && timer.elapsed() < 5000) {
+        app.processEvents();
+        QThread::msleep(5);
+    }
+    require(!transfer.busy() && !QFile::exists(root + "/destination/note.txt") && QFile::exists(root + "/destination/folder/note (2).txt"), "File drop must move without overwriting");
+    require(QGuiApplication::clipboard()->text() == "keep this clipboard", "Dragging must preserve clipboard contents");
+    require(!transfer.canMove({folder}, QUrl::fromLocalFile(root + "/source/folder/nested")), "Nested folder destinations must be rejected");
+    transfer.move({folder}, QUrl::fromLocalFile(root + "/destination"));
+    timer.restart();
+    while (transfer.busy() && timer.elapsed() < 5000) {
+        app.processEvents();
+        QThread::msleep(5);
+    }
+    require(!transfer.busy() && !QFile::exists(root + "/source/folder") && QDir(root + "/destination/folder (3)").exists(), "Folder drop must move the directory and preserve collisions");
     std::cout << "Clipboard: copy, cut, collision, recursive protection and availability passed\n";
 }

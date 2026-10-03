@@ -159,6 +159,32 @@ int main(int argc, char** argv) {
             }
         }
     }
+    for (const auto& mode : {"stack", "grid"}) {
+        model.setOrganization(mode);
+        root->setProperty("width", mode == QString("stack") ? 1000 : 800);
+        root->setProperty("height", 600);
+        timer.restart();
+        while (timer.elapsed() < 250) {
+            app.processEvents();
+            QThread::msleep(5);
+        }
+        for (int row = 0; row < model.rowCount(); ++row) {
+            QQuickItem* item = nullptr;
+            QMetaObject::invokeMethod(repeater, "itemAt", Q_RETURN_ARG(QQuickItem*, item), Q_ARG(int, row));
+            if (!item || item->x() < 0 || item->y() < 0 || item->x() + item->width() > root->property("width").toDouble() || item->y() + item->height() > 600) {
+                std::cerr << "Resized desktop leaves icons outside the viewport\n";
+                return 16;
+            }
+        }
+        if (mode == QString("stack")) {
+            QQuickItem* item = nullptr;
+            QMetaObject::invokeMethod(repeater, "itemAt", Q_RETURN_ARG(QQuickItem*, item), Q_ARG(int, 0));
+            if (item->x() != 886) {
+                std::cerr << "Stack fails to follow resized right edge\n";
+                return 17;
+            }
+        }
+    }
     delete root;
     std::cout << "Qt/QML desktop: all four menu actions order and persist real repeater items in Free/Grid/Stack\n";
 }
