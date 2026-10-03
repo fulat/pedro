@@ -90,7 +90,7 @@ Item {
         anchors.topMargin: 10
         anchors.right: notificationButton.left
         anchors.rightMargin: 8
-        width: statusRow.width + 16
+        width: statusRow.width + 8 + (height - statusRow.height) / 2
         height: 30
 
         Liquid {
@@ -102,7 +102,9 @@ Item {
         Row {
             id: statusRow
 
-            anchors.centerIn: parent
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: (statusPill.height - height) / 2
             spacing: 4
 
             TopAction {
@@ -181,7 +183,7 @@ Item {
 
             Item {
                 id: dateButton
-                width: dateLabel.implicitWidth + 12
+                width: dateLabel.implicitWidth + 24
                 height: 24
                 Rectangle {
                     anchors.fill: parent
