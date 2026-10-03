@@ -151,7 +151,6 @@ Controls.Menu {
     Entry {
         text: qsTranslate("Pedro", "folder.menu.paste")
         symbol: "paste"
-        visible: root.canPaste
         enabled: root.canPaste
         onTriggered: root.actionRequested("paste")
     }

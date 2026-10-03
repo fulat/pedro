@@ -57,7 +57,8 @@ Item {
         if (!window || !menu) {
             return;
         }
-        menu.selectionCount = controller && controller.selectedDesktopIds ? controller.selectedDesktopIds.length : 1;
+        menu.selectionCount = controller && controller.contextEntries ? controller.contextEntries(entry).length : 1;
+        menu.canPaste = Qt.binding(() => Backend.clipboard.canPaste);
         menu.folderName = entry.name || "";
         menu.fileMode = !folder;
         menu.imageFile = entry.icon === "image";

@@ -490,7 +490,7 @@ void Backend::refreshBluetooth() {
             bluetoothScanning_ = false;
             bluetoothDevices_.clear();
             bluetoothError_ = result.error;
-            
+
             emit bluetoothChanged();
             return;
         }
@@ -589,4 +589,8 @@ QString Backend::appearanceMode() const {
 
 qreal Backend::dockHoverScale() const {
     return dockHoverScale_;
+}
+
+QObject* Backend::clipboard() {
+    return &clipboard_;
 }

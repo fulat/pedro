@@ -77,6 +77,52 @@ QtObject {
         selectOnlyDesktopShortcut(entry.id);
     }
 
+    property Connections clipboardConnection: Connections {
+        target: Backend.clipboard || null
+        function onFailed(message) { controller.desktopOperationError = message; }
+    }
+
+    // File preview windows will consume one request per opened file.
+    signal filePreviewRequested(var entry)
+
+    function contextEntries(entry) {
+        let ids = isDesktopShortcutSelected(entry.id) ? selectedDesktopIds.slice() : [entry.id];
+        if (Backend.desktopModel.organization === "stack") {
+            const stack = stackInfo(entry);
+            if (stack.leader && !stack.expanded) {
+                const group = Backend.desktopModel.groups.find(group => group.key === stack.key);
+                if (group) {
+                    ids = Array.from(new Set(ids.concat(group.members)));
+                }
+            }
+        }
+        const entries = [];
+        for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+            const item = desktopShortcutRepeater.itemAt(index);
+            if (item && item.app && ids.indexOf(item.app.id) !== -1) {
+                entries.push(item.app);
+            }
+        }
+        return entries;
+    }
+
+    function entryAction(action, entry) {
+        const entries = contextEntries(entry);
+        if (action === "open") {
+            for (const item of entries) {
+                if (item.isDirectory && item.url) {
+                    window.openFolderWindow(item.url);
+                } else {
+                    filePreviewRequested(item);
+                }
+            }
+        } else if (action === "copy" || action === "cut") {
+            Backend.clipboard.copy(entries.map(item => item.url), action === "cut");
+        } else if (action === "paste") {
+            Backend.clipboard.paste(entry.isDirectory ? entry.url : Backend.desktopModel.directory);
+        }
+    }
+
     function openEntry(entry) {
         if (!entry.isDirectory || !entry.url) {
             return;
@@ -162,6 +208,8 @@ QtObject {
                 }
             }
             Backend.desktopModel.sort(action);
+        } else if (action === "paste") {
+            Backend.clipboard.paste(Backend.desktopModel.directory);
         } else if (action === "align") {
             Backend.desktopModel.setKeepAligned(!Backend.desktopModel.keepAligned);
         }

@@ -18,7 +18,9 @@ QtObject {
     }
 
     function dispatch(action) {
-        if (action === "open") {
+        if (owner && owner.entryAction) {
+            owner.entryAction(action, entry);
+        } else if (action === "open") {
             activate();
         }
     }

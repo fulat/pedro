@@ -12,6 +12,7 @@ find_package(
     REQUIRED
     COMPONENTS
         Core
+        Gui
         Concurrent
         DBus
         Qml
@@ -208,6 +209,7 @@ target_link_libraries(
 
     PUBLIC
         Qt6::Core
+        Qt6::Gui
         Qt6::Concurrent
         Qt6::Qml
 

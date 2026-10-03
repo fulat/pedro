@@ -62,35 +62,62 @@ ApplicationWindow {
         id: filesWindowLoader
         source: "window/frame.qml"
 
-        onLoaded: {
-            item.objectName = "filesQuickWindow";
-            item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
-            item.contentSource = Qt.resolvedUrl("files/browser.qml");
-            item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#70e8edf5" : "#50101825");
-            item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff");
-            item.headerSource = Qt.resolvedUrl("files/header.qml");
-            item.headerHeight = 58;
-            item.headerOffset = Qt.binding(() => item.controller && item.controller.sidebarCollapsed
-                ? item.titleOffset + item.titleContentWidth + 16 : 222);
-            item.titleOffset = 88;
-            item.titleSize = 16;
-            item.titleInteractive = true;
-            item.titleClicked.connect(() => {
-                if (item.controller) item.controller.sidebarCollapsed = !item.controller.sidebarCollapsed;
-            });
-            item.contentMargin = 0;
-            item.contentTopGap = 0;
-            item.windowRadius = 22;
-            item.minimumWidth = Screen.desktopAvailableWidth > 0 ? Math.min(900, Screen.desktopAvailableWidth * 0.86) : 900;
-            item.minimumHeight = Screen.desktopAvailableHeight > 0
-                ? Math.min(720, Screen.desktopAvailableHeight * 0.82) : 720;
-            item.transientParent = null;
-            item.width = item.minimumWidth;
-            item.height = item.minimumHeight;
-            item.x = window.x + Math.round((window.width - item.width) / 2);
-            item.y = window.y + Math.round((window.height - item.height) / 2);
+        onLoaded: window.configureFilesWindow(item)
+    }
+
+    function configureFilesWindow(item) {
+        item.objectName = "filesQuickWindow";
+        item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
+        item.contentSource = Qt.resolvedUrl("files/browser.qml");
+        item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#70e8edf5" : "#50101825");
+        item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff");
+        item.headerSource = Qt.resolvedUrl("files/header.qml");
+        item.headerHeight = 58;
+        item.headerOffset = Qt.binding(() => item.controller && item.controller.sidebarCollapsed
+            ? item.titleOffset + item.titleContentWidth + 16 : 222);
+        item.titleOffset = 88;
+        item.titleSize = 16;
+        item.titleInteractive = true;
+        item.titleClicked.connect(() => {
+            if (item.controller) item.controller.sidebarCollapsed = !item.controller.sidebarCollapsed;
+        });
+        item.contentMargin = 0;
+        item.contentTopGap = 0;
+        item.windowRadius = 22;
+        item.minimumWidth = Screen.desktopAvailableWidth > 0 ? Math.min(900, Screen.desktopAvailableWidth * 0.86) : 900;
+        item.minimumHeight = Screen.desktopAvailableHeight > 0
+            ? Math.min(720, Screen.desktopAvailableHeight * 0.82) : 720;
+        item.transientParent = null;
+        item.width = item.minimumWidth;
+        item.height = item.minimumHeight;
+        item.x = window.x + Math.round((window.width - item.width) / 2);
+        item.y = window.y + Math.round((window.height - item.height) / 2);
+    }
+
+    Component {
+        id: folderWindowComponent
+        Loader {
+            id: folderWindowLoader
+            property url location
+            source: "window/frame.qml"
+            onLoaded: {
+                window.configureFilesWindow(item);
+                item.objectName = "desktopFolderWindow";
+                if (item.controller) {
+                    item.controller.directory.open(location);
+                }
+                item.closing.connect(() => Qt.callLater(() => folderWindowLoader.destroy()));
+                item.show();
+                item.raise();
+                item.requestActivate();
+            }
         }
     }
+
+    function openFolderWindow(location) {
+        return folderWindowComponent.createObject(window, {location: location});
+    }
+
     function openNetworkSettings(page) {
         if (page && networkWindowLoader.item.contentItem) {
             networkWindowLoader.item.contentItem.open(page);

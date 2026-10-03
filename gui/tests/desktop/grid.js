@@ -101,7 +101,7 @@ const context = {
     stackDragPending: false
 };
 const Controller = new Function("context", "with (context) {\n" + functions
-    + "\nreturn {select, wallpaperAction, snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, sortDesktop, endDesktopDrag};\n}")(context);
+    + "\nreturn {contextEntries, entryAction, select, wallpaperAction, snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, sortDesktop, endDesktopDrag};\n}")(context);
 
 function obstacle(rectangle) {
     return {width: rectangle.width - 16, height: rectangle.height - 16, visible: true,
@@ -216,3 +216,26 @@ Controller.wallpaperAction("select");
 Controller.select(dragged.app);
 assert(context.selectedDesktopIds.length === 1, "Normal click still selects a single entry");
 print("Desktop context selection: passed");
+
+const opened = [];
+const previews = [];
+context.window = {openFolderWindow: url => opened.push(url)};
+context.filePreviewRequested = entry => previews.push(entry);
+shortcuts.splice(0, shortcuts.length);
+for (let index = 0; index < 1000; ++index) {
+    shortcuts.push({app: {id: "folder" + index, isDirectory: true, url: "file:///folder" + index}});
+}
+context.desktopShortcutRepeater.count = shortcuts.length;
+context.Backend.desktopModel.organization = "stack";
+context.Backend.desktopModel.groups = [{key: "folder", members: shortcuts.map(item => item.app.id)}];
+context.expandedDesktopStacks = [];
+context.selectedDesktopIds = [shortcuts[0].app.id];
+Controller.entryAction("open", shortcuts[0].app);
+assert(opened.length === 1000 && new Set(opened).size === 1000, "Opening a collapsed stack requests an independent window for every folder without a cap");
+shortcuts.forEach(item => { item.app.isDirectory = false; });
+Controller.entryAction("open", shortcuts[0].app);
+assert(previews.length === 1000, "Every file in a stack receives a future preview request");
+context.Backend.desktopModel.organization = "free";
+context.selectedDesktopIds = shortcuts.slice(0, 2).map(item => item.app.id);
+assert(Controller.contextEntries(shortcuts[0].app).length === 2, "Group context actions use the full selection");
+print("Desktop stack opening: 1000 independent folder and file requests passed");
