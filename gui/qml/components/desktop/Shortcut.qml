@@ -57,7 +57,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: 12
-        color: shortcut.stackIndicator ? "transparent" : shell.controller.stackDropTargetId === shortcut.app.id ? "#405b99dd" : shortcut.selected ? Theme.shortcutSelected : shortcutMouse.containsMouse ? Theme.shortcutHover : "transparent"
+        color: shortcut.stackIndicator ? (shortcutMouse.containsMouse ? Theme.shortcutHover : "transparent") : shell.controller.stackDropTargetId === shortcut.app.id ? "#405b99dd" : shortcut.selected ? Theme.shortcutSelected : shortcutMouse.containsMouse ? Theme.shortcutHover : "transparent"
         border.width: !shortcut.stackIndicator && (shortcut.selected || shell.controller.stackDropTargetId === shortcut.app.id) ? 1 : 0
         border.color: Theme.shortcutSelectedBorder
 
