@@ -30,6 +30,7 @@ Window {
     readonly property alias contentItem: contentLoader.item
     property url contentSource
     property color surfaceColor: "transparent"
+    property color glassTint: Backend.appearanceMode === "light" ? Theme.menuGlassLightHaze : Theme.menuGlassHaze
     property Window wallpaperWindow
     // Wayland does not expose global top-level positions to clients. Keep native
     // transparency there instead of drawing a wallpaper sample that cannot track moves.
@@ -95,6 +96,7 @@ Window {
             anchors.fill: parent
             backdrop: frame.canTrackWallpaper ? windowBackdrop : null
             frosted: true
+            tintColor: frame.glassTint
             cornerRadius: frame.maximized ? 0 : frame.windowRadius
         }
 

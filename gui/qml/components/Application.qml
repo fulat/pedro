@@ -71,6 +71,7 @@ ApplicationWindow {
         item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
         item.contentSource = Qt.resolvedUrl("files/browser.qml");
         item.wallpaperWindow = window;
+        item.glassTint = Qt.binding(() => Backend.appearanceMode === "light" ? Theme.filesGlassLightHaze : Theme.filesGlassHaze);
         item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff");
         item.headerSource = Qt.resolvedUrl("files/header.qml");
         item.headerHeight = 58;
