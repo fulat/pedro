@@ -11,12 +11,16 @@ Rectangle {
     id: root
     property string title
     property string subtitle
+
     property url icon
+
     property color activeColor: Theme.white
     property color inactiveColor: Theme.white
     property color symbolColor: root.active ? root.activeColor : root.inactiveColor
+
     property bool active: false
-    property bool toggleable: true
+    property bool toggleable: Papi.bluetoothAvailable
+
     signal activated
 
     // Connects the tile presentation to its behavior controller.

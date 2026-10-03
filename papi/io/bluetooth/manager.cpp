@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 using BluetoothInterfaceMap = QMap<QString, QVariantMap>;
@@ -24,6 +25,7 @@ Q_DECLARE_METATYPE(BluetoothInterfaceMap)
 Q_DECLARE_METATYPE(BluetoothManagedObjects)
 
 namespace Pedro::Papi::Bluetooth {
+
     namespace {
 
         constexpr auto service = "org.bluez";
@@ -34,13 +36,11 @@ namespace Pedro::Papi::Bluetooth {
         constexpr auto deviceInterface = "org.bluez.Device1";
 
         std::runtime_error dbusError(const std::string& operation, const QDBusError& error) {
-
             return std::runtime_error(operation + ": " + error.message().toStdString());
         }
 
         QDBusConnection systemBus() {
-
-            auto bus = QDBusConnection::systemBus();
+            const auto bus = QDBusConnection::systemBus();
 
             if (!bus.isConnected()) {
                 throw std::runtime_error("Unable to connect to the system D-Bus");
@@ -49,10 +49,18 @@ namespace Pedro::Papi::Bluetooth {
             return bus;
         }
 
-        BluetoothManagedObjects managedObjects(const QDBusConnection& bus) {
+        void registerDbusTypes() {
+            static const bool registered = [] {
+                qDBusRegisterMetaType<BluetoothInterfaceMap>();
+                qDBusRegisterMetaType<BluetoothManagedObjects>();
+                return true;
+            }();
 
-            qDBusRegisterMetaType<BluetoothInterfaceMap>();
-            qDBusRegisterMetaType<BluetoothManagedObjects>();
+            (void)registered;
+        }
+
+        BluetoothManagedObjects managedObjects(const QDBusConnection& bus) {
+            registerDbusTypes();
 
             QDBusInterface manager(service, managerPath, objectManagerInterface, bus);
 
@@ -70,7 +78,6 @@ namespace Pedro::Papi::Bluetooth {
         }
 
         std::vector<QString> adapterPaths(const BluetoothManagedObjects& objects) {
-
             std::vector<QString> paths;
 
             for (auto object = objects.cbegin(); object != objects.cend(); ++object) {
@@ -83,7 +90,6 @@ namespace Pedro::Papi::Bluetooth {
         }
 
         void callAdapters(const QString& method, const std::string& operation) {
-
             const auto bus = systemBus();
             const auto paths = adapterPaths(managedObjects(bus));
 
@@ -96,13 +102,15 @@ namespace Pedro::Papi::Bluetooth {
 
             for (const auto& path : paths) {
                 QDBusInterface adapter(service, path, adapterInterface, bus);
+
                 const auto reply = adapter.call(method);
 
                 if (reply.type() != QDBusMessage::ErrorMessage) {
                     succeeded = true;
-                } else {
-                    lastError = QDBusError(reply);
+                    continue;
                 }
+
+                lastError = QDBusError(reply);
             }
 
             if (!succeeded) {
@@ -113,20 +121,24 @@ namespace Pedro::Papi::Bluetooth {
     } // namespace
 
     Snapshot Manager::snapshot() const {
-
         const auto bus = systemBus();
         const auto objects = managedObjects(bus);
+
         Snapshot result;
 
         for (auto object = objects.cbegin(); object != objects.cend(); ++object) {
-            const auto adapter = object.value().constFind(QString::fromLatin1(adapterInterface));
+            const auto& interfaces = object.value();
 
-            if (adapter == object.value().cend()) {
+            const auto adapter = interfaces.constFind(QString::fromLatin1(adapterInterface));
+
+            if (adapter == interfaces.cend()) {
                 continue;
             }
 
             result.available = true;
+
             result.enabled = result.enabled || adapter->value(QStringLiteral("Powered")).toBool();
+
             result.scanning = result.scanning || adapter->value(QStringLiteral("Discovering")).toBool();
         }
 
@@ -135,16 +147,22 @@ namespace Pedro::Papi::Bluetooth {
         }
 
         for (auto object = objects.cbegin(); object != objects.cend(); ++object) {
-            const auto device = object.value().constFind(QString::fromLatin1(deviceInterface));
+            const auto& interfaces = object.value();
 
-            if (device == object.value().cend()) {
+            const auto device = interfaces.constFind(QString::fromLatin1(deviceInterface));
+
+            if (device == interfaces.cend()) {
                 continue;
             }
 
             Device value;
+
             value.name = device->value(QStringLiteral("Alias"), device->value(QStringLiteral("Name"))).toString().toStdString();
+
             value.icon = device->value(QStringLiteral("Icon")).toString().toStdString();
+
             value.connected = device->value(QStringLiteral("Connected")).toBool();
+
             value.paired = device->value(QStringLiteral("Paired")).toBool();
 
             if (value.name.empty()) {
@@ -170,7 +188,6 @@ namespace Pedro::Papi::Bluetooth {
     }
 
     void Manager::setEnabled(bool enabled) const {
-
         const auto bus = systemBus();
         const auto paths = adapterPaths(managedObjects(bus));
 
@@ -183,14 +200,17 @@ namespace Pedro::Papi::Bluetooth {
 
         for (const auto& path : paths) {
             QDBusInterface properties(service, path, propertiesInterface, bus);
+
             const auto value = QVariant::fromValue(QDBusVariant(QVariant::fromValue(enabled)));
+
             const auto reply = properties.call(QStringLiteral("Set"), QString::fromLatin1(adapterInterface), QStringLiteral("Powered"), value);
 
             if (reply.type() != QDBusMessage::ErrorMessage) {
                 succeeded = true;
-            } else {
-                lastError = QDBusError(reply);
+                continue;
             }
+
+            lastError = QDBusError(reply);
         }
 
         if (!succeeded) {
@@ -198,13 +218,25 @@ namespace Pedro::Papi::Bluetooth {
         }
     }
 
-    void Manager::scan() const {
 
+    bool Manager::isAvailable() const {
+        const auto bus = systemBus();
+        const auto objects = managedObjects(bus);
+
+        for (auto object = objects.cbegin(); object != objects.cend(); ++object) {
+            if (object.value().contains(QString::fromLatin1(adapterInterface))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void Manager::scan() const {
         callAdapters(QStringLiteral("StartDiscovery"), "Unable to start Bluetooth discovery");
     }
 
     void Manager::stopScan() const {
-
         callAdapters(QStringLiteral("StopDiscovery"), "Unable to stop Bluetooth discovery");
     }
 

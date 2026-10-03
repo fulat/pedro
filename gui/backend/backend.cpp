@@ -1,6 +1,6 @@
 #include "backend.hpp"
 
-#include <pedro/papi/io/fs/fs.hpp>
+#include <pedro/papi/io/filesystem/filesystem.hpp>
 #include <pedro/papi/utils/utils.hpp>
 #include <pedro/papi/gui/wallpapers/wallpaper.hpp>
 
@@ -165,21 +165,27 @@ QUrl Backend::wallpaper() const {
 QString Backend::hostname() const {
     return hostname_;
 }
+
 QString Backend::kernel() const {
     return kernel_;
 }
+
 QString Backend::architecture() const {
     return architecture_;
 }
+
 QString Backend::uptime() const {
     return uptime_;
 }
+
 double Backend::cpuUsage() const {
     return cpuUsage_;
 }
+
 double Backend::memoryUsage() const {
     return memoryUsage_;
 }
+
 QString Backend::memorySummary() const {
     return memorySummary_;
 }
@@ -222,15 +228,18 @@ QString Backend::wifiError() const {
 QVariantList Backend::wifiNetworks() const {
     return wifiNetworks_;
 }
+
 bool Backend::bluetoothAvailable() const {
     return bluetoothAvailable_;
 }
+
 bool Backend::bluetoothEnabled() const {
     return bluetoothEnabled_;
 }
 bool Backend::bluetoothScanning() const {
     return bluetoothScanning_;
 }
+
 QString Backend::bluetoothError() const {
     return bluetoothError_;
 }
@@ -268,7 +277,7 @@ void Backend::refreshSystem() {
 
 void Backend::loadDocument() {
     try {
-        documentText_ = QString::fromStdString(Pedro::Papi::Filesystem::readFile(documentPath_.toStdString()));
+        documentText_ = QString::fromStdString(Pedro::Papi::FileSystem::readFile(documentPath_.toStdString()));
         emit documentTextChanged();
         setStatusMessage(QCoreApplication::translate("Pedro", "files.status.loaded").replace("{path}", documentPath_));
     } catch (const std::exception& error) {
@@ -278,7 +287,7 @@ void Backend::loadDocument() {
 
 void Backend::saveDocument(const QString& contents) {
     try {
-        Pedro::Papi::Filesystem::writeFile(documentPath_.toStdString(), contents.toStdString());
+        Pedro::Papi::FileSystem::writeFile(documentPath_.toStdString(), contents.toStdString());
         documentText_ = contents;
         emit documentTextChanged();
         setStatusMessage(QCoreApplication::translate("Pedro", "files.status.saved").replace("{path}", documentPath_));
@@ -289,7 +298,7 @@ void Backend::saveDocument(const QString& contents) {
 
 void Backend::createDirectory(const QString& path) {
     try {
-        Pedro::Papi::Filesystem::createDirectory(path.toStdString());
+        Pedro::Papi::FileSystem::createDirectory(path.toStdString());
         setStatusMessage(QCoreApplication::translate("Pedro", "files.status.createdDirectory").replace("{path}", path));
     } catch (const std::exception& error) {
         setStatusMessage(QCoreApplication::translate("Pedro", "files.status.createDirectoryFailed").replace("{error}", error.what()));
@@ -481,6 +490,7 @@ void Backend::refreshBluetooth() {
             bluetoothScanning_ = false;
             bluetoothDevices_.clear();
             bluetoothError_ = result.error;
+            
             emit bluetoothChanged();
             return;
         }

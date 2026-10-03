@@ -6,6 +6,11 @@
 #include <pedro/papi/io/network/wifi/manager.hpp>
 #include <pedro/papi/system/system.hpp>
 #include <pedro/papi/utils/utils.hpp>
+#include <pedro/papi/config/store.hpp>
+#include <pedro/papi/display/brightness/manager.h>
+#include <pedro/papi/audio/volume/manager.h>
+#include <pedro/papi/power/battery/manager.h>
+#include <pedro/papi/network/connection/manager.h>
 
 #include <QUrl>
 #include <QObject>
@@ -16,11 +21,6 @@
 #include <QtQmlIntegration/qqmlintegration.h>
 
 #include <memory>
-#include <pedro/papi/config/store.hpp>
-#include <pedro/papi/display/brightness/manager.h>
-#include <pedro/papi/audio/volume/manager.h>
-#include <pedro/papi/power/battery/manager.h>
-#include <pedro/papi/network/connection/manager.h>
 
 class Backend final : public QObject {
         Q_OBJECT
@@ -77,32 +77,37 @@ class Backend final : public QObject {
 
         QObject* networkConnection();
 
-        [[nodiscard]] bool developmentMode() const;
         [[nodiscard]] QString hostname() const;
         [[nodiscard]] QString kernel() const;
         [[nodiscard]] QString architecture() const;
         [[nodiscard]] QString uptime() const;
-        [[nodiscard]] double cpuUsage() const;
-        [[nodiscard]] double memoryUsage() const;
         [[nodiscard]] QString memorySummary() const;
         [[nodiscard]] QString documentPath() const;
         [[nodiscard]] QString documentText() const;
         [[nodiscard]] QString statusMessage() const;
+        [[nodiscard]] QString applicationError() const;
+        [[nodiscard]] QString connectedWifiName() const;
+        [[nodiscard]] QString wifiError() const;
+        [[nodiscard]] QString bluetoothError() const;
+
+        [[nodiscard]] QVariantList bluetoothDevices() const;
         [[nodiscard]] QVariantList installedApplications() const;
         [[nodiscard]] QVariantList pinnedApplications() const;
-        [[nodiscard]] QString applicationError() const;
+        [[nodiscard]] QVariantList wifiNetworks() const;
+        
+        [[nodiscard]] double cpuUsage() const;
+        [[nodiscard]] double memoryUsage() const;
+
+        [[nodiscard]] bool developmentMode() const;
+
+        [[nodiscard]] bool wifiScanning() const;
         [[nodiscard]] bool wifiAvailable() const;
         [[nodiscard]] bool wifiEnabled() const;
         [[nodiscard]] bool wifiConnected() const;
-        [[nodiscard]] QString connectedWifiName() const;
-        [[nodiscard]] bool wifiScanning() const;
-        [[nodiscard]] QString wifiError() const;
-        [[nodiscard]] QVariantList wifiNetworks() const;
+
         [[nodiscard]] bool bluetoothAvailable() const;
         [[nodiscard]] bool bluetoothEnabled() const;
         [[nodiscard]] bool bluetoothScanning() const;
-        [[nodiscard]] QString bluetoothError() const;
-        [[nodiscard]] QVariantList bluetoothDevices() const;
 
         [[nodiscard]] QUrl wallpaper() const;
 
