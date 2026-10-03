@@ -155,31 +155,37 @@ Item {
                         font.weight: Font.Medium
                     }
                     Item {
-                        width: 23
+                        width: 24
                         height: 18
                         y: (parent.height - height) / 2
                         Icon.Tinted {
                             anchors.fill: parent
                             source: "../../assets/icons/battery.svg"
+                            resolutionScale: 2
                         }
                         Rectangle {
                             objectName: "batteryChargeFill"
                             x: 3
-                            y: 6
+                            y: 5
                             width: 15 * Math.max(0, Math.min(100, Backend.battery.value)) / 100
-                            height: 6
-                            radius: 0.7
+                            height: 8
+                            radius: 1.75
                             visible: Backend.battery.available
-                            color: Backend.battery.low ? Theme.batteryLow : Theme.white
+                            color: Backend.battery.low ? Theme.batteryLow : Backend.battery.charging ? Theme.batteryHealthy : Theme.white
                             Behavior on color { ColorAnimation { duration: 180 } }
                             Behavior on width { NumberAnimation { duration: 180 } }
                         }
-                        Icon.Tinted {
-                            anchors.centerIn: parent
-                            width: 9
-                            height: 14
-                            visible: Backend.battery.charging
-                            source: "../../assets/icons/charging.svg"
+                        Image {
+                            x: 6.5
+                            y: 3
+                            width: 8
+                            height: 12
+                            visible: Backend.battery.available && Backend.battery.charging
+                            source: "image://icons/original/charging.svg"
+                            sourceSize.width: Math.ceil(width * Math.max(1, Screen.devicePixelRatio) * 2)
+                            sourceSize.height: Math.ceil(height * Math.max(1, Screen.devicePixelRatio) * 2)
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
                         }
                     }
 
