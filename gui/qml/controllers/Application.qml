@@ -258,7 +258,7 @@ QtObject {
         for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
             const item = desktopShortcutRepeater.itemAt(index);
             if (item && item.app.id === group.members[0]) {
-                return {id: item.app.id, icon: item.app.icon, isDirectory: item.app.isDirectory};
+                return Object.assign({}, item.app);
             }
         }
         return {id: group.members[0], icon: group.key, isDirectory: group.key === "folder"};

@@ -9,6 +9,7 @@ namespace Pedro::Papi::Power::Battery {
             Q_PROPERTY(bool available READ available NOTIFY changed)
             Q_PROPERTY(int value READ value NOTIFY changed)
             Q_PROPERTY(bool low READ low NOTIFY changed)
+            Q_PROPERTY(bool charging READ charging NOTIFY changed)
 
         public:
 
@@ -19,6 +20,8 @@ namespace Pedro::Papi::Power::Battery {
             int value() const;
 
             bool low() const;
+
+            bool charging() const;
 
         signals:
             void changed();
@@ -35,5 +38,7 @@ namespace Pedro::Papi::Power::Battery {
             int percentage = 0;
 
             unsigned int warningLevel = 0;
+
+            unsigned int state = 0;
     };
 }

@@ -39,6 +39,10 @@ namespace Pedro::Papi::Power::Battery {
         return present && warningLevel >= lowWarning && warningLevel <= actionWarning;
     }
 
+    bool Manager::charging() const {
+        return present && state == 1;
+    }
+
     void Manager::propertiesChanged(const QString& interface, const QVariantMap&, const QStringList&) {
         if (interface == device) {
             refresh();
@@ -58,6 +62,7 @@ namespace Pedro::Papi::Power::Battery {
             present = values.value("IsPresent").toBool();
             percentage = std::clamp(qRound(values.value("Percentage").toDouble()), 0, 100);
             warningLevel = values.value("WarningLevel").toUInt();
+            state = values.value("State").toUInt();
 
             emit changed();
         });

@@ -174,6 +174,13 @@ Item {
                             Behavior on color { ColorAnimation { duration: 180 } }
                             Behavior on width { NumberAnimation { duration: 180 } }
                         }
+                        Icon.Tinted {
+                            anchors.centerIn: parent
+                            width: 9
+                            height: 14
+                            visible: Backend.battery.charging
+                            source: "../../assets/icons/charging.svg"
+                        }
                     }
 
                 }
