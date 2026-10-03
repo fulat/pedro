@@ -12,7 +12,7 @@ Controls.Menu {
     property Item backdrop
     property string organization: "grid"
     property bool keepAligned: true
-    property string sortKey: "name"
+    property string sortKey: ""
     property bool canPaste: false
     property string shortcutName
     signal actionRequested(string action)

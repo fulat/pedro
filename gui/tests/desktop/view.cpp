@@ -44,6 +44,38 @@ int main(int argc, char** argv) {
     if (!controller) {
         return 3;
     }
+    model.setOrganization("free");
+    QHash<QString, QPointF> manual;
+    auto* repeater = root->findChild<QObject*>("repeater");
+    for (int row = 0; row < model.rowCount(); ++row) {
+        QQuickItem* item = nullptr;
+        QMetaObject::invokeMethod(repeater, "itemAt", Q_RETURN_ARG(QQuickItem*, item), Q_ARG(int, row));
+        const auto id = model.data(model.index(row), Qt::UserRole + 1).toMap().value("id").toString();
+        const QPointF position(150 + row * 125, 220 + (row % 2) * 140);
+        item->setX(position.x());
+        item->setY(position.y());
+        manual.insert(id, position);
+    }
+    for (const auto& key : {"size", "type", "type"}) {
+        QMetaObject::invokeMethod(controller, "wallpaperAction", Q_ARG(QVariant, QVariant(key)));
+        timer.restart();
+        while (timer.elapsed() < 100) {
+            app.processEvents();
+            QThread::msleep(5);
+        }
+    }
+    if (!model.sortKey().isEmpty()) {
+        return 14;
+    }
+    for (int row = 0; row < model.rowCount(); ++row) {
+        QQuickItem* item = nullptr;
+        QMetaObject::invokeMethod(repeater, "itemAt", Q_RETURN_ARG(QQuickItem*, item), Q_ARG(int, row));
+        const auto id = model.data(model.index(row), Qt::UserRole + 1).toMap().value("id").toString();
+        if (QPointF(item->x(), item->y()) != manual.value(id)) {
+            std::cerr << "Sort toggle failed to restore the original visual layout\n";
+            return 15;
+        }
+    }
     for (const auto& mode : {"free", "grid"}) {
         model.setOrganization(mode);
         for (const auto& key : {"name", "type", "date", "size"}) {

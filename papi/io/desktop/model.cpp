@@ -380,6 +380,16 @@ namespace Pedro::Papi::Io::Desktop {
 
     Model::Model(QObject* parent) : QAbstractListModel(parent), state(std::make_unique<State>(this)) {
 
+        // Start each session with the user's manual layout and no selected sort.
+        if (!sortKey().isEmpty() && state->positions.contains("organization/undo/positions")) {
+            const auto snapshot = state->positions.value("organization/undo/positions").toMap();
+            state->positions.remove("layout");
+            for (auto it = snapshot.cbegin(); it != snapshot.cend(); ++it) {
+                state->positions.setValue(it.key(), it.value());
+            }
+        }
+        state->positions.setValue("organization/sort", QString());
+
         const auto* desktop = g_get_user_special_dir(G_USER_DIRECTORY_DESKTOP);
 
         if (!desktop || !*desktop) {

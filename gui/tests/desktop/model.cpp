@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
 
     Model restored;
     waitFor([&] { return !restored.loading(); });
-    require(restored.sortKey() == "size", "Sort preference should survive model recreation");
-    require(entryAt(restored, 0).value("size") == entryAt(model, 0).value("size"), "Recreated model should restore sort order");
+    require(restored.sortKey().isEmpty(), "New sessions must start without a selected sort");
+
     std::cout << "Desktop sort: all criteria, modes, persistence and filesystem events passed\n";
 }
