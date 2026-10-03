@@ -58,16 +58,12 @@ Item {
             }
         }
 
-        Image {
+        Icon.Tinted {
             anchors.centerIn: parent
-            width: 20
-            height: 20
-            source: "../../assets/logo.png"
-            sourceSize: Qt.size(128, 128)
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            mipmap: true
-            antialiasing: true
+            width: 18
+            height: 18
+            source: "../../assets/icons/logo.svg"
+            tint: Theme.white
         }
 
         MouseArea {
