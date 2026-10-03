@@ -17,6 +17,8 @@ Item {
     property alias logoControl: logoButton
     property alias statusControl: statusPill
     property alias notificationControl: notificationButton
+    property alias networkControl: wifiButton
+    property alias bluetoothControl: bluetoothButton
 
     signal panelRequested(string mode, real anchorX, string source)
     signal desktopRequested
@@ -261,6 +263,7 @@ Item {
             anchors.centerIn: parent
             icon: Backend.focusMode.active ? "../../assets/icons/silent.svg" : "../../assets/icons/bell.svg"
             iconSize: 14
+            iconColor: Backend.focusMode.active ? Theme.notificationMuted : Theme.white
             description: qsTranslate("Pedro", "shell.notifications.title")
             highlighted: root.activeSource === "notifications"
             width: parent.width
@@ -276,6 +279,7 @@ Item {
         property string description
         property bool highlighted: false
         property real iconSize: 16
+        property color iconColor: Theme.white
         signal activated
 
         width: 24
@@ -298,7 +302,7 @@ Item {
             width: action.iconSize
             height: action.iconSize
             source: action.icon
-            tint: Theme.white
+            tint: action.iconColor
         }
 
         MouseArea {

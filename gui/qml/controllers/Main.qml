@@ -4,7 +4,19 @@ import "../scripts/theme.js" as Theme
 
 // Resolves shell-wide configuration that is independent from visual markup.
 QtObject {
+    id: root
     required property var view
+
+    property Timer menuTransition: Timer {
+        interval: 100
+        property string menuMode
+        property string menuSource
+        property real menuAnchor
+        onTriggered: {
+            if (root.view.panelMode === "")
+                root.view.controller.togglePanel(menuMode, menuAnchor, menuSource);
+        }
+    }
 
     property real selectionOriginX
     property real selectionOriginY
@@ -111,6 +123,18 @@ QtObject {
         item.availableHeight = Qt.binding(() => view.height - topBar.barHeight);
         item.closeRequested.connect(view.controller.closePanel);
         item.modeRequested.connect(mode => view.panelMode = mode);
+        item.topMenuRequested.connect(mode => {
+            const bluetooth = mode === "bluetooth";
+            const trigger = bluetooth ? topBar.bluetoothControl : topBar.networkControl;
+            const anchor = trigger.mapToItem(topBar, trigger.width / 2, trigger.height).x;
+            const source = bluetooth ? "bluetooth" : "wifi";
+            menuTransition.stop();
+            menuTransition.menuMode = mode;
+            menuTransition.menuSource = source;
+            menuTransition.menuAnchor = anchor;
+            view.controller.closePanel();
+            menuTransition.start();
+        });
         item.networkSettingsRequested.connect(() => view.openNetworkSettings());
     }
 
