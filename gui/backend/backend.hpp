@@ -1,5 +1,7 @@
 #pragma once
 
+#include "appearance/palette.hpp"
+
 #include <pedro/papi/gui/application/manager.hpp>
 #include <pedro/papi/io/bluetooth/manager.hpp>
 #include <pedro/papi/io/desktop/model.hpp>
@@ -121,6 +123,8 @@ class Backend final : public QObject {
 
         [[nodiscard]] QUrl wallpaper() const;
 
+        Q_INVOKABLE QVariantMap filesSurfacePalette() const;
+
         QString language() const;
 
         QString appearanceMode() const;
@@ -160,6 +164,8 @@ class Backend final : public QObject {
         void dockHoverScaleChanged();
 
     private:
+
+        Pedro::Gui::Appearance::Palette appearancePalette_;
 
         void setStatusMessage(const QString& message);
 

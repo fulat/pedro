@@ -43,6 +43,7 @@ set(PEDRO_GUI_SOURCES
         backend/application/icon/provider.hpp
 
         backend/render/info.cpp
+        backend/appearance/palette.cpp
         backend/render/info.hpp
 )
 

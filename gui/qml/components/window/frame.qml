@@ -32,6 +32,7 @@ Window {
     property color surfaceColor: "transparent"
     property color surfaceEndColor: surfaceColor
     property bool opaqueSurface: false
+    property var surfacePalette: ({})
     property color titleColor: Theme.white
     readonly property real resizeBorder: 7
     readonly property real resizeCorner: 18
@@ -98,6 +99,8 @@ Window {
             color: frame.surfaceColor
             gradient: frame.opaqueSurface ? surfaceGradient : null
             radius: frame.maximized ? 0 : frame.windowRadius
+            border.width: frame.opaqueSurface ? 1 : 0
+            border.color: Theme.liquidEdge
 
             Gradient {
                 id: surfaceGradient

@@ -162,6 +162,10 @@ bool Backend::developmentMode() const {
     return std::getenv("PEDRO_DEVELOPMENT_MODE") != nullptr;
 }
 
+QVariantMap Backend::filesSurfacePalette() const {
+    return appearancePalette_.snapshot(wallpaper_);
+}
+
 QUrl Backend::wallpaper() const {
     return wallpaper_;
 }

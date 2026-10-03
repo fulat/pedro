@@ -71,8 +71,13 @@ ApplicationWindow {
         item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
         item.contentSource = Qt.resolvedUrl("files/browser.qml");
         item.opaqueSurface = true;
-        item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light" ? Theme.filesLightSurfaceTop : Theme.filesSurfaceTop);
-        item.surfaceEndColor = Qt.binding(() => Backend.appearanceMode === "light" ? Theme.filesLightSurfaceBottom : Theme.filesSurfaceBottom);
+        item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light"
+            ? item.surfacePalette.lightTop || Theme.filesLightSurfaceTop : item.surfacePalette.darkTop || Theme.filesSurfaceTop);
+        item.surfaceEndColor = Qt.binding(() => Backend.appearanceMode === "light"
+            ? item.surfacePalette.lightBottom || Theme.filesLightSurfaceBottom : item.surfacePalette.darkBottom || Theme.filesSurfaceBottom);
+        item.visibleChanged.connect(() => {
+            if (item.visible) item.surfacePalette = Backend.filesSurfacePalette();
+        });
         item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff");
         item.headerSource = Qt.resolvedUrl("files/header.qml");
         item.headerHeight = 58;
