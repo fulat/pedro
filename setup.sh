@@ -90,6 +90,8 @@ packages=(
     qt6-l10n-tools
     qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-svg-plugins qt6-wayland-dev
     libglib2.0-dev libsystemd-dev libtomlplusplus-dev gvfs gvfs-backends
+    # PAPI controls system audio through wpctl and watches changes with pw-mon.
+    wireplumber pipewire-bin
     libwayland-dev wayland-protocols libxkbcommon-dev libegl-dev
     qt6-qpa-plugins qt6-wayland qgnomeplatform-qt6
     qml6-module-qtqml qml6-module-qtqml-workerscript

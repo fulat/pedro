@@ -9,7 +9,7 @@ import "../../scripts/theme.js" as Theme
 Item {
     id: root
 
-    property real level: 0.62
+    readonly property real level: Backend.audioVolume.muted ? 0 : Backend.audioVolume.value / 100
     signal settingsRequested()
 
     RowLayout {
@@ -17,13 +17,23 @@ Item {
         spacing: 12
 
         Icon.Tinted {
-            source: "../../../assets/icons/speaker.svg"
+            source: Backend.audioVolume.muted ? "../../../assets/icons/muted.svg" : "../../../assets/icons/speaker.svg"
             Layout.preferredWidth: 21
             Layout.preferredHeight: 21
+            opacity: Backend.audioVolume.available ? 1 : 0.45
+
+            MouseArea {
+                objectName: "systemMuteButton"
+                anchors.fill: parent
+                enabled: Backend.audioVolume.available
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Backend.audioVolume.toggleMuted()
+            }
         }
 
         Controls.Slider {
             id: volumeSlider
+            objectName: "systemVolumeSlider"
 
             Layout.fillWidth: true
             Layout.preferredHeight: 28
@@ -31,6 +41,9 @@ Item {
             from: 0
             to: 1
             value: root.level
+            enabled: Backend.audioVolume.available
+            opacity: enabled ? 1 : 0.45
+            onMoved: Backend.audioVolume.setValue(Math.round(value * 100))
 
             background: Rectangle {
                 y: (volumeSlider.height - height) / 2
@@ -56,7 +69,7 @@ Item {
                 color: Theme.white
             }
 
-            HoverHandler { cursorShape: Qt.PointingHandCursor }
+            HoverHandler { cursorShape: volumeSlider.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
         }
 
         Rectangle {
