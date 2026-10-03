@@ -2,13 +2,15 @@
 
 #include <QCoreApplication>
 #include <QDBusConnection>
+#include <QDBusContext>
+#include <QDBusError>
 #include <QElapsedTimer>
 #include <QStandardPaths>
 #include <QThread>
 
 #include <iostream>
 
-class Bridge final : public QObject {
+class Bridge final : public QObject, protected QDBusContext {
         Q_OBJECT
         Q_CLASSINFO("D-Bus Interface", "org.pedro.Applications")
 
@@ -16,9 +18,14 @@ class Bridge final : public QObject {
 
         int calls = 0;
         bool allowed = true;
+        bool outdated = false;
 
     public slots:
         bool Capture(int, int, int width, int height, bool video, bool, const QString& filename, QString& saved) {
+            if (outdated) {
+                sendErrorReply(QDBusError::UnknownMethod, "No such method Capture");
+                return false;
+            }
             ++calls;
             saved = filename + (video ? ".webm" : "");
             return allowed && width > 0 && height > 0;
@@ -74,6 +81,13 @@ int main(int argc, char** argv) {
     if (!wait() || manager.recording()) {
         return 1;
     }
+    bridge.outdated = true;
+    manager.open();
+    manager.take(region, false, false, 0);
+    if (!wait() || !manager.visible() || !manager.error().contains("log out")) {
+        return 1;
+    }
+    bridge.outdated = false;
     bridge.allowed = false;
     manager.open();
     manager.take(region, false, false, 0);

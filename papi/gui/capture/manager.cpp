@@ -119,7 +119,12 @@ namespace Pedro::Papi::Gui::Capture {
             call->deleteLater();
             pending = false;
             if (reply.type() == QDBusMessage::ErrorMessage || !reply.arguments().value(0).toBool()) {
-                failure = reply.type() == QDBusMessage::ErrorMessage ? QDBusError(reply).message() : tr("Screen capture failed.");
+                const auto error = QDBusError(reply);
+                if (reply.type() == QDBusMessage::ErrorMessage && error.type() == QDBusError::UnknownMethod) {
+                    failure = tr("GNOME is running an older Pedro capture integration. Run make gnome, then log out and log back in to enable recording and screenshots.");
+                } else {
+                    failure = reply.type() == QDBusMessage::ErrorMessage ? error.message() : tr("Screen capture failed.");
+                }
                 shown = !running;
             } else {
                 running = method == "Capture" && arguments.value(4).toBool();
