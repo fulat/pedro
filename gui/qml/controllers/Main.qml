@@ -135,7 +135,9 @@ QtObject {
             return;
         }
 
-        if (!shortcut.selected) {
+        const stackToggle = Backend.desktopModel.organization === "stack" && shortcut.stack.leader
+            && shortcut.stack.count > 1 && !shortcut.stack.expanded;
+        if (!stackToggle && !shortcut.selected) {
             view.controller.selectOnlyDesktopShortcut(shortcut.app.id);
         }
 

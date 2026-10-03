@@ -269,6 +269,7 @@ QtObject {
         const expanded = expandedDesktopStacks.slice();
         const index = expanded.indexOf(info.key);
         if (index === -1) {
+            selectedDesktopIds = [];
             expanded.push(info.key);
         } else {
             expanded.splice(index, 1);

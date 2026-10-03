@@ -103,7 +103,7 @@ const context = {
     stackDragPending: false
 };
 const Controller = new Function("context", "with (context) {\n" + functions
-    + "\nreturn {cancelDesktopDrag, arrangeDesktop, dropDesktopIntoFolder, contextEntries, entryAction, select, wallpaperAction, snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, sortDesktop, endDesktopDrag};\n}")(context);
+    + "\nreturn {toggleStack, cancelDesktopDrag, arrangeDesktop, dropDesktopIntoFolder, contextEntries, entryAction, select, wallpaperAction, snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, sortDesktop, endDesktopDrag};\n}")(context);
 
 function obstacle(rectangle) {
     return {width: rectangle.width - 16, height: rectangle.height - 16, visible: true,
@@ -269,7 +269,7 @@ const calls = [];
 const shellContext = {Qt: {LeftButton: 1, RightButton: 2, ControlModifier: 4},
     Backend: {desktopModel: {organization: "stack"}},
     view: {controller: {toggleStack: () => calls.push("toggle"), selectOnlyDesktopShortcut: () => calls.push("select")}}};
-const Shell = new Function("context", "with (context) {" + interactions + "\nreturn {shortcutClicked, shortcutDoubleClicked};}")(shellContext);
+const Shell = new Function("context", "with (context) {" + interactions + "\nreturn {shortcutPressed, shortcutClicked, shortcutDoubleClicked};}")(shellContext);
 const indicator = {stackIndicator: true, app: {id: "leader"}};
 Shell.shortcutClicked({button: 2}, false, indicator);
 assert(calls.length === 0, "Expanded stack indicator ignores right click");
@@ -279,3 +279,16 @@ const member = {stackIndicator: false, app: {id: "leader"}, stack: {leader: true
 Shell.shortcutClicked({button: 1, modifiers: 0}, false, member);
 assert(calls.join() === "toggle,select", "Expanded first folder acts as a real member rather than the stack toggle");
 print("Separate stack indicator interactions: passed");
+
+context.Backend.desktopModel.organization = "stack";
+context.Backend.desktopModel.groups = [{key: "folder", members: ["first", "second"]}];
+context.expandedDesktopStacks = [];
+context.selectedDesktopIds = ["first"];
+Controller.toggleStack({id: "first"});
+assert(context.selectedDesktopIds.length === 0, "Opening a stack clears the leader selection");
+shellContext.view.controller.beginDesktopDrag = () => calls.push("drag");
+const collapsed = {app: {id: "first"}, selected: false, stack: {leader: true, count: 2, expanded: false}};
+const beforePress = calls.length;
+Shell.shortcutPressed({button: 1, modifiers: 0, x: 10, y: 10}, {}, collapsed);
+assert(calls.slice(beforePress).join() === "drag", "Pressing a collapsed stack never selects its first member");
+print("Stack expansion selection: passed");

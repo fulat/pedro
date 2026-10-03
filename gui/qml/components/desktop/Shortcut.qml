@@ -68,17 +68,25 @@ Item {
         }
     }
 
-    Rectangle {
+    Icon {
         visible: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && (shortcut.stackIndicator || !shortcut.stack.expanded)
-        width: 42
-        height: 38
-        radius: 5
-        color: "#4036475a"
-        border.color: "#40ffffff"
+        width: 57
+        height: 57
         x: (parent.width - width) / 2 + 5
-        y: 10
-        rotation: 8
-        opacity: shortcut.stackIndicator ? 0.35 : 1
+        y: -3
+        rotation: 7
+        opacity: 0.55
+        kind: shortcut.app && shortcut.app.isDirectory ? "folder" : "notes"
+    }
+    Icon {
+        visible: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && (shortcut.stackIndicator || !shortcut.stack.expanded)
+        width: 57
+        height: 57
+        x: (parent.width - width) / 2 - 3
+        y: 0
+        rotation: -5
+        opacity: 0.75
+        kind: shortcut.app && shortcut.app.isDirectory ? "folder" : "notes"
     }
 
     function closeMenu() {
@@ -101,7 +109,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         width: 57
         height: 57
-        opacity: shortcut.stackIndicator ? 0.35 : 1
+        opacity: shortcut.stackIndicator ? 0.92 : 1
         source: shortcut.app && shortcut.app.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
         onLoaded: {
             item.controller = Qt.binding(() => shortcut.shell.controller);

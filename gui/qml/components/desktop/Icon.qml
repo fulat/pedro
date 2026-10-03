@@ -10,32 +10,15 @@ Item {
     property url imageUrl
     property real cornerRadius: 6
 
-    Rectangle {
-        visible: desktopIcon.kind === "notes"
-        anchors.centerIn: parent
-        width: desktopIcon.width * 0.70
-        height: desktopIcon.height * 0.84
-        radius: 4
-        color: Theme.notesBackground
-        border.color: Theme.notesBorder
-
-        Column {
-            x: parent.width * 0.17
-            y: parent.height * 0.27
-            spacing: parent.height * 0.12
-
-            Repeater {
-                model: 3
-
-                delegate: Rectangle {
-                    required property int index
-
-                    width: desktopIcon.width * (index === 2 ? 0.28 : 0.39)
-                    height: 1
-                    color: Theme.notesLines
-                }
-            }
-        }
+    Image {
+        visible: desktopIcon.kind === "notes" || desktopIcon.kind === "file"
+        anchors.fill: parent
+        source: "../../../assets/icons/document.svg"
+        sourceSize: Qt.size(Math.ceil(desktopIcon.width * Math.max(1, Screen.devicePixelRatio) * 2),
+            Math.ceil(desktopIcon.height * Math.max(1, Screen.devicePixelRatio) * 2))
+        fillMode: Image.PreserveAspectFit
+        smooth: true
+        antialiasing: true
     }
 
     Rectangle {
