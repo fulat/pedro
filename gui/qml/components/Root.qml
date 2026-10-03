@@ -26,8 +26,8 @@ Rectangle {
     signal modeRequested(string mode)
 
     visible: mode !== ""
-    implicitWidth: Math.max(0, Math.min(mode === "network" ? 300 : mode === "quick" ? 328 : controlMode ? 304 : mode === "system" ? 288 : 320, availableWidth - 24))
-    implicitHeight: Math.max(0, Math.min(mode === "quick" ? control.implicitHeight + 24 : mode === "wifi" ? wifi.implicitHeight + 24 : mode === "bluetooth" ? bluetooth.implicitHeight + 24 : mode === "sound" ? 76 : mode === "network" ? 254 : mode === "system" ? 288 : mode === "notifications" || mode === "calendar" ? 180 : 380, availableHeight - 20))
+    implicitWidth: Math.max(0, Math.min(mode === "battery" ? 240 : mode === "network" ? 300 : mode === "quick" ? 328 : controlMode ? 304 : mode === "system" ? 288 : 320, availableWidth - 24))
+    implicitHeight: Math.max(0, Math.min(mode === "battery" ? 140 : mode === "quick" ? control.implicitHeight + 24 : mode === "wifi" ? wifi.implicitHeight + 24 : mode === "bluetooth" ? bluetooth.implicitHeight + 24 : mode === "sound" ? 76 : mode === "network" ? 254 : mode === "system" ? 288 : mode === "notifications" || mode === "calendar" ? 180 : 380, availableHeight - 20))
 
     width: implicitWidth
     height: implicitHeight
@@ -67,7 +67,7 @@ Rectangle {
             Layout.fillWidth: true
             visible: !root.controlMode
             Label {
-                text: root.mode === "notifications" ? qsTranslate("Pedro", "shell.notifications.title") : root.mode === "calendar" ? qsTranslate("Pedro", "shell.calendar.title") : root.mode === "files" ? qsTranslate("Pedro", "app.files.name") : root.mode === "about" ? qsTranslate("Pedro", "shell.panel.about") : qsTranslate("Pedro", "shell.panel.system")
+                text: root.mode === "battery" ? qsTranslate("Pedro", "shell.battery.title") : root.mode === "notifications" ? qsTranslate("Pedro", "shell.notifications.title") : root.mode === "calendar" ? qsTranslate("Pedro", "shell.calendar.title") : root.mode === "files" ? qsTranslate("Pedro", "app.files.name") : root.mode === "about" ? qsTranslate("Pedro", "shell.panel.about") : qsTranslate("Pedro", "shell.panel.system")
                 color: Theme.white
                 font.pixelSize: 16
                 font.weight: Font.Medium
@@ -101,7 +101,7 @@ Rectangle {
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: root.mode === "files" ? 1 : root.mode === "about" ? 2 : root.mode === "quick" ? 3 : root.mode === "wifi" ? 4 : root.mode === "bluetooth" ? 5 : root.mode === "sound" ? 6 : root.mode === "network" ? 7 : root.mode === "notifications" ? 8 : root.mode === "calendar" ? 9 : 0
+            currentIndex: root.mode === "files" ? 1 : root.mode === "about" ? 2 : root.mode === "quick" ? 3 : root.mode === "wifi" ? 4 : root.mode === "bluetooth" ? 5 : root.mode === "sound" ? 6 : root.mode === "network" ? 7 : root.mode === "notifications" ? 8 : root.mode === "calendar" ? 9 : root.mode === "battery" ? 10 : 0
 
             System.View {}
             Files.View {}
@@ -154,6 +154,7 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.Wrap
             }
+            Item {}
         }
     }
 }

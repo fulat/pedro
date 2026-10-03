@@ -138,39 +138,66 @@ Item {
                 onActivated: controller.requestPanel(Backend.networkConnection.type === "wifi" || (Backend.networkConnection.type === "none" && Backend.wifiAvailable) ? "wifi" : "network", "wifi", wifiButton)
             }
 
-            Row {
-                y: (statusRow.height - height) / 2
+            Item {
+                id: batteryButton
+                width: batteryRow.width + 12
                 height: 24
-                spacing: 4
-                Quick.Text {
-                    height: parent.height
-                    verticalAlignment: Text.AlignVCenter
-                    text: Backend.battery.available ? Backend.battery.value + "%" : "—%"
-                    color: Theme.white
-                    font.pixelSize: 12
-                    font.weight: Font.Medium
-                }
-                Item {
-                    width: 23
-                    height: 18
-                    y: (parent.height - height) / 2
-                    Icon.Tinted {
-                        anchors.fill: parent
-                        source: "../../assets/icons/battery.svg"
-                    }
-                    Rectangle {
-                        objectName: "batteryChargeFill"
-                        x: 3
-                        y: 6
-                        width: 15 * Math.max(0, Math.min(100, Backend.battery.value)) / 100
-                        height: 6
-                        radius: 0.7
-                        visible: Backend.battery.available
-                        color: Theme.white
-                        Behavior on width { NumberAnimation { duration: 180 } }
-                    }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: height / 2
+                    color: batteryMouse.pressed ? Theme.overlayPressed : batteryMouse.containsMouse || root.activeSource === "battery" ? Theme.actionHover : "transparent"
+                    Behavior on color { ColorAnimation { duration: 140 } }
                 }
 
+                Row {
+                    id: batteryRow
+                    anchors.centerIn: parent
+                    height: 24
+                    spacing: 4
+                    Quick.Text {
+                        height: parent.height
+                        verticalAlignment: Text.AlignVCenter
+                        text: Backend.battery.available ? Backend.battery.value + "%" : "—%"
+                        color: Theme.white
+                        font.pixelSize: 12
+                        font.weight: Font.Medium
+                    }
+                    Item {
+                        width: 23
+                        height: 18
+                        y: (parent.height - height) / 2
+                        Icon.Tinted {
+                            anchors.fill: parent
+                            source: "../../assets/icons/battery.svg"
+                        }
+                        Rectangle {
+                            objectName: "batteryChargeFill"
+                            x: 3
+                            y: 6
+                            width: 15 * Math.max(0, Math.min(100, Backend.battery.value)) / 100
+                            height: 6
+                            radius: 0.7
+                            visible: Backend.battery.available
+                            color: Backend.battery.low ? Theme.batteryLow : Theme.white
+                            Behavior on color { ColorAnimation { duration: 180 } }
+                            Behavior on width { NumberAnimation { duration: 180 } }
+                        }
+                    }
+
+                }
+
+                MouseArea {
+                    id: batteryMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: controller.requestPanel("battery", "battery", batteryButton)
+                }
+
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTranslate("Pedro", "shell.battery.title")
+                Accessible.onPressAction: controller.requestPanel("battery", "battery", batteryButton)
             }
 
             TopAction {

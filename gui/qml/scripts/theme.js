@@ -66,6 +66,7 @@ var windowMinimizeGlyph = "#765000"
 
 // Navigation and system controls.
 var batteryHealthy = "#24d687"
+var batteryLow = "#ff5b61"
 var controlOrbBackground = "#5d28264a"
 var controlOrbBorder = "#609dbbff"
 var controlOrbBottom = "#1445c8"

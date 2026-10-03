@@ -327,5 +327,6 @@
     "shell.notifications.title": "Notificaciones",
     "shell.notifications.empty": "No hay notificaciones",
     "shell.calendar.title": "Calendario",
-    "shell.calendar.pending": "Calendario próximamente"
+    "shell.calendar.pending": "Calendario próximamente",
+    "shell.battery.title": "Batería"
 }

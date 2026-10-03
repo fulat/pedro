@@ -1646,5 +1646,10 @@
             <extracomment>Stable Pedro key: shell.calendar.pending</extracomment>
             <translation>Calendario próximamente</translation>
         </message>
+        <message>
+            <source>shell.battery.title</source>
+            <extracomment>Stable Pedro key: shell.battery.title</extracomment>
+            <translation>Batería</translation>
+        </message>
     </context>
 </TS>
