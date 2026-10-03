@@ -13,10 +13,10 @@ SUDO := sudo
 endif
 
 .DEFAULT_GOAL := image
-.PHONY: help setup gnome host-check config build gui-config gui-build gui dev qml diagnose compositor image-config stage verify image clean
+.PHONY: help setup gnome host-check config build gui-config gui-build gui dev start GUI qml diagnose compositor image-config stage verify image clean
 
 help:
-	@echo "make gui | dev   Compile and open the GUI"
+	@echo "make gui | dev | start | GUI   Compile and open the GUI"
 	@echo "make gui-config  Configure GUI development in build/dev"
 	@echo "make gui-build   Compile PAPI and GUI only"
 	@echo "make config      Configure all development components in build/all"
@@ -51,7 +51,7 @@ gui-config:
 gui-build: gui-config
 	cmake --build "$(GUI_BUILD_DIR)" --target pedro_gui --parallel $(JOBS)
 
-gui dev: gui-config
+gui dev start GUI: gui-config
 	cmake --build "$(GUI_BUILD_DIR)" --target pedro-gui-run --parallel $(JOBS)
 
 config:
