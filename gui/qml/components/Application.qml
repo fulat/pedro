@@ -70,6 +70,7 @@ ApplicationWindow {
         item.objectName = "filesQuickWindow";
         item.title = Qt.binding(() => qsTranslate("Pedro", "app.files.name"));
         item.contentSource = Qt.resolvedUrl("files/browser.qml");
+        item.surfaceColor = Qt.binding(() => Backend.appearanceMode === "light" ? Theme.filesGlassLightOverlay : Theme.filesGlassOverlay);
         Backend.windowGlass.registerTitle(item.title);
         item.titleChanged.connect(() => Backend.windowGlass.registerTitle(item.title));
         item.titleColor = Qt.binding(() => Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff");
