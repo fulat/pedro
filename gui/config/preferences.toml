@@ -1,7 +1,7 @@
 # Global Pedro preferences
 
 [language]
-current = "es"
+current = "en"
 
 [appearance]
 mode = "dark" # "light" or "dark"
