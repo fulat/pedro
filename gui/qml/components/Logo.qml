@@ -44,6 +44,19 @@ Item {
             anchors.fill: parent
             backdrop: root.backdrop
             cornerRadius: width / 2
+            resolutionScale: 2
+            edgeColor: Theme.logoGlassEdge
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: width / 2
+            antialiasing: true
+            gradient: Gradient {
+                GradientStop { position: 0; color: Theme.logoGlassHighlight }
+                GradientStop { position: 0.55; color: Theme.logoGlassShade }
+                GradientStop { position: 1; color: "transparent" }
+            }
         }
 
         Rectangle {
@@ -62,8 +75,9 @@ Item {
             anchors.centerIn: parent
             width: 18
             height: 18
-            source: "../../assets/icons/logo.svg"
+            source: "../../assets/logo.svg"
             tint: Theme.white
+            resolutionScale: 3
         }
 
         MouseArea {

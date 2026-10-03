@@ -10,6 +10,9 @@ Item {
     property Item backdrop
     property real cornerRadius: 16
     property bool frosted: false
+    property real resolutionScale: 1
+    property color edgeColor: Theme.liquidEdge
+    readonly property real sampleRatio: Math.max(1, Screen.devicePixelRatio) * Math.max(1, resolutionScale)
     readonly property bool lightMode: Backend.appearanceMode === "light"
     property real blurAmount: frosted ? 1.0 : Theme.menuBlur
     property point backdropOrigin: Qt.point(0, 0)
@@ -33,6 +36,8 @@ Item {
 
         anchors.fill: parent
         sourceItem: liquid.backdrop
+        textureSize: Qt.size(Math.ceil(liquid.width * liquid.sampleRatio), Math.ceil(liquid.height * liquid.sampleRatio))
+        smooth: true
         sourceRect: {
             if (!liquid.backdrop) {
                 return Qt.rect(0, 0, liquid.width, liquid.height);
@@ -55,6 +60,7 @@ Item {
         visible: false
         layer.enabled: true
         layer.smooth: true
+        layer.textureSize: Qt.size(Math.ceil(liquid.width * liquid.sampleRatio), Math.ceil(liquid.height * liquid.sampleRatio))
         antialiasing: true
     }
 
@@ -89,7 +95,7 @@ Item {
             ColorAnimation { duration: 180; easing.type: Easing.InOutQuad }
         }
         border.width: 1
-        border.color: Theme.liquidEdge
+        border.color: liquid.edgeColor
         antialiasing: true
     }
 }

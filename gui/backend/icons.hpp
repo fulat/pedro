@@ -23,7 +23,9 @@ class Icons final : public QQuickImageProvider {
 
             const auto directory = qEnvironmentVariable("PEDRO_QML_DIR");
             const auto base = directory.isEmpty() ? QString(":/qt/qml/gui") : directory;
-            auto path = base + "/assets/icons/" + parts[1];
+            // The canonical Pedro logo is maintained at the asset root.
+            const auto assetDirectory = parts[1] == QStringLiteral("logo.svg") ? "/assets/" : "/assets/icons/";
+            auto path = base + assetDirectory + parts[1];
 
             if (!QFileInfo(path).isFile() && parts[1].startsWith("window-")) {
                 path = QStringLiteral(":/pedro/appearance/icons/Pedro/scalable/ui/") + parts[1];
