@@ -123,7 +123,7 @@ Item {
                     Layout.preferredHeight: 48
                     title: qsTranslate("Pedro", "shell.focus.title")
                     subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
-                    icon: "../../../assets/icons/moon.svg"
+                    icon: active ? "../../../assets/icons/crescent.svg" : "../../../assets/icons/moon.svg"
                     activeColor: Theme.focusActive
                     active: Papi.focusMode.active
                     toggleable: false
