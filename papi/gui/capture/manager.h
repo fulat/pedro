@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QObject>
+#include <QElapsedTimer>
+#include <QTimer>
 #include <QVariant>
 #include <QRect>
 
@@ -11,6 +13,7 @@ namespace Pedro::Papi::Gui::Capture {
             Q_PROPERTY(bool visible READ visible NOTIFY changed)
             Q_PROPERTY(bool recording READ recording NOTIFY changed)
             Q_PROPERTY(QString file READ file NOTIFY changed)
+            Q_PROPERTY(int elapsed READ elapsed NOTIFY changed)
             Q_PROPERTY(QString error READ error NOTIFY changed)
 
         public:
@@ -26,6 +29,8 @@ namespace Pedro::Papi::Gui::Capture {
             bool recording() const;
 
             QString file() const;
+
+            int elapsed() const;
 
             Q_INVOKABLE void open();
 
@@ -44,6 +49,10 @@ namespace Pedro::Papi::Gui::Capture {
         private:
 
             void finish(const QString& method, const QList<QVariant>& arguments);
+
+            QElapsedTimer clock;
+            QTimer ticker;
+            int seconds = 0;
 
             bool shown = false;
             bool running = false;

@@ -32,7 +32,7 @@ class Bridge final : public QObject {
 int main(int argc, char** argv) {
     qputenv("XDG_CONFIG_HOME", argv[1]);
     QCoreApplication application(argc, argv);
-    if (!QStandardPaths::writableLocation(QStandardPaths::PicturesLocation).startsWith(QString::fromLocal8Bit(argv[1]))) {
+    if (!QStandardPaths::writableLocation(QStandardPaths::DesktopLocation).startsWith(QString::fromLocal8Bit(argv[1]))) {
         return 1;
     }
     auto bus = QDBusConnection::sessionBus();
@@ -63,6 +63,11 @@ int main(int argc, char** argv) {
     manager.open();
     manager.take(region, true, true, 0);
     if (!wait() || !manager.recording() || !manager.file().endsWith(".webm")) {
+        return 1;
+    }
+    QThread::msleep(1050);
+    application.processEvents();
+    if (manager.elapsed() < 1 || !manager.file().startsWith(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/")) {
         return 1;
     }
     manager.stop();

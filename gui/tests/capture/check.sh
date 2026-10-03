@@ -12,6 +12,7 @@ c++ -std=c++17 -fPIC -I "$sourceDirectory" -I "$taskDirectory" \
     "${flags[@]}" -o "$taskDirectory/check"
 # Never opens the real capture UI or changes the user's session.
 cat > "$taskDirectory/user-dirs.dirs" <<EOF
+XDG_DESKTOP_DIR="$taskDirectory/Desktop"
 XDG_PICTURES_DIR="$taskDirectory/Pictures"
 XDG_VIDEOS_DIR="$taskDirectory/Videos"
 EOF

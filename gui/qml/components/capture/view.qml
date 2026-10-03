@@ -261,10 +261,10 @@ Item {
                 Action {
                     text: root.video ? qsTranslate("Pedro", "capture.record") : qsTranslate("Pedro", "capture.take")
                     symbol: root.video ? "../../../assets/icons/capture/record.svg" : "../../../assets/icons/capture/camera.svg"
-                    showText: true
                     accent: true
-                    Layout.preferredWidth: 124
-                    Layout.preferredHeight: 40
+                    circular: true
+                    Layout.preferredWidth: 42
+                    Layout.preferredHeight: 42
                     enabled: !root.capture.busy
                     onClicked: root.submit()
                 }
@@ -383,8 +383,8 @@ Item {
                 id: symbol
                 visible: action.symbol.toString().length > 0
                 source: action.symbol
-                width: 19
-                height: 19
+                width: action.accent ? 22 : 19
+                height: action.accent ? 22 : 19
                 x: action.stacked || action.circular ? (parent.width - width) / 2 : 0
                 y: action.stacked ? 0 : (parent.height - height) / 2
             }

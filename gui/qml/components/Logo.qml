@@ -109,15 +109,30 @@ Item {
 
             TopAction {
                 visible: Backend.capture.recording
+                width: 84
                 iconSize: 0
                 description: qsTranslate("Pedro", "capture.stop")
-                onActivated: Backend.capture.stop()
-                Rectangle {
+                onActivated: { if (!Backend.capture.busy) Backend.capture.stop(); }
+                Row {
                     anchors.centerIn: parent
-                    width: 9
-                    height: 9
-                    radius: 2
-                    color: Theme.notificationMuted
+                    spacing: 7
+                    Rectangle {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 8; height: 8; radius: 4
+                        color: Theme.notificationMuted
+                    }
+                    Text {
+                        text: Math.floor(Backend.capture.elapsed / 60).toString().padStart(2, "0") + ":" + (Backend.capture.elapsed % 60).toString().padStart(2, "0")
+                        color: Theme.white
+                        font.pixelSize: 12
+                        font.family: "monospace"
+                    }
+                    Rectangle {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 9; height: 9; radius: 2
+                        color: Theme.white
+                        opacity: Backend.capture.busy ? 0.4 : 1
+                    }
                 }
             }
 

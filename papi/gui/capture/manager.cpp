@@ -12,6 +12,12 @@
 
 namespace Pedro::Papi::Gui::Capture {
     Manager::Manager(QObject* parent) : QObject(parent) {
+        ticker.setInterval(1000);
+        connect(&ticker, &QTimer::timeout, this, [this] {
+            seconds = static_cast<int>(clock.elapsed() / 1000);
+            emit changed();
+        });
+
         auto bus = QDBusConnection::sessionBus();
         bus.connect("org.pedro.Applications", "/org/pedro/Applications", "org.pedro.Applications", "CaptureStopped", this, SLOT(recordingStopped(QString)));
         auto* watcher = new QDBusServiceWatcher("org.pedro.Applications", bus, QDBusServiceWatcher::WatchForUnregistration, this);
@@ -24,6 +30,7 @@ namespace Pedro::Papi::Gui::Capture {
 
     void Manager::recordingStopped(const QString& error) {
         running = false;
+        ticker.stop();
         failure = error;
         shown = !failure.isEmpty();
         emit changed();
@@ -43,6 +50,10 @@ namespace Pedro::Papi::Gui::Capture {
 
     QString Manager::file() const {
         return destination;
+    }
+
+    int Manager::elapsed() const {
+        return seconds;
     }
 
     QString Manager::error() const {
@@ -68,8 +79,8 @@ namespace Pedro::Papi::Gui::Capture {
             return;
         }
 
-        const auto base = QStandardPaths::writableLocation(video ? QStandardPaths::MoviesLocation : QStandardPaths::PicturesLocation);
-        const auto directory = QDir(base).filePath(video ? "Screencasts" : "Screenshots");
+        const auto base = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+        const auto directory = base;
         if (base.isEmpty() || !QDir().mkpath(directory)) {
             failure = tr("Could not create the capture folder.");
             emit changed();
@@ -112,6 +123,13 @@ namespace Pedro::Papi::Gui::Capture {
                 shown = !running;
             } else {
                 running = method == "Capture" && arguments.value(4).toBool();
+                if (running) {
+                    seconds = 0;
+                    clock.start();
+                    ticker.start();
+                } else {
+                    ticker.stop();
+                }
                 if (method == "Capture") {
                     destination = reply.arguments().value(1).toString();
                 }
