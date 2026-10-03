@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PEDRO_PAPI_IO_TRANSFER_MANAGER_HPP
+#define PEDRO_PAPI_IO_TRANSFER_MANAGER_HPP
 
 #include <QObject>
 #include <QUrl>
@@ -35,3 +36,5 @@ namespace Pedro::Papi::Io::Transfer {
     };
 
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PEDRO_PAPI_GUI_CLIPBOARD_MANAGER_HPP
+#define PEDRO_PAPI_GUI_CLIPBOARD_MANAGER_HPP
 
 #include <pedro/papi/io/transfer/manager.hpp>
 
@@ -36,3 +37,5 @@ namespace Pedro::Papi::Gui::Clipboard {
     };
 
 }
+
+#endif
