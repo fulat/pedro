@@ -426,7 +426,7 @@
         <message>
             <source>shell.focus.title</source>
             <extracomment>Stable Pedro key: shell.focus.title</extracomment>
-            <translation>Modo enfoque</translation>
+            <translation>No molestar</translation>
         </message>
         <message>
             <source>shell.keyboard.layout</source>

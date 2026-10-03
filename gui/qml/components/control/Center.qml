@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import gui
 import "../../controllers" as Controllers
-import "../action" as Action
 import "../media" as Media
 import "../quick" as Quick
 import "../slider" as Slider
@@ -125,6 +124,7 @@ Item {
                     title: qsTranslate("Pedro", "shell.focus.title")
                     subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/moon.svg"
+                    activeColor: Theme.focusActive
                     active: Papi.focusMode.active
                     toggleable: false
                     enabled: Papi.focusMode.available
@@ -197,40 +197,5 @@ Item {
             onNextRequested: controller.showNotice(qsTranslate("Pedro", "media.next.pending"))
         }
 
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 1
-            color: Theme.overlayPressed
-        }
-
-        GridLayout {
-            Layout.fillWidth: true
-            columns: 4
-            columnSpacing: 0
-            rowSpacing: 0
-            Action.Tile {
-                title: qsTranslate("Pedro", "settings.title")
-                icon: "../../../assets/icons/settings.svg"
-                separator: true
-                onActivated: controller.requestSettings()
-            }
-            Action.Tile {
-                title: qsTranslate("Pedro", "shell.power.lock")
-                icon: "../../../assets/icons/lock.svg"
-                separator: true
-                onActivated: controller.showNotice(qsTranslate("Pedro", "shell.power.lockPending"))
-            }
-            Action.Tile {
-                title: qsTranslate("Pedro", "shell.power.restart")
-                icon: "../../../assets/icons/restart.svg"
-                separator: true
-                onActivated: controller.showNotice(qsTranslate("Pedro", "shell.power.restartPending"))
-            }
-            Action.Tile {
-                title: qsTranslate("Pedro", "shell.power.off")
-                icon: "../../../assets/icons/power.svg"
-                onActivated: controller.showNotice(qsTranslate("Pedro", "shell.power.offPending"))
-            }
-        }
     }
 }

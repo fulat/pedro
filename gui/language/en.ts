@@ -426,7 +426,7 @@
         <message>
             <source>shell.focus.title</source>
             <extracomment>Stable Pedro key: shell.focus.title</extracomment>
-            <translation>Focus mode</translation>
+            <translation>Do Not Disturb</translation>
         </message>
         <message>
             <source>shell.keyboard.layout</source>
@@ -576,7 +576,7 @@
         <message>
             <source>shell.system.powerSaving.title</source>
             <extracomment>Stable Pedro key: shell.system.powerSaving.title</extracomment>
-            <translation>Power saving</translation>
+            <translation>Power Saving</translation>
         </message>
         <message>
             <source>system.errors.information</source>
