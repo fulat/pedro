@@ -64,6 +64,9 @@ int main(int argc, char** argv) {
     for (const auto& mode : {"grid", "free", "stack"}) {
         model.setOrganization(mode);
         for (const auto& key : {"name", "type", "date", "size"}) {
+            if (model.sortKey() == key) {
+                model.sort(key);
+            }
             model.sort(key);
             require(model.organization() == mode, "Sorting must not change organization");
             require(model.sortKey() == key, "Sort key should reflect the selected criterion");
@@ -90,9 +93,9 @@ int main(int argc, char** argv) {
 
     const auto beforeRepeat = requested.size();
     model.sort("size");
-    require(requested.size() == beforeRepeat + 1, "Repeating sort should still request redistribution");
+    require(model.sortKey().isEmpty() && requested.size() == beforeRepeat, "Repeating sort should disable sorting without redistribution");
     model.sort("invalid");
-    require(model.sortKey() == "size" && requested.size() == beforeRepeat + 1, "Unknown sort criterion should be ignored");
+    require(model.sortKey().isEmpty() && requested.size() == beforeRepeat, "Unknown sort criterion should be ignored");
 
     model.setOrganization("free");
     const auto id = entryAt(model, 0).value("id").toString();
@@ -108,6 +111,18 @@ int main(int argc, char** argv) {
     }
     require(positionPreserved, "Model sort must leave coordinate persistence to the GUI");
 
+    model.sort("size");
+    model.savePosition(id, 500, 600);
+    model.sort("size");
+    bool restoredPosition = false;
+    for (int row = 0; row < model.rowCount(); ++row) {
+        const auto entry = entryAt(model, row);
+        if (entry.value("id") == id) {
+            const auto position = entry.value("position").toMap();
+            restoredPosition = position.value("x") == 123 && position.value("y") == 234;
+        }
+    }
+    require(restoredPosition, "Disabling sort should restore the original manual position across criterion changes");
     model.sort("size");
     QFile added(model.directory() + "/new.txt");
     require(added.open(QIODevice::WriteOnly), "Cannot create monitored file");

@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
                 }
                 const auto x = item->property("x").toDouble();
                 const auto y = item->property("y").toDouble();
-                if (y < previousY || (y == previousY && x <= previousX)) {
+                if (previousX >= 0 && (x > previousX || (x == previousX && y <= previousY))) {
                     std::cerr << "Visual order differs from " << key << " model order in " << mode << '\n';
                     return 6;
                 }

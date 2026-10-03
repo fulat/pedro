@@ -69,6 +69,8 @@ namespace Pedro::Papi::Io::Desktop {
 
             void sortRequested();
 
+            void sortRestored();
+
             void entryCreated(const QString& id);
 
             void entryRenamed(const QString& id);

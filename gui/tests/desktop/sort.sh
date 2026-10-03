@@ -10,6 +10,7 @@ from pathlib import Path
 import os
 import sys
 root = Path(sys.argv[1])
+(root / 'config/pedro/desktop.ini').unlink(missing_ok=True)
 (root / 'config/user-dirs.dirs').write_text(f'XDG_DESKTOP_DIR="{root}/desktop"\n')
 (root / 'desktop/new.txt').unlink(missing_ok=True)
 for index, (name, size) in enumerate([('Alpha.txt', 10), ('Beta.svg', 100), ('node2.txt', 30), ('node10.txt', 200)]):

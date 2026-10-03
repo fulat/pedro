@@ -192,6 +192,7 @@ Components.Application {
             main.controller.renamingDesktopBusy = false;
             main.controller.desktopOperationError = message;
         }
+        function onSortRestored() { Qt.callLater(main.controller.arrangeDesktop); }
         function onSortRequested() { Qt.callLater(main.controller.sortDesktop); }
         function onOrganizationChanged() { Qt.callLater(main.controller.arrangeDesktop); }
         function onGroupsChanged() {

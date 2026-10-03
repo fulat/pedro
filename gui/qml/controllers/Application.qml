@@ -141,6 +141,14 @@ QtObject {
             if (desktopDragging) {
                 endDesktopDrag();
             }
+            if (!Backend.desktopModel.sortKey && Backend.desktopModel.organization !== "stack") {
+                for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+                    const item = desktopShortcutRepeater.itemAt(index);
+                    if (item) {
+                        Backend.desktopModel.savePosition(item.app.id, item.x, item.y);
+                    }
+                }
+            }
             Backend.desktopModel.sort(action);
         } else if (action === "align") {
             Backend.desktopModel.setKeepAligned(!Backend.desktopModel.keepAligned);
@@ -234,23 +242,12 @@ QtObject {
             return;
         }
 
-        const candidates = desktopGridCandidates().sort((first, second) => first.y - second.y || first.x - second.x);
         const placements = [];
-        let candidateIndex = 0;
-
         for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
             const item = desktopShortcutRepeater.itemAt(index);
-            if (!item) {
-                continue;
-            }
-
-            while (candidateIndex < candidates.length) {
-                const candidate = candidates[candidateIndex++];
-                const rectangle = {x: candidate.x, y: candidate.y, width: item.width, height: item.height};
-                if (!placements.some(placement => Grid.intersects(rectangle, placement, desktopGap() - 0.000001))) {
-                    placements.push({item: item, x: candidate.x, y: candidate.y, width: item.width, height: item.height});
-                    break;
-                }
+            if (item) {
+                const position = desktopStackPosition(index);
+                placements.push({item: item, x: position.x, y: position.y});
             }
         }
 

@@ -41,6 +41,7 @@ Item {
     }
     Connections {
         target: Backend.desktopModel
+        function onSortRestored() { Qt.callLater(controller.arrangeDesktop); }
         function onSortRequested() { Qt.callLater(controller.sortDesktop); }
     }
 }

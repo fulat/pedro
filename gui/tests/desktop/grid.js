@@ -186,7 +186,7 @@ const oldSavedCount = saved.length;
 Controller.sortDesktop();
 assert(context.Backend.desktopModel.organization === "free", "Explicit sorting preserves free organization");
 assert(saved.length === oldSavedCount + shortcuts.length, "Sorting persists every icon in the active layout");
-assert(dragged.y <= second.y && (dragged.y < second.y || dragged.x < second.x), "Icon positions follow the ordered model");
+assert(dragged.x >= second.x && (dragged.x > second.x || dragged.y < second.y), "Icon positions follow the ordered model");
 assert(!Grid.intersects(dragged, second, 8 - 0.000001), "Sorted icons preserve grid spacing");
 context.Backend.desktopModel.organization = "grid";
 Controller.sortDesktop();

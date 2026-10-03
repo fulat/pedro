@@ -520,8 +520,8 @@ namespace Pedro::Papi::Io::Desktop {
 
     QString Model::sortKey() const {
 
-        const auto key = state->positions.value("organization/sort", "name").toString();
-        return key == "type" || key == "date" || key == "size" ? key : QStringLiteral("name");
+        const auto key = state->positions.value("organization/sort", "").toString();
+        return key == "name" || key == "type" || key == "date" || key == "size" ? key : QString();
     }
 
     void Model::sort(const QString& key) {
@@ -530,14 +530,44 @@ namespace Pedro::Papi::Io::Desktop {
             return;
         }
 
-        const bool changed = key != sortKey();
-        state->positions.setValue("organization/sort", key);
-        reorder();
-
-        if (changed) {
+        const auto active = sortKey();
+        if (active == key) {
+            const auto snapshot = state->positions.value("organization/undo/positions").toMap();
+            if (state->positions.contains("organization/undo/positions")) {
+                state->positions.remove("layout");
+                for (auto it = snapshot.cbegin(); it != snapshot.cend(); ++it) {
+                    state->positions.setValue(it.key(), it.value());
+                }
+            }
+            state->positions.setValue("organization/sort", QString());
+            const auto entries = state->entries;
+            for (const auto& entry : entries) {
+                apply(entry.value("id").toString(), entry);
+            }
+            reorder();
             emit sortChanged();
+            emit groupsChanged();
+            emit sortRestored();
+            return;
         }
 
+        if (active.isEmpty()) {
+            QVariantMap snapshot;
+            for (const auto& setting : state->positions.allKeys()) {
+                if (setting.startsWith("layout/")) {
+                    snapshot.insert(setting, state->positions.value(setting));
+                }
+            }
+            QStringList order;
+            for (const auto& entry : state->entries) {
+                order.append(entry.value("id").toString());
+            }
+            state->positions.setValue("organization/undo/positions", snapshot);
+            state->positions.setValue("organization/undo/order", order);
+        }
+        state->positions.setValue("organization/sort", key);
+        reorder();
+        emit sortChanged();
         emit groupsChanged();
         emit sortRequested();
     }
@@ -549,7 +579,17 @@ namespace Pedro::Papi::Io::Desktop {
         collator.setCaseSensitivity(Qt::CaseInsensitive);
         const auto key = sortKey();
         auto ordered = state->entries;
-        std::stable_sort(ordered.begin(), ordered.end(), [&key, &collator](const auto& left, const auto& right) { return precedes(left, right, key, collator); });
+        const auto manualOrder = state->positions.value("organization/undo/order").toStringList();
+        std::stable_sort(ordered.begin(), ordered.end(), [&key, &collator, &manualOrder](const auto& left, const auto& right) {
+            if (key.isEmpty() && !manualOrder.isEmpty()) {
+                const auto leftIndex = manualOrder.indexOf(left.value("id").toString());
+                const auto rightIndex = manualOrder.indexOf(right.value("id").toString());
+                if (leftIndex != rightIndex) {
+                    return leftIndex >= 0 && (rightIndex < 0 || leftIndex < rightIndex);
+                }
+            }
+            return precedes(left, right, key, collator);
+        });
 
         for (int target = 0; target < ordered.size(); ++target) {
             const auto id = ordered.at(target).value("id").toString();
