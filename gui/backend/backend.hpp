@@ -14,6 +14,7 @@
 #include <pedro/papi/power/battery/manager.h>
 #include <pedro/papi/power/profile/manager.h>
 #include <pedro/papi/gui/focus/manager.h>
+#include <pedro/papi/display/night/manager.h>
 #include <pedro/papi/network/connection/manager.h>
 
 #include <QUrl>
@@ -38,6 +39,7 @@ class Backend final : public QObject {
         Q_PROPERTY(QObject* battery READ battery CONSTANT)
         Q_PROPERTY(QObject* powerSaving READ powerSaving CONSTANT)
         Q_PROPERTY(QObject* focusMode READ focusMode CONSTANT)
+        Q_PROPERTY(QObject* nightLight READ nightLight CONSTANT)
         Q_PROPERTY(QObject* networkConnection READ networkConnection CONSTANT)
         Q_PROPERTY(bool developmentMode READ developmentMode CONSTANT)
         Q_PROPERTY(QString hostname READ hostname NOTIFY systemChanged)
@@ -92,6 +94,8 @@ class Backend final : public QObject {
         QObject* powerSaving();
 
         QObject* focusMode();
+
+        QObject* nightLight();
 
         QObject* networkConnection();
 
@@ -187,6 +191,7 @@ class Backend final : public QObject {
         Pedro::Papi::Power::Battery::Manager battery_;
         Pedro::Papi::Power::Profile::Manager profile_;
         Pedro::Papi::Gui::Focus::Manager focus_;
+        Pedro::Papi::Display::Night::Manager night_;
         Pedro::Papi::Network::Connection::Manager connection_;
 
         QTimer refreshTimer_;

@@ -26,7 +26,7 @@ Rectangle {
     signal modeRequested(string mode)
 
     visible: mode !== ""
-    implicitWidth: Math.max(0, Math.min(mode === "battery" ? 240 : mode === "network" ? 300 : mode === "quick" ? 328 : controlMode ? 304 : mode === "system" ? 288 : 320, availableWidth - 24))
+    implicitWidth: Math.max(0, Math.min(mode === "battery" ? 240 : mode === "network" ? 300 : mode === "quick" ? 352 : controlMode ? 304 : mode === "system" ? 288 : 320, availableWidth - 24))
     implicitHeight: Math.max(0, Math.min(mode === "battery" ? 140 : mode === "quick" ? control.implicitHeight + 24 : mode === "wifi" ? wifi.implicitHeight + 24 : mode === "bluetooth" ? bluetooth.implicitHeight + 24 : mode === "sound" ? 76 : mode === "network" ? 254 : mode === "system" ? 288 : mode === "notifications" || mode === "calendar" ? 180 : 380, availableHeight - 20))
 
     width: implicitWidth

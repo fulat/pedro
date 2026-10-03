@@ -1,6 +1,7 @@
 #include <gio/gio.h>
 
 #include "papi/gui/focus/manager.h"
+#include "papi/display/night/manager.h"
 #include "papi/power/profile/manager.h"
 
 #include <QCoreApplication>
@@ -35,10 +36,14 @@ namespace {
             GSettings* settings = g_settings_new("org.gnome.desktop.notifications");
             bool banners = g_settings_get_boolean(settings, "show-banners");
             QString original = profile();
+            GSettings* color = g_settings_new("org.gnome.settings-daemon.plugins.color");
+            bool nightEnabled = g_settings_get_boolean(color, "night-light-enabled");
 
             ~Restore() {
                 g_settings_set_boolean(settings, "show-banners", banners);
+                g_settings_set_boolean(color, "night-light-enabled", nightEnabled);
                 g_settings_sync();
+                g_object_unref(color);
                 g_object_unref(settings);
                 if (!original.isEmpty()) {
                     setProfile(original);
@@ -52,6 +57,7 @@ int main(int argc, char** argv) {
     Restore restore;
     Pedro::Papi::Power::Profile::Manager power;
     Pedro::Papi::Gui::Focus::Manager focus;
+    Pedro::Papi::Display::Night::Manager night;
     auto wait = [&](auto condition) {
         QElapsedTimer timer;
         timer.start();
@@ -71,6 +77,16 @@ int main(int argc, char** argv) {
     if (!require(wait([&] { return power.available(); }) && focus.available(), "system controls available")) {
         return 1;
     }
+    const bool initialNight = night.active();
+    night.toggle();
+    if (!require(night.available() && wait([&] { return night.active() != initialNight; }) && bool(g_settings_get_boolean(restore.color, "night-light-enabled")) != initialNight, "Night Light controls GNOME setting")) {
+        return 1;
+    }
+    g_settings_set_boolean(restore.color, "night-light-enabled", restore.nightEnabled);
+    if (!require(wait([&] { return night.active() == initialNight; }), "external Night Light updates")) {
+        return 1;
+    }
+
     const bool initialFocus = focus.active();
     focus.toggle();
     if (!require(wait([&] { return focus.active() != initialFocus; }) && bool(g_settings_get_boolean(restore.settings, "show-banners")) == initialFocus, "Focus controls GNOME banners")) {
@@ -96,6 +112,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    std::cout << "PASS: GNOME Focus and Power Saving, external updates and profile restoration\n";
+    std::cout << "PASS: GNOME Night Light, Focus and Power Saving, external updates and profile restoration\n";
     return 0;
 }

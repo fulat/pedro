@@ -95,6 +95,10 @@ QObject* Backend::powerSaving() {
     return &profile_;
 }
 
+QObject* Backend::nightLight() {
+    return &night_;
+}
+
 QObject* Backend::focusMode() {
     return &focus_;
 }

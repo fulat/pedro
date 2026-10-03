@@ -40,6 +40,14 @@ Item {
         }
     }
 
+    Connections {
+        target: Papi.nightLight
+        function onChanged() {
+            if (Papi.nightLight.error.length > 0)
+                controller.showNotice(Papi.nightLight.error);
+        }
+    }
+
     ColumnLayout {
         id: content
         anchors.fill: parent
@@ -154,8 +162,11 @@ Item {
                     title: qsTranslate("Pedro", "shell.nightLight.title")
                     subtitle: active ? qsTranslate("Pedro", "shell.nightLight.automatic") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/brightness.svg"
-                    active: true
-                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.nightLight.pending"))
+                    active: Papi.nightLight.active
+                    activeColor: Theme.nightLightActive
+                    toggleable: false
+                    enabled: Papi.nightLight.available
+                    onActivated: Papi.nightLight.toggle()
                 }
                 Toggle.Tile {
                     Layout.preferredHeight: 48
