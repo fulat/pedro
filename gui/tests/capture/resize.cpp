@@ -103,6 +103,13 @@ int main(int argc, char** argv) {
     if (manager.captured != QRect(285, 220, 500, 350)) {
         return 1;
     }
+    auto* options = item->findChild<QObject*>("captureOptions");
+    if (!options || !QMetaObject::invokeMethod(options, "open")) {
+        return 1;
+    }
+    QTest::qWait(50);
+    QMetaObject::invokeMethod(options, "close");
+    QTest::qWait(150);
     auto* toolbar = item->findChild<QQuickItem*>("captureToolbar");
     const auto original = toolbar->position();
     const QPoint from(qRound(original.x() + 38), qRound(original.y() + 20));

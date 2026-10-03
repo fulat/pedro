@@ -1726,5 +1726,40 @@
             <extracomment>Stable Pedro key: capture.take</extracomment>
             <translation>Capture</translation>
         </message>
+        <message>
+            <source>capture.timer</source>
+            <extracomment>Stable Pedro key: capture.timer</extracomment>
+            <translation>Timer</translation>
+        </message>
+        <message>
+            <source>capture.microphone</source>
+            <extracomment>Stable Pedro key: capture.microphone</extracomment>
+            <translation>Microphone</translation>
+        </message>
+        <message>
+            <source>capture.preview</source>
+            <extracomment>Stable Pedro key: capture.preview</extracomment>
+            <translation>Audio · Preview</translation>
+        </message>
+        <message>
+            <source>capture.none</source>
+            <extracomment>Stable Pedro key: capture.none</extracomment>
+            <translation>None</translation>
+        </message>
+        <message>
+            <source>capture.defaultMicrophone</source>
+            <extracomment>Stable Pedro key: capture.defaultMicrophone</extracomment>
+            <translation>System microphone</translation>
+        </message>
+        <message>
+            <source>capture.microphoneNote</source>
+            <extracomment>Stable Pedro key: capture.microphoneNote</extracomment>
+            <translation>Audio recording coming soon</translation>
+        </message>
+        <message>
+            <source>capture.close</source>
+            <extracomment>Stable Pedro key: capture.close</extracomment>
+            <translation>Close</translation>
+        </message>
     </context>
 </TS>

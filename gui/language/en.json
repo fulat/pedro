@@ -343,5 +343,12 @@
     "capture.noDelay": "No Timer",
     "capture.stop": "Stop",
     "capture.record": "Record",
-    "capture.take": "Capture"
+    "capture.take": "Capture",
+    "capture.timer": "Timer",
+    "capture.microphone": "Microphone",
+    "capture.preview": "Audio · Preview",
+    "capture.none": "None",
+    "capture.defaultMicrophone": "System microphone",
+    "capture.microphoneNote": "Audio recording coming soon",
+    "capture.close": "Close"
 }

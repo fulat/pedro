@@ -18,6 +18,7 @@ Item {
     property bool video: false
     property bool cursor: false
     property int delay: 0
+    property bool microphone: false
 
     visible: capture.visible
     focus: capture.visible
@@ -173,7 +174,7 @@ Item {
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 30; color: Theme.dividerSoft }
                 Action {
                     text: qsTranslate("Pedro", "capture.screen")
-                    symbol: "../../../assets/icons/display.svg"
+                    symbol: "../../../assets/icons/capture/screen.svg"
                     showText: true
                     stacked: true
                     checkable: true; checked: !root.area
@@ -190,7 +191,7 @@ Item {
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
                 Action {
                     text: qsTranslate("Pedro", "capture.image")
-                    symbol: "../../../assets/icons/image.svg"
+                    symbol: "../../../assets/icons/capture/camera.svg"
                     showText: true
                     stacked: true
                     checkable: true; checked: !root.video
@@ -198,7 +199,7 @@ Item {
                 }
                 Action {
                     text: qsTranslate("Pedro", "capture.video")
-                    symbol: "../../../assets/icons/video.svg"
+                    symbol: "../../../assets/icons/capture/video.svg"
                     showText: true
                     stacked: true
                     checkable: true; checked: root.video
@@ -207,36 +208,51 @@ Item {
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 22; color: Theme.dividerSoft }
                 Action {
                     text: qsTranslate("Pedro", "capture.options")
-                    symbol: "../../../assets/icons/settings.svg"
+                    symbol: "../../../assets/icons/capture/options.svg"
                     showText: true
                     stacked: true
                     onClicked: options.open()
-                    Menu {
+                    GlassMenu {
                         id: options
+                        objectName: "captureOptions"
                         y: -height - 8
-                        background: Rectangle {
-                            implicitWidth: 190
-                            radius: 14
-                            color: Theme.menuBackground
-                            border.color: Theme.cardBorder
-                        }
-                        MenuItem { palette.text: Theme.white; text: qsTranslate("Pedro", "capture.cursor"); checkable: true; checked: root.cursor; onTriggered: root.cursor = !root.cursor }
-                        MenuSeparator {}
+                        Heading { text: qsTranslate("Pedro", "capture.timer") }
                         Repeater {
-                            model: [0, 3, 5]
-                            delegate: MenuItem {
-                                palette.text: Theme.white
+                            model: [0, 3, 5, 10]
+                            delegate: Option {
                                 required property int modelData
                                 text: modelData === 0 ? qsTranslate("Pedro", "capture.noDelay") : modelData + " s"
-                                checkable: true; checked: root.delay === modelData
+                                checkable: true
+                                checked: root.delay === modelData
                                 onTriggered: root.delay = modelData
                             }
+                        }
+                        MenuSeparator {}
+                        Option {
+                            text: qsTranslate("Pedro", "capture.cursor")
+                            checkable: true
+                            checked: root.cursor
+                            onTriggered: root.cursor = !root.cursor
+                        }
+                        MenuSeparator {}
+                        Menu {
+                            title: qsTranslate("Pedro", "capture.microphone")
+                            width: 250
+                            padding: 6
+                            popupType: Popup.Item
+                            background: Components.Liquid { backdrop: root.backdrop; frosted: true; cornerRadius: 12 }
+                            delegate: Option {}
+                            Heading { text: qsTranslate("Pedro", "capture.preview") }
+                            Option { text: qsTranslate("Pedro", "capture.none"); checkable: true; checked: !root.microphone; onTriggered: root.microphone = false }
+                            Option { text: qsTranslate("Pedro", "capture.defaultMicrophone"); checkable: true; checked: root.microphone; onTriggered: root.microphone = true }
+                            MenuSeparator {}
+                            Heading { text: qsTranslate("Pedro", "capture.microphoneNote") }
                         }
                     }
                 }
                 Action {
                     text: root.video ? qsTranslate("Pedro", "capture.record") : qsTranslate("Pedro", "capture.take")
-                    symbol: root.video ? "../../../assets/icons/video.svg" : "../../../assets/icons/image.svg"
+                    symbol: root.video ? "../../../assets/icons/capture/video.svg" : "../../../assets/icons/capture/camera.svg"
                     showText: true
                     accent: true
                     Layout.preferredWidth: 132
@@ -245,8 +261,9 @@ Item {
                 }
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 30; color: Theme.dividerSoft }
                 Action {
-                    text: "×"
-                    showText: true
+                    text: qsTranslate("Pedro", "capture.close")
+                    symbol: "../../../assets/icons/capture/close.svg"
+                    circular: true
                     Layout.preferredWidth: 36
                     onClicked: root.capture.close()
                 }
@@ -264,12 +281,60 @@ Item {
         wrapMode: Text.WordWrap
     }
 
+    component GlassMenu: Menu {
+        width: 250
+        padding: 6
+        popupType: Popup.Item
+        cascade: true
+        delegate: Option {}
+        background: Components.Liquid { backdrop: root.backdrop; frosted: true; blurAmount: 1.0; cornerRadius: 12 }
+    }
+
+    component Heading: MenuItem {
+        id: heading
+        enabled: false
+        implicitHeight: 30
+        contentItem: Text { text: heading.text; color: Theme.textMuted; font.pixelSize: 11; wrapMode: Text.WordWrap }
+        background: Item {}
+    }
+
+    component Option: MenuItem {
+        id: option
+        implicitHeight: 34
+        leftPadding: 12
+        rightPadding: 12
+        indicator: Item {}
+        arrow: Item {}
+        contentItem: Item {
+            Text { anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter; text: option.text; color: Theme.white; font.pixelSize: 13 }
+            Icon.Tinted {
+                visible: !!option.subMenu
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                width: 18; height: 18
+                source: "../../../assets/icons/capture/microphone.svg"
+            }
+            Rectangle {
+                visible: option.checkable
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                width: 16; height: 16; radius: 8
+                color: option.checked ? Theme.overlayHover : "transparent"
+                border.width: 1
+                border.color: option.checked ? Theme.textMuted : Theme.cardBorderStrong
+                Rectangle { anchors.centerIn: parent; width: 6; height: 6; radius: 3; visible: option.checked; color: Theme.textMuted }
+            }
+        }
+        background: Rectangle { radius: 6; color: option.hovered || option.highlighted ? "#18ffffff" : "transparent" }
+    }
+
     component Action: Button {
         id: action
         property url symbol
         property bool showText: false
         property bool accent: false
         property bool stacked: false
+        property bool circular: false
         Accessible.name: text
         contentItem: Item {
             implicitWidth: action.stacked ? Math.max(label.implicitWidth, 64) : (action.symbol.toString().length > 0 ? 25 : 0) + (action.showText ? label.implicitWidth : 0)
@@ -280,7 +345,7 @@ Item {
                 source: action.symbol
                 width: 19
                 height: 19
-                x: action.stacked ? (parent.width - width) / 2 : 0
+                x: action.stacked || action.circular ? (parent.width - width) / 2 : 0
                 y: action.stacked ? 0 : (parent.height - height) / 2
             }
             Text {
@@ -297,10 +362,11 @@ Item {
         background: Rectangle {
             implicitWidth: action.stacked ? action.contentItem.implicitWidth + 16 : action.showText ? action.contentItem.implicitWidth + 22 : 36
             implicitHeight: action.stacked ? 46 : 36
-            radius: 11
-            border.width: action.accent ? 1 : 0
+            radius: action.circular || action.accent ? height / 2 : 11
+            border.width: action.accent || action.circular ? 1 : 0
             border.color: Theme.cardBorderStrong
-            color: action.down || action.checked ? Theme.overlayPressed : action.hovered || action.accent ? Theme.overlayHover : "transparent"
+            color: action.down ? "#26ffffff" : action.checked ? "#18ffffff" : action.hovered ? "#14ffffff" : action.accent || action.circular ? "#0cffffff" : "transparent"
+            Behavior on color { ColorAnimation { duration: 100 } }
         }
         ToolTip.visible: hovered && !showText
         ToolTip.delay: 400

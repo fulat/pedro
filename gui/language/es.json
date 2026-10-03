@@ -343,5 +343,12 @@
     "capture.noDelay": "Sin temporizador",
     "capture.stop": "Detener",
     "capture.record": "Grabar",
-    "capture.take": "Capturar"
+    "capture.take": "Capturar",
+    "capture.timer": "Temporizador",
+    "capture.microphone": "Micrófono",
+    "capture.preview": "Audio · Vista previa",
+    "capture.none": "Ninguno",
+    "capture.defaultMicrophone": "Micrófono del sistema",
+    "capture.microphoneNote": "Grabación de audio próximamente",
+    "capture.close": "Cerrar"
 }

@@ -14,7 +14,7 @@ Item {
     implicitHeight: 24
 
     //source icon
-    property url sourceIcon: root.source.toString().length ? "image://icons/" + root.tint.toString().replace("#", "") + "/" + root.source.toString().split("/").pop() : ""
+    property url sourceIcon: root.source.toString().length ? "image://icons/" + root.tint.toString().replace("#", "") + "/" + (root.source.toString().includes("/assets/icons/") ? root.source.toString().split("/assets/icons/").pop() : root.source.toString().split("/").pop()) : ""
 
     Image {
         anchors.fill: parent
