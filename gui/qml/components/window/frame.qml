@@ -12,7 +12,7 @@ Window {
     id: frame
 
     readonly property var controller: contentLoader.item ? contentLoader.item.controller || null : null
-    readonly property alias entryBackdrop: windowBackdrop
+    readonly property Item entryBackdrop: windowBackdrop.item
     property url headerSource
     property real headerHeight: 44
     property real titleOffset: 90
@@ -32,6 +32,7 @@ Window {
     property color surfaceColor: "transparent"
     property color glassTint: Backend.appearanceMode === "light" ? Theme.menuGlassLightHaze : Theme.menuGlassHaze
     property Window wallpaperWindow
+    property var backdropWindows: []
     // Wayland does not expose global top-level positions to clients. Keep native
     // transparency there instead of drawing a wallpaper sample that cannot track moves.
     readonly property bool canTrackWallpaper: !Qt.platform.pluginName.startsWith("wayland")
@@ -78,23 +79,21 @@ Window {
             autoPaddingEnabled: false
         }
 
-        Image {
+        Loader {
             id: windowBackdrop
-            // Reproduce the desktop crop in global coordinates, not a window-sized copy.
-            x: (frame.wallpaperWindow ? frame.wallpaperWindow.x : frame.Screen.virtualX) - frame.x
-            y: (frame.wallpaperWindow ? frame.wallpaperWindow.y : frame.Screen.virtualY) - frame.y
-            width: frame.wallpaperWindow ? frame.wallpaperWindow.width : frame.Screen.width
-            height: frame.wallpaperWindow ? frame.wallpaperWindow.height : frame.Screen.height
-            source: frame.canTrackWallpaper ? Backend.wallpaper : ""
-            fillMode: Image.PreserveAspectCrop
+            source: "backdrop.qml"
             visible: false
-            smooth: true
-            mipmap: true
+            onLoaded: {
+                item.owner = frame;
+                item.desktopWindow = Qt.binding(() => frame.wallpaperWindow);
+                item.windows = Qt.binding(() => frame.backdropWindows);
+                item.enabled = Qt.binding(() => frame.canTrackWallpaper);
+            }
         }
 
         Components.Liquid {
             anchors.fill: parent
-            backdrop: frame.canTrackWallpaper ? windowBackdrop : null
+            backdrop: frame.canTrackWallpaper ? windowBackdrop.item : null
             frosted: true
             tintColor: frame.glassTint
             cornerRadius: frame.maximized ? 0 : frame.windowRadius
