@@ -31,6 +31,9 @@ Window {
     property url contentSource
     property color surfaceColor: "transparent"
     property Window wallpaperWindow
+    // Wayland does not expose global top-level positions to clients. Keep native
+    // transparency there instead of drawing a wallpaper sample that cannot track moves.
+    readonly property bool canTrackWallpaper: !Qt.platform.pluginName.startsWith("wayland")
     property color titleColor: Theme.white
     readonly property real resizeBorder: 7
     readonly property real resizeCorner: 18
@@ -81,7 +84,7 @@ Window {
             y: (frame.wallpaperWindow ? frame.wallpaperWindow.y : frame.Screen.virtualY) - frame.y
             width: frame.wallpaperWindow ? frame.wallpaperWindow.width : frame.Screen.width
             height: frame.wallpaperWindow ? frame.wallpaperWindow.height : frame.Screen.height
-            source: Backend.wallpaper
+            source: frame.canTrackWallpaper ? Backend.wallpaper : ""
             fillMode: Image.PreserveAspectCrop
             visible: false
             smooth: true
@@ -90,7 +93,7 @@ Window {
 
         Components.Liquid {
             anchors.fill: parent
-            backdrop: windowBackdrop
+            backdrop: frame.canTrackWallpaper ? windowBackdrop : null
             frosted: true
             cornerRadius: frame.maximized ? 0 : frame.windowRadius
         }
