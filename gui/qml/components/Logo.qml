@@ -107,25 +107,12 @@ Item {
             anchors.rightMargin: (statusPill.height - height) / 2
             spacing: 4
 
-            Item {
-                width: searchButton.width + 3
-                height: 24
-
-                TopAction {
-                    id: searchButton
-                    icon: "../../assets/icons/search.svg"
-                    description: qsTranslate("Pedro", "common.search")
-                    highlighted: root.activeSource === "search"
-                    onActivated: controller.requestPanel("about", "search", searchButton)
-                }
-
-                Rectangle {
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 1
-                    height: 18
-                    color: Theme.dividerBright
-                }
+            TopAction {
+                id: searchButton
+                icon: "../../assets/icons/search.svg"
+                description: qsTranslate("Pedro", "common.search")
+                highlighted: root.activeSource === "search"
+                onActivated: controller.requestPanel("about", "search", searchButton)
             }
 
             TopAction {
