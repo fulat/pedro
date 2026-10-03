@@ -30,6 +30,7 @@ Window {
     readonly property alias contentItem: contentLoader.item
     property url contentSource
     property color surfaceColor: "transparent"
+    property Window wallpaperWindow
     property color titleColor: Theme.white
     readonly property real resizeBorder: 7
     readonly property real resizeCorner: 18
@@ -75,7 +76,11 @@ Window {
 
         Image {
             id: windowBackdrop
-            anchors.fill: parent
+            // Reproduce the desktop crop in global coordinates, not a window-sized copy.
+            x: (frame.wallpaperWindow ? frame.wallpaperWindow.x : frame.Screen.virtualX) - frame.x
+            y: (frame.wallpaperWindow ? frame.wallpaperWindow.y : frame.Screen.virtualY) - frame.y
+            width: frame.wallpaperWindow ? frame.wallpaperWindow.width : frame.Screen.width
+            height: frame.wallpaperWindow ? frame.wallpaperWindow.height : frame.Screen.height
             source: Backend.wallpaper
             fillMode: Image.PreserveAspectCrop
             visible: false
