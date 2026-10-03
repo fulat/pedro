@@ -3,6 +3,10 @@
 #include <QFileInfo>
 #include <QHash>
 #include <QIcon>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QSettings>
+#include <QUrl>
 #include <QQuickImageProvider>
 #include <QPainter>
 #include <QSvgRenderer>
@@ -14,7 +18,26 @@ class Icons final : public QQuickImageProvider {
         Icons() : QQuickImageProvider(QQuickImageProvider::Image) {
         }
 
+        static void configureTheme() {
+            auto paths = QIcon::themeSearchPaths();
+            paths.prepend(QStringLiteral(":/pedro/appearance/icons"));
+            paths.removeDuplicates();
+            QIcon::setThemeSearchPaths(paths);
+            const auto theme = qEnvironmentVariable("PEDRO_ICON_THEME");
+            QIcon::setThemeName(theme.isEmpty() ? QStringLiteral("Pedro") : theme);
+            QIcon::setFallbackThemeName(QStringLiteral("hicolor"));
+        }
+
         QImage requestImage(const QString& id, QSize* size, const QSize& requested) override {
+            if (id.startsWith("theme/")) {
+                const auto names = QJsonDocument::fromJson(QUrl::fromPercentEncoding(id.mid(6).toUtf8()).toUtf8()).array();
+                const auto target = (requested.isValid() ? requested : QSize(64, 64)).boundedTo(QSize(1024, 1024)).expandedTo(QSize(1, 1));
+                const auto image = themedImage(names, target);
+                if (size) {
+                    *size = image.size();
+                }
+                return image;
+            }
             const auto parts = id.split('/');
 
             if (parts.size() != 2 || parts[1].contains("..")) {
@@ -31,25 +54,7 @@ class Icons final : public QQuickImageProvider {
                 path = QStringLiteral(":/pedro/appearance/icons/Pedro/scalable/ui/") + parts[1];
             }
             const auto target = (requested.isValid() ? requested : QSize(64, 64)).boundedTo(QSize(1024, 1024)).expandedTo(QSize(1, 1));
-            QImage source;
-
-            if (parts[1].endsWith(".svg", Qt::CaseInsensitive) && QFileInfo(path).isFile()) {
-                QSvgRenderer renderer(path);
-
-                if (renderer.isValid()) {
-                    auto renderSize = renderer.defaultSize();
-                    renderSize.scale(target, Qt::KeepAspectRatio);
-                    source = QImage(renderSize, QImage::Format_ARGB32_Premultiplied);
-                    source.fill(Qt::transparent);
-
-                    QPainter vectorPainter(&source);
-                    vectorPainter.setRenderHint(QPainter::Antialiasing, true);
-                    vectorPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-                    renderer.render(&vectorPainter, source.rect());
-                }
-            } else if (QFileInfo(path).isFile()) {
-                source = QImage(path);
-            }
+            auto source = loadImage(path, target);
 
             if (source.isNull()) {
                 const auto icon = QIcon::fromTheme(themeIcon(parts[1]));
@@ -82,6 +87,73 @@ class Icons final : public QQuickImageProvider {
         }
 
     private:
+
+        static QImage loadImage(const QString& path, const QSize& target) {
+            if (!QFileInfo(path).isFile()) {
+                return {};
+            }
+            if (!path.endsWith(".svg", Qt::CaseInsensitive)) {
+                return QImage(path);
+            }
+            QSvgRenderer renderer(path);
+            if (!renderer.isValid()) {
+                return {};
+            }
+            auto renderSize = renderer.defaultSize();
+            renderSize.scale(target, Qt::KeepAspectRatio);
+            QImage image(renderSize, QImage::Format_ARGB32_Premultiplied);
+            image.fill(Qt::transparent);
+            QPainter painter(&image);
+            painter.setRenderHint(QPainter::Antialiasing, true);
+            painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+            renderer.render(&painter, image.rect());
+            return image;
+        }
+
+        // Pedro's own SVGs use the existing renderer even without Qt's SVG icon plugin.
+        // Directory names come from the theme's standard index, not MIME-specific mappings.
+        static QImage pedroImage(const QString& name, const QSize& target) {
+            for (const auto& root : QIcon::themeSearchPaths()) {
+                const auto theme = root + "/Pedro/";
+                if (!QFileInfo::exists(theme + "index.theme")) {
+                    continue;
+                }
+                QSettings index(theme + "index.theme", QSettings::IniFormat);
+                index.beginGroup("Icon Theme");
+                const auto directories = index.value("Directories").toStringList();
+                index.endGroup();
+                for (const auto& directory : directories) {
+                    if (index.value(directory + "/Context").toString() != "MimeTypes") {
+                        continue;
+                    }
+                    const auto image = loadImage(theme + directory + '/' + name + ".svg", target);
+                    if (!image.isNull()) {
+                        return image;
+                    }
+                }
+            }
+            return {};
+        }
+
+        static QImage themedImage(const QJsonArray& candidates, const QSize& target) {
+            for (const auto& candidate : candidates) {
+                const auto name = candidate.toString();
+                if (name.isEmpty() || name.contains('/') || name.contains('\\') || name.contains("..")) {
+                    continue;
+                }
+                if (QIcon::themeName() == "Pedro") {
+                    const auto own = pedroImage(name, target);
+                    if (!own.isNull()) {
+                        return own;
+                    }
+                }
+                const auto pixmap = QIcon::fromTheme(name).pixmap(target);
+                if (!pixmap.isNull()) {
+                    return pixmap.toImage().convertToFormat(QImage::Format_ARGB32_Premultiplied);
+                }
+            }
+            return pedroImage(QStringLiteral("text-x-generic"), target);
+        }
 
         static QString themeIcon(const QString& fileName) {
 

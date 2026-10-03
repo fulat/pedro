@@ -1,0 +1,32 @@
+#include <gio/gio.h>
+
+#include <pedro/papi/io/content/icon.h>
+
+namespace Pedro::Papi::Io::Content {
+
+    QStringList iconNames(const QString& type) {
+        QStringList names;
+        if (!type.isEmpty()) {
+            const auto encoded = type.toUtf8();
+            auto* icon = g_content_type_get_icon(encoded.constData());
+            if (icon && G_IS_THEMED_ICON(icon)) {
+                const auto* candidates = g_themed_icon_get_names(G_THEMED_ICON(icon));
+                for (int index = 0; candidates && candidates[index]; ++index) {
+                    names.append(QString::fromUtf8(candidates[index]));
+                }
+            }
+            if (icon) {
+                g_object_unref(icon);
+            }
+            auto* generic = g_content_type_get_generic_icon_name(encoded.constData());
+            if (generic) {
+                names.append(QString::fromUtf8(generic));
+                g_free(generic);
+            }
+        }
+        names.append(QStringLiteral("text-x-generic"));
+        names.removeDuplicates();
+        return names;
+    }
+
+}

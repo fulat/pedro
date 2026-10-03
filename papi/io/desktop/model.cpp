@@ -1,6 +1,7 @@
 #include <gio/gio.h>
 
 #include <pedro/papi/io/desktop/model.hpp>
+#include <pedro/papi/io/content/icon.h>
 
 #include <QCollator>
 #include <QPointer>
@@ -77,7 +78,25 @@ namespace Pedro::Papi::Io::Desktop {
 
             const auto* identity = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_ID_FILE);
 
-            return {{QStringLiteral("group"), group}, {QStringLiteral("identity"), identity ? QString::fromUtf8(identity) : QString{}}, {QStringLiteral("id"), url.toString(QUrl::FullyEncoded)}, {QStringLiteral("name"), QString::fromUtf8(g_file_info_get_display_name(info))}, {QStringLiteral("url"), url}, {QStringLiteral("path"), url.toLocalFile()}, {QStringLiteral("isDirectory"), folder}, {QStringLiteral("icon"), folder ? "folder" : image ? "image" : "notes"}, {QStringLiteral("type"), contentType ? QString::fromUtf8(contentType) : QString{}}, {QStringLiteral("size"), QVariant::fromValue(g_file_info_get_size(info))}, {QStringLiteral("modified"), QVariant::fromValue(g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED))}};
+            const auto type = contentType ? QString::fromUtf8(contentType) : QString{};
+            QVariantMap entry;
+            entry["id"] = url.toString(QUrl::FullyEncoded);
+            entry["identity"] = identity ? QString::fromUtf8(identity) : QString{};
+            entry["name"] = QString::fromUtf8(g_file_info_get_display_name(info));
+            entry["url"] = url;
+            entry["path"] = url.toLocalFile();
+            entry["isDirectory"] = folder;
+            entry["group"] = group;
+            entry["icon"] = folder ? "folder" : image ? "image" : "notes";
+
+            entry["visualType"] = folder ? "folder" : image && url.isLocalFile() ? "image" : "themed";
+            entry["contentType"] = type;
+            entry["iconNames"] = Pedro::Papi::Io::Content::iconNames(type);
+
+            entry["type"] = type;
+            entry["size"] = QVariant::fromValue(g_file_info_get_size(info));
+            entry["modified"] = QVariant::fromValue(g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED));
+            return entry;
         }
 
     }

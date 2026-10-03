@@ -1,6 +1,7 @@
 #include <gio/gio.h>
 
 #include <pedro/papi/io/directory/model.hpp>
+#include <pedro/papi/io/content/icon.h>
 
 #include <QDateTime>
 #include <QFile>
@@ -132,6 +133,11 @@ namespace Pedro::Papi::Io::Directory {
             result["name"] = QString::fromUtf8(g_file_info_get_display_name(info));
             result["isDirectory"] = folder;
             result["icon"] = folder ? "folder" : contentType && g_content_type_is_a(contentType, "image/*") ? "image" : "file";
+            const auto type = contentType ? QString::fromUtf8(contentType) : QString{};
+            const bool thumbnail = contentType && g_content_type_is_a(contentType, "image/*") && QUrl(address).isLocalFile();
+            result["contentType"] = type;
+            result["iconNames"] = Pedro::Papi::Io::Content::iconNames(type);
+            result["visualType"] = folder ? "folder" : thumbnail ? "image" : "themed";
             result["type"] = description ? QString::fromUtf8(description) : QString{};
             result["size"] = QVariant::fromValue(size);
             result["sizeText"] = folder ? QString{} : formatSize(size);

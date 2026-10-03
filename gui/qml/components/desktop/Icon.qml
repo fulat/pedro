@@ -7,13 +7,16 @@ Item {
     id: desktopIcon
 
     property string kind
+    property var iconNames: []
     property url imageUrl
     property real cornerRadius: 6
 
     Image {
-        visible: desktopIcon.kind === "notes" || desktopIcon.kind === "file"
+        visible: desktopIcon.kind === "notes" || desktopIcon.kind === "file" || desktopIcon.kind === "themed"
         anchors.fill: parent
-        source: "image://icons/original/document.svg"
+        source: !visible ? "" : desktopIcon.iconNames.length
+            ? "image://icons/theme/" + encodeURIComponent(JSON.stringify(desktopIcon.iconNames))
+            : "image://icons/original/document.svg"
         sourceSize: Qt.size(Math.ceil(desktopIcon.width * Math.max(1, Screen.devicePixelRatio) * 2),
             Math.ceil(desktopIcon.height * Math.max(1, Screen.devicePixelRatio) * 2))
         fillMode: Image.PreserveAspectFit

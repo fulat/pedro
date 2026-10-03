@@ -2,11 +2,18 @@
 Name=Pedro
 Comment=Pedro OS Icon Theme
 Inherits=Yaru,hicolor
-Directories=scalable/ui
+Directories=scalable/ui,scalable/mimetypes
 
 [scalable/ui]
 Context=UI
 Size=16
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[scalable/mimetypes]
+Context=MimeTypes
+Size=64
 MinSize=8
 MaxSize=512
 Type=Scalable

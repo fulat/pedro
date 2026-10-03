@@ -53,16 +53,7 @@ int main(int argc, char* argv[]) {
 
     QCoreApplication::setOrganizationName(QStringLiteral("Pedro"));
 
-    const auto iconTheme = qEnvironmentVariable("PEDRO_ICON_THEME");
-
-    if (!iconTheme.isEmpty()) {
-        QIcon::setThemeName(iconTheme);
-    } else if (QIcon::themeName().isEmpty()) {
-        QIcon::setThemeName(QStringLiteral("Pedro"));
-    }
-
-    // Keeps freedesktop application icons available when a platform theme is absent.
-    QIcon::setFallbackThemeName(QStringLiteral("hicolor"));
+    Icons::configureTheme();
 
     /*
      * Backend exposed to QML.

@@ -90,7 +90,8 @@ Item {
         height: width
         anchors.horizontalCenter: parent.horizontalCenter
         y: entryItem.showName ? 8 : (parent.height - height) / 2
-        kind: entryItem.folder ? "folder" : entryItem.entry.icon === "image" && String(entryItem.entry.url || "").startsWith("file:") ? "image" : "notes"
+        kind: entryItem.folder ? "folder" : entryItem.entry.visualType || "notes"
+        iconNames: entryItem.entry.iconNames || []
         imageUrl: entryItem.entry.url || ""
         cornerRadius: entryItem.cornerRadius
     }

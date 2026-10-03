@@ -22,7 +22,7 @@ PY
 
 # Compile standalone checks using the public includes from the development build.
 /usr/lib/qt6/libexec/moc "$sourceDirectory/papi/io/desktop/model.hpp" -o "$taskDirectory/moc.cpp"
-commonSources=("$sourceDirectory/papi/io/desktop/model.cpp" "$taskDirectory/moc.cpp")
+commonSources=("$sourceDirectory/papi/io/content/icon.cpp" "$sourceDirectory/papi/io/desktop/model.cpp" "$taskDirectory/moc.cpp")
 read -r -a modelFlags <<< "$(pkg-config --cflags --libs Qt6Core Qt6Test gio-2.0 gio-unix-2.0)"
 read -r -a viewFlags <<< "$(pkg-config --cflags --libs Qt6Quick Qt6Qml gio-2.0 gio-unix-2.0)"
 c++ -std=c++17 -fPIC -I "$sourceDirectory/build/papi/include" \
