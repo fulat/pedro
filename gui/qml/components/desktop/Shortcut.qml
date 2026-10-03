@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls.Basic
 
 import "../../scripts/theme.js" as Theme
+import ".." as Components
 
 // Declares the visual representation and input wiring for a desktop shortcut.
 Item {
@@ -108,15 +109,26 @@ Item {
         }
     }
 
-    Rectangle {
+    Item {
         visible: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.rightMargin: 12
         width: 24
         height: 24
-        radius: 12
-        color: "#cc253445"
+        Components.Liquid {
+            anchors.fill: parent
+            backdrop: shortcut.shell.entryBackdrop
+            cornerRadius: 12
+            frosted: true
+            resolutionScale: 2
+        }
+        Rectangle {
+            anchors.fill: parent
+            radius: 12
+            color: "#660b1420"
+            antialiasing: true
+        }
         Text {
             anchors.centerIn: parent
             text: shortcut.stack.count
