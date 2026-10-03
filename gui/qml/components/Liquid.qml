@@ -12,9 +12,6 @@ Item {
     property bool frosted: false
     property real resolutionScale: 1
     property color edgeColor: Theme.liquidEdge
-    property color tintColor: lightMode
-        ? (frosted ? Theme.menuGlassLightHaze : Theme.liquidLightHaze)
-        : (frosted ? Theme.menuGlassHaze : Theme.liquidHaze)
     readonly property real sampleRatio: Math.max(1, Screen.devicePixelRatio) * Math.max(1, resolutionScale)
     readonly property bool lightMode: Backend.appearanceMode === "light"
     property real blurAmount: frosted ? 1.0 : Theme.menuBlur
@@ -91,7 +88,9 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: liquid.cornerRadius
-        color: liquid.tintColor
+        color: liquid.lightMode
+            ? (liquid.frosted ? Theme.menuGlassLightHaze : Theme.liquidLightHaze)
+            : (liquid.frosted ? Theme.menuGlassHaze : Theme.liquidHaze)
         Behavior on color {
             ColorAnimation { duration: 180; easing.type: Easing.InOutQuad }
         }

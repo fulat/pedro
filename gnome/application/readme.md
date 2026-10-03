@@ -17,9 +17,3 @@ make gnome
 La primera instalación requiere cerrar sesión y volver a entrar para que GNOME descubra la extensión. No reiniciar ni reemplazar el compositor desde Pedro. El instalador respeta XDG_DATA_HOME y conserva las demás extensiones. Actualizaciones del JavaScript también pueden requerir una nueva sesión. La metadata declara la versión de GNOME verificada; versiones futuras requieren revisar compatibilidad.
 
 Esta integración pertenece a la experiencia overlay GNOME. El pipeline actual de imagen con compositor propio tiene otra arquitectura y no se modifica ni se considera equivalente a esta sesión.
-
-## Vidrio de las quick windows
-
-`SetGlass(s title)` registra el título de las ventanas del proceso llamante. GNOME obtiene el PID del remitente en D-Bus, y aplica `Shell.BlurEffect` en modo `BACKGROUND` únicamente a sus ventanas con ese título. `GetGlass() → u` permite comprobar cuántas ventanas tienen el efecto. Al cerrar la conexión o deshabilitar la extensión se retira el efecto.
-
-El compositor desenfoca los píxeles reales debajo de la ventana (wallpaper, escritorio y otras aplicaciones) en cada composición. QML mantiene el tinte y el contenido nítido. No hay screenshots, polling, copias de ventanas ni muestras del wallpaper. La selección automática de XWayland se eliminó: se respeta el backend Qt de la sesión. Esta integración es específica de GNOME; el compositor propio de Pedro todavía no implementa este efecto.

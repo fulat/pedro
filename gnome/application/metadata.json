@@ -1,9 +1,7 @@
 {
     "uuid": "applications@pedro",
     "name": "Pedro Applications",
-    "description": "Provides GNOME application activation and compositor glass for the Pedro desktop overlay.",
-    "shell-version": [
-        "50"
-    ],
-    "version": 2
+    "description": "Exposes GNOME application activation to the Pedro desktop overlay.",
+    "shell-version": ["50"],
+    "version": 1
 }

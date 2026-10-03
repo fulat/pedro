@@ -12,7 +12,7 @@ Window {
     id: frame
 
     readonly property var controller: contentLoader.item ? contentLoader.item.controller || null : null
-    readonly property Item entryBackdrop: null
+    readonly property alias entryBackdrop: windowBackdrop
     property url headerSource
     property real headerHeight: 44
     property real titleOffset: 90
@@ -30,7 +30,6 @@ Window {
     readonly property alias contentItem: contentLoader.item
     property url contentSource
     property color surfaceColor: "transparent"
-    property color glassTint: Backend.appearanceMode === "light" ? Theme.menuGlassLightHaze : Theme.menuGlassHaze
     property color titleColor: Theme.white
     readonly property real resizeBorder: 7
     readonly property real resizeCorner: 18
@@ -74,12 +73,20 @@ Window {
             autoPaddingEnabled: false
         }
 
+        Image {
+            id: windowBackdrop
+            anchors.fill: parent
+            source: Backend.wallpaper
+            fillMode: Image.PreserveAspectCrop
+            visible: false
+            smooth: true
+            mipmap: true
+        }
+
         Components.Liquid {
             anchors.fill: parent
-            // The compositor blurs the actual scene beneath this native window.
-            backdrop: null
+            backdrop: windowBackdrop
             frosted: true
-            tintColor: frame.glassTint
             cornerRadius: frame.maximized ? 0 : frame.windowRadius
         }
 
