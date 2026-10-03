@@ -16,6 +16,7 @@ namespace Pedro::Papi::Io::Desktop {
             Q_PROPERTY(QString organization READ organization NOTIFY organizationChanged)
             Q_PROPERTY(bool keepAligned READ keepAligned NOTIFY organizationChanged)
             Q_PROPERTY(QVariantList groups READ groups NOTIFY groupsChanged)
+            Q_PROPERTY(QString sortKey READ sortKey NOTIFY sortChanged)
 
         public:
 
@@ -41,6 +42,10 @@ namespace Pedro::Papi::Io::Desktop {
 
             QVariantList groups() const;
 
+            QString sortKey() const;
+
+            Q_INVOKABLE void sort(const QString& key);
+
             Q_INVOKABLE void setOrganization(const QString& mode);
 
             Q_INVOKABLE void setKeepAligned(bool enabled);
@@ -60,6 +65,10 @@ namespace Pedro::Papi::Io::Desktop {
 
             void groupsChanged();
 
+            void sortChanged();
+
+            void sortRequested();
+
             void entryCreated(const QString& id);
 
             void entryRenamed(const QString& id);
@@ -75,6 +84,8 @@ namespace Pedro::Papi::Io::Desktop {
             void apply(const QString& uri, const QVariantMap& entry);
 
             void setError(const QString& error);
+
+            void reorder();
 
             std::unique_ptr<State> state;
     };

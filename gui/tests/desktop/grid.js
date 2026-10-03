@@ -101,7 +101,7 @@ const context = {
     stackDragPending: false
 };
 const Controller = new Function("context", "with (context) {\n" + functions
-    + "\nreturn {snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, endDesktopDrag};\n}")(context);
+    + "\nreturn {snapDesktopDragToGrid, desktopInitialPosition, desktopRestoredPosition, desktopStackPosition, sortDesktop, endDesktopDrag};\n}")(context);
 
 function obstacle(rectangle) {
     return {width: rectangle.width - 16, height: rectangle.height - 16, visible: true,
@@ -175,3 +175,30 @@ const firstStack = Controller.desktopStackPosition(0);
 assert(near(firstStack.x, 1166) && near(firstStack.y, 48), "Controller uses menu edge for first stack");
 assert(saved.length === beforeStack, "Stack placement does not overwrite saved individual positions");
 print("Stack placement: passed; " + checks + " total checks");
+
+// Sorting a free/grid desktop replaces coordinates in model order without changing mode.
+context.desktopObstacles = [logo, menu, notification].map(obstacle);
+context.Backend.desktopModel.organization = "free";
+context.desktopDragItems = [];
+context.desktopDragAnchor = null;
+context.desktopDragging = false;
+const oldSavedCount = saved.length;
+Controller.sortDesktop();
+assert(context.Backend.desktopModel.organization === "free", "Explicit sorting preserves free organization");
+assert(saved.length === oldSavedCount + shortcuts.length, "Sorting persists every icon in the active layout");
+assert(dragged.y <= second.y && (dragged.y < second.y || dragged.x < second.x), "Icon positions follow the ordered model");
+assert(!Grid.intersects(dragged, second, 8 - 0.000001), "Sorted icons preserve grid spacing");
+context.Backend.desktopModel.organization = "grid";
+Controller.sortDesktop();
+assert(context.Backend.desktopModel.organization === "grid", "Explicit sorting preserves grid organization");
+print("Desktop sorting controller: passed; " + checks + " total checks");
+
+context.Backend.desktopModel.organization = "stack";
+context.Backend.desktopModel.groups = [{key: "text", members: [dragged.app.id, second.app.id]}];
+context.expandedDesktopStacks = ["text"];
+const beforeStackSort = saved.length;
+Controller.sortDesktop();
+assert(near(dragged.y, 48) && second.y > dragged.y && near(dragged.x, second.x),
+    "Sorting expanded stack members respects the model order and menu edge");
+assert(saved.length === beforeStackSort, "Sorting stacks preserves individual free/grid layout records");
+print("Expanded stack sorting: passed; " + checks + " total checks");

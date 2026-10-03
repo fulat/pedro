@@ -95,7 +95,7 @@ Components.Application {
                 required property var entry
                 required property int index
 
-                readonly property point initialPosition: main.controller.desktopRestoredPosition(entry, index)
+                property point initialPosition: Qt.point(0, 0)
                 x: initialPosition.x
                 y: initialPosition.y
                 shell: main
@@ -104,6 +104,8 @@ Components.Application {
                 cellHeight: desktopShortcutsArea.itemHeight
                 app: entry
                 selected: main.controller.isDesktopShortcutSelected(entry.id)
+
+                Component.onCompleted: initialPosition = main.controller.desktopRestoredPosition(entry, index)
 
                 onMenuRequested: (localX, localY) => mainController.shortcutMenuRequested(desktopShortcut, localX, localY)
             }
@@ -172,6 +174,7 @@ Components.Application {
             item.backdrop = wallpaper;
             item.organization = Qt.binding(() => Backend.desktopModel.organization);
             item.keepAligned = Qt.binding(() => Backend.desktopModel.keepAligned);
+            item.sortKey = Qt.binding(() => Backend.desktopModel.sortKey);
             item.actionRequested.connect(action => main.controller.wallpaperAction(action));
         }
     }
@@ -189,6 +192,7 @@ Components.Application {
             main.controller.renamingDesktopBusy = false;
             main.controller.desktopOperationError = message;
         }
+        function onSortRequested() { Qt.callLater(main.controller.sortDesktop); }
         function onOrganizationChanged() { Qt.callLater(main.controller.arrangeDesktop); }
         function onGroupsChanged() {
             if (Backend.desktopModel.organization === "stack") {

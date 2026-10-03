@@ -137,6 +137,11 @@ QtObject {
             }
             expandedDesktopStacks = [];
             Backend.desktopModel.setOrganization(action);
+        } else if (action === "name" || action === "type" || action === "date" || action === "size") {
+            if (desktopDragging) {
+                endDesktopDrag();
+            }
+            Backend.desktopModel.sort(action);
         } else if (action === "align") {
             Backend.desktopModel.setKeepAligned(!Backend.desktopModel.keepAligned);
         }
@@ -216,8 +221,47 @@ QtObject {
             }
             const position = mode === "stack" ? desktopStackPosition(stackInfo(item.app).slot)
                 : desktopRestoredPosition(item.app, index);
+            item.initialPosition = Qt.point(position.x, position.y);
             item.x = position.x;
             item.y = position.y;
+        }
+    }
+
+    // Explicit sorting redistributes icons without changing the organization mode.
+    function sortDesktop() {
+        if (Backend.desktopModel.organization === "stack") {
+            arrangeDesktop();
+            return;
+        }
+
+        const candidates = desktopGridCandidates().sort((first, second) => first.y - second.y || first.x - second.x);
+        const placements = [];
+        let candidateIndex = 0;
+
+        for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
+            const item = desktopShortcutRepeater.itemAt(index);
+            if (!item) {
+                continue;
+            }
+
+            while (candidateIndex < candidates.length) {
+                const candidate = candidates[candidateIndex++];
+                const rectangle = {x: candidate.x, y: candidate.y, width: item.width, height: item.height};
+                if (!placements.some(placement => Grid.intersects(rectangle, placement, desktopGap() - 0.000001))) {
+                    placements.push({item: item, x: candidate.x, y: candidate.y, width: item.width, height: item.height});
+                    break;
+                }
+            }
+        }
+
+        // Apply the whole layout before model notifications update saved positions.
+        for (const placement of placements) {
+            placement.item.initialPosition = Qt.point(placement.x, placement.y);
+            placement.item.x = placement.x;
+            placement.item.y = placement.y;
+        }
+        for (const placement of placements) {
+            Backend.desktopModel.savePosition(placement.item.app.id, placement.x, placement.y);
         }
     }
 
@@ -617,6 +661,7 @@ QtObject {
         for (let index = 0; index < bestPlacement.length; ++index) {
             const placement = bestPlacement[index];
 
+            placement.item.initialPosition = Qt.point(placement.x, placement.y);
             placement.item.x = placement.x;
             placement.item.y = placement.y;
             Backend.desktopModel.savePosition(placement.item.app.id, placement.x, placement.y);
@@ -642,6 +687,7 @@ QtObject {
                     entry.item.x = entry.x;
                     entry.item.y = entry.y;
                 }
+                entry.item.initialPosition = Qt.point(entry.item.x, entry.item.y);
                 Backend.desktopModel.savePosition(entry.item.app.id, entry.item.x, entry.item.y);
             }
         } else {

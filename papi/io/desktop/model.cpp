@@ -2,6 +2,7 @@
 
 #include <pedro/papi/io/desktop/model.hpp>
 
+#include <QCollator>
 #include <QPointer>
 #include <QCryptographicHash>
 #include <QSettings>
@@ -30,6 +31,32 @@ namespace Pedro::Papi::Io::Desktop {
             return !name.trimmed().isEmpty() && name != "." && name != ".." && !name.contains('/') && !name.contains(QChar::Null);
         }
 
+        bool precedes(const QVariantMap& left, const QVariantMap& right, const QString& key, const QCollator& collator) {
+
+            if (key == "type") {
+                const bool leftFolder = left.value("isDirectory").toBool();
+                const bool rightFolder = right.value("isDirectory").toBool();
+                if (leftFolder != rightFolder) {
+                    return leftFolder;
+                }
+
+                const int comparison = collator.compare(left.value("type").toString(), right.value("type").toString());
+                if (comparison != 0) {
+                    return comparison < 0;
+                }
+            } else if (key == "date" || key == "size") {
+                const auto attribute = key == "date" ? "modified" : "size";
+                const auto leftValue = left.value(attribute).toULongLong();
+                const auto rightValue = right.value(attribute).toULongLong();
+                if (leftValue != rightValue) {
+                    return leftValue > rightValue;
+                }
+            }
+
+            const int comparison = collator.compare(left.value("name").toString(), right.value("name").toString());
+            return comparison != 0 ? comparison < 0 : left.value("id").toString() < right.value("id").toString();
+        }
+
         constexpr int entryRole = Qt::UserRole + 1;
 
         QVariantMap value(GFile* file, GFileInfo* info) {
@@ -50,7 +77,7 @@ namespace Pedro::Papi::Io::Desktop {
 
             const auto* identity = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_ID_FILE);
 
-            return {{QStringLiteral("group"), group}, {QStringLiteral("identity"), identity ? QString::fromUtf8(identity) : QString{}}, {QStringLiteral("id"), url.toString(QUrl::FullyEncoded)}, {QStringLiteral("name"), QString::fromUtf8(g_file_info_get_display_name(info))}, {QStringLiteral("url"), url}, {QStringLiteral("path"), url.toLocalFile()}, {QStringLiteral("isDirectory"), folder}, {QStringLiteral("icon"), folder ? "folder" : image ? "image" : "notes"}, {QStringLiteral("size"), QVariant::fromValue(g_file_info_get_size(info))}, {QStringLiteral("modified"), QVariant::fromValue(g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED))}};
+            return {{QStringLiteral("group"), group}, {QStringLiteral("identity"), identity ? QString::fromUtf8(identity) : QString{}}, {QStringLiteral("id"), url.toString(QUrl::FullyEncoded)}, {QStringLiteral("name"), QString::fromUtf8(g_file_info_get_display_name(info))}, {QStringLiteral("url"), url}, {QStringLiteral("path"), url.toLocalFile()}, {QStringLiteral("isDirectory"), folder}, {QStringLiteral("icon"), folder ? "folder" : image ? "image" : "notes"}, {QStringLiteral("type"), contentType ? QString::fromUtf8(contentType) : QString{}}, {QStringLiteral("size"), QVariant::fromValue(g_file_info_get_size(info))}, {QStringLiteral("modified"), QVariant::fromValue(g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED))}};
         }
 
     }
@@ -491,14 +518,70 @@ namespace Pedro::Papi::Io::Desktop {
         emit organizationChanged();
     }
 
-    QVariantList Model::groups() const {
-        QMap<QString, QStringList> members;
-        for (const auto& entry : state->entries) {
-            members[entry.value("group").toString()].append(entry.value("id").toString());
+    QString Model::sortKey() const {
+
+        const auto key = state->positions.value("organization/sort", "name").toString();
+        return key == "type" || key == "date" || key == "size" ? key : QStringLiteral("name");
+    }
+
+    void Model::sort(const QString& key) {
+
+        if (key != "name" && key != "type" && key != "date" && key != "size") {
+            return;
         }
+
+        const bool changed = key != sortKey();
+        state->positions.setValue("organization/sort", key);
+        reorder();
+
+        if (changed) {
+            emit sortChanged();
+        }
+
+        emit groupsChanged();
+        emit sortRequested();
+    }
+
+    void Model::reorder() {
+
+        QCollator collator;
+        collator.setNumericMode(true);
+        collator.setCaseSensitivity(Qt::CaseInsensitive);
+        const auto key = sortKey();
+        auto ordered = state->entries;
+        std::stable_sort(ordered.begin(), ordered.end(), [&key, &collator](const auto& left, const auto& right) { return precedes(left, right, key, collator); });
+
+        for (int target = 0; target < ordered.size(); ++target) {
+            const auto id = ordered.at(target).value("id").toString();
+            int source = target;
+            while (source < state->entries.size() && state->entries.at(source).value("id").toString() != id) {
+                ++source;
+            }
+
+            if (source != target && source < state->entries.size()) {
+                beginMoveRows({}, source, source, {}, target);
+                state->entries.move(source, target);
+                endMoveRows();
+            }
+        }
+    }
+
+    QVariantList Model::groups() const {
+
+        QMap<QString, QStringList> members;
+        QStringList keys;
+
+        for (const auto& entry : state->entries) {
+            const auto key = entry.value("group").toString();
+            if (!members.contains(key)) {
+                keys.append(key);
+            }
+            members[key].append(entry.value("id").toString());
+        }
+
         QVariantList groups;
-        for (auto iterator = members.cbegin(); iterator != members.cend(); ++iterator) {
-            groups.append(QVariantMap{{"key", iterator.key()}, {"members", iterator.value()}});
+        for (const auto& key : keys) {
+            groups.append(QVariantMap{{"key", key}, {"members", members.value(key)}});
         }
         return groups;
     }
@@ -601,8 +684,12 @@ namespace Pedro::Papi::Io::Desktop {
                 endRemoveRows();
                 emit groupsChanged();
             } else if (state->entries.at(row) != entry) {
+                const auto previous = state->entries.at(row);
                 state->entries[row] = entry;
                 emit dataChanged(index(row), index(row), {entryRole});
+                if (previous.value("name") != entry.value("name") || previous.value("type") != entry.value("type") || previous.value("size") != entry.value("size") || previous.value("modified") != entry.value("modified")) {
+                    reorder();
+                }
                 emit groupsChanged();
             }
 
@@ -614,6 +701,7 @@ namespace Pedro::Papi::Io::Desktop {
             beginInsertRows({}, row, row);
             state->entries.append(entry);
             endInsertRows();
+            reorder();
             emit groupsChanged();
         }
     }

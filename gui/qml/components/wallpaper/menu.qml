@@ -12,6 +12,7 @@ Controls.Menu {
     property Item backdrop
     property string organization: "grid"
     property bool keepAligned: true
+    property string sortKey: "name"
     property bool canPaste: false
     property string shortcutName
     signal actionRequested(string action)
@@ -196,21 +197,29 @@ Controls.Menu {
         Entry {
             text: qsTranslate("Pedro", "desktop.menu.name")
             symbol: "sort"
+            selectionOption: true
+            checked: root.sortKey === "name"
             onTriggered: root.actionRequested("name")
         }
         Entry {
             text: qsTranslate("Pedro", "desktop.menu.type")
             symbol: "tag"
+            selectionOption: true
+            checked: root.sortKey === "type"
             onTriggered: root.actionRequested("type")
         }
         Entry {
             text: qsTranslate("Pedro", "desktop.menu.date")
             symbol: "calendar"
+            selectionOption: true
+            checked: root.sortKey === "date"
             onTriggered: root.actionRequested("date")
         }
         Entry {
             text: qsTranslate("Pedro", "desktop.menu.size")
             symbol: "size"
+            selectionOption: true
+            checked: root.sortKey === "size"
             onTriggered: root.actionRequested("size")
         }
     }

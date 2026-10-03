@@ -177,7 +177,7 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 ## Desktop y menú del wallpaper
 
 - [x] Crear carpetas y archivos vacíos con nombres únicos de forma asíncrona, con renombrado en línea.
-- [x] Organización cuadrícula, libre y pilas expandibles por tipo; alineación y persistencia de preferencias y posiciones por modo.
+- [x] Organización cuadrícula, libre y pilas expandibles por tipo; alineación y persistencia de preferencias y posiciones por modo. Ordenación por nombre natural, tipo MIME, fecha reciente y tamaño descendente en los tres modos, con criterio persistente y redistribución explícita; Pila conserva los registros individuales.
 - [x] Barreras de arrastre en Libre y Cuadrícula contra logo, menús, widgets y dock, con margen universal de 8 px también en Pila; Cuadrícula busca una celda válida cercana al soltar, con origen local en los bordes de las zonas libres delimitadas por esos controles; las zonas despejadas conservan el origen de pantalla. Pila inicia cada tramo de columna desde el borde del obstáculo anterior, incluido el menú superior.
 - [x] Gap de 8 px entre elementos en Cuadrícula y Pila, incluyendo áreas de selección; Libre permite superposición.
 - [x] Arrastre visual en pilas: representación bajo el cursor, resaltado de destino y retorno sin modificar posiciones; permite arrastrar elementos de pilas expandidas.
