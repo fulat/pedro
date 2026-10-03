@@ -86,17 +86,32 @@ Controls.Menu {
                     width: 16
                     height: 16
                     radius: 8
-                    color: entry.checked ? "#3478f6" : "transparent"
+                    color: entry.checked ? Theme.overlayHover : "transparent"
                     border.width: 1
-                    border.color: entry.checked ? "#80b5ff" : Theme.textMuted
+                    border.color: entry.checked ? Theme.textMuted : Theme.cardBorderStrong
+                    antialiasing: true
 
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: 7
-                        height: 7
-                        radius: 3.5
+                    Behavior on color {
+                        ColorAnimation { duration: 120 }
+                    }
+
+                    Behavior on border.color {
+                        ColorAnimation { duration: 120 }
+                    }
+
+                    Controls.Label {
+                        anchors.fill: parent
+                        text: "✓"
                         color: Theme.white
-                        visible: entry.checked
+                        font.pixelSize: 11
+                        font.weight: Font.Medium
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        opacity: entry.checked ? 1 : 0
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 120 }
+                        }
                     }
                 }
             }
