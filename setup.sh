@@ -86,7 +86,9 @@ fi
 
 packages=(
     build-essential cmake ninja-build python3 python3-gi pkg-config clang-format
-    qt6-l10n-tools qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-svg-plugins qt6-wayland-dev
+    # Qt Linguist supplies lrelease, required to compile Pedro translation catalogs.
+    qt6-l10n-tools
+    qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-svg-plugins qt6-wayland-dev
     libglib2.0-dev libsystemd-dev libtomlplusplus-dev gvfs gvfs-backends
     libwayland-dev wayland-protocols libxkbcommon-dev libegl-dev
     qt6-qpa-plugins qt6-wayland qgnomeplatform-qt6
@@ -105,6 +107,17 @@ echo "Installing Pedro development and image-building dependencies..."
 # Resolve the complete package set before changing installed packages.
 "${asRoot[@]}" apt-get --simulate install --no-install-recommends "${packages[@]}"
 "${asRoot[@]}" apt-get install -y --no-install-recommends "${packages[@]}"
+
+# Ubuntu installs Qt 6 tools outside PATH; verify the tool CMake discovers.
+lreleaseExecutable=/usr/lib/qt6/bin/lrelease
+
+if [[ ! -x "$lreleaseExecutable" ]]; then
+    echo "Qt 6 lrelease is missing after installing qt6-l10n-tools." >&2
+    echo "Repair the package with: sudo apt-get install --reinstall qt6-l10n-tools" >&2
+    exit 1
+fi
+
+"$lreleaseExecutable" -version
 
 pkg-config --exists gio-2.0 gio-unix-2.0 libsystemd
 sourceDirectory=$(dirname "$(realpath "$0")")

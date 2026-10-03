@@ -102,8 +102,13 @@ file(GLOB_RECURSE PEDRO_GUI_ASSETS
 # Qt translation catalogs are compiled by the standard Qt Linguist tool.
 # JSON files are reference metadata only and are not loaded at runtime.
 find_program(PEDRO_LRELEASE NAMES lrelease-qt6 lrelease
-        HINTS /usr/lib/qt6/bin
-        REQUIRED)
+        HINTS /usr/lib/qt6/bin)
+if(NOT PEDRO_LRELEASE)
+        message(FATAL_ERROR
+                "Qt 6 lrelease is required to compile Pedro translations. "
+                "Run ./setup.sh or install it with: "
+                "sudo apt-get install -y --no-install-recommends qt6-l10n-tools")
+endif()
 set(PEDRO_GUI_LANGUAGE_FILES)
 foreach(locale en es)
         set(qm "${CMAKE_CURRENT_BINARY_DIR}/language/${locale}.qm")
