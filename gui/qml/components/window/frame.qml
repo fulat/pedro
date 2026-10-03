@@ -30,6 +30,8 @@ Window {
     readonly property alias contentItem: contentLoader.item
     property url contentSource
     property color surfaceColor: "transparent"
+    property color surfaceEndColor: surfaceColor
+    property bool opaqueSurface: false
     property color titleColor: Theme.white
     readonly property real resizeBorder: 7
     readonly property real resizeCorner: 18
@@ -85,6 +87,7 @@ Window {
 
         Components.Liquid {
             anchors.fill: parent
+            visible: !frame.opaqueSurface
             backdrop: windowBackdrop
             frosted: true
             cornerRadius: frame.maximized ? 0 : frame.windowRadius
@@ -93,7 +96,14 @@ Window {
         Rectangle {
             anchors.fill: parent
             color: frame.surfaceColor
+            gradient: frame.opaqueSurface ? surfaceGradient : null
             radius: frame.maximized ? 0 : frame.windowRadius
+
+            Gradient {
+                id: surfaceGradient
+                GradientStop { position: 0; color: frame.surfaceColor }
+                GradientStop { position: 1; color: frame.surfaceEndColor }
+            }
         }
 
         Item {
