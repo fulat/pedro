@@ -90,7 +90,7 @@ Item {
         anchors.topMargin: 10
         anchors.right: notificationButton.left
         anchors.rightMargin: 8
-        width: statusRow.width + 8 + (height - statusRow.height) / 2
+        width: statusRow.width + height - statusRow.height
         height: 30
 
         Liquid {
@@ -107,19 +107,25 @@ Item {
             anchors.rightMargin: (statusPill.height - height) / 2
             spacing: 4
 
-            TopAction {
-                id: searchButton
-                icon: "../../assets/icons/search.svg"
-                description: qsTranslate("Pedro", "common.search")
-                highlighted: root.activeSource === "search"
-                onActivated: controller.requestPanel("about", "search", searchButton)
-            }
+            Item {
+                width: searchButton.width + 3
+                height: 24
 
-            Rectangle {
-                width: 1
-                height: 20
-                y: (statusRow.height - height) / 2
-                color: Theme.dividerBright
+                TopAction {
+                    id: searchButton
+                    icon: "../../assets/icons/search.svg"
+                    description: qsTranslate("Pedro", "common.search")
+                    highlighted: root.activeSource === "search"
+                    onActivated: controller.requestPanel("about", "search", searchButton)
+                }
+
+                Rectangle {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 1
+                    height: 18
+                    color: Theme.dividerBright
+                }
             }
 
             TopAction {
