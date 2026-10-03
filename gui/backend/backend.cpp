@@ -91,6 +91,14 @@ QObject* Backend::networkConnection() {
     return &connection_;
 }
 
+QObject* Backend::powerSaving() {
+    return &profile_;
+}
+
+QObject* Backend::focusMode() {
+    return &focus_;
+}
+
 QObject* Backend::battery() {
     return &battery_;
 }

@@ -25,6 +25,22 @@ Item {
         view: root
     }
 
+    Connections {
+        target: Papi.powerSaving
+        function onChanged() {
+            if (Papi.powerSaving.error.length > 0)
+                controller.showNotice(Papi.powerSaving.error);
+        }
+    }
+
+    Connections {
+        target: Papi.focusMode
+        function onChanged() {
+            if (Papi.focusMode.error.length > 0)
+                controller.showNotice(Papi.focusMode.error);
+        }
+    }
+
     ColumnLayout {
         id: content
         anchors.fill: parent
@@ -109,8 +125,10 @@ Item {
                     title: qsTranslate("Pedro", "shell.focus.title")
                     subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/moon.svg"
-                    active: true
-                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.focus.preview"))
+                    active: Papi.focusMode.active
+                    toggleable: false
+                    enabled: Papi.focusMode.available
+                    onActivated: Papi.focusMode.toggle()
                 }
                 Toggle.Tile {
                     Layout.preferredHeight: 48
@@ -118,7 +136,10 @@ Item {
                     subtitle: active ? qsTranslate("Pedro", "shell.focus.enabled") : qsTranslate("Pedro", "bluetooth.status.off")
                     icon: "../../../assets/icons/leaf.svg"
                     activeColor: Theme.batteryHealthy
-                    onActivated: controller.showNotice(qsTranslate("Pedro", "shell.system.powerSaving.pending"))
+                    active: Papi.powerSaving.active
+                    toggleable: false
+                    enabled: Papi.powerSaving.available && !Papi.powerSaving.busy
+                    onActivated: Papi.powerSaving.toggle()
                 }
                 Toggle.Tile {
                     Layout.preferredHeight: 48
