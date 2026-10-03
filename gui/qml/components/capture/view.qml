@@ -135,82 +135,55 @@ Item {
         x: (root.width - width) / 2
         y: root.height - height - 28
         width: Math.min(root.width - 24, controls.implicitWidth + 48)
-        height: contents.implicitHeight + 20
-        radius: 20
+        height: 62
+        radius: 28
         color: "transparent"
-        Components.Liquid { anchors.fill: parent; backdrop: root.backdrop; frosted: true; cornerRadius: 20 }
-        Rectangle { anchors.fill: parent; radius: 20; color: Theme.menuBackground; opacity: 0.55 }
+        Components.Liquid { anchors.fill: parent; backdrop: root.backdrop; frosted: true; cornerRadius: 28 }
+        Rectangle { anchors.fill: parent; radius: 28; color: Theme.menuBackground; opacity: 0.55 }
 
-        ColumnLayout {
-            id: contents
-            anchors.fill: parent
-            anchors.margins: 10
-            spacing: 8
-            Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 26
-                RowLayout {
-                    anchors.fill: parent
-                    spacing: 8
-                    Item {
-                        Layout.preferredWidth: 14
-                        Layout.preferredHeight: 14
-                        Repeater {
-                            model: 6
-                            delegate: Rectangle {
-                                required property int index
-                                x: index % 2 * 6
-                                y: Math.floor(index / 2) * 5
-                                width: 2
-                                height: 2
-                                radius: 1
-                                color: Theme.statusInactive
-                            }
+        RowLayout {
+                id: controls
+                anchors.centerIn: parent
+                spacing: 7
+                Item {
+                    Layout.preferredWidth: 28
+                    Layout.preferredHeight: 46
+                    Repeater {
+                        model: 6
+                        delegate: Rectangle {
+                            required property int index
+                            x: 9 + index % 2 * 7
+                            y: 14 + Math.floor(index / 2) * 7
+                            width: 3
+                            height: 3
+                            radius: 1.5
+                            color: Theme.textMuted
                         }
                     }
-                    Text {
-                        Layout.fillWidth: true
-                        text: (root.area ? qsTranslate("Pedro", "capture.area") : qsTranslate("Pedro", "capture.screen")) + " · " + Math.round(root.area ? root.region.width : root.screenGeometry.width) + " × " + Math.round(root.area ? root.region.height : root.screenGeometry.height)
-                        color: Theme.textMuted
-                        font.pixelSize: 11
-                    }
-                    Text {
-                        text: root.delay > 0 ? root.delay + " s" : ""
-                        color: Theme.textMuted
-                        font.pixelSize: 11
-                    }
-                    Action {
-                        text: "×"
-                        showText: true
-                        Layout.preferredWidth: 26
-                        Layout.preferredHeight: 26
-                        onClicked: root.capture.close()
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.SizeAllCursor
+                        drag.target: toolbar
+                        drag.minimumX: 12
+                        drag.maximumX: Math.max(12, root.width - toolbar.width - 12)
+                        drag.minimumY: 12
+                        drag.maximumY: Math.max(12, root.height - toolbar.height - 12)
                     }
                 }
-                MouseArea {
-                    anchors.fill: parent
-                    anchors.rightMargin: 34
-                    cursorShape: Qt.SizeAllCursor
-                    drag.target: toolbar
-                    drag.minimumX: 12
-                    drag.maximumX: Math.max(12, root.width - toolbar.width - 12)
-                    drag.minimumY: 12
-                    drag.maximumY: Math.max(12, root.height - toolbar.height - 12)
-                }
-            }
-            RowLayout {
-                id: controls
-                Layout.alignment: Qt.AlignHCenter
-                spacing: 5
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 30; color: Theme.dividerSoft }
                 Action {
                     text: qsTranslate("Pedro", "capture.screen")
                     symbol: "../../../assets/icons/display.svg"
+                    showText: true
+                    stacked: true
                     checkable: true; checked: !root.area
                     onClicked: root.area = false
                 }
                 Action {
                     text: qsTranslate("Pedro", "capture.area")
                     symbol: "../../../assets/icons/selection.svg"
+                    showText: true
+                    stacked: true
                     checkable: true; checked: root.area
                     onClicked: root.area = true
                 }
@@ -218,12 +191,16 @@ Item {
                 Action {
                     text: qsTranslate("Pedro", "capture.image")
                     symbol: "../../../assets/icons/image.svg"
+                    showText: true
+                    stacked: true
                     checkable: true; checked: !root.video
                     onClicked: root.video = false
                 }
                 Action {
                     text: qsTranslate("Pedro", "capture.video")
                     symbol: "../../../assets/icons/video.svg"
+                    showText: true
+                    stacked: true
                     checkable: true; checked: root.video
                     onClicked: root.video = true
                 }
@@ -231,6 +208,8 @@ Item {
                 Action {
                     text: qsTranslate("Pedro", "capture.options")
                     symbol: "../../../assets/icons/settings.svg"
+                    showText: true
+                    stacked: true
                     onClicked: options.open()
                     Menu {
                         id: options
@@ -260,10 +239,17 @@ Item {
                     symbol: root.video ? "../../../assets/icons/video.svg" : "../../../assets/icons/image.svg"
                     showText: true
                     accent: true
+                    Layout.preferredWidth: 132
                     enabled: !root.capture.busy
                     onClicked: root.submit()
                 }
-            }
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 30; color: Theme.dividerSoft }
+                Action {
+                    text: "×"
+                    showText: true
+                    Layout.preferredWidth: 36
+                    onClicked: root.capture.close()
+                }
         }
     }
     Text {
@@ -283,32 +269,34 @@ Item {
         property url symbol
         property bool showText: false
         property bool accent: false
+        property bool stacked: false
         Accessible.name: text
         contentItem: Item {
-            implicitWidth: row.implicitWidth
-            implicitHeight: 20
-            RowLayout {
-                id: row
-                anchors.centerIn: parent
-                spacing: 7
-                Icon.Tinted {
-                    visible: action.symbol.toString().length > 0
-                    source: action.symbol
-                    Layout.preferredWidth: 18
-                    Layout.preferredHeight: 18
-                }
-                Text {
-                    visible: action.showText
-                    text: action.text
-                    color: Theme.white
-                    font.pixelSize: 12
-                    font.weight: Font.Medium
-                }
+            implicitWidth: action.stacked ? Math.max(label.implicitWidth, 64) : (action.symbol.toString().length > 0 ? 25 : 0) + (action.showText ? label.implicitWidth : 0)
+            implicitHeight: action.stacked ? 38 : 20
+            Icon.Tinted {
+                id: symbol
+                visible: action.symbol.toString().length > 0
+                source: action.symbol
+                width: 19
+                height: 19
+                x: action.stacked ? (parent.width - width) / 2 : 0
+                y: action.stacked ? 0 : (parent.height - height) / 2
+            }
+            Text {
+                id: label
+                visible: action.showText
+                text: action.text
+                color: Theme.white
+                font.pixelSize: 12
+                font.weight: Font.Medium
+                x: action.stacked ? (parent.width - width) / 2 : symbol.visible ? 26 : (parent.width - width) / 2
+                y: action.stacked ? 23 : (parent.height - height) / 2
             }
         }
         background: Rectangle {
-            implicitWidth: action.showText ? action.contentItem.implicitWidth + 22 : 36
-            implicitHeight: 36
+            implicitWidth: action.stacked ? action.contentItem.implicitWidth + 16 : action.showText ? action.contentItem.implicitWidth + 22 : 36
+            implicitHeight: action.stacked ? 46 : 36
             radius: 11
             border.width: action.accent ? 1 : 0
             border.color: Theme.cardBorderStrong

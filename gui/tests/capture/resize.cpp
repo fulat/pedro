@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
     }
     auto* toolbar = item->findChild<QQuickItem*>("captureToolbar");
     const auto original = toolbar->position();
-    const QPoint from(qRound(original.x() + 20), qRound(original.y() + 20));
+    const QPoint from(qRound(original.x() + 38), qRound(original.y() + 20));
     QTest::mousePress(&window, Qt::LeftButton, Qt::NoModifier, from);
     QTest::mouseMove(&window, from - QPoint(20, 20), 10);
     QTest::mouseMove(&window, from - QPoint(120, 80), 10);
