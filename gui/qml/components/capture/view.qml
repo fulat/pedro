@@ -134,7 +134,7 @@ Item {
         objectName: "captureToolbar"
         x: (root.width - width) / 2
         y: root.height - height - 28
-        width: Math.min(root.width - 24, controls.implicitWidth + 24)
+        width: Math.min(root.width - 24, controls.implicitWidth + 48)
         height: contents.implicitHeight + 20
         radius: 20
         color: "transparent"
