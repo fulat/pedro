@@ -15,6 +15,7 @@ Item {
     property rect screenGeometry: Qt.rect(Screen.virtualX, Screen.virtualY, Screen.width, Screen.height)
     property rect region: Qt.rect(width * 0.25, height * 0.25, width * 0.5, height * 0.5)
     property var quickWindows: []
+    property var windowProvider: null
     property var selectedWindow: null
     property bool windowMode: false
     property bool area: true
@@ -223,7 +224,10 @@ Item {
                     showText: true
                     stacked: true
                     checked: root.windowMode
-                    onClicked: windows.open()
+                    onClicked: {
+                        if (root.windowProvider) root.quickWindows = root.windowProvider();
+                        windows.open();
+                    }
                     GlassMenu {
                         id: windows
                         objectName: "captureWindows"

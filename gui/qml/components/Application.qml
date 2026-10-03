@@ -67,7 +67,7 @@ ApplicationWindow {
     }
 
     function captureWindows() {
-        return [filesWindowLoader].concat(folderWindows)
+        return [filesWindowLoader, networkWindowLoader].concat(folderWindows)
             .map(loader => loader.item)
             .filter(item => item && item.visible && item.visibility !== Window.Minimized);
     }

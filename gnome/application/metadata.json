@@ -3,5 +3,5 @@
     "name": "Pedro Applications",
     "description": "Exposes GNOME application activation and screen capture to the Pedro desktop overlay.",
     "shell-version": ["50"],
-    "version": 3
+    "version": 4
 }

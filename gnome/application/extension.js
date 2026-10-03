@@ -23,6 +23,20 @@ const interfaceXml = `<node>
 // GNOME owns matching, activation, workspace changes and minimized windows.
 export default class Applications extends Extension {
     enable() {
+        // Wayland ignores Qt's stays-on-bottom hint for ordinary app windows.
+        // Keep only Pedro's wallpaper window below applications; never lower Files.
+        this._focusSignal = global.display.connect('notify::focus-window',
+            () => this._lowerDesktop());
+        this._windowSignal = global.display.connect('window-created', () => {
+            if (!this._desktopIdle) {
+                this._desktopIdle = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                    this._desktopIdle = 0;
+                    this._lowerDesktop();
+                    return GLib.SOURCE_REMOVE;
+                });
+            }
+        });
+        this._lowerDesktop();
         this._service = Gio.DBusExportedObject.wrapJSObject(interfaceXml, this);
         this._service.export(Gio.DBus.session, '/org/pedro/Applications');
         this._captureSignal = Gio.DBus.session.signal_subscribe(
@@ -37,6 +51,17 @@ export default class Applications extends Extension {
             });
         this._owner = Gio.bus_own_name_on_connection(Gio.DBus.session,
             'org.pedro.Applications', Gio.BusNameOwnerFlags.NONE, null, null);
+    }
+
+    _lowerDesktop() {
+        for (const actor of global.get_window_actors()) {
+            const window = actor.meta_window;
+            const application = (window.get_wm_class() ?? '').toLowerCase();
+            if (window.get_title() === 'Pedro OS' &&
+                ['pedro', 'pedro_gui', 'pedro-gui'].includes(application)) {
+                window.lower();
+            }
+        }
     }
 
     Activate(id) {
@@ -146,6 +171,18 @@ export default class Applications extends Extension {
     }
 
     disable() {
+        if (this._focusSignal) {
+            global.display.disconnect(this._focusSignal);
+            this._focusSignal = 0;
+        }
+        if (this._windowSignal) {
+            global.display.disconnect(this._windowSignal);
+            this._windowSignal = 0;
+        }
+        if (this._desktopIdle) {
+            GLib.Source.remove(this._desktopIdle);
+            this._desktopIdle = 0;
+        }
         if (this._captureOwner) {
             Gio.bus_unwatch_name(this._captureOwner);
             this._captureOwner = 0;
