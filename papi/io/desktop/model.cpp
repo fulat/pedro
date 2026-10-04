@@ -91,7 +91,7 @@ namespace Pedro::Papi::Io::Desktop {
             entry["group"] = group;
             entry["icon"] = folder ? "folder" : image ? "image" : "notes";
 
-            entry["visualType"] = folder ? "folder" : image && url.isLocalFile() ? "image" : video && url.isLocalFile() ? "video" : "themed";
+            entry["visualType"] = folder ? "folder" : image && url.isLocalFile() ? "image" : video && url.isLocalFile() ? "video" : Pedro::Papi::Io::Content::isDocument(type) ? "document" : "themed";
             entry["contentType"] = type;
             entry["iconNames"] = Pedro::Papi::Io::Content::iconNames(type);
 

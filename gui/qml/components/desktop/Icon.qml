@@ -14,9 +14,9 @@ Item {
     property real cornerRadius: 6
 
     Image {
-        visible: desktopIcon.kind === "notes" || desktopIcon.kind === "file" || desktopIcon.kind === "themed" || (desktopIcon.kind === "video" && !desktopIcon.thumbnailReady)
+        visible: desktopIcon.kind === "document" || desktopIcon.kind === "notes" || desktopIcon.kind === "file" || desktopIcon.kind === "themed" || (desktopIcon.kind === "video" && !desktopIcon.thumbnailReady)
         anchors.fill: parent
-        source: !visible ? "" : desktopIcon.iconNames.length
+        source: !visible ? "" : desktopIcon.kind !== "document" && desktopIcon.iconNames.length
             ? "image://icons/theme/" + encodeURIComponent(JSON.stringify(desktopIcon.iconNames))
             : "image://icons/original/document.svg"
         sourceSize: Qt.size(Math.ceil(desktopIcon.width * Math.max(1, Screen.devicePixelRatio) * 2),

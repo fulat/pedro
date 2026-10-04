@@ -4,6 +4,11 @@
 
 namespace Pedro::Papi::Io::Content {
 
+    bool isDocument(const QString& type) {
+
+        return type.startsWith(QStringLiteral("text/")) || type == "application/pdf" || type == "application/json" || type == "application/xml" || type.contains(QStringLiteral("officedocument")) || type.contains(QStringLiteral("opendocument")) || type == "application/msword" || type == "application/rtf";
+    }
+
     QStringList iconNames(const QString& type) {
         QStringList names;
         if (!type.isEmpty()) {
