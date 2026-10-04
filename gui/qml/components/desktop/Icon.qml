@@ -6,13 +6,15 @@ import "../../scripts/theme.js" as Theme
 Item {
     id: desktopIcon
 
+    readonly property bool thumbnailReady: thumbnail.status === Image.Ready
     property string kind
     property var iconNames: []
+    property var revision: 0
     property url imageUrl
     property real cornerRadius: 6
 
     Image {
-        visible: desktopIcon.kind === "notes" || desktopIcon.kind === "file" || desktopIcon.kind === "themed"
+        visible: desktopIcon.kind === "notes" || desktopIcon.kind === "file" || desktopIcon.kind === "themed" || (desktopIcon.kind === "video" && !desktopIcon.thumbnailReady)
         anchors.fill: parent
         source: !visible ? "" : desktopIcon.iconNames.length
             ? "image://icons/theme/" + encodeURIComponent(JSON.stringify(desktopIcon.iconNames))
@@ -25,7 +27,7 @@ Item {
     }
 
     Rectangle {
-        visible: desktopIcon.kind === "image"
+        visible: desktopIcon.kind === "image" || (desktopIcon.kind === "video" && desktopIcon.thumbnailReady)
         anchors.centerIn: parent
         width: desktopIcon.width * 0.82
         height: desktopIcon.height * 0.68
@@ -36,15 +38,27 @@ Item {
         clip: true
 
         Image {
+            id: thumbnail
             anchors.fill: parent
             anchors.margins: 2
-            source: desktopIcon.kind === "image" ? desktopIcon.imageUrl : ""
+            source: desktopIcon.kind === "image" ? desktopIcon.imageUrl
+                : desktopIcon.kind === "video" ? "image://thumbnails/" + encodeURIComponent(desktopIcon.imageUrl) + "?" + encodeURIComponent(String(desktopIcon.revision)) : ""
             asynchronous: true
             sourceSize: Qt.size(128, 96)
             fillMode: Image.PreserveAspectCrop
             smooth: true
             mipmap: true
         }
+    }
+
+    Rectangle {
+        visible: desktopIcon.kind === "video" && thumbnail.status === Image.Ready
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 5
+        width: 19; height: 19; radius: 10
+        color: "#b0202935"
+        Text { anchors.centerIn: parent; text: "▶"; color: "white"; font.pixelSize: 10 }
     }
 
     Rectangle {

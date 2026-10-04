@@ -5,6 +5,7 @@
 #include "icons.hpp"
 #include "render/info.hpp"
 #include "preview/provider.h"
+#include "thumbnail/provider.h"
 
 #include <QCommandLineParser>
 #include <QDebug>
@@ -99,6 +100,7 @@ int main(int argc, char* argv[]) {
      * Pedro icon provider.
      */
     engine.addImageProvider("icons", new Icons);
+    engine.addImageProvider("thumbnails", new Pedro::Gui::Backend::Thumbnail::Provider);
     engine.addImageProvider("preview", new Pedro::Gui::Backend::Preview::Provider(backend));
 
     // Full-color desktop application icons supplied by GLib application data.

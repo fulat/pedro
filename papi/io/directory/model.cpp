@@ -135,9 +135,10 @@ namespace Pedro::Papi::Io::Directory {
             result["icon"] = folder ? "folder" : contentType && g_content_type_is_a(contentType, "image/*") ? "image" : "file";
             const auto type = contentType ? QString::fromUtf8(contentType) : QString{};
             const bool thumbnail = contentType && g_content_type_is_a(contentType, "image/*") && QUrl(address).isLocalFile();
+            const bool video = contentType && g_content_type_is_a(contentType, "video/*") && QUrl(address).isLocalFile();
             result["contentType"] = type;
             result["iconNames"] = Pedro::Papi::Io::Content::iconNames(type);
-            result["visualType"] = folder ? "folder" : thumbnail ? "image" : "themed";
+            result["visualType"] = folder ? "folder" : thumbnail ? "image" : video ? "video" : "themed";
             result["type"] = description ? QString::fromUtf8(description) : QString{};
             result["size"] = QVariant::fromValue(size);
             result["sizeText"] = folder ? QString{} : formatSize(size);

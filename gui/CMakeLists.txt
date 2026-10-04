@@ -47,6 +47,9 @@ set(PEDRO_GUI_SOURCES
 
         backend/preview/provider.cpp
         backend/preview/provider.h
+
+        backend/thumbnail/provider.cpp
+        backend/thumbnail/provider.h
 )
 
 

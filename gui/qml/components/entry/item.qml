@@ -93,6 +93,7 @@ Item {
         kind: entryItem.folder ? "folder" : entryItem.entry.visualType || "notes"
         iconNames: entryItem.entry.iconNames || []
         imageUrl: entryItem.entry.url || ""
+        revision: entryItem.entry.modified || 0
         cornerRadius: entryItem.cornerRadius
     }
     Text {

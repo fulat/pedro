@@ -74,6 +74,8 @@ namespace Pedro::Papi::Io::Desktop {
             const auto* contentType = g_file_info_get_content_type(info);
             const bool image = contentType && g_content_type_is_a(contentType, "image/*");
 
+            const bool video = contentType && g_content_type_is_a(contentType, "video/*");
+
             const QString group = folder ? "folder" : image ? "image" : contentType && g_content_type_is_a(contentType, "text/plain") ? "text" : contentType && g_content_type_is_a(contentType, "audio/*") ? "audio" : contentType && g_content_type_is_a(contentType, "video/*") ? "video" : "file";
 
             const auto* identity = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_ID_FILE);
@@ -89,7 +91,7 @@ namespace Pedro::Papi::Io::Desktop {
             entry["group"] = group;
             entry["icon"] = folder ? "folder" : image ? "image" : "notes";
 
-            entry["visualType"] = folder ? "folder" : image && url.isLocalFile() ? "image" : "themed";
+            entry["visualType"] = folder ? "folder" : image && url.isLocalFile() ? "image" : video && url.isLocalFile() ? "video" : "themed";
             entry["contentType"] = type;
             entry["iconNames"] = Pedro::Papi::Io::Content::iconNames(type);
 
