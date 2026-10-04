@@ -5,6 +5,7 @@ import QtQuick.Window
 import "../controllers" as Controllers
 import "../scripts/constants.js" as Constants
 import "../scripts/theme.js" as Theme
+import "../scripts/window/placement.js" as Placement
 
 // Declares the shell window and exposes controller-owned state to child views.
 ApplicationWindow {
@@ -74,11 +75,10 @@ ApplicationWindow {
         Loader {
             id: sessionLoader
             property var session
-            property var openingPosition: null
             source: "preview/window.qml"
             onLoaded: {
                 item.preview = session;
-                item.openingPosition = openingPosition;
+                item.positionWindow = window.placeQuickWindow;
                 item.finished.connect(() => {
                     window.previewWindows = window.previewWindows.filter(candidate => candidate !== sessionLoader);
                     Qt.callLater(() => {
@@ -101,10 +101,7 @@ ApplicationWindow {
                 if (existing.item) existing.item.activateViewer();
                 return;
             }
-            const previous = window.previewWindows.length ? window.previewWindows[window.previewWindows.length - 1] : null;
-            const previousWindow = previous && previous.item ? previous.item.item : null;
-            const openingPosition = previousWindow ? Qt.point(previousWindow.x - 24, previousWindow.y + 24) : null;
-            const loader = previewWindowComponent.createObject(window, {session: session, openingPosition: openingPosition});
+            const loader = previewWindowComponent.createObject(window, {session: session});
             window.previewWindows = window.previewWindows.concat([loader]);
         }
     }
@@ -123,6 +120,18 @@ ApplicationWindow {
         return [filesWindowLoader, networkWindowLoader].concat(folderWindows, previewWindows.map(loader => loader.item))
             .map(loader => loader ? loader.item : null)
             .filter(item => item && item.visible && item.visibility !== Window.Minimized);
+    }
+
+    function placeQuickWindow(item) {
+        const occupied = captureWindows().filter(other => other !== item)
+            .map(other => ({x: other.x, y: other.y, width: other.width, height: other.height}));
+        const point = Placement.place({width: item.width, height: item.height},
+            {x: item.Screen.virtualX, y: item.Screen.virtualY,
+                width: item.Screen.desktopAvailableWidth, height: item.Screen.desktopAvailableHeight},
+            occupied, {x: window.x + (window.width - item.width) / 2,
+                y: window.y + (window.height - item.height) / 2});
+        item.x = point.x;
+        item.y = point.y;
     }
 
     function configureFilesWindow(item) {
@@ -174,6 +183,7 @@ ApplicationWindow {
                     window.folderWindows = window.folderWindows.filter(loader => loader !== folderWindowLoader);
                     Qt.callLater(() => folderWindowLoader.destroy());
                 });
+                window.placeQuickWindow(item);
                 item.show();
                 item.raise();
                 item.requestActivate();

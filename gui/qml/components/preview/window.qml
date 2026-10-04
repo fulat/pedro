@@ -7,6 +7,7 @@ Loader {
     property var preview: Backend.preview
     property bool closingSession: false
     property var openingPosition: null
+    property var positionWindow: null
     signal finished()
     property bool pendingOpen: false
     property string sizedSource: ""
@@ -91,6 +92,8 @@ Loader {
         }
         // Set the final geometry before creating the visible native surface.
         fitVisual();
+        if (positionWindow) positionWindow(item);
+        else placeWindow();
         pendingOpen = false;
         if (item.visibility === Window.Minimized || item.visibility === Window.Maximized
                 || item.visibility === Window.FullScreen) {
