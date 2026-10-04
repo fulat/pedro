@@ -95,6 +95,7 @@ ApplicationWindow {
     Connections {
         target: Backend
         function onPreviewRequested(session) {
+            ++window.desktopFocusGeneration;
             const existing = window.previewWindows.find(candidate => candidate.session === session);
             if (existing) {
                 if (existing.item) existing.item.activateViewer();
@@ -146,7 +147,7 @@ ApplicationWindow {
         item.minimumWidth = Screen.desktopAvailableWidth > 0 ? Math.min(900, Screen.desktopAvailableWidth * 0.86) : 900;
         item.minimumHeight = Screen.desktopAvailableHeight > 0
             ? Math.min(720, Screen.desktopAvailableHeight * 0.82) : 720;
-        item.transientParent = null;
+        item.transientParent = window;
         item.width = item.minimumWidth;
         item.height = item.minimumHeight;
         item.x = window.x + Math.round((window.width - item.width) / 2);
@@ -181,6 +182,7 @@ ApplicationWindow {
     }
 
     property var activeFilesWindow: null
+    property int desktopFocusGeneration: 0
     Connections {
         target: filesWindowLoader.item
         function onActiveChanged() {
@@ -189,14 +191,27 @@ ApplicationWindow {
     }
 
     function keepFileWindowActive() {
-        if (activeFilesWindow && activeFilesWindow.visible) {
+        if (activeFilesWindow && activeFilesWindow.visible && activeFilesWindow.visibility !== Window.Minimized) {
+            activeFilesWindow.raise();
             activeFilesWindow.requestActivate();
         }
+    }
+
+    function retainFileWindow() {
+        const generation = ++desktopFocusGeneration;
+        const retainedWindow = activeFilesWindow;
+        Qt.callLater(() => {
+            if (generation === desktopFocusGeneration && retainedWindow === activeFilesWindow
+                    && !applicationController.renamingDesktopId.length) {
+                keepFileWindowActive();
+            }
+        });
     }
 
     property var folderWindows: []
 
     function openFolderWindow(location) {
+        ++desktopFocusGeneration;
         const loader = folderWindowComponent.createObject(window, {location: location});
         folderWindows = folderWindows.concat([loader]);
         return loader;

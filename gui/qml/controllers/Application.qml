@@ -178,6 +178,7 @@ QtObject {
 
     // Presents the standalone files window above the shell.
     function openFilesQuickWindow() {
+        ++window.desktopFocusGeneration;
         closePanel();
         if (filesQuickWindow.visibility === Window.Minimized) {
             filesQuickWindow.showNormal();
@@ -656,9 +657,7 @@ QtObject {
         if (renamingDesktopId.length > 0) {
             return;
         }
-        if (window.keepFileWindowActive) {
-            Qt.callLater(window.keepFileWindowActive);
-        }
+        window.retainFileWindow();
         const position = shortcut.mapToItem(desktopShortcuts, localX, localY);
         if (Backend.desktopModel.organization === "stack") {
             stackDragPending = true;

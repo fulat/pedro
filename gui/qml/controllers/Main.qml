@@ -58,6 +58,7 @@ QtObject {
 
     // Starts desktop selection or opens the background context menu.
     function desktopPressed(mouse, desktopArea, selectionRectangle, desktopMenu) {
+        if (mouse.button === Qt.LeftButton) view.retainFileWindow();
         if (mouse.button === Qt.RightButton) {
             view.selectedDesktopIds = [];
             view.controller.closePanel();
@@ -150,6 +151,7 @@ QtObject {
 
     // Starts selection or grouped dragging for one desktop shortcut.
     function shortcutPressed(mouse, mouseArea, shortcut) {
+        if (mouse.button === Qt.LeftButton) view.retainFileWindow();
         if (shortcut.stackIndicator) {
             return;
         }
