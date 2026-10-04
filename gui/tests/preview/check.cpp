@@ -242,19 +242,18 @@ int main(int argc, char** argv) {
 
     auto* text = view->findChild<QObject*>("previewText");
 
-    if (!text || text->property("textFormat").toInt() != 0 || !text->property("readOnly").toBool()) {
+    if (!text || text->property("textFormat").toInt() != 0 || text->property("readOnly").toBool()) {
         return 9;
     }
 
-    view->setProperty("editing", true);
+    auto* toolbar = view->findChild<QObject*>("previewToolbar");
+    if (!require(toolbar && !toolbar->property("visible").toBool(), "Text preview has no toolbar")) {
+        return 42;
+    }
+
     text->setProperty("text", QStringLiteral("Edited document\n"));
     QCoreApplication::processEvents();
-    QVariant canClose = true;
-    QMetaObject::invokeMethod(view, "requestClose", Q_RETURN_ARG(QVariant, canClose));
-    if (!require(!canClose.toBool(), "Unsaved text blocks window close")) {
-        return 37;
-    }
-    if (!require(!text->property("readOnly").toBool() && view->property("dirty").toBool() && manager.saveText(text->property("text").toString()), "Qt text editing and atomic save")) {
+    if (!require(!text->property("readOnly").toBool() && !view->property("dirty").toBool() && manager.text() == "Edited document\n", "Immediate Qt text editing and autosave")) {
         return 34;
     }
     QFile saved(manager.source().toLocalFile());
@@ -271,7 +270,12 @@ int main(int argc, char** argv) {
     if (!require(!manager.saveText("Overwrite") && !manager.saveError().isEmpty(), "External edit conflict")) {
         return 36;
     }
-    view->setProperty("editing", false);
+    text->setProperty("text", QStringLiteral("Unsaved local change"));
+    QVariant canClose = true;
+    QMetaObject::invokeMethod(view, "requestClose", Q_RETURN_ARG(QVariant, canClose));
+    if (!require(!canClose.toBool() && text->property("text").toString() == "Unsaved local change", "Failed autosave retains draft and blocks close")) {
+        return 37;
+    }
 
     manager.next();
 
@@ -310,6 +314,21 @@ int main(int argc, char** argv) {
     if (!require(encoded.readAll() == QByteArray::fromHex("efbbbf") + "Changed\r\nSecond\r\n", "Preserved BOM and CRLF"))
         return 39;
     encoded.close();
+
+    for (const auto& name : {QStringLiteral("empty"), QStringLiteral("noextension")}) {
+        QFile extensionless(url(name).toLocalFile());
+        if (!extensionless.open(QIODevice::WriteOnly))
+            return 40;
+        if (name == "noextension")
+            extensionless.write("Plain content without extension");
+        extensionless.close();
+        manager.open(url(name));
+        if (!require(ready() && manager.kind() == "text" && manager.editable(), "Extensionless and empty document detection"))
+            return 40;
+        text->setProperty("text", QStringLiteral("Autosaved extensionless document"));
+        if (!require(manager.text() == "Autosaved extensionless document" && !view->property("dirty").toBool(), "Extensionless autosave"))
+            return 41;
+    }
 
     manager.open(url("binary.bin"));
 
