@@ -1,4 +1,5 @@
 #include <pedro/papi/gui/preview/manager.h>
+#include <pedro/papi/io/thumbnail/image.h>
 #include <pedro/papi/gui/preview/text/provider.h>
 
 #include "preview/provider.h"
@@ -110,6 +111,35 @@ int main(int argc, char** argv) {
 
     if (!ffmpeg.waitForFinished(30000) || ffmpeg.exitCode() != 0) {
         return 4;
+    }
+
+    qputenv("XDG_CACHE_HOME", fixtures.filePath("cache").toUtf8());
+    const auto thumbnail = Pedro::Papi::Io::Thumbnail::image(url("video.mp4"));
+    const auto cachedThumbnail = Pedro::Papi::Io::Thumbnail::image(url("video.mp4"));
+
+    if (thumbnail.isNull() || thumbnail.width() > 256 || thumbnail.height() > 256 || thumbnail != cachedThumbnail || !Pedro::Papi::Io::Thumbnail::image(url("missing.mp4")).isNull()) {
+        std::cerr << "GNOME video thumbnail generation and cached lookup failed\n";
+        return 42;
+    }
+
+    const auto thumbnailPath = path("thumbnail with spaces.mp4");
+    QFile::remove(thumbnailPath);
+    QFile::copy(path("video.mp4"), thumbnailPath);
+    const auto thumbnailUrl = QUrl::fromLocalFile(thumbnailPath);
+    const auto before = Pedro::Papi::Io::Thumbnail::image(thumbnailUrl);
+    QFile thumbnailFile(thumbnailPath);
+    const auto modified = QFileInfo(thumbnailPath).lastModified().addSecs(5);
+
+    if (before.isNull() || !thumbnailFile.open(QIODevice::ReadWrite) || !thumbnailFile.setFileTime(modified, QFileDevice::FileModificationTime)) {
+        return 43;
+    }
+
+    thumbnailFile.close();
+    const auto refreshed = Pedro::Papi::Io::Thumbnail::image(thumbnailUrl);
+
+    if (refreshed.isNull() || refreshed.text(QStringLiteral("Thumb::MTime")) != QString::number(modified.toSecsSinceEpoch())) {
+        std::cerr << "GNOME thumbnail cache invalidation failed\n";
+        return 44;
     }
 
     QObject previewOwner;

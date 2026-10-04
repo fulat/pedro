@@ -20,6 +20,7 @@ case "${1:-}" in
 esac
 
 previewPackages=(
+    python3-gi gir1.2-gnomedesktop-4.0 gst-video-thumbnailer
     pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
     libglycin-2-dev libpoppler-glib-dev glycin-loaders bubblewrap
     gstreamer1.0-plugins-base gstreamer1.0-plugins-good

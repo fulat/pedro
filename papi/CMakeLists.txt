@@ -250,3 +250,7 @@ install(
     DESTINATION
         usr/include
 )
+
+qt_add_resources(pedro_papi pedro_thumbnail
+    PREFIX "/pedro/papi"
+    FILES io/thumbnail/generate.py)

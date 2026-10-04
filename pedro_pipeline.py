@@ -153,6 +153,7 @@ def stage(source, build, arch):
         run('chroot', root, 'apt-get', 'update', env=env)
         packages = ['systemd-sysv', 'dbus', 'udev', 'initramfs-tools', 'linux-image-virtual',
                     'libqt6concurrent6', 'qt6-qpa-plugins', 'qt6-wayland', 'qgnomeplatform-qt6',
+                    'python3-gi', 'gir1.2-gnomedesktop-4.0', 'gst-video-thumbnailer',
                     'libglycin-2-0', 'glycin-loaders', 'bubblewrap', 'libpoppler-glib8t64',
                     'gstreamer1.0-plugins-base', 'gstreamer1.0-plugins-good',
                     'gstreamer1.0-plugins-bad', 'gstreamer1.0-libav',
