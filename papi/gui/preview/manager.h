@@ -16,6 +16,8 @@ namespace Pedro::Papi::Gui::Preview {
             Q_PROPERTY(QString kind READ kind NOTIFY changed)
             Q_PROPERTY(QString error READ error NOTIFY changed)
             Q_PROPERTY(QString text READ text NOTIFY changed)
+            Q_PROPERTY(bool editable READ editable NOTIFY changed)
+            Q_PROPERTY(QString saveError READ saveError NOTIFY changed)
             Q_PROPERTY(bool textTruncated READ textTruncated NOTIFY changed)
             Q_PROPERTY(bool active READ active NOTIFY changed)
             Q_PROPERTY(bool busy READ busy NOTIFY changed)
@@ -49,6 +51,12 @@ namespace Pedro::Papi::Gui::Preview {
             QString error() const;
 
             QString text() const;
+
+            bool editable() const;
+
+            QString saveError() const;
+
+            Q_INVOKABLE bool saveText(const QString& text);
 
             bool textTruncated() const;
 

@@ -10,7 +10,13 @@ namespace Pedro::Papi::Gui::Preview::Text {
 
             Provider();
 
+            bool saveText(const QString& text) override;
+
             void open(const QUrl& source) override;
+
+        private:
+
+            QUrl currentSource;
     };
 
 }

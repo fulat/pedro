@@ -405,5 +405,11 @@
     "preview.video.fullscreen": "Full screen",
     "preview.video.draft": "Editing preview · changes are not saved yet",
     "preview.video.backward": "Back 10 seconds",
-    "preview.video.forward": "Forward 10 seconds"
+    "preview.video.forward": "Forward 10 seconds",
+    "preview.edit": "Edit source",
+    "preview.edit.conflict": "The file changed outside Preview. Reopen it before saving.",
+    "preview.edit.discard": "Discard your changes and close?",
+    "preview.edit.limit": "The edited text exceeds the preview limit or cannot be encoded.",
+    "preview.edit.save": "Save",
+    "preview.edit.unsaved": "Unsaved changes"
 }

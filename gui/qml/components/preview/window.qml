@@ -123,7 +123,11 @@ Loader {
             showWindow();
         });
         if (item.contentItem) item.contentItem.preview = Qt.binding(() => loader.preview);
-        item.closing.connect(() => {
+        item.closing.connect(event => {
+            if (item.contentItem && !item.contentItem.requestClose()) {
+                event.accepted = false;
+                return;
+            }
             if (loader.closingSession) return;
             loader.closingSession = true;
             loader.preview.close();

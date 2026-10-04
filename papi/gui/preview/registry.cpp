@@ -16,7 +16,7 @@ namespace Pedro::Papi::Gui::Preview {
         add({"application/pdf"}, [] { return std::make_unique<Document::Provider>(); });
         add({"video/*"}, [] { return std::make_unique<Media::Provider>(QStringLiteral("video")); });
         add({"audio/*"}, [] { return std::make_unique<Media::Provider>(QStringLiteral("audio")); });
-        add({"text/plain", "application/json", "application/xml", "application/javascript", "application/x-shellscript"}, [] { return std::make_unique<Text::Provider>(); });
+        add({"text/*", "text/plain", "application/json", "application/xml", "application/javascript", "application/x-shellscript"}, [] { return std::make_unique<Text::Provider>(); });
     }
 
     void Registry::add(QStringList types, Factory factory) {

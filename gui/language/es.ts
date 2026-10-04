@@ -1955,5 +1955,35 @@ o elige Abrir para empezar.</translation>
     <message><source>preview.video.draft</source><translation>Vista de edición · los cambios todavía no se guardan</translation></message>
 <message><source>preview.video.backward</source><translation>Retroceder 10 segundos</translation></message>
 <message><source>preview.video.forward</source><translation>Avanzar 10 segundos</translation></message>
+    <message>
+      <source>preview.edit</source>
+      <extracomment>Stable Pedro key: preview.edit</extracomment>
+      <translation>Editar contenido</translation>
+    </message>
+    <message>
+      <source>preview.edit.conflict</source>
+      <extracomment>Stable Pedro key: preview.edit.conflict</extracomment>
+      <translation>El archivo cambió fuera de Preview. Ábrelo de nuevo antes de guardar.</translation>
+    </message>
+    <message>
+      <source>preview.edit.discard</source>
+      <extracomment>Stable Pedro key: preview.edit.discard</extracomment>
+      <translation>¿Descartar los cambios y cerrar?</translation>
+    </message>
+    <message>
+      <source>preview.edit.limit</source>
+      <extracomment>Stable Pedro key: preview.edit.limit</extracomment>
+      <translation>El texto supera el límite del visor o no puede codificarse.</translation>
+    </message>
+    <message>
+      <source>preview.edit.save</source>
+      <extracomment>Stable Pedro key: preview.edit.save</extracomment>
+      <translation>Guardar</translation>
+    </message>
+    <message>
+      <source>preview.edit.unsaved</source>
+      <extracomment>Stable Pedro key: preview.edit.unsaved</extracomment>
+      <translation>Cambios sin guardar</translation>
+    </message>
 </context>
 </TS>

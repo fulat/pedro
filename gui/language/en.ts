@@ -1955,5 +1955,35 @@ or choose Open to get started.</translation>
     <message><source>preview.video.draft</source><translation>Editing preview · changes are not saved yet</translation></message>
 <message><source>preview.video.backward</source><translation>Back 10 seconds</translation></message>
 <message><source>preview.video.forward</source><translation>Forward 10 seconds</translation></message>
+    <message>
+      <source>preview.edit</source>
+      <extracomment>Stable Pedro key: preview.edit</extracomment>
+      <translation>Edit source</translation>
+    </message>
+    <message>
+      <source>preview.edit.conflict</source>
+      <extracomment>Stable Pedro key: preview.edit.conflict</extracomment>
+      <translation>The file changed outside Preview. Reopen it before saving.</translation>
+    </message>
+    <message>
+      <source>preview.edit.discard</source>
+      <extracomment>Stable Pedro key: preview.edit.discard</extracomment>
+      <translation>Discard your changes and close?</translation>
+    </message>
+    <message>
+      <source>preview.edit.limit</source>
+      <extracomment>Stable Pedro key: preview.edit.limit</extracomment>
+      <translation>The edited text exceeds the preview limit or cannot be encoded.</translation>
+    </message>
+    <message>
+      <source>preview.edit.save</source>
+      <extracomment>Stable Pedro key: preview.edit.save</extracomment>
+      <translation>Save</translation>
+    </message>
+    <message>
+      <source>preview.edit.unsaved</source>
+      <extracomment>Stable Pedro key: preview.edit.unsaved</extracomment>
+      <translation>Unsaved changes</translation>
+    </message>
 </context>
 </TS>

@@ -54,3 +54,7 @@ at 2,400 pixels per side. GStreamer codec support comes from installed plugins.
 Build and runtime dependencies are declared in `papi/CMakeLists.txt`, `setup.sh`
 and the staging pipeline. Normal development still uses `PEDRO_BUILD_IMAGE=OFF`.
 The reusable API introduces no new top-level component and no systemd unit.
+
+## Text editing
+
+Text/source previews use Qt Quick TextArea in plain-text mode, including raw HTML and Markdown. Complete, writable previews can be edited explicitly and saved through the PAPI controller. QSaveFile writes atomically without a direct-write fallback; the provider preserves the detected Unicode encoding, BOM and CRLF line endings. Saving rejects externally changed files, encoding failures, and contents above the 128 KiB preview limit. Truncated and read-only files stay read-only. The UI blocks closing an unsaved editor until the user discards or cancels. PDF remains a Poppler page preview; DOCX/ODT editing requires a future document provider and is not implemented by treating binary office files as text.

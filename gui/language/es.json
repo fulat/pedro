@@ -405,5 +405,11 @@
     "preview.video.fullscreen": "Pantalla completa",
     "preview.video.draft": "Vista de edición · los cambios todavía no se guardan",
     "preview.video.backward": "Retroceder 10 segundos",
-    "preview.video.forward": "Avanzar 10 segundos"
+    "preview.video.forward": "Avanzar 10 segundos",
+    "preview.edit": "Editar contenido",
+    "preview.edit.conflict": "El archivo cambió fuera de Preview. Ábrelo de nuevo antes de guardar.",
+    "preview.edit.discard": "¿Descartar los cambios y cerrar?",
+    "preview.edit.limit": "El texto supera el límite del visor o no puede codificarse.",
+    "preview.edit.save": "Guardar",
+    "preview.edit.unsaved": "Cambios sin guardar"
 }

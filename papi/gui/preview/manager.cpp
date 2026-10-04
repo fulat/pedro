@@ -57,6 +57,18 @@ namespace Pedro::Papi::Gui::Preview {
         return current.text;
     }
 
+    bool Manager::editable() const {
+        return current.editable;
+    }
+
+    QString Manager::saveError() const {
+        return current.saveError;
+    }
+
+    bool Manager::saveText(const QString& text) {
+        return provider && provider->saveText(text);
+    }
+
     bool Manager::textTruncated() const {
         return current.textTruncated;
     }

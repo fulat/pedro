@@ -10,6 +10,10 @@ namespace Pedro::Papi::Gui::Preview {
             QString kind;
             QString error;
             QString text;
+            QByteArray originalText;
+            bool editable = false;
+            bool crlfText = false;
+            QString saveError;
             bool textTruncated = false;
             QImage frame;
             bool busy = false;

@@ -25,6 +25,11 @@ namespace Pedro::Papi::Gui::Preview {
         current.playing = false;
     }
 
+    bool Provider::saveText(const QString&) {
+
+        return false;
+    }
+
     void Provider::setPage(int) {
     }
 

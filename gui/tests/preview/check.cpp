@@ -246,6 +246,33 @@ int main(int argc, char** argv) {
         return 9;
     }
 
+    view->setProperty("editing", true);
+    text->setProperty("text", QStringLiteral("Edited document\n"));
+    QCoreApplication::processEvents();
+    QVariant canClose = true;
+    QMetaObject::invokeMethod(view, "requestClose", Q_RETURN_ARG(QVariant, canClose));
+    if (!require(!canClose.toBool(), "Unsaved text blocks window close")) {
+        return 37;
+    }
+    if (!require(!text->property("readOnly").toBool() && view->property("dirty").toBool() && manager.saveText(text->property("text").toString()), "Qt text editing and atomic save")) {
+        return 34;
+    }
+    QFile saved(manager.source().toLocalFile());
+    if (!saved.open(QIODevice::ReadOnly))
+        return 35;
+    if (!require(saved.readAll() == "Edited document\n", "Saved text content")) {
+        return 35;
+    }
+    saved.close();
+    if (!saved.open(QIODevice::WriteOnly))
+        return 36;
+    saved.write("External change");
+    saved.close();
+    if (!require(!manager.saveText("Overwrite") && !manager.saveError().isEmpty(), "External edit conflict")) {
+        return 36;
+    }
+    view->setProperty("editing", false);
+
     manager.next();
 
     if (!require(ready() && manager.kind() == "document" && manager.pageCount() == 2 && manager.frame().pixelColor(100, 100).red() > 240, "PDF provider")) {
@@ -266,9 +293,23 @@ int main(int argc, char** argv) {
 
     manager.open(url("large.txt"));
 
-    if (!require(ready() && manager.text().size() < 128 * 1024 + 100 && manager.textTruncated(), "Bounded text preview")) {
+    if (!require(ready() && manager.text().size() < 128 * 1024 + 100 && manager.textTruncated() && !manager.editable() && !manager.saveText("Overwrite"), "Bounded text preview")) {
         return 13;
     }
+
+    QFile encoded(url("encoded.txt").toLocalFile());
+    if (!encoded.open(QIODevice::WriteOnly))
+        return 38;
+    encoded.write(QByteArray::fromHex("efbbbf") + "First\r\nSecond\r\n");
+    encoded.close();
+    manager.open(url("encoded.txt"));
+    if (!require(ready() && manager.editable() && manager.saveText("Changed\nSecond\n"), "Encoded text save"))
+        return 38;
+    if (!encoded.open(QIODevice::ReadOnly))
+        return 38;
+    if (!require(encoded.readAll() == QByteArray::fromHex("efbbbf") + "Changed\r\nSecond\r\n", "Preserved BOM and CRLF"))
+        return 39;
+    encoded.close();
 
     manager.open(url("binary.bin"));
 

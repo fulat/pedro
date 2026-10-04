@@ -15,6 +15,24 @@ Item {
     readonly property bool media: preview.kind === "video" || preview.kind === "audio"
     readonly property bool visual: preview.kind === "image" || preview.kind === "document" || preview.kind === "video"
     readonly property color ink: Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff"
+    property bool editing: false
+    readonly property bool dirty: editing && editor.text !== preview.text
+    property bool discardApproved: false
+
+    function requestClose() {
+        if (dirty && !discardApproved) {
+            discardDialog.open();
+            return false;
+        }
+        return true;
+    }
+
+    onEditingChanged: { if (!editing) editor.text = preview.text; }
+
+    function save() {
+        if (preview.saveText(editor.text)) editing = false;
+    }
+
     property real zoom: 1
     property int rotationAngle: 0
     property bool mirrored: false
@@ -39,24 +57,42 @@ Item {
     Connections {
         target: view.preview
         function onChanged() {
+            if (!view.editing) editor.text = view.preview.text;
             if (view.lastSource !== view.preview.source.toString()) {
                 view.lastSource = view.preview.source.toString();
                 view.resetImage();
+                view.editing = false;
+                editor.text = view.preview.text;
+                view.discardApproved = false;
             }
         }
     }
     property string lastSource: ""
 
     Shortcut { sequence: "Escape"; onActivated: view.close() }
-    Shortcut { sequence: "Space"; onActivated: view.close() }
+    Shortcut { sequence: "Space"; enabled: !view.editing; onActivated: view.close() }
     Shortcut { sequence: "K"; enabled: view.media; onActivated: view.preview.togglePlayback() }
-    Shortcut { sequence: "Left"; enabled: view.preview.canPrevious; onActivated: view.preview.previous() }
-    Shortcut { sequence: "Right"; enabled: view.preview.canNext; onActivated: view.preview.next() }
+    Shortcut { sequence: "Left"; enabled: !view.editing && view.preview.canPrevious; onActivated: view.preview.previous() }
+    Shortcut { sequence: "Right"; enabled: !view.editing && view.preview.canNext; onActivated: view.preview.next() }
     Shortcut { sequence: "PgUp"; enabled: view.preview.page > 0; onActivated: view.preview.setPage(view.preview.page - 1) }
     Shortcut { sequence: "PgDown"; enabled: view.preview.page + 1 < view.preview.pageCount; onActivated: view.preview.setPage(view.preview.page + 1) }
     Shortcut { sequence: "Ctrl+0"; onActivated: view.zoom = 1 }
 
+    Shortcut { sequence: "Ctrl+S"; enabled: view.editing; onActivated: view.save() }
+
+    Controls.Dialog {
+        id: discardDialog
+        width: Math.min(420, view.width - 32)
+        anchors.centerIn: parent
+        modal: true
+        title: qsTranslate("Pedro", "preview.edit.unsaved")
+        standardButtons: Controls.Dialog.Discard | Controls.Dialog.Cancel
+        onDiscarded: { view.discardApproved = true; view.close(); }
+        contentItem: Controls.Label { text: qsTranslate("Pedro", "preview.edit.discard"); color: view.ink }
+    }
+
     DropArea {
+        enabled: !view.editing
         anchors.fill: parent
         onEntered: drag => { drag.accepted = drag.hasUrls; }
         onDropped: drop => {
@@ -102,8 +138,8 @@ Item {
         RowLayout {
             visible: view.preview.kind !== "image" && view.preview.kind !== "video"
             Layout.fillWidth: true
-            Button { text: "‹"; enabled: view.preview.canPrevious; Accessible.name: qsTranslate("Pedro", "preview.previous"); onClicked: view.preview.previous() }
-            Button { text: "›"; enabled: view.preview.canNext; Accessible.name: qsTranslate("Pedro", "preview.next"); onClicked: view.preview.next() }
+            Button { text: "‹"; enabled: !view.editing && view.preview.canPrevious; Accessible.name: qsTranslate("Pedro", "preview.previous"); onClicked: view.preview.previous() }
+            Button { text: "›"; enabled: !view.editing && view.preview.canNext; Accessible.name: qsTranslate("Pedro", "preview.next"); onClicked: view.preview.next() }
             Controls.Label {
                 Layout.fillWidth: true
                 text: view.preview.kind.length ? qsTranslate("Pedro", "preview.type." + view.preview.kind) : ""
@@ -111,6 +147,18 @@ Item {
                 opacity: 0.65
                 elide: Text.ElideRight
                 font.pixelSize: 12
+            }
+            Button {
+                visible: view.preview.kind === "text" && !view.editing
+                enabled: view.preview.editable
+                text: qsTranslate("Pedro", "preview.edit")
+                onClicked: { view.editing = true; editor.forceActiveFocus(); }
+            }
+            Button {
+                visible: view.editing
+                enabled: view.dirty
+                text: qsTranslate("Pedro", "preview.edit.save")
+                onClicked: view.save()
             }
             Button { text: "−"; visible: view.visual && !view.media; Accessible.name: qsTranslate("Pedro", "preview.zoom.out"); onClicked: view.zoom = Math.max(0.25, view.zoom / 1.25) }
             Button { text: Math.round(view.zoom * 100) + "%"; visible: view.visual && !view.media; Accessible.name: qsTranslate("Pedro", "preview.fit"); onClicked: view.zoom = 1 }
@@ -171,10 +219,12 @@ Item {
                 anchors.margins: 16
                 visible: view.preview.kind === "text" && !view.preview.error.length
                 Controls.TextArea {
+                    id: editor
                     objectName: "previewText"
-                    text: view.preview.text
+                    text: ""
+                    Component.onCompleted: text = view.preview.text
                     textFormat: TextEdit.PlainText
-                    readOnly: true
+                    readOnly: !view.editing
                     selectByMouse: true
                     wrapMode: TextEdit.NoWrap
                     color: view.ink
@@ -219,6 +269,14 @@ Item {
                 running: view.preview.busy
                 visible: running
             }
+        }
+
+        Controls.Label {
+            Layout.fillWidth: true
+            visible: view.preview.saveError.length > 0 || view.dirty
+            text: view.preview.saveError.length ? view.preview.saveError : qsTranslate("Pedro", "preview.edit.unsaved")
+            color: view.ink
+            wrapMode: Text.Wrap
         }
 
         Controls.Label {
