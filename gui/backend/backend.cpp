@@ -643,7 +643,7 @@ QObject* Backend::preview() {
     return &preview_;
 }
 
-void Backend::openPreview(const QUrl& source, const QVariantList& siblings) {
+void Backend::openPreview(const QUrl& source, const QVariantList& siblings, bool activateExisting) {
 
     if (source.isEmpty()) {
         return;
@@ -664,7 +664,9 @@ void Backend::openPreview(const QUrl& source, const QVariantList& siblings) {
 
     for (auto* existing : findChildren<Pedro::Papi::Gui::Preview::Manager*>(QString{}, Qt::FindDirectChildrenOnly)) {
         if (existing != &preview_ && existing->active() && identity(existing->source()) == requested) {
-            emit previewRequested(existing);
+            if (activateExisting) {
+                emit previewRequested(existing);
+            }
             return;
         }
     }

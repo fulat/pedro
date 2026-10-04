@@ -104,8 +104,8 @@ QtObject {
     }
 
     // File preview windows will consume one request per opened file.
-    signal filePreviewRequested(var entry)
-    onFilePreviewRequested: entry => previewEntry(entry)
+    signal filePreviewRequested(var entry, bool skipExisting)
+    onFilePreviewRequested: (entry, skipExisting) => previewEntry(entry, skipExisting)
 
     function contextEntries(entry) {
         let ids = isDesktopShortcutSelected(entry.id) ? selectedDesktopIds.slice() : [entry.id];
@@ -133,9 +133,9 @@ QtObject {
         if (action === "open") {
             for (const item of entries) {
                 if (item.isDirectory && item.url) {
-                    window.openFolderWindow(item.url);
+                    window.openFolderWindow(item.url, true);
                 } else {
-                    filePreviewRequested(item);
+                    filePreviewRequested(item, true);
                 }
             }
         } else if (action === "copy" || action === "cut") {
@@ -145,7 +145,7 @@ QtObject {
         }
     }
 
-    function previewEntry(entry) {
+    function previewEntry(entry, skipExisting = false) {
         const siblings = [];
         for (let row = 0; row < desktopShortcutRepeater.count; ++row) {
             const shortcut = desktopShortcutRepeater.itemAt(row);
@@ -153,7 +153,7 @@ QtObject {
                 siblings.push(shortcut.app.url);
             }
         }
-        Backend.openPreview(entry.url, siblings);
+        Backend.openPreview(entry.url, siblings, !skipExisting);
     }
 
     function openEntry(entry) {
@@ -180,6 +180,7 @@ QtObject {
     function openFilesQuickWindow() {
         ++window.desktopFocusGeneration;
         closePanel();
+        if (!filesQuickWindow.visible) window.placeQuickWindow(filesQuickWindow);
         if (filesQuickWindow.visibility === Window.Minimized) {
             filesQuickWindow.showNormal();
         } else {

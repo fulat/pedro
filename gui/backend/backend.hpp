@@ -168,7 +168,7 @@ class Backend final : public QObject {
 
         QObject* preview();
 
-        Q_INVOKABLE void openPreview(const QUrl& source, const QVariantList& siblings = {});
+        Q_INVOKABLE void openPreview(const QUrl& source, const QVariantList& siblings = {}, bool activateExisting = true);
 
         Q_INVOKABLE void releasePreview(QObject* session);
 

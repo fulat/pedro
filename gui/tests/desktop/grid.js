@@ -222,7 +222,7 @@ print("Desktop context selection: passed");
 const opened = [];
 const previews = [];
 context.window = {openFolderWindow: url => opened.push(url)};
-context.filePreviewRequested = entry => previews.push(entry);
+context.filePreviewRequested = (entry, skipExisting) => previews.push({entry, skipExisting});
 shortcuts.splice(0, shortcuts.length);
 for (let index = 0; index < 1000; ++index) {
     shortcuts.push({app: {id: "folder" + index, isDirectory: true, url: "file:///folder" + index}});
@@ -236,7 +236,7 @@ Controller.entryAction("open", shortcuts[0].app);
 assert(opened.length === 1000 && new Set(opened).size === 1000, "Opening a collapsed stack requests an independent window for every folder without a cap");
 shortcuts.forEach(item => { item.app.isDirectory = false; });
 Controller.entryAction("open", shortcuts[0].app);
-assert(previews.length === 1000, "Every file in a stack receives a future preview request");
+assert(previews.length === 1000 && previews.every(request => request.skipExisting), "Every file in a stack receives a future preview request");
 context.Backend.desktopModel.organization = "free";
 context.selectedDesktopIds = shortcuts.slice(0, 2).map(item => item.app.id);
 assert(Controller.contextEntries(shortcuts[0].app).length === 2, "Group context actions use the full selection");
@@ -268,7 +268,7 @@ const interactions = shellSource.match(/^    function [\s\S]*?^    }/gm).join("\
 const calls = [];
 const shellContext = {Qt: {LeftButton: 1, RightButton: 2, ControlModifier: 4},
     Backend: {desktopModel: {organization: "stack"}},
-    view: {controller: {toggleStack: () => calls.push("toggle"), selectOnlyDesktopShortcut: () => calls.push("select")}}};
+    view: {retainFileWindow: () => {}, controller: {toggleStack: () => calls.push("toggle"), selectOnlyDesktopShortcut: () => calls.push("select")}}};
 const Shell = new Function("context", "with (context) {" + interactions + "\nreturn {shortcutPressed, shortcutClicked, shortcutDoubleClicked};}")(shellContext);
 const indicator = {stackIndicator: true, app: {id: "leader"}};
 Shell.shortcutClicked({button: 2}, false, indicator);

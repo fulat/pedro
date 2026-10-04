@@ -210,7 +210,13 @@ ApplicationWindow {
 
     property var folderWindows: []
 
-    function openFolderWindow(location) {
+    function openFolderWindow(location, skipExisting = false) {
+        if (skipExisting) {
+            const existing = [filesWindowLoader].concat(folderWindows).find(loader => loader.item
+                && loader.item.visible && loader.item.controller && loader.item.controller.directory
+                && String(loader.item.controller.directory.location) === String(location));
+            if (existing) return existing;
+        }
         ++desktopFocusGeneration;
         const loader = folderWindowComponent.createObject(window, {location: location});
         folderWindows = folderWindows.concat([loader]);
