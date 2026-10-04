@@ -17,6 +17,7 @@ Window {
     property real headerHeight: 44
     property real titleOffset: 90
     property real titleSize: 13
+    property bool titleVisible: true
     property bool titleInteractive: false
     signal titleClicked()
     property real contentMargin: 12
@@ -24,6 +25,7 @@ Window {
     readonly property real titleContentWidth: windowTitle.contentWidth
     property real headerOffset: 240
     Behavior on headerOffset {
+        enabled: frame.titleVisible
         NumberAnimation { duration: 240; easing.type: Easing.InOutCubic }
     }
     property real windowRadius: 14
@@ -157,6 +159,7 @@ Window {
 
             Text {
                 id: windowTitle
+                visible: frame.titleVisible
                 anchors.left: parent.left
                 anchors.leftMargin: frame.titleOffset
                 anchors.right: parent.right

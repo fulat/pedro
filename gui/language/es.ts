@@ -1791,5 +1791,169 @@
             <extracomment>Stable Pedro key: capture.noWindows</extracomment>
             <translation>Abre un Quick Window primero</translation>
         </message>
-    </context>
+        <message>
+            <source>preview.open</source>
+            <translation>Abrir…</translation>
+        </message>
+        <message>
+            <source>preview.zoom.out</source>
+            <translation>Alejar</translation>
+        </message>
+        <message>
+            <source>preview.fit</source>
+            <translation>Ajustar imagen</translation>
+        </message>
+        <message>
+            <source>preview.zoom.in</source>
+            <translation>Acercar</translation>
+        </message>
+        <message>
+            <source>preview.rotate</source>
+            <translation>Girar</translation>
+        </message>
+        <message>
+            <source>preview.dialog</source>
+            <translation>Abrir en Preview</translation>
+        </message>
+        <message>
+            <source>preview.filter.all</source>
+            <translation>Todos los archivos (*)</translation>
+        </message>
+        <message>
+            <source>preview.unsupported</source>
+            <translation>Este archivo no es una imagen ni un video.</translation>
+        </message>
+        <message>
+            <source>preview.image.error</source>
+            <translation>No se pudo abrir esta imagen.</translation>
+        </message>
+        <message>
+            <source>preview.empty</source>
+            <translation>Arrastra una imagen o un video aquí
+o elige Abrir para empezar.</translation>
+        </message>
+        <message>
+            <source>preview.pause</source>
+            <translation>Pausar</translation>
+        </message>
+        <message>
+            <source>preview.play</source>
+            <translation>Reproducir</translation>
+        </message>
+        <message>
+            <source>preview.position</source>
+            <translation>Posición de reproducción</translation>
+        </message>
+        <message>
+            <source>preview.unmute</source>
+            <translation>Activar sonido</translation>
+        </message>
+        <message>
+            <source>preview.mute</source>
+            <translation>Silenciar</translation>
+        </message>
+        <message>
+            <source>preview.volume</source>
+            <translation>Volumen</translation>
+        </message>
+        <message>
+            <source>preview.filter.media</source>
+            <translation>Imágenes y videos (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.svg *.tif *.tiff *.avif *.heic *.mp4 *.mkv *.webm *.mov *.avi *.m4v *.ogv *.mpeg *.mpg)</translation>
+        </message>
+        <message>
+            <source>preview.previous</source>
+            <translation>Archivo anterior</translation>
+        </message>
+        <message>
+            <source>preview.next</source>
+            <translation>Archivo siguiente</translation>
+        </message>
+        <message>
+            <source>preview.unavailable</source>
+            <translation>Vista previa no disponible</translation>
+        </message>
+        <message>
+            <source>preview.page.previous</source>
+            <translation>Página anterior</translation>
+        </message>
+        <message>
+            <source>preview.page.next</source>
+            <translation>Página siguiente</translation>
+        </message>
+        <message>
+            <source>preview.type.image</source>
+            <translation>Imagen</translation>
+        </message>
+        <message>
+            <source>preview.type.document</source>
+            <translation>Documento</translation>
+        </message>
+        <message>
+            <source>preview.type.audio</source>
+            <translation>Audio</translation>
+        </message>
+        <message>
+            <source>preview.type.video</source>
+            <translation>Video</translation>
+        </message>
+        <message>
+            <source>preview.type.text</source>
+            <translation>Texto</translation>
+        </message>
+        <message>
+            <source>preview.type.unsupported</source>
+            <translation>Archivo</translation>
+        </message>
+        <message>
+            <source>preview.text.limited</source>
+            <translation>Se muestra una vista previa abreviada del texto.</translation>
+        </message>
+        <message>
+            <source>preview.information</source>
+            <translation>Información de la imagen</translation>
+        </message>
+        <message>
+            <source>preview.tools</source>
+            <translation>Herramientas de imagen</translation>
+        </message>
+        <message>
+            <source>preview.share</source>
+            <translation>Compartir</translation>
+        </message>
+        <message>
+            <source>preview.more</source>
+            <translation>Más opciones</translation>
+        </message>
+        <message>
+            <source>preview.rotate.left</source>
+            <translation>Girar a la izquierda</translation>
+        </message>
+        <message>
+            <source>preview.rotate.right</source>
+            <translation>Girar a la derecha</translation>
+        </message>
+        <message>
+            <source>preview.flip</source>
+            <translation>Voltear horizontalmente</translation>
+        </message>
+        <message>
+            <source>preview.reset</source>
+            <translation>Restablecer vista</translation>
+        </message>
+        <message>
+            <source>preview.copy</source>
+            <translation>Copiar archivo de imagen</translation>
+        </message>
+        <message><source>preview.video.tools</source><translation>Herramientas de video</translation></message>
+    <message><source>preview.video.trim</source><translation>Recortar</translation></message>
+    <message><source>preview.video.crop</source><translation>Encuadrar</translation></message>
+    <message><source>preview.video.rotate</source><translation>Girar</translation></message>
+    <message><source>preview.video.speed</source><translation>Velocidad</translation></message>
+    <message><source>preview.video.reset</source><translation>Restablecer herramientas</translation></message>
+    <message><source>preview.video.done</source><translation>Cerrar herramientas</translation></message>
+    <message><source>preview.video.fullscreen</source><translation>Pantalla completa</translation></message>
+    <message><source>preview.video.draft</source><translation>Vista de edición · los cambios todavía no se guardan</translation></message>
+<message><source>preview.video.backward</source><translation>Retroceder 10 segundos</translation></message>
+<message><source>preview.video.forward</source><translation>Avanzar 10 segundos</translation></message>
+</context>
 </TS>

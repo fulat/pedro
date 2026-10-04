@@ -67,9 +67,60 @@ ApplicationWindow {
         onLoaded: window.configureFilesWindow(item)
     }
 
+    property var previewWindows: []
+
+    Component {
+        id: previewWindowComponent
+        Loader {
+            id: sessionLoader
+            property var session
+            property var openingPosition: null
+            source: "preview/window.qml"
+            onLoaded: {
+                item.preview = session;
+                item.openingPosition = openingPosition;
+                item.finished.connect(() => {
+                    window.previewWindows = window.previewWindows.filter(candidate => candidate !== sessionLoader);
+                    Qt.callLater(() => {
+                        sessionLoader.active = false;
+                        Backend.releasePreview(session);
+                        sessionLoader.destroy();
+                    });
+                });
+                item.open();
+            }
+        }
+    }
+
+    Connections {
+        target: Backend
+        function onPreviewRequested(session) {
+            const existing = window.previewWindows.find(candidate => candidate.session === session);
+            if (existing) {
+                if (existing.item) existing.item.activateViewer();
+                return;
+            }
+            const previous = window.previewWindows.length ? window.previewWindows[window.previewWindows.length - 1] : null;
+            const previousWindow = previous && previous.item ? previous.item.item : null;
+            const openingPosition = previousWindow ? Qt.point(previousWindow.x - 24, previousWindow.y + 24) : null;
+            const loader = previewWindowComponent.createObject(window, {session: session, openingPosition: openingPosition});
+            window.previewWindows = window.previewWindows.concat([loader]);
+        }
+    }
+
+    Shortcut {
+        sequence: "Space"
+        enabled: window.active && window.selectedDesktopIds.length === 1
+            && !(window.activeFocusItem && window.activeFocusItem.readOnly === false)
+        onActivated: {
+            const entry = window.controller.contextEntries({id: window.selectedDesktopIds[0]})[0];
+            if (entry && !entry.isDirectory) window.controller.previewEntry(entry);
+        }
+    }
+
     function captureWindows() {
-        return [filesWindowLoader, networkWindowLoader].concat(folderWindows)
-            .map(loader => loader.item)
+        return [filesWindowLoader, networkWindowLoader].concat(folderWindows, previewWindows.map(loader => loader.item))
+            .map(loader => loader ? loader.item : null)
             .filter(item => item && item.visible && item.visibility !== Window.Minimized);
     }
 

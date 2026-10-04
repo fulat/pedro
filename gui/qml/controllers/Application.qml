@@ -105,6 +105,7 @@ QtObject {
 
     // File preview windows will consume one request per opened file.
     signal filePreviewRequested(var entry)
+    onFilePreviewRequested: entry => previewEntry(entry)
 
     function contextEntries(entry) {
         let ids = isDesktopShortcutSelected(entry.id) ? selectedDesktopIds.slice() : [entry.id];
@@ -144,13 +145,27 @@ QtObject {
         }
     }
 
+    function previewEntry(entry) {
+        const siblings = [];
+        for (let row = 0; row < desktopShortcutRepeater.count; ++row) {
+            const shortcut = desktopShortcutRepeater.itemAt(row);
+            if (shortcut && shortcut.app && !shortcut.app.isDirectory && shortcut.app.url) {
+                siblings.push(shortcut.app.url);
+            }
+        }
+        Backend.openPreview(entry.url, siblings);
+    }
+
     function openEntry(entry) {
-        if (!entry.isDirectory || !entry.url) {
+        if (!entry.url) {
             return;
         }
-        pendingFilesLocation = String(entry.url);
-        openFilesQuickWindow();
-        applyFilesLocation();
+        if (!entry.isDirectory) {
+            previewEntry(entry);
+            return;
+        }
+        closePanel();
+        window.openFolderWindow(String(entry.url));
     }
 
     function applyFilesLocation() {

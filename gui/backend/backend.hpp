@@ -19,6 +19,8 @@
 #include <pedro/papi/display/keyboard/manager.h>
 #include <pedro/papi/network/connection/manager.h>
 
+#include <pedro/papi/gui/preview/manager.h>
+
 #include <QUrl>
 #include <QObject>
 #include <QString>
@@ -45,6 +47,7 @@ class Backend final : public QObject {
         Q_PROPERTY(QObject* keyboard READ keyboard CONSTANT)
         Q_PROPERTY(QObject* capture READ capture CONSTANT)
         Q_PROPERTY(QObject* networkConnection READ networkConnection CONSTANT)
+        Q_PROPERTY(QObject* preview READ preview CONSTANT)
         Q_PROPERTY(bool developmentMode READ developmentMode CONSTANT)
         Q_PROPERTY(QString hostname READ hostname NOTIFY systemChanged)
         Q_PROPERTY(QString kernel READ kernel NOTIFY systemChanged)
@@ -163,7 +166,14 @@ class Backend final : public QObject {
         Q_INVOKABLE void setBluetoothEnabled(bool enabled);
         Q_INVOKABLE void scanBluetooth();
 
+        QObject* preview();
+
+        Q_INVOKABLE void openPreview(const QUrl& source, const QVariantList& siblings = {});
+
+        Q_INVOKABLE void releasePreview(QObject* session);
+
     signals:
+        void previewRequested(QObject* session);
         void systemChanged();
         void documentPathChanged();
         void documentTextChanged();
@@ -203,6 +213,8 @@ class Backend final : public QObject {
         Pedro::Papi::Display::Night::Manager night_;
         Pedro::Papi::Display::Keyboard::Manager keyboard_;
         Pedro::Papi::Network::Connection::Manager connection_;
+
+        Pedro::Papi::Gui::Preview::Manager preview_;
 
         QTimer refreshTimer_;
         QTimer applicationsRefreshTimer_;

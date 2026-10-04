@@ -44,6 +44,9 @@ set(PEDRO_GUI_SOURCES
 
         backend/render/info.cpp
         backend/render/info.hpp
+
+        backend/preview/provider.cpp
+        backend/preview/provider.h
 )
 
 
@@ -385,3 +388,25 @@ add_custom_command(TARGET pedro_gui POST_BUILD
                 "${CMAKE_CURRENT_SOURCE_DIR}/config" "$<TARGET_FILE_DIR:pedro_gui>/config")
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/config/" DESTINATION usr/share/pedro/config)
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets/wallpapers/" DESTINATION usr/share/pedro/wallpapers)
+
+# Preview integration checks use the same native providers and Liquid window.
+option(PEDRO_BUILD_PREVIEW_TESTS "Build the native preview integration check" OFF)
+if(PEDRO_BUILD_PREVIEW_TESTS)
+        find_program(PEDRO_PREVIEW_FFMPEG NAMES ffmpeg REQUIRED)
+        qt_add_executable(pedro_preview_check
+                tests/preview/check.cpp
+                backend/preview/provider.cpp)
+        qt_add_resources(pedro_preview_check pedro_preview_appearance
+                PREFIX "/pedro/appearance" BASE "${PEDRO_APPEARANCE_ROOT}"
+                FILES ${PEDRO_THEME_ASSETS})
+        target_include_directories(pedro_preview_check PRIVATE backend)
+        target_link_libraries(pedro_preview_check PRIVATE pedro_papi Qt6::Quick Qt6::Svg PkgConfig::PREVIEW)
+        add_custom_target(pedro-preview-check
+                COMMAND ${CMAKE_COMMAND} -E env QT_QPA_PLATFORM=offscreen
+                        $<TARGET_FILE:pedro_preview_check>
+                        "${CMAKE_CURRENT_SOURCE_DIR}/qml/components/preview/window.qml"
+                        "${CMAKE_CURRENT_BINARY_DIR}/preview/fixtures"
+                        "${PEDRO_PREVIEW_FFMPEG}"
+                DEPENDS pedro_preview_check
+                USES_TERMINAL VERBATIM)
+endif()

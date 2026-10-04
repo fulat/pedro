@@ -65,6 +65,14 @@ QtObject {
         if (entry.isDirectory) {
             selectedEntry = {};
             directory.open(entry.url);
+        } else if (entry.url) {
+            previewEntry(entry);
+        }
+    }
+
+    function previewEntry(entry) {
+        if (entry && entry.url && !entry.isDirectory) {
+            Backend.openPreview(entry.url, files.map(item => item.url));
         }
     }
 

@@ -4,7 +4,9 @@
 #include "application/icon/provider.hpp"
 #include "icons.hpp"
 #include "render/info.hpp"
+#include "preview/provider.h"
 
+#include <QCommandLineParser>
 #include <QDebug>
 #include <QDir>
 #include <QFileInfo>
@@ -53,6 +55,11 @@ int main(int argc, char* argv[]) {
 
     QCoreApplication::setOrganizationName(QStringLiteral("Pedro"));
 
+    QCommandLineParser arguments;
+    arguments.addHelpOption();
+    arguments.addOption({QStringLiteral("preview"), QStringLiteral("Open a file in the internal preview window."), QStringLiteral("file")});
+    arguments.process(app);
+
     Icons::configureTheme();
 
     /*
@@ -92,6 +99,7 @@ int main(int argc, char* argv[]) {
      * Pedro icon provider.
      */
     engine.addImageProvider("icons", new Icons);
+    engine.addImageProvider("preview", new Pedro::Gui::Backend::Preview::Provider(backend));
 
     // Full-color desktop application icons supplied by GLib application data.
     engine.addImageProvider("applications", new Pedro::Gui::Backend::Application::Icon::Provider);
@@ -136,6 +144,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    if (arguments.isSet(QStringLiteral("preview"))) {
+        const auto source = QUrl::fromUserInput(arguments.value(QStringLiteral("preview")), QDir::currentPath(), QUrl::AssumeLocalFile);
+
+        QTimer::singleShot(0, &backend, [&backend, source] { backend.openPreview(source); });
+    }
+
     const auto developmentMode = qEnvironmentVariableIsSet("PEDRO_DEVELOPMENT_MODE");
 
     /*
@@ -165,11 +179,12 @@ int main(int argc, char* argv[]) {
         const auto captureMode = qEnvironmentVariable("PEDRO_CAPTURE_MODE");
 
         const auto captureFilesWindow = captureMode == QStringLiteral("files-window");
+        const auto capturePreview = captureMode == QStringLiteral("preview");
         const auto captureDesktop = captureMode == QStringLiteral("desktop");
 
         if (captureFilesWindow) {
             QMetaObject::invokeMethod(applicationController, "openFilesQuickWindow");
-        } else if (!captureDesktop) {
+        } else if (!captureDesktop && !capturePreview) {
             applicationController->setProperty("panelMode", captureMode.isEmpty() ? QStringLiteral("quick") : captureMode);
         }
 
@@ -181,12 +196,12 @@ int main(int argc, char* argv[]) {
             applicationController->setProperty("panelAnchorX", captureAnchor);
         }
 
-        QTimer::singleShot(1000, &app, [window, capturePath, captureFilesWindow] {
+        QTimer::singleShot(1000, &app, [window, capturePath, captureFilesWindow, capturePreview] {
             auto* captureWindow = window;
 
-            if (captureFilesWindow) {
+            if (captureFilesWindow || capturePreview) {
                 for (auto* candidate : QGuiApplication::allWindows()) {
-                    if (candidate->objectName() == QStringLiteral("filesQuickWindow")) {
+                    if (candidate->objectName() == (capturePreview ? QStringLiteral("previewWindow") : QStringLiteral("filesQuickWindow"))) {
                         captureWindow = qobject_cast<QQuickWindow*>(candidate);
 
                         break;

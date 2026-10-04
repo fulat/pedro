@@ -26,6 +26,14 @@ Rectangle {
         }
     }
 
+    Shortcut {
+        sequence: "Space"
+        enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
+            && !browser.controller.selectedEntry.isDirectory
+            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.readOnly === false)
+        onActivated: browser.controller.previewEntry(browser.controller.selectedEntry)
+    }
+
     Directory { id: directory; objectName: "filesDirectory" }
     Loader {
         id: controllerLoader

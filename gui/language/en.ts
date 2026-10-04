@@ -1791,5 +1791,169 @@
             <extracomment>Stable Pedro key: capture.noWindows</extracomment>
             <translation>Open a Quick Window first</translation>
         </message>
-    </context>
+        <message>
+            <source>preview.open</source>
+            <translation>Open…</translation>
+        </message>
+        <message>
+            <source>preview.zoom.out</source>
+            <translation>Zoom out</translation>
+        </message>
+        <message>
+            <source>preview.fit</source>
+            <translation>Fit image</translation>
+        </message>
+        <message>
+            <source>preview.zoom.in</source>
+            <translation>Zoom in</translation>
+        </message>
+        <message>
+            <source>preview.rotate</source>
+            <translation>Rotate</translation>
+        </message>
+        <message>
+            <source>preview.dialog</source>
+            <translation>Open in Preview</translation>
+        </message>
+        <message>
+            <source>preview.filter.all</source>
+            <translation>All files (*)</translation>
+        </message>
+        <message>
+            <source>preview.unsupported</source>
+            <translation>This file is not an image or video.</translation>
+        </message>
+        <message>
+            <source>preview.image.error</source>
+            <translation>This image could not be opened.</translation>
+        </message>
+        <message>
+            <source>preview.empty</source>
+            <translation>Drop an image or video here
+or choose Open to get started.</translation>
+        </message>
+        <message>
+            <source>preview.pause</source>
+            <translation>Pause</translation>
+        </message>
+        <message>
+            <source>preview.play</source>
+            <translation>Play</translation>
+        </message>
+        <message>
+            <source>preview.position</source>
+            <translation>Playback position</translation>
+        </message>
+        <message>
+            <source>preview.unmute</source>
+            <translation>Unmute</translation>
+        </message>
+        <message>
+            <source>preview.mute</source>
+            <translation>Mute</translation>
+        </message>
+        <message>
+            <source>preview.volume</source>
+            <translation>Volume</translation>
+        </message>
+        <message>
+            <source>preview.filter.media</source>
+            <translation>Images and videos (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.svg *.tif *.tiff *.avif *.heic *.mp4 *.mkv *.webm *.mov *.avi *.m4v *.ogv *.mpeg *.mpg)</translation>
+        </message>
+        <message>
+            <source>preview.previous</source>
+            <translation>Previous file</translation>
+        </message>
+        <message>
+            <source>preview.next</source>
+            <translation>Next file</translation>
+        </message>
+        <message>
+            <source>preview.unavailable</source>
+            <translation>Preview unavailable</translation>
+        </message>
+        <message>
+            <source>preview.page.previous</source>
+            <translation>Previous page</translation>
+        </message>
+        <message>
+            <source>preview.page.next</source>
+            <translation>Next page</translation>
+        </message>
+        <message>
+            <source>preview.type.image</source>
+            <translation>Image</translation>
+        </message>
+        <message>
+            <source>preview.type.document</source>
+            <translation>Document</translation>
+        </message>
+        <message>
+            <source>preview.type.audio</source>
+            <translation>Audio</translation>
+        </message>
+        <message>
+            <source>preview.type.video</source>
+            <translation>Video</translation>
+        </message>
+        <message>
+            <source>preview.type.text</source>
+            <translation>Text</translation>
+        </message>
+        <message>
+            <source>preview.type.unsupported</source>
+            <translation>File</translation>
+        </message>
+        <message>
+            <source>preview.text.limited</source>
+            <translation>Showing a shortened text preview.</translation>
+        </message>
+        <message>
+            <source>preview.information</source>
+            <translation>Image information</translation>
+        </message>
+        <message>
+            <source>preview.tools</source>
+            <translation>Image tools</translation>
+        </message>
+        <message>
+            <source>preview.share</source>
+            <translation>Share</translation>
+        </message>
+        <message>
+            <source>preview.more</source>
+            <translation>More options</translation>
+        </message>
+        <message>
+            <source>preview.rotate.left</source>
+            <translation>Rotate left</translation>
+        </message>
+        <message>
+            <source>preview.rotate.right</source>
+            <translation>Rotate right</translation>
+        </message>
+        <message>
+            <source>preview.flip</source>
+            <translation>Flip horizontally</translation>
+        </message>
+        <message>
+            <source>preview.reset</source>
+            <translation>Reset view</translation>
+        </message>
+        <message>
+            <source>preview.copy</source>
+            <translation>Copy image file</translation>
+        </message>
+        <message><source>preview.video.tools</source><translation>Video tools</translation></message>
+    <message><source>preview.video.trim</source><translation>Trim</translation></message>
+    <message><source>preview.video.crop</source><translation>Crop</translation></message>
+    <message><source>preview.video.rotate</source><translation>Rotate</translation></message>
+    <message><source>preview.video.speed</source><translation>Speed</translation></message>
+    <message><source>preview.video.reset</source><translation>Reset tools</translation></message>
+    <message><source>preview.video.done</source><translation>Close tools</translation></message>
+    <message><source>preview.video.fullscreen</source><translation>Full screen</translation></message>
+    <message><source>preview.video.draft</source><translation>Editing preview · changes are not saved yet</translation></message>
+<message><source>preview.video.backward</source><translation>Back 10 seconds</translation></message>
+<message><source>preview.video.forward</source><translation>Forward 10 seconds</translation></message>
+</context>
 </TS>

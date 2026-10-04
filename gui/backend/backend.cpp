@@ -638,3 +638,50 @@ int Backend::dragFiles(QObject* source, const QVariantList& values) {
     drag.setMimeData(mime);
     return drag.exec(Qt::MoveAction, Qt::MoveAction);
 }
+
+QObject* Backend::preview() {
+    return &preview_;
+}
+
+void Backend::openPreview(const QUrl& source, const QVariantList& siblings) {
+
+    if (source.isEmpty()) {
+        return;
+    }
+
+    const auto identity = [](const QUrl& url) {
+        const auto normalized = url.isRelative() ? QUrl::fromLocalFile(QFileInfo(url.toString()).absoluteFilePath()) : url;
+
+        if (!normalized.isLocalFile()) {
+            return normalized;
+        }
+
+        const QFileInfo file(normalized.toLocalFile());
+        const auto canonical = file.canonicalFilePath();
+        return QUrl::fromLocalFile(canonical.isEmpty() ? file.absoluteFilePath() : canonical);
+    };
+    const auto requested = identity(source);
+
+    for (auto* existing : findChildren<Pedro::Papi::Gui::Preview::Manager*>(QString{}, Qt::FindDirectChildrenOnly)) {
+        if (existing != &preview_ && existing->active() && identity(existing->source()) == requested) {
+            emit previewRequested(existing);
+            return;
+        }
+    }
+
+    auto* session = new Pedro::Papi::Gui::Preview::Manager(this);
+    static quint64 nextSession = 0;
+    session->setObjectName(QStringLiteral("previewSession%1").arg(++nextSession));
+    session->open(source, siblings);
+    emit previewRequested(session);
+}
+
+void Backend::releasePreview(QObject* session) {
+
+    auto* manager = qobject_cast<Pedro::Papi::Gui::Preview::Manager*>(session);
+
+    if (manager && manager != &preview_ && manager->parent() == this) {
+        manager->close();
+        manager->deleteLater();
+    }
+}
