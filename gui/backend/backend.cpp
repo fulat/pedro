@@ -8,6 +8,7 @@
 #include <QMimeData>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QPointer>
 #include <QDir>
 #include <QFutureWatcher>
 #include <QStandardPaths>
@@ -641,6 +642,27 @@ int Backend::dragFiles(QObject* source, const QVariantList& values) {
 
 QObject* Backend::preview() {
     return &preview_;
+}
+
+void Backend::activateWindow(QObject* object) {
+
+    const QPointer<QQuickWindow> window = qobject_cast<QQuickWindow*>(object);
+    if (!window) {
+        return;
+    }
+
+    const auto pid = static_cast<unsigned int>(QCoreApplication::applicationPid());
+    const auto title = window->title().toStdString();
+    auto* watcher = new QFutureWatcher<bool>(this);
+    connect(watcher, &QFutureWatcher<bool>::finished, this, [window, watcher] {
+        const bool activated = watcher->result();
+        watcher->deleteLater();
+        if (window && !activated) {
+            window->raise();
+            window->requestActivate();
+        }
+    });
+    watcher->setFuture(QtConcurrent::run([pid, title] { return Pedro::Papi::Gui::Application::Manager{}.activateWindow(pid, title); }));
 }
 
 void Backend::openPreview(const QUrl& source, const QVariantList& siblings, bool activateExisting) {

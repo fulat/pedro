@@ -14,6 +14,7 @@ Gio._promisify(Shell.Screenshot, 'composite_to_stream');
 const interfaceXml = `<node>
     <interface name="org.pedro.Applications">
         <method name="Activate"><arg type="s" direction="in" name="id"/></method>
+        <method name="ActivateWindow"><arg type="u" direction="in" name="pid"/><arg type="s" direction="in" name="title"/><arg type="b" direction="out" name="success"/></method>
         <method name="GetRunning"><arg type="as" direction="out" name="ids"/></method>
         <method name="Capture"><arg type="i" direction="in" name="x"/><arg type="i" direction="in" name="y"/><arg type="i" direction="in" name="width"/><arg type="i" direction="in" name="height"/><arg type="b" direction="in" name="video"/><arg type="b" direction="in" name="cursor"/><arg type="s" direction="in" name="filename"/><arg type="b" direction="out" name="success"/><arg type="s" direction="out" name="filename"/></method>
         <signal name="CaptureStopped"><arg type="s" name="error"/></signal>
@@ -83,6 +84,20 @@ export default class Applications extends Extension {
         // Mutter request attention instead of focusing the existing window.
         const timestamp = global.display.get_current_time_roundtrip();
         application.activate_full(-1, timestamp);
+    }
+
+    ActivateWindow(pid, title) {
+        const matches = global.get_window_actors().map(actor => actor.meta_window)
+            .filter(window => window.get_pid() === pid && window.get_title() === title);
+        // A duplicate basename must never activate an unrelated Pedro viewer.
+        if (matches.length !== 1)
+            return false;
+        const window = matches[0];
+        const timestamp = global.display.get_current_time_roundtrip();
+        window.unminimize();
+        window.unset_demands_attention();
+        Main.activateWindow(window, timestamp);
+        return true;
     }
 
     async _recorderCall(method, argumentsVariant) {

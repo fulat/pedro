@@ -48,6 +48,10 @@ def main():
         interface = ElementTree.fromstring(reply.unpack()[0]).find(
             "interface[@name='org.pedro.Applications']")
         methods = {method.get('name') for method in interface.findall('method')} if interface is not None else set()
+        if 'ActivateWindow' in methods:
+            print('Pedro viewer focus integration is active.')
+        else:
+            print('Viewer focus integration needs a GNOME logout and login to load ActivateWindow.')
         if {'Capture', 'StopCapture'}.issubset(methods):
             print('Screen capture integration is active: Capture and StopCapture are available.')
         else:

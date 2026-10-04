@@ -380,6 +380,12 @@ namespace Pedro::Papi::Gui::Application {
         launch(id);
     }
 
+    bool Manager::activateWindow(unsigned int pid, const std::string& title) const {
+
+        const QDBusReply<bool> reply(callShell("ActivateWindow", {pid, QString::fromStdString(title)}));
+        return reply.isValid() && reply.value();
+    }
+
     void Manager::launch(const std::string& id) const {
 
         if (id.empty()) {

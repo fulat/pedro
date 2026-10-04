@@ -56,8 +56,8 @@ Loader {
         if (!item) return;
         if (item.visibility === Window.Minimized) item.showNormal();
         else if (!item.visible) item.show();
-        item.raise();
-        item.requestActivate();
+        if (typeof Backend.activateWindow === "function") Backend.activateWindow(item);
+        else { item.raise(); item.requestActivate(); }
     }
 
     function placeWindow() {
