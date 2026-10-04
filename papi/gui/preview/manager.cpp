@@ -234,7 +234,14 @@ namespace Pedro::Papi::Gui::Preview {
                 return result;
             }
 
-            result.mime = QMimeDatabase().mimeTypeForFile(file, QMimeDatabase::MatchDefault);
+            QMimeDatabase database;
+            result.mime = file.size() == 0 ? database.mimeTypeForName(QStringLiteral("text/plain")) : database.mimeTypeForFile(file, QMimeDatabase::MatchDefault);
+            if (result.mime.name() == QStringLiteral("application/octet-stream")) {
+                // Qt content sniffing handles readable text without relying on a filename suffix.
+                const auto content = database.mimeTypeForFile(file, QMimeDatabase::MatchContent);
+                if (content.inherits(QStringLiteral("text/plain")))
+                    result.mime = content;
+            }
             return result;
         }));
     }
