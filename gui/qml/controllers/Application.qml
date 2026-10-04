@@ -133,9 +133,9 @@ QtObject {
         if (action === "open") {
             for (const item of entries) {
                 if (item.isDirectory && item.url) {
-                    window.openFolderWindow(item.url, true);
+                    window.openFolderWindow(item.url, entries.length > 1);
                 } else {
-                    filePreviewRequested(item, true);
+                    filePreviewRequested(item, entries.length > 1);
                 }
             }
         } else if (action === "copy" || action === "cut") {

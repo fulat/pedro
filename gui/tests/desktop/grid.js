@@ -240,6 +240,12 @@ assert(previews.length === 1000 && previews.every(request => request.skipExistin
 context.Backend.desktopModel.organization = "free";
 context.selectedDesktopIds = shortcuts.slice(0, 2).map(item => item.app.id);
 assert(Controller.contextEntries(shortcuts[0].app).length === 2, "Group context actions use the full selection");
+context.Backend.desktopModel.organization = "free";
+context.selectedDesktopIds = [shortcuts[0].app.id];
+const beforeIndividual = previews.length;
+Controller.entryAction("open", shortcuts[0].app);
+assert(previews.length === beforeIndividual + 1 && !previews[previews.length - 1].skipExisting,
+    "Opening one selected file requests focus instead of silently skipping the existing preview");
 print("Desktop stack opening: 1000 independent folder and file requests passed");
 
 const moves = [];
