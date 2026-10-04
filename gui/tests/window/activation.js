@@ -8,7 +8,9 @@ const Gio = {_promisify: () => {}};
 const Shell = {Screenshot: {prototype: {}}};
 const Main = {activateWindow: (window, timestamp) => activations.push({window, timestamp})};
 const Applications = new Function("Gio", "Shell", "GLib", "St", "Main", "Extension", "global", source + "\nreturn Applications;")(
-    Gio, Shell, {}, {}, Main, class {}, shell);
+    Gio, Shell, {Variant: class { constructor(type, value) { this.value = value; } },
+        timeout_add: (priority, interval, callback) => { for (let i = 0; i < 25; ++i) if (!callback()) break; },
+        SOURCE_REMOVE: false, SOURCE_CONTINUE: true}, {}, Main, class {}, shell);
 const service = new Applications();
 const target = {get_pid: () => 123, get_title: () => "Video.mp4", unminimize: () => {}, unset_demands_attention: () => {}};
 const foreign = Object.assign({}, target, {get_pid: () => 456});
@@ -21,3 +23,21 @@ if (service.ActivateWindow(123, "Video.mp4") || activations.length !== 1)
 if (service.ActivateWindow(123, "missing") || activations.length !== 1)
     throw new Error("Missing viewer activation must fall back");
 print("GNOME viewer activation: process ownership, current timestamp and ambiguous-name fallback passed");
+
+const bounds = {x: 0, y: 0, width: 1600, height: 1000};
+const windows = [1, 2, 3, 4].map(id => {
+    const rect = {x: 350, y: 140, width: id === 4 ? 480 : 900, height: id === 4 ? 340 : 720};
+    return {get_pid: () => 123, get_title: () => id === 4 ? "Photo.png" : "Files",
+        get_stable_sequence: () => id, get_frame_rect: () => rect,
+        get_work_area_current_monitor: () => bounds,
+        move_frame: (user, x, y) => { rect.x = x; rect.y = y; }};
+});
+actors = windows.map(meta_window => ({meta_window}));
+for (const title of ["Files", "Files", "Files", "Photo.png"]) {
+    let success = false;
+    service.PlaceWindowAsync([123, title, "Pedro OS"], {return_value: result => { success = result.value[0]; }});
+    if (!success) throw new Error("Mapped stack window was not placed");
+}
+const origins = new Set(windows.map(window => { const rect = window.get_frame_rect(); return `${rect.x}:${rect.y}`; }));
+if (origins.size !== 4) throw new Error("GNOME placed stack folders and viewer at identical origins");
+print("GNOME placement: three same-title folders and an image viewer get distinct actual frame positions");

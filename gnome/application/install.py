@@ -48,6 +48,10 @@ def main():
         interface = ElementTree.fromstring(reply.unpack()[0]).find(
             "interface[@name='org.pedro.Applications']")
         methods = {method.get('name') for method in interface.findall('method')} if interface is not None else set()
+        if 'PlaceWindow' in methods:
+            print('Pedro stack window placement integration is active.')
+        else:
+            print('Stack window placement needs a GNOME logout and login to load PlaceWindow.')
         if 'ActivateWindow' in methods:
             print('Pedro viewer focus integration is active.')
         else:

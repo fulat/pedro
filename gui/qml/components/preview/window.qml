@@ -8,6 +8,7 @@ Loader {
     property bool closingSession: false
     property var openingPosition: null
     property var positionWindow: null
+    property var mappedWindow: null
     signal finished()
     property bool pendingOpen: false
     property string sizedSource: ""
@@ -101,6 +102,7 @@ Loader {
         } else {
             item.show();
         }
+        if (mappedWindow) mappedWindow(item);
         item.raise();
         item.requestActivate();
     }

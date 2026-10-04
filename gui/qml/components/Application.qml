@@ -79,6 +79,7 @@ ApplicationWindow {
             onLoaded: {
                 item.preview = session;
                 item.positionWindow = window.placeQuickWindow;
+                item.mappedWindow = window.placeMappedWindow;
                 item.finished.connect(() => {
                     window.previewWindows = window.previewWindows.filter(candidate => candidate !== sessionLoader);
                     Qt.callLater(() => {
@@ -122,9 +123,13 @@ ApplicationWindow {
             .filter(item => item && item.visible && item.visibility !== Window.Minimized);
     }
 
+    property var placementReservations: []
+
     function placeQuickWindow(item) {
-        const occupied = captureWindows().filter(other => other !== item)
+        placementReservations = placementReservations.filter(record => record.item && record.item !== item);
+        const visible = captureWindows().filter(other => other !== item)
             .map(other => ({x: other.x, y: other.y, width: other.width, height: other.height}));
+        const occupied = visible.concat(placementReservations.map(record => record.rect));
         const point = Placement.place({width: item.width, height: item.height},
             {x: item.Screen.virtualX, y: item.Screen.virtualY,
                 width: item.Screen.desktopAvailableWidth, height: item.Screen.desktopAvailableHeight},
@@ -132,6 +137,15 @@ ApplicationWindow {
                 y: window.y + (window.height - item.height) / 2});
         item.x = point.x;
         item.y = point.y;
+        placementReservations = placementReservations.concat([{item: item,
+            rect: {x: point.x, y: point.y, width: item.width, height: item.height}}]);
+        item.visibleChanged.connect(() => {
+            if (!item.visible) window.placementReservations = window.placementReservations.filter(record => record.item !== item);
+        });
+    }
+
+    function placeMappedWindow(item) {
+        if (typeof Backend.placeWindow === "function") Backend.placeWindow(item, window.title);
     }
 
     function configureFilesWindow(item) {
@@ -185,6 +199,7 @@ ApplicationWindow {
                 });
                 window.placeQuickWindow(item);
                 item.show();
+                window.placeMappedWindow(item);
                 item.raise();
                 item.requestActivate();
             }

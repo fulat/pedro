@@ -185,6 +185,7 @@ QtObject {
             filesQuickWindow.showNormal();
         } else {
             filesQuickWindow.show();
+            window.placeMappedWindow(filesQuickWindow);
         }
         filesQuickWindow.raise();
         filesQuickWindow.requestActivate();

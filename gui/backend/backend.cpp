@@ -644,6 +644,19 @@ QObject* Backend::preview() {
     return &preview_;
 }
 
+void Backend::placeWindow(QObject* object, const QString& shellTitle) {
+
+    auto* window = qobject_cast<QQuickWindow*>(object);
+    if (!window) {
+        return;
+    }
+    const auto pid = static_cast<unsigned int>(QCoreApplication::applicationPid());
+    const auto title = window->title().toStdString();
+    auto* watcher = new QFutureWatcher<bool>(this);
+    connect(watcher, &QFutureWatcher<bool>::finished, watcher, &QObject::deleteLater);
+    watcher->setFuture(QtConcurrent::run([pid, title, shellTitle] { return Pedro::Papi::Gui::Application::Manager{}.placeWindow(pid, title, shellTitle.toStdString()); }));
+}
+
 void Backend::activateWindow(QObject* object) {
 
     const QPointer<QQuickWindow> window = qobject_cast<QQuickWindow*>(object);
