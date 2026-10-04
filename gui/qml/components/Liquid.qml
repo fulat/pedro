@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import QtQuick.Effects
 
 import "../scripts/theme.js" as Theme
@@ -16,6 +17,23 @@ Item {
     readonly property bool lightMode: Backend.appearanceMode === "light"
     property real blurAmount: frosted ? 1.0 : Theme.menuBlur
     property point backdropOrigin: Qt.point(0, 0)
+
+    readonly property bool separateWindow: backdrop !== null && backdrop.Window.window !== liquid.Window.window
+    readonly property Item sampledBackdrop: separateWindow ? popupWallpaper : backdrop
+
+    // A texture source must live in the same window as its shader.
+    Image {
+        id: popupWallpaper
+        width: liquid.backdrop ? liquid.backdrop.width : liquid.width
+        height: liquid.backdrop ? liquid.backdrop.height : liquid.height
+        x: -liquid.backdropOrigin.x
+        y: -liquid.backdropOrigin.y
+        source: liquid.separateWindow ? Backend.wallpaper : ""
+        fillMode: Image.PreserveAspectCrop
+        smooth: true
+        mipmap: true
+        visible: false
+    }
 
     // mapToItem does not notify bindings when a popup's ancestors move.
     // Track the actual position while visible, including popup reparenting.
@@ -35,7 +53,7 @@ Item {
         id: backdropSample
 
         anchors.fill: parent
-        sourceItem: liquid.backdrop
+        sourceItem: liquid.sampledBackdrop
         textureSize: Qt.size(Math.ceil(liquid.width * liquid.sampleRatio), Math.ceil(liquid.height * liquid.sampleRatio))
         smooth: true
         sourceRect: {

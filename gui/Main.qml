@@ -468,24 +468,31 @@ Components.Application {
         }
     }
 
-    Loader {
-        id: panelLoader
+    Popup {
+        id: panelPopup
 
-        z: 30
-        active: main.panelMode !== ""
-        source: "qml/components/Root.qml"
-
-        anchors.top: main.contentItem.top
-        anchors.topMargin: topBarItem.barHeight + 5
+        parent: main.contentItem
+        popupType: Popup.Window
+        z: 300
+        padding: 0
+        margins: 10
+        // A native Wayland popup must have valid geometry before it is mapped.
+        width: Math.max(1, panelLoader.item ? panelLoader.item.implicitWidth : 240)
+        height: Math.max(1, panelLoader.item ? panelLoader.item.implicitHeight : 140)
+        visible: main.panelMode !== "" && panelLoader.status === Loader.Ready
+            && panelLoader.item !== null && panelLoader.item.implicitWidth > 0 && panelLoader.item.implicitHeight > 0
         x: Math.max(10, Math.min(main.width - width - 10, main.panelAnchorX - width / 2))
+        y: topBarItem.barHeight + 5
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        onClosed: main.controller.closePanel()
+        background: Item {}
 
-        onLoaded: mainController.panelLoaded(item, wallpaper, topBarItem)
+        contentItem: Loader {
+            id: panelLoader
 
-        Behavior on x {
-            NumberAnimation {
-                duration: 140
-                easing.type: Easing.OutCubic
-            }
+            active: main.panelMode !== ""
+            source: "qml/components/Root.qml"
+            onLoaded: mainController.panelLoaded(item, wallpaper, topBarItem)
         }
     }
 
