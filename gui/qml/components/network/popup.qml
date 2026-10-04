@@ -273,7 +273,7 @@ Item {
                     color: Theme.white
                     font.pixelSize: detail.revealable ? 12 : 13
                     font.weight: Font.Medium
-                    font.family: detail.revealable ? "monospace" : Qt.font({}).family
+                    font.family: detail.revealable ? "monospace" : Qt.application.font.family
                     font.letterSpacing: detail.revealable ? 0.6 : 0
                     readOnly: true
                     textFormat: TextEdit.PlainText

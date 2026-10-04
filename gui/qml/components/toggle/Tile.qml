@@ -20,7 +20,7 @@ Rectangle {
 
     property bool navigable: true
     property bool active: false
-    property bool toggleable: Papi.bluetoothAvailable
+    property bool toggleable: true
 
     signal activated
 

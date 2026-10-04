@@ -28,7 +28,7 @@ Item {
                 clip: true
                 Image {
                     anchors.fill: parent
-                    source: "../../../assets/artwork.svg"
+                    source: "image://icons/original/music.svg"
                     fillMode: Image.PreserveAspectFit
                     sourceSize: Qt.size(Pixel.physical(width, Screen.devicePixelRatio),
                                         Pixel.physical(height, Screen.devicePixelRatio))
