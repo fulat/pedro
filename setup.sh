@@ -3,6 +3,29 @@
 # Install host development tools only. Pedro build output stays under build/.
 set -euo pipefail
 
+previewOnly=false
+
+if (( $# > 1 )); then
+    echo "Usage: $0 [--preview]" >&2
+    exit 1
+fi
+
+case "${1:-}" in
+    "") ;;
+    --preview) previewOnly=true ;;
+    *)
+        echo "Usage: $0 [--preview]" >&2
+        exit 1
+        ;;
+esac
+
+previewPackages=(
+    pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+    libglycin-2-dev libpoppler-glib-dev glycin-loaders bubblewrap
+    gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+    gstreamer1.0-plugins-bad gstreamer1.0-libav
+)
+
 if [[ "$(uname -s)" != Linux ]]; then
     echo "Pedro setup requires Ubuntu Linux." >&2
     exit 1
@@ -54,6 +77,15 @@ fi
 echo "Updating Ubuntu package indexes..."
 "${asRoot[@]}" apt-get update
 
+if [[ "$previewOnly" == true ]]; then
+    echo "Installing native Preview build and runtime dependencies..."
+    "${asRoot[@]}" apt-get --simulate install --no-install-recommends "${previewPackages[@]}"
+    "${asRoot[@]}" apt-get install -y --no-install-recommends "${previewPackages[@]}"
+    pkg-config --exists 'gstreamer-1.0 >= 1.20' gstreamer-app-1.0 gstreamer-video-1.0 'glycin-2 >= 2.0' poppler-glib
+    echo "Preview dependencies are ready. Run 'make gui-build'."
+    exit 0
+fi
+
 # Qt Quick Effects and other Qt modules are in Ubuntu's universe component.
 effectsCandidate=$(apt-cache policy qml6-module-qtquick-effects | awk '$1 == "Candidate:" { print $2; exit }')
 
@@ -88,6 +120,7 @@ packages=(
     build-essential cmake ninja-build python3 python3-gi pkg-config clang-format
     # Qt Linguist supplies lrelease, required to compile Pedro translation catalogs.
     qt6-l10n-tools
+    "${previewPackages[@]}"
     qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-svg-plugins qt6-wayland-dev
     libglib2.0-dev libsystemd-dev libtomlplusplus-dev gvfs gvfs-backends
     # PAPI controls system audio through wpctl and watches changes with pw-mon.

@@ -38,6 +38,19 @@ pkg_check_modules(
 )
 
 
+# Preview providers use native decoding libraries, independently of the GUI.
+pkg_check_modules(PREVIEW QUIET IMPORTED_TARGET GLOBAL
+    gstreamer-1.0>=1.20 gstreamer-app-1.0 gstreamer-video-1.0
+    glycin-2>=2.0 poppler-glib)
+if(NOT PREVIEW_FOUND)
+    message(FATAL_ERROR
+        "Native Preview development packages are missing or too old. "
+        "Run ./setup.sh --preview, then retry make gui-build. "
+        "Required pkg-config modules: gstreamer-1.0 >= 1.20, "
+        "gstreamer-app-1.0, gstreamer-video-1.0, glycin-2 >= 2.0, poppler-glib. "
+        "Configuration does not install or download dependencies.")
+endif()
+
 # -----------------------------------------------------------------------------
 # Sources
 #
@@ -216,6 +229,7 @@ target_link_libraries(
     PRIVATE
         Qt6::DBus
         PkgConfig::GIO
+        PkgConfig::PREVIEW
         tomlplusplus::tomlplusplus
 )
 
