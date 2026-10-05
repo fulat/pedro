@@ -26,7 +26,12 @@ Item {
 
     visible: capture.visible
     focus: capture.visible
-    Keys.onEscapePressed: capture.close()
+    Shortcut {
+        sequence: "Escape"
+        context: Qt.WindowShortcut
+        enabled: root.visible
+        onActivated: root.capture.close()
+    }
 
     function submit() {
         if (windowMode && (!selectedWindow || !selectedWindow.visible)) {

@@ -83,3 +83,18 @@ gjs gui/tests/window/activation.js gnome/application/extension.js
 Para los proveedores del visor, usar el target `pedro-preview-check` según `gui/tests/preview/readme.md`. Las tres pruebas que requieren actualizarse son `gui/tests/icons/mime.sh`, `gui/tests/capture/check.sh` y `gui/tests/capture/resize.sh`.
 
 Orden recomendado: unificar el backend, eliminar la realimentación del audio, dar identidad estable al foco de ventanas y preservar el BOM al guardar vacío. Actualizar las pruebas obsoletas junto con cada responsabilidad relacionada. Esta auditoría no cambia esas implementaciones.
+
+## Correcciones y verificación posterior
+
+Se corrigieron los cuatro fallos confirmados de esta auditoría:
+
+- `Backend` y el singleton QML `Papi` comparten ahora el objeto creado por `main.cpp`. La ejecución real devolvió `true` para ambas comparaciones de identidad y mostró un único proceso hijo `pw-dump`.
+- Audio observa los registros JSON de `pw-dump --monitor` y descarta eventos de clientes como `wpctl`. Solo notifica cambios efectivos de estado. El gestor real emitió una notificación inicial en tres segundos en reposo, frente a 19–22 antes. El fixture aislado comprobó fragmentación JSON, ruido de clientes, cambios externos de volumen/mute y cambio de salida predeterminada: cuatro consultas y tres notificaciones de estado.
+- La colocación devuelve la secuencia estable de Mutter; Pedro conserva esa identidad y la utiliza para enfocar la ventana exacta. Las solicitudes de colocación se serializan y el foco solicitado antes de terminar se conserva. El fixture GNOME comprobó títulos duplicados, pertenencia al proceso, identidades inexistentes y compatibilidad con el método anterior. La extensión actualizada está instalada; el servicio de la sesión actual sigue usando el módulo anterior. **Cerrar sesión y volver a entrar en GNOME es necesario para comprobar este cambio con Mutter real.**
+- El proveedor de texto conserva la codificación y el BOM durante toda la sesión. Las pruebas nativas pasaron el ciclo borrar todo → escribir nuevamente en UTF-8 y UTF-16, incluyendo CRLF, guardado atómico y protección ante modificaciones externas.
+
+Se actualizaron las pruebas de iconos y captura para documentos y ventanas popup. Al completar esta última apareció otro fallo: Escape dejaba de cerrar la captura después de cerrar los menús nativos. Un `Shortcut` de ámbito de ventana evita depender del elemento que conserva el foco. La prueba pasó tanto el Escape del submenú (conserva la captura) como el Escape posterior del visor de captura, además de sus comprobaciones de redimensionado, movimiento y opciones.
+
+`make gui-build`, `pedro-preview-check`, las comprobaciones de audio, iconos, captura y activación GNOME pasaron. La ejecución real abrió imágenes, vídeo inicialmente pausado, PDF, texto y carpetas; reprodujo, pausó, buscó y cerró todas las ventanas sin dejar sesiones ni reservas. Los menús pasaron 52 transiciones tanto en Wayland como en X11; el fixture comprueba también la identidad compartida de `Backend` y `Papi`. Los registros de esta revisión son `build/diagnostic/fixes-*.log`.
+
+Los avisos de tipo Qt inválido en la prueba de ordenación y de `QtWaylandTextInputv3::disableSurface` al abrir/cerrar editores rápidamente siguen presentes. Sus pruebas funcionales pasaron; no se da por resuelta una posible incidencia de IME ni se atribuyen estos avisos a un fallo demostrado. No se cambió el compositor de la imagen ni se probó su arranque.

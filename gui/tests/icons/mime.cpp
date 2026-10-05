@@ -87,7 +87,8 @@ int main(int argc, char** argv) {
             } else if (name == "image.png") {
                 require(entry.value("visualType") == "image", "Local image thumbnail must remain enabled");
             } else {
-                require(entry.value("visualType") == "themed", "Non-image files must use MIME theme icons");
+                const auto expected = name == "test.pdf" || name == "test.py" ? "document" : "themed";
+                require(entry.value("visualType") == expected, "Document artwork and MIME theme fallback classification");
                 if (name == "test.pdf") {
                     pdfEntry = entry;
                     require(names.contains("application-pdf"), "Actual PDF must expose its specific GIO icon");
@@ -181,7 +182,7 @@ int main(int argc, char** argv) {
         require(item != nullptr, "Card and table components must load");
         waitFor([&] {
             const auto loadedIcon = [](const auto& visit, QQuickItem* root) -> bool {
-                if (root->property("source").toUrl().toString().startsWith("image://icons/theme/") && root->property("status").toInt() == 1) {
+                if ((root->property("source").toUrl().toString().startsWith("image://icons/theme/") || root->property("source").toUrl().toString() == "image://icons/original/document.svg") && root->property("status").toInt() == 1) {
                     return true;
                 }
                 for (auto* child : root->childItems()) {

@@ -128,6 +128,7 @@ int main(int argc, char** argv) {
     }
     auto* options = item->findChild<QObject*>("captureOptions");
     if (!options || !QMetaObject::invokeMethod(options, "open")) {
+        std::cerr << "FAIL: options lookup/open\n";
         return 1;
     }
     QTest::qWait(50);
@@ -142,25 +143,41 @@ int main(int argc, char** argv) {
         }
         return nullptr;
     };
-    auto* timer = findEntry(window.contentItem(), QStringLiteral("captureTimer10"));
+    auto* menuContent = qvariant_cast<QQuickItem*>(options->property("contentItem"));
+    if (!menuContent) {
+        std::cerr << "FAIL: options content lookup\n";
+        return 1;
+    }
+    auto* timer = findEntry(menuContent, QStringLiteral("captureTimer10"));
     if (!timer) {
         std::cerr << "FAIL: timer lookup\n";
         return 1;
     }
-    QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, timer->mapToScene(QPointF(timer->width() / 2, timer->height() / 2)).toPoint());
+    QTest::mouseClick(timer->window(), Qt::LeftButton, Qt::NoModifier, timer->mapToScene(QPointF(timer->width() / 2, timer->height() / 2)).toPoint());
     if (item->property("delay").toInt() != 10 || !options->property("visible").toBool()) {
         std::cerr << "FAIL: persistent options selection\n";
         return 1;
     }
     auto* microphones = item->findChild<QObject*>("captureMicrophones");
-    auto* microphoneEntry = findEntry(window.contentItem(), QStringLiteral("captureMicrophonesEntry"));
+    auto* microphoneEntry = findEntry(menuContent, QStringLiteral("captureMicrophonesEntry"));
     if (!microphones || !microphoneEntry) {
+        std::cerr << "FAIL: microphones lookup " << bool(microphones) << " " << bool(microphoneEntry) << "\n";
         return 1;
     }
-    QTest::mouseMove(&window, microphoneEntry->mapToScene(QPointF(microphoneEntry->width() / 2, microphoneEntry->height() / 2)).toPoint());
+    QTest::mouseMove(microphoneEntry->window(), microphoneEntry->mapToScene(QPointF(microphoneEntry->width() / 2, microphoneEntry->height() / 2)).toPoint());
     QTest::qWait(400);
     if (!microphones->property("visible").toBool()) {
         std::cerr << "FAIL: microphones hover submenu\n";
+        return 1;
+    }
+    auto* microphoneContent = qvariant_cast<QQuickItem*>(microphones->property("contentItem"));
+    if (!microphoneContent || !microphoneContent->window()) {
+        return 1;
+    }
+    QTest::keyClick(microphoneContent->window(), Qt::Key_Escape);
+    QTest::qWait(100);
+    if (!manager.shown) {
+        std::cerr << "FAIL: submenu Escape must preserve capture\n";
         return 1;
     }
     QMetaObject::invokeMethod(microphones, "close");
@@ -179,6 +196,7 @@ int main(int argc, char** argv) {
     }
     QTest::keyClick(&window, Qt::Key_Escape);
     if (manager.shown) {
+        std::cerr << "FAIL: Escape after closing native popup\n";
         return 1;
     }
     std::cout << "PASS: all four edges, corner resizing, moving and minimum selection size, monitor geometry, toolbar drag, exclusive modes, persistent options, microphone hover and Escape\n";

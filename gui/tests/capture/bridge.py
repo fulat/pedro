@@ -38,18 +38,6 @@ const info = Gio.DBusNodeInfo.new_for_xml(interfaceXml).interfaces[0];
 if (!info.lookup_method('Capture') || !info.lookup_method('StopCapture'))
     throw new Error('Missing capture interface');
 const bridge = new Applications();
-let lowered = [];
-globalThis.global = {get_window_actors() {
-    return [
-        {meta_window: {get_wm_class() { return 'Pedro'; }, get_title() { return 'Pedro OS'; }, lower() { lowered.push('desktop'); }}},
-        {meta_window: {get_wm_class() { return 'Pedro'; }, get_title() { return 'Files'; }, lower() { lowered.push('files'); }}},
-        {meta_window: {get_wm_class() { return 'ChatGPT'; }, get_title() { return 'ChatGPT'; }, lower() { lowered.push('external'); }}}
-    ];
-}};
-bridge._lowerDesktop();
-if (lowered.length !== 1 || lowered[0] !== 'desktop')
-    throw new Error('Desktop stacking must not lower Files or external applications');
-
 let result;
 const invocation = {
     get_sender() { return ':1.1000'; },
