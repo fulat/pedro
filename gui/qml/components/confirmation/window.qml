@@ -4,7 +4,6 @@ import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import ".." as Components
-import "../icon" as Icon
 import "../../scripts/theme.js" as Theme
 
 // A Pedro system confirmation. Content and actions belong to its caller.
@@ -25,16 +24,16 @@ Window {
 
     objectName: "pedroConfirmation"
     color: "transparent"
-    flags: Qt.Window | Qt.FramelessWindowHint | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint | (keepOnTop ? Qt.WindowStaysOnTopHint : 0)
+    flags: Qt.Window | Qt.FramelessWindowHint | Qt.CustomizeWindowHint | (keepOnTop ? Qt.WindowStaysOnTopHint : 0)
     transientParent: null
     modality: blocking ? Qt.ApplicationModal : Qt.NonModal
     visible: false
-    readonly property real preferredWidth: Math.min(400, Screen.desktopAvailableWidth || 400)
+    readonly property real preferredWidth: Math.min(360, Screen.desktopAvailableWidth || 360)
     width: preferredWidth
-    height: Math.min(body.implicitHeight + 70, Screen.desktopAvailableHeight || 600)
+    height: Math.min(Math.max(220, body.implicitHeight + 82), Screen.desktopAvailableHeight || 600)
     minimumWidth: preferredWidth
     maximumWidth: preferredWidth
-    minimumHeight: Math.min(164, Screen.desktopAvailableHeight || 600)
+    minimumHeight: Math.min(220, Screen.desktopAvailableHeight || 600)
     maximumHeight: Screen.desktopAvailableHeight || 600
 
     function open() {
@@ -135,38 +134,11 @@ Window {
             target: null
             onActiveChanged: { if (active) confirmation.startSystemMove(); }
         }
-        Controls.Button {
-            id: closeButton
-            objectName: "confirmationClose"
-            x: 10
-            anchors.verticalCenter: parent.verticalCenter
-            width: 22; height: 26
-            hoverEnabled: true
-            Accessible.name: qsTranslate("Pedro", "common.close")
-            onClicked: confirmation.reject()
-            contentItem: Item {}
-            background: Item {
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 12; height: 12
-                    radius: 6
-                    color: "#ff5c5f"
-                    visible: !closeButton.hovered
-                }
-                Icon.Tinted {
-                    anchors.centerIn: parent
-                    width: 15; height: 15
-                    source: "window-close.svg"
-                    tint: "#ff5c5f"
-                    visible: closeButton.hovered
-                }
-            }
-        }
         Text {
             anchors.left: parent.left
-            anchors.leftMargin: 42
+            anchors.leftMargin: 20
             anchors.right: parent.right
-            anchors.rightMargin: 42
+            anchors.rightMargin: 20
             anchors.verticalCenter: parent.verticalCenter
             text: confirmation.title
             horizontalAlignment: Text.AlignLeft
@@ -192,6 +164,8 @@ Window {
         anchors.leftMargin: 20
         anchors.rightMargin: 20
         anchors.topMargin: 58
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
         spacing: 12
         Text {
             Layout.fillWidth: true
@@ -212,6 +186,7 @@ Window {
             wrapMode: Text.WrapAnywhere
             textFormat: Text.PlainText
         }
+        Item { Layout.fillHeight: true }
         Rectangle {
             Layout.fillWidth: true
             Layout.topMargin: 2
