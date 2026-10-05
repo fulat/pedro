@@ -98,3 +98,30 @@ Se actualizaron las pruebas de iconos y captura para documentos y ventanas popup
 `make gui-build`, `pedro-preview-check`, las comprobaciones de audio, iconos, captura y activación GNOME pasaron. La ejecución real abrió imágenes, vídeo inicialmente pausado, PDF, texto y carpetas; reprodujo, pausó, buscó y cerró todas las ventanas sin dejar sesiones ni reservas. Los menús pasaron 52 transiciones tanto en Wayland como en X11; el fixture comprueba también la identidad compartida de `Backend` y `Papi`. Los registros de esta revisión son `build/diagnostic/fixes-*.log`.
 
 Los avisos de tipo Qt inválido en la prueba de ordenación y de `QtWaylandTextInputv3::disableSurface` al abrir/cerrar editores rápidamente siguen presentes. Sus pruebas funcionales pasaron; no se da por resuelta una posible incidencia de IME ni se atribuyen estos avisos a un fallo demostrado. No se cambió el compositor de la imagen ni se probó su arranque.
+
+## Revisión tras cerrar sesión y volver a entrar
+
+El 4 de octubre de 2026 se repitió el diagnóstico después de que el usuario iniciara una nueva sesión GNOME y ejecutara `make gui`. La introspección D-Bus confirmó que `PlaceWindowIdentity` y `ActivateWindowIdentity` están activos. La instancia del usuario mantuvo un único hijo `pw-dump` y permaneció abierta al terminar las pruebas.
+
+Se usó una instancia adicional de Pedro con sus mismos objetos PAPI, proveedores y controladores QML, y fixtures bajo `build/`. Para comprobar el foco se compiló una copia de la entrada de desarrollo con una sonda de `QGuiApplication::focusWindow()`; fuente, objeto y ejecutable quedaron exclusivamente en `build/diagnostic/recheck/`. La sonda no modifica la lógica del backend. La primera comprobación con `QWindow::active` produjo un falso positivo: varias ventanas relacionadas devolvían `true` simultáneamente. Las comprobaciones siguientes compararon la ventana de foco exacta y registraron su identidad estable, en lugar de exigir que las demás ventanas devolvieran `active = false`.
+
+La ejecución normal terminó con 14 comprobaciones aprobadas:
+
+- Identidad compartida de `Backend`, `Papi`, audio y captura.
+- Imagen, PDF, texto, vídeo y tres carpetas abiertas simultáneamente; seis sesiones de visor al añadir dos `note.txt` de directorios distintos.
+- Vídeo inicialmente pausado, foco al reabrir sin duplicación, reproducción con avance temporal y búsqueda a 500 ms permaneciendo pausado.
+- Cada `note.txt` recibió su propia ventana de foco real y una identidad distinta. Reabrir el minimizado tras finalizar la minimización lo restauró y enfocó correctamente.
+- Abrir un duplicado en modo masivo mantuvo el número de sesiones y el foco.
+- Cerrar un vídeo después de redimensionarlo y volver a abrirlo restauró sus dimensiones iniciales y el estado pausado.
+- Dos carpetas con el mismo título `Archivos` recibieron, por separado, el foco nativo solicitado.
+- Cerrar las ventanas liberó todos los visores, carpetas y reservas de colocación.
+
+Las pruebas de proveedores nativos, iconos, captura, menús y audio también pasaron. Los menús completaron 52 transiciones en Wayland sin cierre de aplicación. Escape conservó la captura al salir del submenú y la cerró correctamente después. Los guardados reales vacío → `é` conservaron `efbbbfc3a9` en UTF-8 y `fffee900` en UTF-16. Cada gestor de audio real emitió una sola notificación inicial durante tres segundos. Una observación de cinco segundos, después de cerrar las instancias de diagnóstico, no mostró clientes `wpctl` nuevos; ya no aparece la realimentación continua observada antes.
+
+### Caso intermitente pendiente
+
+Una prueba de estrés que llama a minimizar y reabrir el mismo visor **en el mismo turno de eventos**, sin esperar la transición de Mutter, perdió el foco en una de tres ejecuciones instrumentadas. La ventana Qt volvió a su visibilidad normal, pero `QGuiApplication::focusWindow()` no señalaba ese visor al comprobarlo posteriormente. No se creó un duplicado ni se activó el otro archivo con el mismo nombre. Las otras dos ejecuciones y la reapertura normal con una transición separada pasaron. Es una observación pendiente de aislar; una carrera entre minimización y activación es una hipótesis, no una causa demostrada. No se cambió la implementación para ocultar este resultado.
+
+Los avisos de `QtWaylandTextInputv3::disableSurface` siguen apareciendo en las aperturas/cierres rápidos de editores; no hubo cierre de aplicación ni pérdida de guardado en las pruebas. No se verificó composición IME ni el arranque de la imagen Pedro. No se editaron documentos del usuario ni se detuvo su instancia.
+
+Evidencia desechable: `build/diagnostic/recheck/normal.log`, `focus-exact.log`, `complete.log`, `complete-repeat.log`, `utf8.log`, `utf16.log`, `audio.log`, `idle-final.log`, `providers.log`, `capture.log`, `resize.log`, `icons.log` y `menus.log`. `complete.log` conserva el resultado intermitente; `normal.log` registra las 14 comprobaciones normales aprobadas.
