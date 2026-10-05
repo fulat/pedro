@@ -11,6 +11,7 @@ Controls.Menu {
     property Item backdrop
     readonly property bool canCreate: !!directory && String(directory.location).startsWith("file:")
     signal informationRequested()
+    signal emptyRequested()
     width: 260
     height: Math.max(1, contentItem.implicitHeight + topPadding + bottomPadding)
     padding: 6
@@ -26,7 +27,7 @@ Controls.Menu {
     component Action: Controls.MenuItem {
         id: action
         property string symbol
-        implicitHeight: 36
+        implicitHeight: visible ? 36 : 0
         hoverEnabled: true
         contentItem: Row {
             spacing: 12
@@ -52,6 +53,7 @@ Controls.Menu {
         }
     }
     Action {
+        visible: !menu.directory || !String(menu.directory.location).startsWith("trash:")
         objectName: "filesCreateFolder"
         text: qsTranslate("Pedro", "desktop.menu.folder")
         symbol: "folder"
@@ -59,11 +61,19 @@ Controls.Menu {
         onTriggered: menu.directory.createFolder(text)
     }
     Action {
+        visible: !menu.directory || !String(menu.directory.location).startsWith("trash:")
         objectName: "filesCreateFile"
         text: qsTranslate("Pedro", "desktop.menu.file")
         symbol: "file"
         enabled: menu.canCreate
         onTriggered: menu.directory.createFile(text)
+    }
+    Action {
+        visible: !!menu.directory && String(menu.directory.location).startsWith("trash:")
+        text: qsTranslate("Pedro", "trash.empty")
+        symbol: "trash"
+        enabled: !!menu.directory && !Backend.trash.busy && menu.directory.folders.length + menu.directory.files.length > 0
+        onTriggered: menu.emptyRequested()
     }
     Controls.MenuSeparator {}
     Action {

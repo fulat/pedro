@@ -61,7 +61,20 @@ QtObject {
         selectedEntry = entry;
     }
 
+    signal removalRequested(var urls)
+
+    function entryAction(action, entry) {
+        if (action === "trash") Backend.trash.move([entry.url]);
+        else if (action === "restore") Backend.trash.restore([entry.url]);
+        else if (action === "remove" && entry.canRemove) removalRequested([entry.url]);
+        else if (action === "open") openEntry(entry);
+        else if (action === "preview") previewEntry(entry);
+        else if (action === "copy" || action === "cut") Backend.clipboard.copy([entry.url], action === "cut");
+        else if (action === "paste") Backend.clipboard.paste(entry.isDirectory ? entry.url : directory.location);
+    }
+
     function openEntry(entry) {
+        if (entry.inTrash && !entry.isDirectory) return;
         if (entry.isDirectory) {
             selectedEntry = {};
             directory.open(entry.url);
@@ -71,7 +84,7 @@ QtObject {
     }
 
     function previewEntry(entry) {
-        if (entry && entry.url && !entry.isDirectory) {
+        if (entry && entry.url && !entry.inTrash && !entry.isDirectory) {
             Backend.openPreview(entry.url, files.map(item => item.url));
         }
     }

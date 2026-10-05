@@ -411,5 +411,10 @@
     "preview.edit.discard": "¿Descartar los cambios y cerrar?",
     "preview.edit.limit": "El texto supera el límite del visor o no puede codificarse.",
     "preview.edit.save": "Guardar",
-    "preview.edit.unsaved": "Cambios sin guardar"
+    "preview.edit.unsaved": "Cambios sin guardar",
+    "trash.busy": "Trabajando…",
+    "trash.confirm": "Estos archivos se eliminarán permanentemente. Esta acción no se puede deshacer.",
+    "trash.delete": "Eliminar permanentemente",
+    "trash.empty": "Vaciar Papelera",
+    "trash.restore": "Restaurar"
 }

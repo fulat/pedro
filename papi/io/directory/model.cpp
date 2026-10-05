@@ -20,7 +20,7 @@ namespace Pedro::Papi::Io::Directory {
     namespace {
 
         constexpr int entryRole = Qt::UserRole + 1;
-        constexpr auto attributes = "standard::name,standard::display-name,standard::type,standard::is-hidden,standard::content-type,standard::size,time::modified";
+        constexpr auto attributes = "standard::name,standard::display-name,standard::type,standard::is-hidden,standard::content-type,standard::size,time::modified,trash::orig-path,trash::deletion-date";
 
         class Order : public QSortFilterProxyModel {
             public:
@@ -130,6 +130,15 @@ namespace Pedro::Papi::Io::Directory {
             result["id"] = address;
             result["url"] = address;
             result["path"] = QUrl(address).isLocalFile() ? QUrl(address).toLocalFile() : QUrl(address).toDisplayString();
+            result["inTrash"] = QUrl(address).scheme() == "trash";
+            const auto* original = g_file_info_get_attribute_byte_string(info, G_FILE_ATTRIBUTE_TRASH_ORIG_PATH);
+            result["originalPath"] = original ? QString::fromLocal8Bit(original) : QString{};
+            auto* parent = g_file_get_parent(file);
+            auto* trash = g_file_new_for_uri("trash:///");
+            result["canRemove"] = parent && g_file_equal(parent, trash);
+            result["canRestore"] = original && g_path_is_absolute(original) && result["canRemove"].toBool();
+            g_clear_object(&parent);
+            g_object_unref(trash);
             result["name"] = QString::fromUtf8(g_file_info_get_display_name(info));
             result["isDirectory"] = folder;
             result["icon"] = folder ? "folder" : contentType && g_content_type_is_a(contentType, "image/*") ? "image" : "file";
@@ -250,14 +259,14 @@ namespace Pedro::Papi::Io::Directory {
                     g_clear_error(&creationError);
                 }
                 GError* error = nullptr;
-                auto* enumerator = g_file_enumerate_children(directory, attributes, G_FILE_QUERY_INFO_NONE, cancel.get(), &error);
+                auto* enumerator = g_file_enumerate_children(directory, attributes, g_file_has_uri_scheme(directory, "trash") ? G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS : G_FILE_QUERY_INFO_NONE, cancel.get(), &error);
                 if (enumerator) {
                     while (!g_cancellable_is_cancelled(cancel.get())) {
                         auto* info = g_file_enumerator_next_file(enumerator, cancel.get(), &error);
                         if (!info) {
                             break;
                         }
-                        if (!g_file_info_get_is_hidden(info)) {
+                        if (g_file_has_uri_scheme(directory, "trash") || !g_file_info_get_is_hidden(info)) {
                             auto* child = g_file_enumerator_get_child(enumerator, info);
                             snapshot.entries.append(entry(child, info));
                             g_object_unref(child);

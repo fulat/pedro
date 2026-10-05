@@ -62,6 +62,10 @@ Item {
         menu.folderName = entry.name || "";
         menu.fileMode = !folder;
         menu.imageFile = entry.icon === "image";
+        if (entry.inTrash) {
+            menu.canRestore = !!entry.canRestore;
+            menu.canRemove = !!entry.canRemove;
+        }
         menu.popup(menuPoint.x, menuPoint.y);
     }
 
@@ -128,7 +132,7 @@ Item {
     Loader {
         id: menuLoader
         active: false
-        source: "menu.qml"
+        source: entryItem.entry.inTrash ? "trash.qml" : "menu.qml"
         onLoaded: {
             item.objectName = "entryMenu";
             item.parent = entryItem.Window.window.contentItem;

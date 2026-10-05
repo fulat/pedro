@@ -6,12 +6,15 @@ import "palette.js" as Palette
 Item {
     id: toolbar
     readonly property var colors: Palette.colors(Backend.appearanceMode)
+    property var controller
+    readonly property bool trashMode: !!controller && String(controller.directory.location).startsWith("trash:")
+    signal emptyRequested()
     implicitHeight: 55
     RowLayout {
         anchors.fill: parent
         spacing: 7
         Repeater {
-            model: ["all", "folders", "documents", "images"]
+            model: toolbar.trashMode ? [] : ["all", "folders", "documents", "images"]
             delegate: Loader {
                 id: filter
                 required property string modelData
@@ -26,6 +29,31 @@ Item {
                 }
             }
         }
+        Text {
+            visible: toolbar.trashMode
+            text: Backend.trash.busy ? qsTranslate("Pedro", "trash.busy") : toolbar.controller ? String(toolbar.controller.folders.length + toolbar.controller.files.length) + " " + qsTranslate("Pedro", "files.sample.itemsLabel") : ""
+            color: toolbar.colors.ink
+        }
         Item { Layout.fillWidth: true }
+        Loader {
+            visible: toolbar.trashMode
+            source: "button.qml"
+            onLoaded: {
+                item.objectName = "trashRestore";
+                item.text = qsTranslate("Pedro", "trash.restore");
+                item.enabled = Qt.binding(() => toolbar.trashMode && !!toolbar.controller.selectedEntry.canRestore && !Backend.trash.busy);
+                item.clicked.connect(() => toolbar.controller.entryAction("restore", toolbar.controller.selectedEntry));
+            }
+        }
+        Loader {
+            visible: toolbar.trashMode
+            source: "button.qml"
+            onLoaded: {
+                item.objectName = "trashEmpty";
+                item.text = qsTranslate("Pedro", "trash.empty");
+                item.enabled = Qt.binding(() => toolbar.trashMode && toolbar.controller.folders.length + toolbar.controller.files.length > 0 && !Backend.trash.busy);
+                item.clicked.connect(() => toolbar.emptyRequested());
+            }
+        }
     }
 }

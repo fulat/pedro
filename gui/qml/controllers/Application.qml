@@ -103,6 +103,11 @@ QtObject {
         function onFailed(message) { controller.desktopOperationError = message; }
     }
 
+    property Connections trashConnection: Connections {
+        target: Backend.trash
+        function onFailed(message) { controller.desktopOperationError = message; }
+    }
+
     // File preview windows will consume one request per opened file.
     signal filePreviewRequested(var entry, bool skipExisting)
     onFilePreviewRequested: (entry, skipExisting) => previewEntry(entry, skipExisting)
@@ -138,6 +143,8 @@ QtObject {
                     filePreviewRequested(item, entries.length > 1);
                 }
             }
+        } else if (action === "trash") {
+            Backend.trash.move(entries.map(item => item.url));
         } else if (action === "copy" || action === "cut") {
             Backend.clipboard.copy(entries.map(item => item.url), action === "cut");
         } else if (action === "paste") {

@@ -411,5 +411,10 @@
     "preview.edit.discard": "Discard your changes and close?",
     "preview.edit.limit": "The edited text exceeds the preview limit or cannot be encoded.",
     "preview.edit.save": "Save",
-    "preview.edit.unsaved": "Unsaved changes"
+    "preview.edit.unsaved": "Unsaved changes",
+    "trash.busy": "Working…",
+    "trash.confirm": "These files will be permanently deleted. This cannot be undone.",
+    "trash.delete": "Delete permanently",
+    "trash.empty": "Empty Trash",
+    "trash.restore": "Restore"
 }

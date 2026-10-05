@@ -206,6 +206,7 @@ Controls.Menu {
     }
 
     Entry {
+        enabled: !Backend.trash.busy
         text: qsTranslate("Pedro", "folder.menu.trash")
         symbol: "trash"
         shortcutText: "Delete"

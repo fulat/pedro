@@ -1985,5 +1985,30 @@ o elige Abrir para empezar.</translation>
       <extracomment>Stable Pedro key: preview.edit.unsaved</extracomment>
       <translation>Cambios sin guardar</translation>
     </message>
+    <message>
+      <source>trash.busy</source>
+      <extracomment>Stable Pedro key: trash.busy</extracomment>
+      <translation>Trabajando…</translation>
+    </message>
+    <message>
+      <source>trash.confirm</source>
+      <extracomment>Stable Pedro key: trash.confirm</extracomment>
+      <translation>Estos archivos se eliminarán permanentemente. Esta acción no se puede deshacer.</translation>
+    </message>
+    <message>
+      <source>trash.delete</source>
+      <extracomment>Stable Pedro key: trash.delete</extracomment>
+      <translation>Eliminar permanentemente</translation>
+    </message>
+    <message>
+      <source>trash.empty</source>
+      <extracomment>Stable Pedro key: trash.empty</extracomment>
+      <translation>Vaciar Papelera</translation>
+    </message>
+    <message>
+      <source>trash.restore</source>
+      <extracomment>Stable Pedro key: trash.restore</extracomment>
+      <translation>Restaurar</translation>
+    </message>
 </context>
 </TS>

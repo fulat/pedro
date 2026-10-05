@@ -635,6 +635,10 @@ qreal Backend::dockHoverScale() const {
     return dockHoverScale_;
 }
 
+QObject* Backend::trash() {
+    return &trash_;
+}
+
 QObject* Backend::clipboard() {
     return &clipboard_;
 }

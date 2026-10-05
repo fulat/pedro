@@ -158,6 +158,19 @@ Item {
             color: Theme.dockIndicator
         }
 
+        DropArea {
+            anchors.fill: parent
+            enabled: entry.app.trash === true && !Backend.trash.busy
+            keys: ["text/uri-list"]
+            onEntered: drag => { drag.accepted = drag.urls.length > 0; }
+            onDropped: drop => {
+                if (drop.urls.length) {
+                    Backend.trash.move(drop.urls);
+                    drop.accept(Qt.MoveAction);
+                }
+            }
+        }
+
         MouseArea {
             id: entryMouse
 

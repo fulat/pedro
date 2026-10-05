@@ -197,7 +197,8 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 - [x] Título alterna lateral completo/iconos, animación suave; controles de ventana y resize por bordes/esquinas.
 - [ ] Ajustar ancho del lateral arrastrando la división.
 - [ ] Conectar búsqueda local, filtros y edición de marcadores; la presentación existe. El soporte de etiquetas se registra en Extended File Metadata / Tags.
-- [ ] Operaciones de archivos desde Files, incluida restauración/vaciado de Papelera; aplicar los jobs definidos en Storage & Filesystem.
+- [x] Papelera real mediante GIO/GVfs: enviar desde Desktop/Files y arrastrar al dock, restaurar sin sobrescribir y eliminar/vaciar con confirmación.
+- [ ] Completar las demás operaciones de archivos desde Files; aplicar los jobs definidos en Storage & Filesystem.
 - [ ] Integrar los backends GIO/GVfs necesarios en la futura sesión de producción.
 
 Detalle: [Pedro Files](files.md).

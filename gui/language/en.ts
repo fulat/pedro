@@ -1985,5 +1985,30 @@ or choose Open to get started.</translation>
       <extracomment>Stable Pedro key: preview.edit.unsaved</extracomment>
       <translation>Unsaved changes</translation>
     </message>
+    <message>
+      <source>trash.busy</source>
+      <extracomment>Stable Pedro key: trash.busy</extracomment>
+      <translation>Working…</translation>
+    </message>
+    <message>
+      <source>trash.confirm</source>
+      <extracomment>Stable Pedro key: trash.confirm</extracomment>
+      <translation>These files will be permanently deleted. This cannot be undone.</translation>
+    </message>
+    <message>
+      <source>trash.delete</source>
+      <extracomment>Stable Pedro key: trash.delete</extracomment>
+      <translation>Delete permanently</translation>
+    </message>
+    <message>
+      <source>trash.empty</source>
+      <extracomment>Stable Pedro key: trash.empty</extracomment>
+      <translation>Empty Trash</translation>
+    </message>
+    <message>
+      <source>trash.restore</source>
+      <extracomment>Stable Pedro key: trash.restore</extracomment>
+      <translation>Restore</translation>
+    </message>
 </context>
 </TS>

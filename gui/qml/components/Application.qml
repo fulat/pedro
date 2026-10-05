@@ -117,6 +117,13 @@ ApplicationWindow {
         }
     }
 
+    Shortcut {
+        sequence: "Delete"
+        enabled: window.active && window.selectedDesktopIds.length > 0 && !Backend.trash.busy
+            && !(window.activeFocusItem && window.activeFocusItem.readOnly === false)
+        onActivated: window.controller.entryAction("trash", {id: window.selectedDesktopIds[0]})
+    }
+
     function captureWindows() {
         return [filesWindowLoader, networkWindowLoader].concat(folderWindows, previewWindows.map(loader => loader.item))
             .map(loader => loader ? loader.item : null)

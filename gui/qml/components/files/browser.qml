@@ -17,9 +17,12 @@ Rectangle {
     DropArea {
         anchors.fill: parent
         keys: ["text/uri-list"]
-        onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, directory.location); }
+        onEntered: drag => { drag.accepted = String(directory.location).startsWith("trash:") ? drag.urls.length > 0 && !Backend.trash.busy : Backend.fileTransfer.canMove(drag.urls, directory.location); }
         onDropped: drop => {
-            if (Backend.fileTransfer.canMove(drop.urls, directory.location)) {
+            if (String(directory.location).startsWith("trash:") && drop.urls.length && !Backend.trash.busy) {
+                Backend.trash.move(drop.urls);
+                drop.accept(Qt.MoveAction);
+            } else if (Backend.fileTransfer.canMove(drop.urls, directory.location)) {
                 Backend.fileTransfer.move(drop.urls, directory.location);
                 drop.accept(Qt.MoveAction);
             }
@@ -29,9 +32,40 @@ Rectangle {
     Shortcut {
         sequence: "Space"
         enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
-            && !browser.controller.selectedEntry.isDirectory
+            && !browser.controller.selectedEntry.isDirectory && !browser.controller.selectedEntry.inTrash
             && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.readOnly === false)
         onActivated: browser.controller.previewEntry(browser.controller.selectedEntry)
+    }
+
+    Shortcut {
+        sequence: "Delete"
+        enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
+            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.readOnly === false)
+        onActivated: browser.controller.entryAction(browser.controller.selectedEntry.inTrash ? "remove" : "trash", browser.controller.selectedEntry)
+    }
+
+    Connections {
+        target: browser.controller
+        function onRemovalRequested(urls) { confirmation.urls = urls; confirmation.open(); }
+    }
+
+    Dialog {
+        id: confirmation
+        objectName: "trashConfirmation"
+        property var urls: []
+        parent: browser.Window.window.contentItem
+        anchors.centerIn: parent
+        width: Math.min(400, parent.width - 32)
+        modal: true
+        title: qsTranslate("Pedro", urls.length ? "trash.delete" : "trash.empty")
+        standardButtons: Dialog.Cancel | Dialog.Ok
+        background: Rectangle { color: browser.colors.surface; radius: 12; border.color: browser.colors.line }
+        header: Label { text: confirmation.title; color: browser.colors.ink; padding: 16 }
+        contentItem: Label { text: qsTranslate("Pedro", "trash.confirm"); color: browser.colors.ink; wrapMode: Text.WordWrap }
+        onAccepted: {
+            if (urls.length) Backend.trash.remove(urls);
+            else Backend.trash.empty();
+        }
     }
 
     Directory { id: directory; objectName: "filesDirectory" }
@@ -53,6 +87,7 @@ Rectangle {
             item.parent = browser.Window.window.contentItem;
             item.backdrop = Qt.binding(() => browser.Window.window.entryBackdrop);
             item.informationRequested.connect(() => information.open());
+            item.emptyRequested.connect(() => { confirmation.urls = []; confirmation.open(); });
         }
     }
     Dialog {
@@ -147,11 +182,19 @@ Rectangle {
             Layout.leftMargin: 17
             Layout.rightMargin: 16
             spacing: 8
-            Loader { Layout.fillWidth: true; Layout.preferredHeight: 55; source: "toolbar.qml" }
-            Text {
-                visible: directory.error.length > 0
+            Loader {
                 Layout.fillWidth: true
-                text: directory.error
+                Layout.preferredHeight: 55
+                source: "toolbar.qml"
+                onLoaded: {
+                    item.controller = Qt.binding(() => browser.controller);
+                    item.emptyRequested.connect(() => { confirmation.urls = []; confirmation.open(); });
+                }
+            }
+            Text {
+                visible: directory.error.length > 0 || Backend.trash.error.length > 0
+                Layout.fillWidth: true
+                text: directory.error || Backend.trash.error
                 color: browser.colors.muted
                 wrapMode: Text.WordWrap
             }
