@@ -19,7 +19,7 @@ Item {
     property string label: entry.name || ""
     property int nameAlignment: Text.AlignHCenter
     property int nameSize: 13
-    property int nameWeight: Font.Medium
+    property int nameWeight: Font.Medium + 50
     property bool renaming: false
     property url renameSource
     readonly property var nameEditor: nameLoader.item ? nameLoader.item.editor : null

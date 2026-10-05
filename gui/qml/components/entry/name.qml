@@ -6,7 +6,7 @@ import "../../scripts/theme.js" as Theme
 
 Item {
     id: name
-    property var behavior: ({renaming: false, label: "", textColor: "white", cutPending: false, nameSize: 13, nameWeight: Font.Medium, nameAlignment: Text.AlignHCenter})
+    property var behavior: ({renaming: false, label: "", textColor: "white", cutPending: false, nameSize: 13, nameWeight: Font.Medium + 50, nameAlignment: Text.AlignHCenter})
     readonly property var editor: input
     property string appearanceMode: Backend.appearanceMode
     readonly property bool light: appearanceMode === "light"

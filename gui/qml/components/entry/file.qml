@@ -12,7 +12,7 @@ Loader {
     property string label: entry.name || ""
     property int nameAlignment: Text.AlignHCenter
     property int nameSize: 13
-    property int nameWeight: Font.Medium
+    property int nameWeight: Font.Medium + 50
     readonly property bool renaming: !!item && item.renaming
     readonly property var nameEditor: item ? item.nameEditor : null
     property bool inputEnabled: true
