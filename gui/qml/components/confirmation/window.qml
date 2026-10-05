@@ -29,9 +29,9 @@ Window {
     transientParent: null
     modality: blocking ? Qt.ApplicationModal : Qt.NonModal
     visible: false
-    readonly property real preferredWidth: Math.min(420, Screen.desktopAvailableWidth || 420)
+    readonly property real preferredWidth: Math.min(400, Screen.desktopAvailableWidth || 400)
     width: preferredWidth
-    height: Math.min(body.implicitHeight + 74, Screen.desktopAvailableHeight || 600)
+    height: Math.min(body.implicitHeight + 70, Screen.desktopAvailableHeight || 600)
     minimumWidth: preferredWidth
     maximumWidth: preferredWidth
     minimumHeight: Math.min(164, Screen.desktopAvailableHeight || 600)
@@ -110,12 +110,12 @@ Window {
         anchors.fill: parent
         backdrop: wallpaper
         frosted: true
-        cornerRadius: 14
+        cornerRadius: 16
     }
     Rectangle {
         anchors.fill: parent
-        radius: 14
-        color: Backend.appearanceMode === "light" ? "#a6eef3fa" : "#98202938"
+        radius: 16
+        color: Backend.appearanceMode === "light" ? Theme.menuGlassLightHaze : Theme.menuGlassHaze
         border.color: Theme.liquidEdge
     }
     Connections {
@@ -129,7 +129,7 @@ Window {
     }
     Item {
         width: parent.width
-        height: 34
+        height: 44
         DragHandler {
             objectName: "confirmationDrag"
             target: null
@@ -168,8 +168,8 @@ Window {
             anchors.right: parent.right
             anchors.rightMargin: 42
             anchors.verticalCenter: parent.verticalCenter
-            text: qsTranslate("Pedro", "shell.productName")
-            horizontalAlignment: Text.AlignHCenter
+            text: confirmation.title
+            horizontalAlignment: Text.AlignLeft
             color: Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff"
             font.pixelSize: 13
             font.weight: Font.Medium
@@ -177,28 +177,25 @@ Window {
             textFormat: Text.PlainText
         }
     }
+    Rectangle {
+        x: 16
+        y: 44
+        width: parent.width - 32
+        height: 1
+        color: Theme.dividerSoft
+    }
     ColumnLayout {
         id: body
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.leftMargin: 24
-        anchors.rightMargin: 24
-        anchors.topMargin: 52
+        anchors.leftMargin: 20
+        anchors.rightMargin: 20
+        anchors.topMargin: 58
         spacing: 12
         Text {
             Layout.fillWidth: true
-            text: confirmation.title
-            color: Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff"
-            font.pixelSize: 16
-            font.weight: Font.DemiBold
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
-            textFormat: Text.PlainText
-        }
-        Text {
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: Text.AlignLeft
             text: confirmation.message
             color: Backend.appearanceMode === "light" ? "#263b63" : "#dce6f6"
             font.pixelSize: 13
@@ -215,9 +212,15 @@ Window {
             wrapMode: Text.WrapAnywhere
             textFormat: Text.PlainText
         }
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.topMargin: 2
+            implicitHeight: 1
+            color: Theme.dividerSoft
+        }
         RowLayout {
             Layout.fillWidth: true
-            Layout.topMargin: 7
+            Layout.topMargin: 1
             spacing: 10
             Item { Layout.fillWidth: true }
             Action {
@@ -241,7 +244,7 @@ Window {
         id: button
         property bool primary: false
         implicitWidth: Math.max(104, contentItem.implicitWidth + 30)
-        implicitHeight: 32
+        implicitHeight: 34
         hoverEnabled: true
         contentItem: Text {
             text: button.text
@@ -252,11 +255,16 @@ Window {
             font.weight: Font.Medium
         }
         background: Rectangle {
-            radius: 8
-            color: button.primary ? "#0877ff" : button.hovered ? "#35ffffff" : "#20ffffff"
-            border.color: button.activeFocus ? "#99ffffff" : button.primary ? "transparent" : Theme.liquidEdge
+            radius: 17
+            color: button.primary ? Theme.switchActive : Theme.cardSurface
+            border.color: button.activeFocus ? Theme.switchActiveBorder : button.primary ? Theme.switchActiveBorder : Theme.buttonBorder
             opacity: button.enabled ? 1 : 0.45
-            Behavior on color { ColorAnimation { duration: 120 } }
+            Rectangle {
+                anchors.fill: parent
+                radius: parent.radius
+                color: button.down ? Theme.overlayPressed : button.hovered ? Theme.overlayHover : "transparent"
+                Behavior on color { ColorAnimation { duration: 120 } }
+            }
         }
         HoverHandler { cursorShape: Qt.PointingHandCursor }
     }
