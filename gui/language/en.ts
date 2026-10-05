@@ -2020,5 +2020,10 @@ or choose Open to get started.</translation>
       <extracomment>Stable Pedro key: trash.deleted</extracomment>
       <translation>Deleted</translation>
     </message>
+    <message>
+      <source>common.ok</source>
+      <extracomment>Stable Pedro key: common.ok</extracomment>
+      <translation>OK</translation>
+    </message>
 </context>
 </TS>

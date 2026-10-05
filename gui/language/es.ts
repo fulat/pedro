@@ -2020,5 +2020,10 @@ o elige Abrir para empezar.</translation>
       <extracomment>Stable Pedro key: trash.deleted</extracomment>
       <translation>Eliminado</translation>
     </message>
+    <message>
+      <source>common.ok</source>
+      <extracomment>Stable Pedro key: common.ok</extracomment>
+      <translation>Aceptar</translation>
+    </message>
 </context>
 </TS>

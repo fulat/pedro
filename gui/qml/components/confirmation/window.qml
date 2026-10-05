@@ -13,8 +13,11 @@ Window {
     property Window ownerWindow: null
     property string message
     property string detail
-    property string confirmText: title
+    property string confirmText: qsTranslate("Pedro", "common.ok")
+    property bool showCancel: true
     property string cancelText: qsTranslate("Pedro", "common.cancel")
+    property bool blocking: true
+    property bool keepOnTop: true
     property bool actionEnabled: true
     property bool resolved: true
     signal accepted()
@@ -22,11 +25,11 @@ Window {
 
     objectName: "pedroConfirmation"
     color: "transparent"
-    flags: Qt.Window | Qt.FramelessWindowHint | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint
+    flags: Qt.Window | Qt.FramelessWindowHint | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint | (keepOnTop ? Qt.WindowStaysOnTopHint : 0)
     transientParent: null
-    modality: Qt.NonModal
+    modality: blocking ? Qt.ApplicationModal : Qt.NonModal
     visible: false
-    readonly property real preferredWidth: Math.min(400, Screen.desktopAvailableWidth || 400)
+    readonly property real preferredWidth: Math.min(420, Screen.desktopAvailableWidth || 420)
     width: preferredWidth
     height: Math.min(body.implicitHeight + 74, Screen.desktopAvailableHeight || 600)
     minimumWidth: preferredWidth
@@ -45,9 +48,16 @@ Window {
             y = Math.max(Screen.virtualY, Math.min(y, Screen.virtualY + Screen.desktopAvailableHeight - height));
             show();
         }
-        cancelButton.forceActiveFocus();
+        if (showCancel) cancelButton.forceActiveFocus();
+        else acceptButton.forceActiveFocus();
+        activateAlert();
+    }
+
+    function activateAlert() {
+        if (!visible || resolved) return;
         raise();
         requestActivate();
+        if (typeof Backend.activateWindow === "function") Backend.activateWindow(confirmation);
     }
 
     function accept() {
@@ -81,6 +91,13 @@ Window {
         }
     }
 
+    Connections {
+        target: Qt.application
+        function onStateChanged() {
+            if (Qt.application.state === Qt.ApplicationActive && confirmation.visible && confirmation.blocking) confirmation.activateAlert();
+        }
+    }
+
     Image {
         id: wallpaper
         anchors.fill: parent
@@ -98,11 +115,14 @@ Window {
     Rectangle {
         anchors.fill: parent
         radius: 14
-        color: Backend.appearanceMode === "light" ? "#52eff4fc" : "#45101825"
+        color: Backend.appearanceMode === "light" ? "#a6eef3fa" : "#98202938"
         border.color: Theme.liquidEdge
     }
     Connections {
         target: confirmation.ownerWindow
+        function onActiveChanged() {
+            if (confirmation.ownerWindow.active && confirmation.blocking && confirmation.visible) confirmation.activateAlert();
+        }
         function onVisibleChanged() {
             if (!confirmation.ownerWindow.visible) confirmation.reject();
         }
@@ -146,9 +166,10 @@ Window {
             anchors.left: parent.left
             anchors.leftMargin: 42
             anchors.right: parent.right
-            anchors.rightMargin: 16
+            anchors.rightMargin: 42
             anchors.verticalCenter: parent.verticalCenter
-            text: confirmation.title
+            text: qsTranslate("Pedro", "shell.productName")
+            horizontalAlignment: Text.AlignHCenter
             color: Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff"
             font.pixelSize: 13
             font.weight: Font.Medium
@@ -161,12 +182,23 @@ Window {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.leftMargin: 20
-        anchors.rightMargin: 20
+        anchors.leftMargin: 24
+        anchors.rightMargin: 24
         anchors.topMargin: 52
-        spacing: 14
+        spacing: 12
         Text {
             Layout.fillWidth: true
+            text: confirmation.title
+            color: Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff"
+            font.pixelSize: 16
+            font.weight: Font.DemiBold
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+            textFormat: Text.PlainText
+        }
+        Text {
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             text: confirmation.message
             color: Backend.appearanceMode === "light" ? "#263b63" : "#dce6f6"
             font.pixelSize: 13
@@ -191,6 +223,7 @@ Window {
             Action {
                 id: cancelButton
                 objectName: "confirmationCancel"
+                visible: confirmation.showCancel
                 text: confirmation.cancelText
                 onClicked: confirmation.reject()
             }

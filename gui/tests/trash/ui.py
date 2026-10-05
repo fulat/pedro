@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Load the real Files/Trash UI offscreen; never accept a deletion dialog."""
 import os
+import json
 from pathlib import Path
 import subprocess
 
@@ -70,12 +71,15 @@ actions = '''
             } else if (step === 2) {
                 const owner = main.controller.filesQuickWindow;
                 const confirmation = owner.contentItem.confirmationWindow;
-                if (!confirmation.visible || confirmation.ownerWindow !== owner || confirmation.transientParent !== null || confirmation.modality !== Qt.NonModal || (confirmation.flags & Qt.Dialog) === Qt.Dialog) {
+                if (!confirmation.visible || confirmation.ownerWindow !== owner || confirmation.transientParent !== null || confirmation.modality !== Qt.ApplicationModal || (confirmation.flags & Qt.WindowStaysOnTopHint) === 0 || (confirmation.flags & Qt.Dialog) === Qt.Dialog) {
                     console.error("TRASH UI FAILED: independent confirmation window");
                     Qt.exit(1);
                     return;
                 }
-                confirmation.reject();
+                confirmation.contentItem.grabToImage(result => result.saveToFile(ALERT_IMAGE));
+            } else if (step === 3) {
+                const owner = main.controller.filesQuickWindow;
+                owner.contentItem.confirmationWindow.reject();
                 const component = Qt.createComponent("qml/components/confirmation/window.qml");
                 probe = component.createObject(main, {ownerWindow: owner, title: "Pedro test", message: "Reusable confirmation", confirmText: "Confirm"});
                 if (!probe) {
@@ -86,7 +90,8 @@ actions = '''
                 probe.accepted.connect(() => ++acceptedCount);
                 probe.rejected.connect(() => ++rejectedCount);
                 probe.open();
-            } else if (step === 3) {
+                owner.requestActivate();
+            } else if (step === 4) {
                 const cancel = main.findTrashControl(probe.contentItem, "confirmationCancel");
                 if (!cancel || !cancel.activeFocus) {
                     console.error("TRASH UI FAILED: safe default focus");
@@ -124,6 +129,23 @@ actions = '''
                     Qt.exit(1);
                     return;
                 }
+                probe.showCancel = false;
+                probe.confirmText = "OK";
+                probe.open();
+            } else if (step === 5) {
+                const accept = main.findTrashControl(probe.contentItem, "confirmationAccept");
+                const cancel = main.findTrashControl(probe.contentItem, "confirmationCancel");
+                if (!accept.activeFocus || cancel.visible) {
+                    console.error("TRASH UI FAILED: acknowledgement alert");
+                    Qt.exit(1);
+                    return;
+                }
+                probe.accept();
+                if (acceptedCount !== 2 || rejectedCount !== 1) {
+                    console.error("TRASH UI FAILED: acknowledgement result");
+                    Qt.exit(1);
+                    return;
+                }
                 probe.destroy();
             } else {
                 console.log("TRASH UI PASSED: listing, toolbar and deletion confirmation loaded");
@@ -133,6 +155,7 @@ actions = '''
         }
     }
 '''
+actions = actions.replace('ALERT_IMAGE', json.dumps(str(target / 'alert.png')))
 position = source.rfind('}')
 (target / 'Main.qml').write_text(source[:position] + actions + source[position:])
 environment = dict(os.environ, PEDRO_DEVELOPMENT_MODE='1', PEDRO_QML_DIR=str(target),

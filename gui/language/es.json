@@ -418,5 +418,6 @@
     "trash.empty": "Vaciar Papelera",
     "trash.restore": "Restaurar",
     "trash.move": "Mover a…",
-    "trash.deleted": "Eliminado"
+    "trash.deleted": "Eliminado",
+    "common.ok": "Aceptar"
 }

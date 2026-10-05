@@ -418,5 +418,6 @@
     "trash.empty": "Empty Trash",
     "trash.restore": "Restore",
     "trash.move": "Move to…",
-    "trash.deleted": "Deleted"
+    "trash.deleted": "Deleted",
+    "common.ok": "OK"
 }
