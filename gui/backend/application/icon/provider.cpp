@@ -4,14 +4,32 @@
 #include <QFileInfo>
 #include <QIcon>
 #include <QPixmap>
+#include <QPainter>
+#include <QSvgRenderer>
 #include <QStandardPaths>
 #include <QUrl>
 
 namespace Pedro::Gui::Backend::Application::Icon {
     namespace {
 
+        QImage renderFile(const QString& path, const QSize& target) {
+
+            if (path.endsWith(QStringLiteral(".svg"), Qt::CaseInsensitive)) {
+                QSvgRenderer renderer(path);
+                if (!renderer.isValid()) {
+                    return {};
+                }
+                QImage image(target, QImage::Format_ARGB32_Premultiplied);
+                image.fill(Qt::transparent);
+                QPainter painter(&image);
+                renderer.render(&painter);
+                return image;
+            }
+            return QIcon(path).pixmap(target).toImage();
+        }
+
         // Resolves application icons when no desktop platform theme is active.
-        QIcon installedIcon(const QString& name) {
+        QString installedPath(const QString& name) {
 
             const auto dataDirectories = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
             const QStringList extensions = {QStringLiteral("png"), QStringLiteral("svg"), QStringLiteral("xpm")};
@@ -21,14 +39,14 @@ namespace Pedro::Gui::Backend::Application::Icon {
                     const auto path = QStringLiteral("%1/pixmaps/%2.%3").arg(directory, name, extension);
 
                     if (QFileInfo::exists(path)) {
-                        return QIcon(path);
+                        return path;
                     }
                 }
 
                 QDirIterator themed(QStringLiteral("%1/icons/hicolor").arg(directory), {QStringLiteral("%1.png").arg(name), QStringLiteral("%1.svg").arg(name), QStringLiteral("%1.xpm").arg(name)}, QDir::Files, QDirIterator::Subdirectories);
 
                 if (themed.hasNext()) {
-                    return QIcon(themed.next());
+                    return themed.next();
                 }
             }
 
@@ -44,17 +62,19 @@ namespace Pedro::Gui::Backend::Application::Icon {
 
         const auto name = QUrl::fromPercentEncoding(id.toUtf8());
         const auto target = (requestedSize.isValid() ? requestedSize : QSize(64, 64)).boundedTo(QSize(1024, 1024)).expandedTo(QSize(1, 1));
-        auto icon = QFileInfo::exists(name) ? QIcon(name) : QIcon::fromTheme(name);
+        auto image = QFileInfo::exists(name) ? renderFile(name, target) : QIcon::fromTheme(name).pixmap(target).toImage();
 
-        if (icon.isNull()) {
-            icon = installedIcon(name);
+        // Some inherited icon engines advertise an icon but return a null
+        // pixmap. Native Qt SVG rendering can still load the installed file.
+        if (image.isNull()) {
+            image = renderFile(installedPath(name), target);
         }
-
-        if (icon.isNull()) {
-            return {};
+        if (image.isNull()) {
+            image = QIcon::fromTheme(QStringLiteral("application-x-executable")).pixmap(target).toImage();
         }
-
-        const auto image = icon.pixmap(target).toImage();
+        if (image.isNull()) {
+            image = renderFile(QStringLiteral(":/qt/qml/gui/assets/icons/window.svg"), target);
+        }
 
         if (size) {
             *size = image.size();

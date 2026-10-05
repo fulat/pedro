@@ -241,7 +241,7 @@ environment = dict(os.environ, PEDRO_DEVELOPMENT_MODE='1', PEDRO_QML_DIR=str(tar
 result = subprocess.run([str(root / 'build/dev/gui/pedro-gui')], env=environment,
                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=35)
 (target / 'check.log').write_text(result.stdout)
-if result.returncode or 'CLIPBOARD UI PASSED' not in result.stdout or any(error in result.stdout for error in ('ReferenceError', 'TypeError', 'CLIPBOARD UI FAILED')):
+if result.returncode or 'CLIPBOARD UI PASSED' not in result.stdout or any(error in result.stdout for error in ('ReferenceError', 'TypeError', 'Binding loop detected', 'Failed to get image from provider', 'CLIPBOARD UI FAILED')):
     raise SystemExit(result.stdout)
 assert (fixtures / 'source' / 'shared (2).txt').read_text() == 'shared clipboard fixture\n'
 assert (fixtures / 'destination' / 'renamed fixture.txt').read_text() == 'shared clipboard fixture\n'

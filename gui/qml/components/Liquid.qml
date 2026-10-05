@@ -18,7 +18,7 @@ Item {
     property real blurAmount: frosted ? 1.0 : Theme.menuBlur
     property point backdropOrigin: Qt.point(0, 0)
 
-    readonly property bool separateWindow: backdrop !== null && backdrop.Window.window !== liquid.Window.window
+    property bool separateWindow: backdrop !== null && backdrop.Window.window !== liquid.Window.window
     readonly property Item sampledBackdrop: separateWindow ? popupWallpaper : backdrop
 
     // A texture source must live in the same window as its shader.

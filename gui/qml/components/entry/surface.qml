@@ -5,6 +5,8 @@ Components.Liquid {
     id: surface
 
     property Item sourceBackdrop
+    // This wallpaper is owned by the surface and always shares its window.
+    separateWindow: false
     backdrop: wallpaper
 
     Image {
