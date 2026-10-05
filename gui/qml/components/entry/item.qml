@@ -4,6 +4,7 @@ import QtQuick.Window
 import "../desktop" as Desktop
 import "../icon" as Icon
 import "../../scripts/theme.js" as Theme
+import "../../controllers/entry/registry.js" as Registry
 
 Item {
     id: entryItem
@@ -14,6 +15,17 @@ Item {
     readonly property bool cutPending: Backend.clipboard.cutFiles.length > 0 && Backend.clipboard.isCut(entry.url || "")
     property bool folder: false
     property bool showName: true
+    property Item nameSurface: null
+    property string label: entry.name || ""
+    property int nameAlignment: Text.AlignHCenter
+    property int nameSize: 12
+    property bool nameBold: false
+    property bool renaming: false
+    property url renameSource
+    readonly property var nameEditor: nameLoader.item ? nameLoader.item.editor : null
+    readonly property var registeredWindow: Window.window
+    Component.onCompleted: Registry.register(entryItem)
+    Component.onDestruction: Registry.unregister(entryItem)
     property bool inputEnabled: true
     property Item inputSurface: entryItem
     property bool activateOnClick: false
@@ -34,6 +46,7 @@ Item {
             item.entry = Qt.binding(() => Object.assign({}, entryItem.entry, {isDirectory: entryItem.folder}));
             item.owner = Qt.binding(() => entryItem.controller);
             item.window = Qt.binding(() => entryItem.Window.window);
+            item.component = entryItem;
             item.requested.connect((action, entry) => entryItem.navigationRequested(action, entry));
         }
     }
@@ -60,6 +73,52 @@ Item {
 
     function dropFiles(urls) {
         return interaction.item && interaction.item.drop(urls);
+    }
+
+    function beginRename() {
+        if (entry.inTrash || Backend.fileTransfer.busy || !nameEditor) return;
+        renameSource = entry.url;
+        renaming = true;
+        nameEditor.text = entry.editName || entry.name || "";
+        Qt.callLater(() => {
+            if (!renaming) return;
+            nameEditor.forceActiveFocus();
+            const dot = nameEditor.text.lastIndexOf(".");
+            nameEditor.select(0, !folder && dot > 0 ? dot : nameEditor.text.length);
+        });
+    }
+
+    function cancelRename() {
+        renaming = false;
+    }
+
+    function finishRename(keepInvalid = true) {
+        if (!renaming) return;
+        const text = nameEditor.text;
+        if (!Backend.fileTransfer.validName(text) || Backend.fileTransfer.busy) {
+            if (keepInvalid) nameEditor.forceActiveFocus();
+            else cancelRename();
+            return;
+        }
+        renaming = false;
+        if (text !== (entry.editName || entry.name)) Backend.fileTransfer.rename(renameSource, text);
+    }
+
+    Connections {
+        target: entryItem.registeredWindow
+        function onActiveChanged() {
+            if (!entryItem.registeredWindow.active && entryItem.renaming) entryItem.finishRename(false);
+        }
+    }
+
+    TapHandler {
+        parent: entryItem.registeredWindow ? entryItem.registeredWindow.contentItem : entryItem
+        enabled: entryItem.renaming
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onTapped: point => {
+            const local = parent.mapToItem(entryItem.nameEditor, point.position.x, point.position.y);
+            if (!entryItem.nameEditor.contains(local)) entryItem.finishRename(false);
+        }
     }
 
     function openMenu(x, y) {
@@ -143,21 +202,21 @@ Item {
         tint: "#b8bec7"
         opacity: 0.85
     }
-    Text {
-        opacity: entryItem.cutPending ? Theme.cutOpacity : 1
-        visible: entryItem.showName
-        y: entryItem.iconSize + 13
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 6
-        text: entryItem.entry.name || ""
-        color: entryItem.textColor
-        // A one-pixel shadow keeps names legible over light wallpapers.
-        style: Text.Raised
-        styleColor: "#70000000"
-        horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: 12
-        elide: Text.ElideMiddle
+    Item {
+        id: defaultNameSurface
+        y: entryItem.iconSize + 10
+        width: entryItem.width
+        height: 28
+        z: 5
+        visible: entryItem.showName || entryItem.renaming
+    }
+    Loader {
+        id: nameLoader
+        parent: entryItem.nameSurface || defaultNameSurface
+        anchors.fill: parent
+        z: 5
+        source: "name.qml"
+        onLoaded: item.behavior = entryItem
     }
     MouseArea {
         parent: entryItem.inputSurface

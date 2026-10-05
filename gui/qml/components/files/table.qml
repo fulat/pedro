@@ -3,7 +3,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import "palette.js" as Palette
-import "../../scripts/theme.js" as Theme
 
 Item {
     id: table
@@ -56,9 +55,11 @@ Item {
             border.color: "transparent"
             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
             Row {
+                z: 1
                 anchors.fill: parent
                 Item {
                     width: table.width * 0.28; height: parent.height
+                    Item { id: nameSlot; x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; height: 28; z: 5 }
                     Loader {
                         id: entryIcon
                         x: 12
@@ -69,12 +70,15 @@ Item {
                         onLoaded: {
                             item.entry = Qt.binding(() => row.modelData);
                             item.showName = false;
+                            item.nameSurface = Qt.binding(() => nameSlot);
+                            item.nameAlignment = Text.AlignLeft;
+                            item.nameBold = true;
+                            item.textColor = Qt.binding(() => table.colors.ink);
                             item.inputSurface = row;
                             item.iconSize = 34;
                             item.controller = Qt.binding(() => table.controller);
                         }
                     }
-                    Text { opacity: entryIcon.item && entryIcon.item.cutPending ? Theme.cutOpacity : 1; x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; elide: Text.ElideMiddle; text: row.modelData.name; color: table.colors.ink; font.pixelSize: 12; font.bold: true }
                 }
                 Text { width: table.width * 0.18; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.type; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
                 Text { width: table.width * 0.115; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.sizeText; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }

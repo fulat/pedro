@@ -1,11 +1,12 @@
 import QtQuick
+import "registry.js" as Registry
 
 // File behavior is independent of its presentation. Hosts supply selection and navigation.
 QtObject {
     property var entry: ({})
     property var owner: null
     property var window: null
-    property var renameDialog: null
+    property var component: null
     signal requested(string action, var entry)
 
     function entries(value = entry) {
@@ -43,15 +44,8 @@ QtObject {
         } else if (action === "duplicate" && !value.inTrash) {
             if (selection.length === 1) Backend.fileTransfer.duplicate(value.url);
         } else if (action === "rename" && !value.inTrash && selection.length === 1) {
-            if (Backend.fileTransfer.busy) return;
-            if (renameDialog && renameDialog.visible) { renameDialog.activateAlert(); return; }
-            const component = Qt.createComponent("../../components/entry/rename.qml");
-            const dialog = component.createObject(window || owner, {entry: value, ownerWindow: window});
-            if (dialog) {
-                renameDialog = dialog;
-                dialog.visibleChanged.connect(() => { if (!dialog.visible) renameDialog = null; });
-                dialog.open();
-            }
+            const target = component && String(component.entry.url) === String(value.url) ? component : Registry.find(window, value.url);
+            if (target) target.beginRename();
         } else if (action === "paste") {
             Backend.clipboard.paste(value.isDirectory ? value.url : owner && owner.directory ? (owner.directory.location || owner.directory.directory) : "");
         } else if (action === "trash") {

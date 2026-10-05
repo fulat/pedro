@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import "entry/registry.js" as Registry
 import gui
 import "../scripts/constants.js" as Constants
 import "../scripts/desktop/collision.js" as Collision
@@ -24,7 +25,6 @@ QtObject {
     property date currentTime: new Date()
     property var selectedDesktopIds: []
     property string renamingDesktopId: ""
-    property bool renamingDesktopBusy: false
     property string desktopOperationError: ""
     property var expandedDesktopStacks: []
     property var desktopDragItems: []
@@ -315,7 +315,6 @@ QtObject {
     }
 
     function startDesktopRename(id) {
-        renamingDesktopBusy = false;
         renamingDesktopId = id;
         selectOnlyDesktopShortcut(id);
         for (const group of Backend.desktopModel.groups) {
@@ -328,16 +327,8 @@ QtObject {
         }
     }
 
-    function commitDesktopRename(entry, name) {
-        if (renamingDesktopBusy || renamingDesktopId !== entry.id) {
-            return;
-        }
-        if (name === entry.name) {
-            renamingDesktopId = "";
-            return;
-        }
-        renamingDesktopBusy = true;
-        Backend.desktopModel.renameEntry(entry.id, name);
+    function isRenamingFile() {
+        return Registry.isRenaming(window);
     }
 
     function arrangeDesktop() {
@@ -669,7 +660,7 @@ QtObject {
 
     // Captures the selected shortcuts before a grouped desktop drag.
     function beginDesktopDrag(shortcut, localX, localY) {
-        if (renamingDesktopId.length > 0) {
+        if (renamingDesktopId.length > 0 || isRenamingFile()) {
             return;
         }
         window.retainFileWindow();

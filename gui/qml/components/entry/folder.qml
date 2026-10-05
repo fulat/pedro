@@ -8,6 +8,13 @@ Loader {
     property var entry: ({})
     readonly property bool cutPending: !!item && item.cutPending
     property bool showName: true
+    property Item nameSurface: null
+    property string label: entry.name || ""
+    property int nameAlignment: Text.AlignHCenter
+    property int nameSize: 12
+    property bool nameBold: false
+    readonly property bool renaming: !!item && item.renaming
+    readonly property var nameEditor: item ? item.nameEditor : null
     property bool inputEnabled: true
     property Item inputSurface: null
     property bool activateOnClick: false
@@ -18,6 +25,7 @@ Loader {
     signal contextRequested()
     signal navigationRequested(string action, var entry)
     source: "item.qml"
+    function beginRename() { if (item) item.beginRename(); }
     function closeMenu() { if (item && item.menu) item.menu.close(); }
     function select() { if (item) item.select(); }
     function activate() { if (item) item.activate(); }
@@ -31,6 +39,11 @@ Loader {
         item.controller = Qt.binding(() => root.controller);
         item.entry = Qt.binding(() => root.entry);
         item.showName = Qt.binding(() => root.showName);
+        item.nameSurface = Qt.binding(() => root.nameSurface);
+        item.label = Qt.binding(() => root.label);
+        item.nameAlignment = Qt.binding(() => root.nameAlignment);
+        item.nameSize = Qt.binding(() => root.nameSize);
+        item.nameBold = Qt.binding(() => root.nameBold);
         item.inputEnabled = Qt.binding(() => root.inputEnabled);
         item.inputSurface = Qt.binding(() => root.inputSurface || item);
         item.activateOnClick = Qt.binding(() => root.activateOnClick);

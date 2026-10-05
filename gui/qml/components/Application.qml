@@ -229,7 +229,7 @@ ApplicationWindow {
         const retainedWindow = activeFilesWindow;
         Qt.callLater(() => {
             if (generation === desktopFocusGeneration && retainedWindow === activeFilesWindow
-                    && !applicationController.renamingDesktopId.length) {
+                    && !applicationController.renamingDesktopId.length && !applicationController.isRenamingFile()) {
                 keepFileWindowActive();
             }
         });

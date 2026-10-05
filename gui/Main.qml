@@ -203,11 +203,9 @@ Components.Application {
         function onEntryRenamed(id) {
             main.controller.desktopOperationError = "";
             main.controller.renamingDesktopId = "";
-            main.controller.renamingDesktopBusy = false;
             main.controller.selectOnlyDesktopShortcut(id);
         }
         function onOperationFailed(message) {
-            main.controller.renamingDesktopBusy = false;
             main.controller.desktopOperationError = message;
         }
         function onSortRestored() { Qt.callLater(main.controller.arrangeDesktop); }

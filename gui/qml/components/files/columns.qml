@@ -4,7 +4,6 @@ import QtQuick.Window
 import QtQuick.Controls.Basic
 import Pedro.Files 1.0
 import "palette.js" as Palette
-import "../../scripts/theme.js" as Theme
 
 ScrollView {
     id: columns
@@ -115,6 +114,7 @@ ScrollView {
                         radius: 7
                         color: columns.controller && columns.controller.selectedEntry.id === entry.id ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
                         HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
+                        Item { id: nameSlot; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; height: 28; z: 5 }
                         Loader {
                             id: entryIcon
                             x: 8
@@ -125,13 +125,15 @@ ScrollView {
                             onLoaded: {
                                 item.entry = Qt.binding(() => row.entry);
                                 item.showName = false;
+                                item.nameSurface = Qt.binding(() => nameSlot);
+                                item.nameAlignment = Text.AlignLeft;
+                                item.textColor = Qt.binding(() => columns.colors.ink);
                                 item.inputSurface = row;
                                 item.activateOnClick = true;
                                 item.iconSize = 28;
                                 item.controller = column;
                             }
                         }
-                        Text { opacity: entryIcon.item && entryIcon.item.cutPending ? Theme.cutOpacity : 1; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; text: row.entry.name; color: columns.colors.ink; font.pixelSize: 12; elide: Text.ElideMiddle }
                         Text { visible: row.entry.isDirectory; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: columns.colors.muted }
                     }
                 }

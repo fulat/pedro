@@ -32,7 +32,7 @@ actions = '''
         function dismissError() { error = ""; changed(); }
     }
     function clipboardControl(item, name) {
-        if (item.objectName === name) return item;
+        if (item.objectName === name && (!name.startsWith("entryComponent-") || item.visible)) return item;
         for (const child of item.children || []) {
             const result = clipboardControl(child, name);
             if (result) return result;
@@ -128,6 +128,9 @@ actions = '''
                 standaloneFile = fileComponent.createObject(main.contentItem, {entry: {name: "shared.txt", url: SOURCE_FILE}, width: 90, height: 100});
                 standaloneFolder = folderComponent.createObject(main.contentItem, {entry: {name: "destination", url: DESTINATION}, width: 90, height: 100});
                 if (!standaloneFile || !standaloneFolder) { console.error("CLIPBOARD UI FAILED: standalone components"); Qt.exit(1); return; }
+                standaloneFile.dispatch("rename");
+                if (!standaloneFile.renaming || !standaloneFile.nameEditor.visible) { console.error("CLIPBOARD UI FAILED: standalone inline rename"); Qt.exit(1); return; }
+                standaloneFile.item.cancelRename();
                 standaloneFile.dispatch("cut");
                 if (!standaloneFile.cutPending || !standaloneFolder.canDrop([SOURCE_FILE]) || standaloneFolder.canDrop([DESTINATION])) {
                     console.error("CLIPBOARD UI FAILED: behavior requires a host controller"); Qt.exit(1); return;
@@ -154,6 +157,9 @@ actions = '''
                 if (!item.menu.visible || item.menu.canCut || !item.cutPending) { console.error("CLIPBOARD UI FAILED: view behavior differs"); Qt.exit(1); return; }
                 item.menu.close();
                 item.dispatch("copy");
+                item.dispatch("rename");
+                if (!item.renaming || !item.nameEditor.visible || item.nameEditor.Window.window !== window) { console.error("CLIPBOARD UI FAILED: inline editor missing from view", step); Qt.exit(1); return; }
+                item.cancelRename();
                 if (step === 8) controller.viewMode = "columns";
                 else if (step === 9) controller.viewMode = "grid";
                 else if (step === 10) controller.viewMode = "mixed";
@@ -162,13 +168,13 @@ actions = '''
                     controller.entryAction("rename", entry);
                 }
             } else if (step === 12) {
-                const dialog = controller.fileBehavior.renameDialog;
-                if (!dialog || !dialog.visible || dialog.actionEnabled) { console.error("CLIPBOARD UI FAILED: rename prompt"); Qt.exit(1); return; }
-                dialog.editor.text = "../bad";
-                if (dialog.actionEnabled) { console.error("CLIPBOARD UI FAILED: rename path validation"); Qt.exit(1); return; }
-                dialog.editor.text = "renamed fixture.txt";
-                if (!dialog.actionEnabled) { console.error("CLIPBOARD UI FAILED: valid rename disabled"); Qt.exit(1); return; }
-                dialog.accept();
+                const item = main.clipboardControl(window.contentItem, "entryComponent-shared.txt");
+                if (!item || !item.renaming || !item.nameEditor.visible) { console.error("CLIPBOARD UI FAILED: inline rename"); Qt.exit(1); return; }
+                item.nameEditor.text = "../bad";
+                item.finishRename();
+                if (!item.renaming) { console.error("CLIPBOARD UI FAILED: invalid name accepted"); Qt.exit(1); return; }
+                item.nameEditor.text = "renamed fixture.txt";
+                item.nameEditor.accepted();
             } else if (step === 13) {
                 const entry = controller.files.find(entry => entry.name === "renamed fixture.txt");
                 if (!entry) return;
@@ -177,9 +183,14 @@ actions = '''
                 const duplicate = controller.files.find(entry => entry.name === "renamed fixture (2).txt");
                 if (!duplicate) return;
                 controller.entryAction("rename", duplicate);
-                const dialog = controller.fileBehavior.renameDialog;
-                dialog.editor.text = "cancelled.txt";
-                dialog.reject();
+                const item = main.clipboardControl(window.contentItem, "entryComponent-renamed fixture (2).txt");
+                item.nameEditor.text = "cancelled.txt";
+                item.cancelRename();
+                item.beginRename();
+                item.nameEditor.text = "clicked away.txt";
+                Qt.callLater(() => window.contentItem.forceActiveFocus());
+            } else if (step === 15) {
+                if (!controller.files.some(entry => entry.name === "clicked away.txt")) return;
                 console.log("CLIPBOARD UI PASSED: standalone behavior, four views, rename, duplicate and cancel");
                 Qt.quit();
             }
@@ -200,6 +211,6 @@ if result.returncode or 'CLIPBOARD UI PASSED' not in result.stdout or any(error 
     raise SystemExit(result.stdout)
 assert (fixtures / 'source' / 'shared (2).txt').read_text() == 'shared clipboard fixture\n'
 assert (fixtures / 'destination' / 'renamed fixture.txt').read_text() == 'shared clipboard fixture\n'
-assert (fixtures / 'destination' / 'renamed fixture (2).txt').read_text() == 'shared clipboard fixture\n'
+assert (fixtures / 'destination' / 'clicked away.txt').read_text() == 'shared clipboard fixture\n'
 assert not (fixtures / 'destination' / 'cancelled.txt').exists()
 print('PASS: standalone behavior, all Files views, rename, duplicate and cancel')

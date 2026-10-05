@@ -106,6 +106,14 @@ Item {
         entryLoader.item.openMenu(position.x, position.y);
     }
 
+    Item {
+        id: nameSlot
+        y: 63
+        width: parent.width
+        height: 28
+        z: 5
+    }
+
     Loader {
         id: entryLoader
         anchors.top: parent.top
@@ -118,8 +126,18 @@ Item {
             item.controller = Qt.binding(() => shortcut.shell.controller);
             item.entry = Qt.binding(() => shortcut.app || {});
             item.showName = false;
+            item.nameSurface = Qt.binding(() => nameSlot);
+            item.nameSize = 13;
+            item.label = Qt.binding(() => shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && (shortcut.stackIndicator || !shortcut.stack.expanded)
+                ? shortcut.shell.controller.stackLabel(shortcut.stack.key) : shortcut.app ? shortcut.app.name : "");
             item.inputEnabled = false;
             item.iconSize = 57;
+            if (shortcut.renameRequested) Qt.callLater(() => {
+                if (shortcut.renameRequested) {
+                    item.beginRename();
+                    shortcut.shell.controller.renamingDesktopId = "";
+                }
+            });
         }
     }
 
@@ -151,56 +169,12 @@ Item {
         }
     }
 
-    Text {
-        anchors.top: parent.top
-        anchors.topMargin: 65
-        anchors.left: parent.left
-        anchors.right: parent.right
-        visible: shortcut.stackIndicator || shell.controller.renamingDesktopId !== shortcut.app.id
-        text: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && (shortcut.stackIndicator || !shortcut.stack.expanded)
-            ? shell.controller.stackLabel(shortcut.stack.key) : shortcut.app ? shortcut.app.name : ""
-        color: Theme.white
-        opacity: entryLoader.item && entryLoader.item.cutPending ? Theme.cutOpacity : 1
-        style: Text.Outline
-        styleColor: Theme.shortcutShadow
-        font.pixelSize: 13
-        horizontalAlignment: Text.AlignHCenter
-        elide: Text.ElideRight
-    }
-
-    TextField {
-        id: nameEditor
-        objectName: "desktopNameEditor"
-        anchors.top: parent.top
-        anchors.topMargin: 63
-        anchors.left: parent.left
-        anchors.right: parent.right
-        z: 5
-        height: 28
-        visible: !shortcut.stackIndicator && shortcut.app && shell.controller.renamingDesktopId === shortcut.app.id
-        readOnly: shell.controller.renamingDesktopBusy
-        color: Theme.white
-        selectionColor: "#805b99dd"
-        font.pixelSize: 13
-        horizontalAlignment: Text.AlignHCenter
-        background: Rectangle {
-            color: "#d9232e3c"
-            radius: 5
-            border.color: "#80ffffff"
+    readonly property bool renameRequested: !stackIndicator && app && shell.controller.renamingDesktopId === app.id
+    onRenameRequestedChanged: {
+        if (renameRequested && entryLoader.item) {
+            entryLoader.item.beginRename();
+            shell.controller.renamingDesktopId = "";
         }
-        onVisibleChanged: {
-            if (visible) {
-                text = shortcut.app.name;
-                Qt.callLater(() => { forceActiveFocus(); selectAll(); });
-            }
-        }
-        onAccepted: shell.controller.commitDesktopRename(shortcut.app, text)
-        onActiveFocusChanged: {
-            if (!activeFocus && visible) {
-                shell.controller.commitDesktopRename(shortcut.app, text);
-            }
-        }
-        Keys.onEscapePressed: shell.controller.renamingDesktopId = ""
     }
 
     function dragFiles(urls) { return entryLoader.item.dragFiles(shortcut, urls); }
