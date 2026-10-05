@@ -180,7 +180,7 @@ class Backend final : public QObject {
 
         Q_INVOKABLE void placeWindow(QObject* window, const QString& shellTitle);
 
-        Q_INVOKABLE void activateWindow(QObject* window);
+        Q_INVOKABLE void activateWindow(QObject* window, bool restoring = false);
 
         Q_INVOKABLE void openPreview(const QUrl& source, const QVariantList& siblings = {}, bool activateExisting = true);
 
@@ -207,7 +207,13 @@ class Backend final : public QObject {
 
         void setStatusMessage(const QString& message);
 
+        void requestWindowActivation(QObject* window, quint64 generation, int retries);
+
+        quint64 activationGeneration_ = 0;
+
         QThreadPool placements_;
+
+        QThreadPool activations_;
 
         Pedro::Papi::Gui::Clipboard::Manager clipboard_;
 

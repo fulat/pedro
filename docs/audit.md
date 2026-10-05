@@ -118,10 +118,25 @@ La ejecución normal terminó con 14 comprobaciones aprobadas:
 
 Las pruebas de proveedores nativos, iconos, captura, menús y audio también pasaron. Los menús completaron 52 transiciones en Wayland sin cierre de aplicación. Escape conservó la captura al salir del submenú y la cerró correctamente después. Los guardados reales vacío → `é` conservaron `efbbbfc3a9` en UTF-8 y `fffee900` en UTF-16. Cada gestor de audio real emitió una sola notificación inicial durante tres segundos. Una observación de cinco segundos, después de cerrar las instancias de diagnóstico, no mostró clientes `wpctl` nuevos; ya no aparece la realimentación continua observada antes.
 
-### Caso intermitente pendiente
+### Caso intermitente observado (corregido en la revisión siguiente)
 
 Una prueba de estrés que llama a minimizar y reabrir el mismo visor **en el mismo turno de eventos**, sin esperar la transición de Mutter, perdió el foco en una de tres ejecuciones instrumentadas. La ventana Qt volvió a su visibilidad normal, pero `QGuiApplication::focusWindow()` no señalaba ese visor al comprobarlo posteriormente. No se creó un duplicado ni se activó el otro archivo con el mismo nombre. Las otras dos ejecuciones y la reapertura normal con una transición separada pasaron. Es una observación pendiente de aislar; una carrera entre minimización y activación es una hipótesis, no una causa demostrada. No se cambió la implementación para ocultar este resultado.
 
 Los avisos de `QtWaylandTextInputv3::disableSurface` siguen apareciendo en las aperturas/cierres rápidos de editores; no hubo cierre de aplicación ni pérdida de guardado en las pruebas. No se verificó composición IME ni el arranque de la imagen Pedro. No se editaron documentos del usuario ni se detuvo su instancia.
 
 Evidencia desechable: `build/diagnostic/recheck/normal.log`, `focus-exact.log`, `complete.log`, `complete-repeat.log`, `utf8.log`, `utf16.log`, `audio.log`, `idle-final.log`, `providers.log`, `capture.log`, `resize.log`, `icons.log` y `menus.log`. `complete.log` conserva el resultado intermitente; `normal.log` registra las 14 comprobaciones normales aprobadas.
+
+## Corrección de la restauración inmediata
+
+El backend ya no trata una respuesta positiva de activación como prueba suficiente de que la restauración terminó. Al reabrir un visor minimizado, QML comunica esa transición al controlador; este verifica la ventana exacta de foco tras la petición y permite hasta dos reintentos separados por 80 ms si todavía falta el foco. Las peticiones de activación se ejecutan en orden. Una generación nueva invalida los reintentos anteriores y las activaciones que aguardaban colocación; las comprobaciones usan referencias débiles y descartan ventanas cerradas u ocultas.
+
+Se incorporó una prueba nativa reproducible en `gui/tests/window/restore.py` y `restore.qml`. Utiliza los proveedores y controladores reales de Pedro, dos archivos con el mismo nombre y GNOME/Wayland; mide el foco con `QGuiApplication::focusWindow()`. Su entrada instrumentada, objetos, ejecutable y fixtures se generan bajo `build/verification/restore/`.
+
+```bash
+make gui-build
+python3 gui/tests/window/restore.py
+```
+
+La extensión GNOME con identidades estables debe estar cargada. La prueba aprobó 30 ciclos de minimizar/reabrir en el mismo turno de eventos y 10 aperturas posteriores que sustituyen una restauración pendiente: **40 casos, cero fallos**. `make gui-build` y `pedro-preview-check` también pasaron. La prueba previa con el ejecutable anterior mostró dos pérdidas de foco en 30 ciclos; los registros están en `build/diagnostic/restore/`. Las ventanas de prueba se cerraron al finalizar y se conservó la instancia del usuario.
+
+Esta corrección cambia el controlador de Pedro y no la extensión GNOME. Para cargarla en la instancia que ya estaba ejecutándose, reiniciar Pedro con `make gui`; no requiere una nueva sesión GNOME. Los avisos de composición Qt/Wayland descritos antes quedan fuera de esta corrección.

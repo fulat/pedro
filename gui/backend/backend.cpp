@@ -16,6 +16,7 @@
 #include <QtConcurrentRun>
 #include <QFileInfo>
 #include <QCoreApplication>
+#include <QGuiApplication>
 #include <QDebug>
 #include <QQmlEngine>
 
@@ -142,6 +143,7 @@ Backend* Backend::create(QQmlEngine* engine, QJSEngine*) {
 
 Backend::Backend(QObject* parent) : QObject(parent) {
     placements_.setMaxThreadCount(1);
+    activations_.setMaxThreadCount(1);
     auto documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     if (documents.isEmpty() || !QDir(documents).exists()) {
         documents = QDir::homePath();
@@ -670,6 +672,7 @@ void Backend::placeWindow(QObject* object, const QString& shellTitle) {
     if (window->property("pedroPlacementPending").toBool() || window->property("pedroWindowIdentity").toUInt()) {
         return;
     }
+    ++activationGeneration_;
     window->setProperty("pedroPlacementPending", true);
     const QPointer<QQuickWindow> guardedWindow(window);
     const auto pid = static_cast<unsigned int>(QCoreApplication::applicationPid());
@@ -685,36 +688,67 @@ void Backend::placeWindow(QObject* object, const QString& shellTitle) {
         guardedWindow->setProperty("pedroPlacementPending", false);
         if (guardedWindow->property("pedroActivationPending").toBool()) {
             guardedWindow->setProperty("pedroActivationPending", false);
-            activateWindow(guardedWindow);
+            const bool restoring = guardedWindow->property("pedroRestorePending").toBool();
+            guardedWindow->setProperty("pedroRestorePending", false);
+            if (guardedWindow->property("pedroActivationGeneration").toULongLong() == activationGeneration_) {
+                activateWindow(guardedWindow, restoring);
+            }
         }
     });
     watcher->setFuture(QtConcurrent::run(&placements_, [pid, title, shellTitle] { return Pedro::Papi::Gui::Application::Manager{}.placeWindowIdentity(pid, title, shellTitle.toStdString()); }));
 }
 
-void Backend::activateWindow(QObject* object) {
+void Backend::activateWindow(QObject* object, bool restoring) {
 
     const QPointer<QQuickWindow> window = qobject_cast<QQuickWindow*>(object);
     if (!window) {
         return;
     }
 
+    const auto generation = ++activationGeneration_;
     if (window->property("pedroPlacementPending").toBool()) {
         window->setProperty("pedroActivationPending", true);
+        window->setProperty("pedroRestorePending", restoring);
+        window->setProperty("pedroActivationGeneration", QVariant::fromValue(generation));
         return;
     }
+    requestWindowActivation(window, generation, restoring ? 2 : 0);
+}
+
+void Backend::requestWindowActivation(QObject* object, quint64 generation, int retries) {
+
+    const QPointer<QQuickWindow> window = qobject_cast<QQuickWindow*>(object);
+    if (!window || !window->isVisible() || generation != activationGeneration_) {
+        return;
+    }
+
     const auto identity = window->property("pedroWindowIdentity").toUInt();
     const auto pid = static_cast<unsigned int>(QCoreApplication::applicationPid());
     const auto title = window->title().toStdString();
     auto* watcher = new QFutureWatcher<bool>(this);
-    connect(watcher, &QFutureWatcher<bool>::finished, this, [window, watcher] {
+    connect(watcher, &QFutureWatcher<bool>::finished, this, [this, window, watcher, generation, retries] {
         const bool activated = watcher->result();
         watcher->deleteLater();
-        if (window && !activated) {
+        if (!window || !window->isVisible() || generation != activationGeneration_) {
+            return;
+        }
+        if (!activated) {
             window->raise();
             window->requestActivate();
         }
+        if (retries > 0) {
+            // A Wayland minimize request and the compositor activation travel on
+            // different connections. The D-Bus reply can precede minimization.
+            // Confirm the exact native focus after that transition, with a bounded
+            // retry that a newer window request supersedes.
+            QTimer::singleShot(80, this, [this, window, generation, retries] {
+                if (window && QGuiApplication::focusWindow() != window) {
+                    requestWindowActivation(window, generation, retries - 1);
+                }
+            });
+        }
     });
-    watcher->setFuture(QtConcurrent::run([pid, title, identity] {
+    watcher->setFuture(QtConcurrent::run(&activations_, [pid, title, identity] {
         const Pedro::Papi::Gui::Application::Manager manager;
         return identity ? manager.activateWindowIdentity(pid, identity) : manager.activateWindow(pid, title);
     }));
@@ -748,6 +782,7 @@ void Backend::openPreview(const QUrl& source, const QVariantList& siblings, bool
         }
     }
 
+    ++activationGeneration_;
     auto* session = new Pedro::Papi::Gui::Preview::Manager(this);
     static quint64 nextSession = 0;
     session->setObjectName(QStringLiteral("previewSession%1").arg(++nextSession));

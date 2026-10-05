@@ -55,9 +55,10 @@ Loader {
 
     function activateViewer() {
         if (!item) return;
-        if (item.visibility === Window.Minimized) item.showNormal();
+        const restoring = item.visibility === Window.Minimized;
+        if (restoring) item.showNormal();
         else if (!item.visible) item.show();
-        if (typeof Backend.activateWindow === "function") Backend.activateWindow(item);
+        if (typeof Backend.activateWindow === "function") Backend.activateWindow(item, restoring);
         else { item.raise(); item.requestActivate(); }
     }
 
