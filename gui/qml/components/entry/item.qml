@@ -18,7 +18,7 @@ Item {
     property Item nameSurface: null
     property string label: entry.name || ""
     property int nameAlignment: Text.AlignHCenter
-    property int nameSize: 12
+    property int nameSize: 13
     property int nameWeight: Font.Medium
     property bool renaming: false
     property url renameSource
@@ -211,7 +211,7 @@ Item {
         id: defaultNameSurface
         y: entryItem.iconSize + 10
         width: entryItem.width
-        height: 30
+        height: 34
         z: 5
         visible: entryItem.showName || entryItem.renaming
     }

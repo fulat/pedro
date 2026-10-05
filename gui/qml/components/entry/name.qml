@@ -6,7 +6,7 @@ import "../../scripts/theme.js" as Theme
 
 Item {
     id: name
-    property var behavior: ({renaming: false, label: "", textColor: "white", cutPending: false, nameSize: 12, nameWeight: Font.Medium, nameAlignment: Text.AlignHCenter})
+    property var behavior: ({renaming: false, label: "", textColor: "white", cutPending: false, nameSize: 13, nameWeight: Font.Medium, nameAlignment: Text.AlignHCenter})
     readonly property var editor: input
     property string appearanceMode: Backend.appearanceMode
     readonly property bool light: appearanceMode === "light"
@@ -33,10 +33,10 @@ Item {
             layer.enabled: name.brightLabel
             layer.effect: MultiEffect {
                 shadowEnabled: true
-                shadowColor: "#55000000"
-                shadowOpacity: 1.0
+                shadowColor: "black"
+                shadowOpacity: 0.85
                 shadowBlur: 1.0
-                blurMax: 6
+                blurMax: 4
                 shadowHorizontalOffset: 0
                 shadowVerticalOffset: 1
                 autoPaddingEnabled: true

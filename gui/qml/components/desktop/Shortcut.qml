@@ -127,7 +127,7 @@ Item {
             item.entry = Qt.binding(() => shortcut.app || {});
             item.showName = false;
             item.nameSurface = Qt.binding(() => nameSlot);
-            item.nameSize = 13;
+            item.nameSize = 14;
             item.label = Qt.binding(() => shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && (shortcut.stackIndicator || !shortcut.stack.expanded)
                 ? shortcut.shell.controller.stackLabel(shortcut.stack.key) : shortcut.app ? shortcut.app.name : "");
             item.inputEnabled = false;
