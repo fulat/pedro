@@ -69,7 +69,8 @@ int main(int argc, char* argv[]) {
      * This must be registered before Main.qml is loaded,
      * otherwise QML will not know what "Backend" is.
      */
-    Backend backend;
+    Backend backend(nullptr);
+    Backend::setInstance(&backend);
 
     // The engine is created after its backend so QML releases first at shutdown.
     QQmlApplicationEngine engine;

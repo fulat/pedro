@@ -31,6 +31,9 @@
 
 #include <memory>
 
+class QQmlEngine;
+class QJSEngine;
+
 class Backend final : public QObject {
         Q_OBJECT
         QML_NAMED_ELEMENT(Papi)
@@ -82,7 +85,13 @@ class Backend final : public QObject {
 
     public:
 
-        explicit Backend(QObject* parent = nullptr);
+        // A required parent argument makes Qt use create() rather than construct
+        // another QML singleton alongside the context backend.
+        explicit Backend(QObject* parent);
+
+        static Backend* create(QQmlEngine* engine, QJSEngine* scriptEngine);
+
+        static void setInstance(Backend* backend);
 
         QAbstractItemModel* desktopModel();
 

@@ -16,7 +16,7 @@ for name in ('qml', 'config', 'assets'):
 # Wayland dismisses programmatic popup grabs without a real input serial.
 # Check protocol survival there; use X11 to also assert persistent visibility.
 require_visible = os.environ.get('QT_QPA_PLATFORM') != 'wayland' and (os.environ.get('QT_QPA_PLATFORM') == 'xcb' or os.environ.get('XDG_SESSION_TYPE') != 'wayland')
-source = (root / 'gui/Main.qml').read_text()
+source = (root / 'gui/Main.qml').read_text().replace('import QtQuick', 'import gui\nimport QtQuick', 1)
 position = source.rfind('}')
 actions = '''
     Timer {
@@ -26,6 +26,11 @@ actions = '''
         property int step: 0
         property var modes: ["battery", "", "system", "", "battery", "quick", "", "wifi", "", "battery", "", "system", ""]
         onTriggered: {
+            if (step === 0 && (Backend !== Papi || Backend.audioVolume !== Papi.audioVolume || Backend.capture !== Papi.capture)) {
+                console.error("MENU CHECK FAILED: duplicate PAPI backend");
+                running = false;
+                return;
+            }
             if (REQUIRE_VISIBLE && step > 0 && modes[(step - 1) % modes.length] && (!panelPopup.visible || panelPopup.width <= 0 || panelPopup.height <= 0)) {
                 console.error("MENU CHECK FAILED", step, modes[(step - 1) % modes.length], main.panelMode, panelPopup.visible, panelPopup.width, panelPopup.height);
                 running = false;

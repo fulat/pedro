@@ -15,7 +15,7 @@ Registro permanente del desarrollo. No implica implementar todas las tareas inme
 
 ### Notifications & Media
 
-- [x] **Output Volume** — slider conectado a PAPI mediante WirePlumber wpctl; eventos PipeWire mantienen sincronizada la salida predeterminada, incluidos cambios externos. Operaciones asíncronas y escrituras agrupadas; mover el slider desactiva mute. Pulsar la bocina alterna mute con icono específico y conserva el volumen anterior. Requiere wpctl y pw-mon en la sesión.
+- [x] **Output Volume** — slider conectado a PAPI mediante WirePlumber wpctl; eventos PipeWire mantienen sincronizada la salida predeterminada, incluidos cambios externos. Operaciones asíncronas y escrituras agrupadas; mover el slider desactiva mute. Pulsar la bocina alterna mute con icono específico y conserva el volumen anterior. Requiere wpctl y pw-dump en la sesión.
 
 - [ ] **Calendar** — la fecha abre un panel independiente; implementar el calendario en ese panel.
 - [ ] **Notifications** — integración con Pedro y futuro Notification Center; los avisos locales de UI no constituyen un sistema de notificaciones. La campana independiente de la barra superior abre su propio panel; conectar este panel al sistema de notificaciones.

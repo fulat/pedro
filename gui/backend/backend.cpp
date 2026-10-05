@@ -17,6 +17,7 @@
 #include <QFileInfo>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QQmlEngine>
 
 #include <cstdlib>
 #include <cmath>
@@ -122,6 +123,21 @@ QObject* Backend::audioVolume() {
 
 QObject* Backend::screenBrightness() {
     return &brightness_;
+}
+
+namespace {
+    QPointer<Backend> sharedBackend;
+}
+
+void Backend::setInstance(Backend* backend) {
+    sharedBackend = backend;
+}
+
+Backend* Backend::create(QQmlEngine* engine, QJSEngine*) {
+    Q_ASSERT(sharedBackend);
+    Q_ASSERT(sharedBackend->thread() == engine->thread());
+    QQmlEngine::setObjectOwnership(sharedBackend, QQmlEngine::CppOwnership);
+    return sharedBackend;
 }
 
 Backend::Backend(QObject* parent) : QObject(parent) {

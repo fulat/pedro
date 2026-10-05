@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QProcess>
 #include <QTimer>
+#include <QSet>
 
 namespace Pedro::Papi::Audio::Volume {
 
@@ -36,10 +37,14 @@ namespace Pedro::Papi::Audio::Volume {
 
         private:
 
+            void readEvents();
+
             void refresh();
 
             void write();
 
+            QByteArray eventBuffer;
+            QSet<int> watchedObjects;
             QProcess monitor;
             QProcess reader;
             QProcess writer;
