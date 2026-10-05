@@ -17,15 +17,26 @@ Item {
         anchors.fill: parent
         visible: !name.behavior.renaming
         opacity: name.behavior.cutPending ? Theme.cutOpacity : 1
-        layer.enabled: name.brightLabel
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: "black"
-            shadowOpacity: 0.95
-            shadowBlur: 1.0
-            blurMax: 8
-            shadowHorizontalOffset: 0
-            shadowVerticalOffset: 1
+        Rectangle {
+            id: shadowSurface
+            width: Math.min(display.width + 8, label.contentWidth + 16)
+            height: label.contentHeight + 6
+            x: label.horizontalAlignment === Text.AlignLeft ? -8
+                : label.horizontalAlignment === Text.AlignRight ? display.width - width + 8
+                : (display.width - width) / 2
+            y: (display.height - height) / 2 + 1
+            radius: 8
+            color: "#8c000000"
+            visible: false
+            layer.enabled: name.brightLabel
+        }
+        MultiEffect {
+            anchors.fill: shadowSurface
+            source: shadowSurface
+            visible: name.brightLabel
+            blurEnabled: true
+            blurMax: 12
+            blur: 1.0
             autoPaddingEnabled: true
         }
         Text {
