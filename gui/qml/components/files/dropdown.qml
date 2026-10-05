@@ -24,6 +24,7 @@ Button {
     ButtonGroup { id: choiceGroup }
     Menu {
         id: menu
+        popupType: Popup.Window
         objectName: dropdown.objectName + "Menu"
         y: dropdown.height + 6
         x: dropdown.width - width

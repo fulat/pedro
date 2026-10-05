@@ -41,16 +41,16 @@ ApplicationWindow {
     readonly property real dockTileSize: applicationController.dockTileSize
     readonly property real dockSpacing: applicationController.dockSpacing
 
-    flags: Qt.Window | Qt.WindowStaysOnBottomHint | (Backend.developmentMode ? 0 : Qt.FramelessWindowHint)
+    flags: Qt.Window
     title: qsTranslate("Pedro", "shell.productName")
-    // Cover the screen without fullscreen focus/occlusion semantics.
+    // Start as a regular resizable window with native window controls.
     visibility: Window.Windowed
     color: Theme.desktopBackground
     visible: true
-    width: Backend.developmentMode ? developmentWidth : Screen.width
-    height: Backend.developmentMode ? developmentHeight : Screen.height
-    minimumWidth: Backend.developmentMode ? Constants.MINIMUM_WIDTH : 0
-    minimumHeight: Backend.developmentMode ? Constants.MINIMUM_HEIGHT : 0
+    width: developmentWidth
+    height: developmentHeight
+    minimumWidth: Constants.MINIMUM_WIDTH
+    minimumHeight: Constants.MINIMUM_HEIGHT
 
     // Connects the presentation object graph to the application controller.
     Controllers.Application {

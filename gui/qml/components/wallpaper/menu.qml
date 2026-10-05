@@ -19,7 +19,7 @@ Controls.Menu {
 
     width: 270
     padding: 6
-    popupType: Controls.Popup.Item
+    popupType: Controls.Popup.Window
     cascade: true
 
     component Glass: Components.Liquid {
@@ -167,7 +167,7 @@ Controls.Menu {
         title: qsTranslate("Pedro", "desktop.menu.organization")
         width: 250
         padding: 6
-        popupType: Controls.Popup.Item
+        popupType: Controls.Popup.Window
         delegate: Entry {}
         background: Glass {}
 

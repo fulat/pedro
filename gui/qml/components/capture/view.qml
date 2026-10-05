@@ -295,7 +295,7 @@ Item {
                             title: qsTranslate("Pedro", "capture.microphones")
                             width: 250
                             padding: 6
-                            popupType: Popup.Item
+                            popupType: Popup.Window
                             background: Components.Liquid { backdrop: root.backdrop; frosted: true; cornerRadius: 12 }
                             delegate: Option {}
                             Heading { text: qsTranslate("Pedro", "capture.preview") }
@@ -341,7 +341,7 @@ Item {
     component GlassMenu: Menu {
         width: 250
         padding: 6
-        popupType: Popup.Item
+        popupType: Popup.Window
         cascade: true
         delegate: Option {}
         background: Components.Liquid { backdrop: root.backdrop; frosted: true; blurAmount: 1.0; cornerRadius: 12 }

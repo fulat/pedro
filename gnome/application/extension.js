@@ -1,6 +1,5 @@
 import Gio from 'gi://Gio';
 import Shell from 'gi://Shell';
-import Meta from 'gi://Meta';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
 
@@ -28,21 +27,6 @@ const interfaceXml = `<node>
 // GNOME owns matching, activation, workspace changes and minimized windows.
 export default class Applications extends Extension {
     enable() {
-        // Give the wallpaper a real desktop layer, independent of focus.
-        // Wayland ignores Qt's stays-on-bottom hint for normal windows.
-        this._desktopTypes = new Map();
-        this._focusSignal = global.display.connect('notify::focus-window',
-            () => this._configureDesktop());
-        this._windowSignal = global.display.connect('window-created', () => {
-            if (!this._desktopIdle) {
-                this._desktopIdle = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
-                    this._desktopIdle = 0;
-                    this._configureDesktop();
-                    return GLib.SOURCE_REMOVE;
-                });
-            }
-        });
-        this._configureDesktop();
         this._service = Gio.DBusExportedObject.wrapJSObject(interfaceXml, this);
         this._service.export(Gio.DBus.session, '/org/pedro/Applications');
         this._captureSignal = Gio.DBus.session.signal_subscribe(
@@ -57,25 +41,6 @@ export default class Applications extends Extension {
             });
         this._owner = Gio.bus_own_name_on_connection(Gio.DBus.session,
             'org.pedro.Applications', Gio.BusNameOwnerFlags.NONE, null, null);
-    }
-
-    _configureDesktop() {
-        for (const actor of global.get_window_actors()) {
-            const window = actor.meta_window;
-            const application = (window.get_wm_class() ?? '').toLowerCase();
-            if (window.get_title() === 'Pedro OS' &&
-                ['pedro', 'pedro_gui', 'pedro-gui'].includes(application)) {
-                if (!this._desktopTypes.has(window)) {
-                    const type = window.get_window_type();
-                    const unmanaged = window.connect('unmanaged', () => {
-                        this._desktopTypes.delete(window);
-                    });
-                    this._desktopTypes.set(window, {type, unmanaged});
-                }
-                if (window.get_window_type() !== Meta.WindowType.DESKTOP)
-                    window.set_type(Meta.WindowType.DESKTOP);
-            }
-        }
     }
 
     Activate(id) {
@@ -268,23 +233,6 @@ export default class Applications extends Extension {
     }
 
     disable() {
-        if (this._focusSignal) {
-            global.display.disconnect(this._focusSignal);
-            this._focusSignal = 0;
-        }
-        if (this._windowSignal) {
-            global.display.disconnect(this._windowSignal);
-            this._windowSignal = 0;
-        }
-        if (this._desktopIdle) {
-            GLib.Source.remove(this._desktopIdle);
-            this._desktopIdle = 0;
-        }
-        for (const [window, {type, unmanaged}] of this._desktopTypes) {
-            window.disconnect(unmanaged);
-            window.set_type(type);
-        }
-        this._desktopTypes.clear();
         if (this._captureOwner) {
             Gio.bus_unwatch_name(this._captureOwner);
             this._captureOwner = 0;
