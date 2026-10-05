@@ -36,9 +36,9 @@ Item {
                 shadowColor: "black"
                 shadowOpacity: 0.85
                 shadowBlur: 1.0
-                blurMax: 4
+                blurMax: 5
                 shadowHorizontalOffset: 0
-                shadowVerticalOffset: 1
+                shadowVerticalOffset: 0
                 autoPaddingEnabled: true
             }
         }
