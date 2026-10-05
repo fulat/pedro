@@ -14,7 +14,7 @@ c++ -std=c++17 -fPIC -I "$sourceDirectory/build/dev/papi/include" \
     "$sourceDirectory/gui/tests/trash/check.cpp" "$sourceDirectory/papi/io/trash/manager.cpp" \
     "$taskDirectory/moc.cpp" "$taskDirectory/directory.cpp" "$taskDirectory/transfer.cpp" \
     "$sourceDirectory/papi/io/transfer/manager.cpp" \
-    "$sourceDirectory/papi/io/directory/model.cpp" "$sourceDirectory/papi/io/content/icon.cpp" "${flags[@]}" -o "$taskDirectory/check"
+    "$sourceDirectory/papi/io/search/provider.cpp" "$sourceDirectory/papi/io/directory/model.cpp" "$sourceDirectory/papi/io/content/icon.cpp" "${flags[@]}" -o "$taskDirectory/check"
 # Never expose the host home, mounts, session bus or actual Trash to this process.
 bwrap --unshare-all --die-with-parent --ro-bind /usr /usr --ro-bind /etc /etc \
     --symlink usr/lib /lib --symlink usr/lib64 /lib64 --symlink usr/bin /bin --dev /dev --proc /proc \

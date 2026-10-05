@@ -196,7 +196,8 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 - [x] Menú del espacio vacío para creación asíncrona y propiedades de la carpeta actual; selección limpia al pulsar fuera; menus contextuales pueden sobresalir de la ventana.
 - [x] Título alterna lateral completo/iconos, animación suave; controles de ventana y resize por bordes/esquinas.
 - [ ] Ajustar ancho del lateral arrastrando la división.
-- [x] Búsqueda por nombre dentro de la ubicación abierta, sin distinguir mayúsculas, mediante proxies Qt del modelo PAPI; incluye carpetas y archivos en las cuatro vistas.
+- [x] Búsqueda general de archivos y carpetas personales mediante GNOME LocalSearch/Tracker desde PAPI, con resultados fuera de la ubicación abierta, consulta asíncrona cancelable y presentación en las cuatro vistas. GNOME Files activo puede aportar resultados adicionales de su proveedor D-Bus.
+- [ ] Distribuir LocalSearch/TinySPARQL (o Tracker 3 según la versión de GNOME) y activar su indexador en la sesión de producción; validar búsqueda de archivos/carpetas y actualización del índice. Ofrecer configuración de ubicaciones personales indexadas, incluidas carpetas compartidas y volúmenes externos; respetar exclusiones de GNOME sin recorrer archivos internos del sistema.
 - [ ] Conectar filtros y edición de marcadores; la presentación existe. El soporte de etiquetas se registra en Extended File Metadata / Tags.
 - [x] Papelera real mediante GIO/GVfs: enviar desde Desktop/Files y arrastrar al dock, restaurar sin sobrescribir y eliminar/vaciar con confirmación.
 - [ ] Completar las demás operaciones de archivos desde Files; aplicar los jobs definidos en Storage & Filesystem.

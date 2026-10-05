@@ -13,6 +13,7 @@ namespace Pedro::Papi::Io::Directory {
             Q_PROPERTY(QString path READ path NOTIFY locationChanged)
             Q_PROPERTY(QString place READ place NOTIFY locationChanged)
             Q_PROPERTY(QString name READ name NOTIFY locationChanged)
+            Q_PROPERTY(bool globalSearch READ globalSearch WRITE setGlobalSearch NOTIFY globalSearchChanged)
             Q_PROPERTY(QString search READ search WRITE setSearch NOTIFY searchChanged)
             Q_PROPERTY(int count READ count NOTIFY contentsChanged)
             Q_PROPERTY(QString error READ error NOTIFY contentsChanged)
@@ -44,6 +45,10 @@ namespace Pedro::Papi::Io::Directory {
             QString place() const;
 
             QString name() const;
+
+            bool globalSearch() const;
+
+            void setGlobalSearch(bool enabled);
 
             QString search() const;
 
@@ -84,6 +89,8 @@ namespace Pedro::Papi::Io::Directory {
             Q_INVOKABLE void goForward();
 
         signals:
+            void globalSearchChanged();
+
             void searchChanged();
 
             void locationChanged();

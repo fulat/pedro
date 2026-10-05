@@ -10,7 +10,7 @@ QtObject {
     onSortKeyChanged: { if (directory) directory.setSort(sortKey); }
     property var directory: null
     property var selectedEntry: ({})
-    readonly property string title: directory ? directory.place.length ? qsTranslate("Pedro", "files.browser." + directory.place) : directory.name || qsTranslate("Pedro", "files.browser.computer") : ""
+    readonly property string title: directory && directory.globalSearch && directory.search.trim().length ? qsTranslate("Pedro", "files.browser.searchResults") : directory ? directory.place.length ? qsTranslate("Pedro", "files.browser." + directory.place) : directory.name || qsTranslate("Pedro", "files.browser.computer") : ""
     readonly property var folders: directory ? directory.folders : []
     readonly property var files: directory ? directory.files : []
 

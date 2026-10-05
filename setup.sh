@@ -117,7 +117,15 @@ if ! dpkg --compare-versions "$qtVersion" ge 6.8; then
     exit 1
 fi
 
+# Reuse the distribution's GNOME file indexer; newer GNOME renamed Tracker.
+if apt-cache show localsearch >/dev/null 2>&1; then
+    searchPackages=(localsearch libtinysparql-3.0-0)
+else
+    searchPackages=(tracker tracker-miner-fs libtracker-sparql-3.0-0)
+fi
+
 packages=(
+    "${searchPackages[@]}"
     build-essential cmake ninja-build python3 python3-gi pkg-config clang-format
     # Qt Linguist supplies lrelease, required to compile Pedro translation catalogs.
     qt6-l10n-tools

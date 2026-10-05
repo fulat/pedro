@@ -13,7 +13,7 @@ Item {
     readonly property real trailingWidth: 278 + (showEmpty ? emptyTrash.contentItem.implicitWidth + 40 : 0)
     readonly property real locationMinimumWidth: Math.min(220, Math.max(110, width - (searchExpanded ? 220 : 44) - header.trailingWidth))
     readonly property string currentPath: controller && controller.directory ? controller.directory.path || controller.directory.location : ""
-    readonly property bool showEmpty: !!controller && controller.directory.place === "trash" && controller.directory.count > 0
+    readonly property bool showEmpty: !!controller && controller.directory.place === "trash" && !(controller.directory.globalSearch && controller.directory.search.trim().length) && controller.directory.count > 0
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     TextMetrics {

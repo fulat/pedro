@@ -18,6 +18,7 @@ ScrollView {
     Connections {
         target: columns.controller ? columns.controller.directory : null
         function onLocationChanged() { columns.locations = [columns.controller.directory.location]; }
+        function onSearchChanged() { if (columns.controller.directory.search.length) columns.locations = [columns.controller.directory.location]; }
     }
     Row {
         height: columns.availableHeight
@@ -51,11 +52,10 @@ ScrollView {
                 Directory {
                     id: directory
                     Component.onCompleted: { open(column.modelData); setSort(columns.controller.sortKey); }
-                    search: columns.controller.directory.search
                 }
                 DropArea {
                     anchors.fill: parent
-                    enabled: true
+                    enabled: !columns.controller.directory.search.trim().length
                     keys: ["text/uri-list"]
                     onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, directory.location); }
                     onDropped: drop => {
@@ -86,7 +86,7 @@ ScrollView {
                     anchors.fill: parent
                     anchors.rightMargin: 9
                     clip: true
-                    model: directory.entriesModel
+                    model: columns.controller.directory.search.length ? columns.controller.directory.entriesModel : directory.entriesModel
                     ScrollBar.vertical: ScrollBar {
                         orientation: Qt.Vertical
                         anchors.right: parent.right

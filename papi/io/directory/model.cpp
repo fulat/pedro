@@ -2,6 +2,7 @@
 
 #include <pedro/papi/io/directory/model.hpp>
 #include <pedro/papi/io/content/icon.h>
+#include <pedro/papi/io/search/provider.h>
 
 #include <QDateTime>
 #include <QFile>
@@ -184,9 +185,20 @@ namespace Pedro::Papi::Io::Directory {
             g_object_unref(file);
         }
 
-        Snapshot scan(const QString& address, const QString& place, const Cancellation& cancel) {
+        Snapshot scan(const QString& address, const QString& place, const Cancellation& cancel, const QString& query) {
 
             Snapshot snapshot;
+            if (!query.trimmed().isEmpty()) {
+                const auto results = Pedro::Papi::Io::Search::query(query, cancel.get());
+                snapshot.error = results.error;
+                for (const auto& result : results.locations) {
+                    if (g_cancellable_is_cancelled(cancel.get())) {
+                        break;
+                    }
+                    append(snapshot, result, cancel.get());
+                }
+                return snapshot;
+            }
             if (place == "home") {
                 // GLib resolves the active user's configured XDG directories in every session.
                 for (int index = 0; index < G_USER_N_DIRECTORIES; ++index) {
@@ -320,6 +332,8 @@ namespace Pedro::Papi::Io::Directory {
             QString place;
             QString error;
             bool loading = false;
+            bool globalSearch = false;
+            QString search;
             int cursor = -1;
             QList<QPair<QString, QString>> history;
             quint64 generation = 0;
@@ -410,8 +424,24 @@ namespace Pedro::Papi::Io::Directory {
         return QUrl(state->location).fileName(QUrl::FullyDecoded);
     }
 
+    bool Model::globalSearch() const {
+        return state->globalSearch;
+    }
+
+    void Model::setGlobalSearch(bool enabled) {
+        if (state->globalSearch == enabled) {
+            return;
+        }
+        state->globalSearch = enabled;
+        for (Order* proxy : {&state->all, static_cast<Order*>(&state->folders), static_cast<Order*>(&state->files)}) {
+            proxy->setSearch(enabled ? QString{} : state->search);
+        }
+        emit globalSearchChanged();
+        refresh();
+    }
+
     QString Model::search() const {
-        return state->all.query;
+        return state->search;
     }
 
     void Model::setSearch(const QString& text) {
@@ -419,8 +449,21 @@ namespace Pedro::Papi::Io::Directory {
             return;
         }
 
+        state->search = text;
         for (Order* proxy : {&state->all, static_cast<Order*>(&state->folders), static_cast<Order*>(&state->files)}) {
-            proxy->setSearch(text);
+            proxy->setSearch(state->globalSearch ? QString{} : text);
+        }
+        if (state->globalSearch) {
+            if (state->cancel) {
+                g_cancellable_cancel(state->cancel.get());
+            }
+            ++state->generation;
+            beginResetModel();
+            state->entries.clear();
+            endResetModel();
+            state->error.clear();
+            state->loading = true;
+            state->debounce.start(250);
         }
 
         emit searchChanged();
@@ -474,7 +517,7 @@ namespace Pedro::Papi::Io::Directory {
 
         QVariantList result;
         for (const auto& item : state->entries) {
-            if (item.value("isDirectory").toBool() && item.value("name").toString().contains(search(), Qt::CaseInsensitive)) {
+            if (item.value("isDirectory").toBool() && (state->globalSearch || item.value("name").toString().contains(search(), Qt::CaseInsensitive))) {
                 result.append(item);
             }
         }
@@ -485,7 +528,7 @@ namespace Pedro::Papi::Io::Directory {
 
         QVariantList result;
         for (const auto& item : state->entries) {
-            if (!item.value("isDirectory").toBool() && item.value("name").toString().contains(search(), Qt::CaseInsensitive)) {
+            if (!item.value("isDirectory").toBool() && (state->globalSearch || item.value("name").toString().contains(search(), Qt::CaseInsensitive))) {
                 result.append(item);
             }
         }
@@ -683,7 +726,7 @@ namespace Pedro::Papi::Io::Directory {
             watch();
             emit contentsChanged();
         });
-        watcher->setFuture(QtConcurrent::run(scan, state->location, state->place, state->cancel));
+        watcher->setFuture(QtConcurrent::run(scan, state->location, state->place, state->cancel, state->globalSearch ? state->search : QString{}));
     }
 
     void Model::watch() {

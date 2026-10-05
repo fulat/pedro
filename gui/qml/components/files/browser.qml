@@ -20,6 +20,7 @@ Rectangle {
 
     DropArea {
         anchors.fill: parent
+        enabled: !(directory.globalSearch && directory.search.trim().length)
         keys: ["text/uri-list"]
         onEntered: drag => { drag.accepted = String(directory.location).startsWith("trash:") ? drag.urls.length > 0 && !Backend.trash.busy : Backend.fileTransfer.canMove(drag.urls, directory.location); }
         onDropped: drop => {
@@ -85,7 +86,7 @@ Rectangle {
         }
     }
 
-    Directory { id: directory; objectName: "filesDirectory" }
+    Directory { id: directory; objectName: "filesDirectory"; globalSearch: true }
     Loader {
         id: controllerLoader
         source: "../../controllers/files/navigation.qml"
@@ -93,6 +94,7 @@ Rectangle {
     }
 
     function openBackgroundMenu(target, point) {
+        if (directory.globalSearch && directory.search.trim().length) return;
         backgroundMenu.item.directory = target;
         backgroundMenu.item.popup(point.x, point.y);
     }
@@ -218,6 +220,13 @@ Rectangle {
                 text: directory.error || Backend.trash.error
                 color: browser.colors.muted
                 wrapMode: Text.WordWrap
+            }
+            Text {
+                visible: directory.loading && directory.globalSearch && directory.search.trim().length > 0
+                Layout.fillWidth: true
+                text: qsTranslate("Pedro", "files.browser.searching")
+                color: browser.colors.muted
+                horizontalAlignment: Text.AlignHCenter
             }
             Text {
                 visible: !directory.loading && directory.search.length > 0 && browser.controller.files.length + browser.controller.folders.length === 0 && !directory.error.length

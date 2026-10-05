@@ -40,6 +40,7 @@ actions = '''
                     Qt.exit(1);
                     return;
                 }
+                controller.directory.globalSearch = false;
                 const surface = main.controller.filesQuickWindow.contentItem.parent.parent;
                 const empty = main.findTrashControl(surface, "trashEmpty");
                 const restore = main.findTrashControl(surface, "trashRestore");

@@ -1242,6 +1242,16 @@
             <translation>Público</translation>
         </message>
         <message>
+            <source>files.browser.searchResults</source>
+            <extracomment>Stable Pedro key: files.browser.searchResults</extracomment>
+            <translation>Resultados de búsqueda</translation>
+        </message>
+        <message>
+            <source>files.browser.searching</source>
+            <extracomment>Stable Pedro key: files.browser.searching</extracomment>
+            <translation>Buscando tus archivos…</translation>
+        </message>
+        <message>
             <source>files.browser.noResults</source>
             <extracomment>Stable Pedro key: files.browser.noResults</extracomment>
             <translation>No hay archivos ni carpetas que coincidan</translation>
