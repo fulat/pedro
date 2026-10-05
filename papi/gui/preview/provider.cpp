@@ -25,6 +25,9 @@ namespace Pedro::Papi::Gui::Preview {
         current.playing = false;
     }
 
+    void Provider::relocate(const QUrl&) {
+    }
+
     bool Provider::saveText(const QString&) {
 
         return false;

@@ -795,6 +795,8 @@ void Backend::openPreview(const QUrl& source, const QVariantList& siblings, bool
     auto* session = new Pedro::Papi::Gui::Preview::Manager(this);
     static quint64 nextSession = 0;
     session->setObjectName(QStringLiteral("previewSession%1").arg(++nextSession));
+    connect(clipboard_.operation(), &Pedro::Papi::Io::Transfer::Manager::renamed, session, &Pedro::Papi::Gui::Preview::Manager::relocate);
+    connect(clipboard_.operation(), &Pedro::Papi::Io::Transfer::Manager::moved, session, &Pedro::Papi::Gui::Preview::Manager::relocate);
     session->setReadOnly(readOnly);
     session->open(source, siblings);
     emit previewRequested(session);

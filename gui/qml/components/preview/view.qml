@@ -20,7 +20,7 @@ Item {
     property bool saving: false
     property string loadedText: ""
     property string providerText: ""
-    readonly property bool dirty: editing && editor.text !== loadedText
+    readonly property bool dirty: preview.kind === "text" && editor.text !== loadedText
     property bool discardApproved: false
 
     function requestClose() {
@@ -75,6 +75,16 @@ Item {
 
     Connections {
         target: view.preview
+        function onRelocated(source, destination) {
+            view.lastSource = view.preview.source.toString();
+            const expected = view.lastSource;
+            Qt.callLater(() => {
+                if (view.preview.source.toString() === expected && view.dirty) view.save();
+            });
+        }
+        function onFileChanged() {
+            if (!view.dirty && !view.saving) view.preview.reload();
+        }
         function onChanged() {
             const sourceChanged = view.lastSource !== view.preview.source.toString();
             if (sourceChanged) {

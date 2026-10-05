@@ -1,6 +1,7 @@
 #include <pedro/papi/gui/preview/manager.h>
 
 #include <QFileInfo>
+#include <QFile>
 #include <QFutureWatcher>
 #include <QMimeDatabase>
 #include <QMutexLocker>
@@ -27,6 +28,20 @@ namespace Pedro::Papi::Gui::Preview {
     }
 
     Manager::Manager(QObject* parent) : QObject(parent) {
+        connect(&watch, &Pedro::Papi::Io::File::Watch::relocated, this, &Manager::relocate);
+        connect(&watch, &Pedro::Papi::Io::File::Watch::changed, this, [this] {
+            emit changed();
+            if (!provider || current.busy || savingText) {
+                return;
+            }
+            if (current.kind == QStringLiteral("text")) {
+                QFile file(currentSource.toLocalFile());
+                if (file.open(QIODevice::ReadOnly) && file.read(128 * 1024 + 1) == current.originalText) {
+                    return;
+                }
+            }
+            emit fileChanged();
+        });
     }
 
     Manager::~Manager() {
@@ -58,7 +73,7 @@ namespace Pedro::Papi::Gui::Preview {
     }
 
     bool Manager::editable() const {
-        return current.editable && !readOnly;
+        return current.editable && !readOnly && watch.available();
     }
 
     QString Manager::saveError() const {
@@ -71,7 +86,14 @@ namespace Pedro::Papi::Gui::Preview {
     }
 
     bool Manager::saveText(const QString& text) {
-        return !readOnly && provider && provider->saveText(text);
+        savingText = true;
+        watch.refresh();
+        const bool saved = !readOnly && provider && provider->saveText(text);
+        if (saved) {
+            watch.refresh();
+        }
+        savingText = false;
+        return saved;
     }
 
     bool Manager::textTruncated() const {
@@ -80,6 +102,10 @@ namespace Pedro::Papi::Gui::Preview {
 
     bool Manager::active() const {
         return !currentSource.isEmpty();
+    }
+
+    bool Manager::available() const {
+        return watch.available();
     }
 
     bool Manager::busy() const {
@@ -192,6 +218,8 @@ namespace Pedro::Papi::Gui::Preview {
         current.muted = savedMuted;
         current.busy = true;
         currentSource = source;
+        watch.open(source);
+        watch.refresh();
         currentName = source.fileName();
         currentMime.clear();
         update();
@@ -254,6 +282,7 @@ namespace Pedro::Papi::Gui::Preview {
     void Manager::close() {
 
         ++generation;
+        watch.close();
 
         if (provider) {
             provider->close();
@@ -271,6 +300,67 @@ namespace Pedro::Papi::Gui::Preview {
         playlist.clear();
         index = -1;
         update();
+    }
+
+    void Manager::relocate(const QUrl& source, const QUrl& destination) {
+        if (!active() || !source.isLocalFile() || !destination.isLocalFile()) {
+            return;
+        }
+        const auto original = currentSource;
+        const auto path = original.toLocalFile();
+        const auto prefix = source.toLocalFile();
+        for (auto& entry : playlist) {
+            const auto entryPath = entry.toLocalFile();
+            if (entryPath == prefix || entryPath.startsWith(prefix + '/')) {
+                entry = QUrl::fromLocalFile(destination.toLocalFile() + entryPath.mid(prefix.size()));
+            }
+        }
+        if (path != prefix && !path.startsWith(prefix + '/')) {
+            return;
+        }
+        const auto target = QUrl::fromLocalFile(destination.toLocalFile() + path.mid(prefix.size()));
+        if (target == original || !QFileInfo(target.toLocalFile()).isFile()) {
+            return;
+        }
+        currentSource = target;
+        currentName = target.fileName();
+        if (watch.source() != target) {
+            watch.open(target);
+        }
+        const bool restart = !provider || (current.busy && (current.kind != QStringLiteral("document") || current.frame.isNull()));
+        if (provider) {
+            provider->relocate(target);
+        }
+        emit relocated(original, target);
+        if (restart) {
+            select(target);
+        } else {
+            // An already-loaded Poppler document can finish a page render
+            // through its retained document, even while its path changes.
+            emit changed();
+        }
+    }
+
+    void Manager::reload() {
+        if (!provider || current.busy || !watch.available()) {
+            return;
+        }
+        // Media stays attached to its open stream; a filesystem change must
+        // not restart playback or silently replace the video being watched.
+        if (current.kind == QStringLiteral("video") || current.kind == QStringLiteral("audio")) {
+            return;
+        }
+        const auto page = current.page;
+        provider->open(currentSource);
+        if (current.kind == QStringLiteral("document") && page > 0) {
+            auto connection = std::make_shared<QMetaObject::Connection>();
+            *connection = connect(provider.get(), &Provider::changed, this, [this, page, connection] {
+                if (provider && !provider->state().busy) {
+                    disconnect(*connection);
+                    provider->setPage(std::min(page, provider->state().pageCount - 1));
+                }
+            });
+        }
     }
 
     void Manager::next() {

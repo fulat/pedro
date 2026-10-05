@@ -67,6 +67,8 @@ namespace Pedro::Papi::Io::Transfer {
 
             void renamed(const QUrl& source, const QUrl& destination);
 
+            void moved(const QUrl& source, const QUrl& destination);
+
         private:
 
             bool transferring = false;

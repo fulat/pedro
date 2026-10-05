@@ -144,6 +144,9 @@ Loader {
 
     Connections {
         target: loader.preview
+        function onRelocated(source, destination) {
+            if (!loader.pendingOpen && loader.sizedSource.length) loader.sizedSource = loader.preview.source.toString();
+        }
         function onChanged() {
             if (loader.pendingOpen) {
                 Qt.callLater(loader.showWindow);

@@ -15,6 +15,7 @@ if fixtures.exists():
 for directory in ('source', 'destination'):
     (fixtures / directory).mkdir(parents=True)
 (fixtures / 'source' / 'shared.txt').write_text('shared clipboard fixture\n')
+(fixtures / 'destination' / 'viewer.txt').write_text('Viewer tracking fixture\n')
 for name in ('qml', 'config', 'assets'):
     link = target / name
     if not link.exists():
@@ -50,6 +51,8 @@ actions = '''
         property var standaloneFile: null
         property var standaloneFolder: null
         property bool applicationsChecked: false
+        property var previewSession: null
+        property int previewCount: 0
         onTriggered: {
             if (++ticks > 100) { console.error("CLIPBOARD UI FAILED: timeout"); Qt.exit(1); return; }
             if (Backend.fileTransfer.error.length && !Backend.fileTransfer.cancelled) {
@@ -225,7 +228,24 @@ actions = '''
                 });
             } else if (step === 15) {
                 if (!controller.files.some(entry => entry.name === "clicked away.txt")) return;
-                console.log("CLIPBOARD UI PASSED: standalone behavior, four views, rename, duplicate and cancel");
+                Backend.openPreview(DESTINATION + "/viewer.txt");
+            } else if (step === 16) {
+                const loader = main.previewWindows.find(candidate => candidate.session.source.toString().endsWith("/viewer.txt"));
+                if (!loader || !loader.item || loader.session.busy) return;
+                previewSession = loader.session;
+                previewCount = main.previewWindows.length;
+                Backend.fileTransfer.rename(previewSession.source, "viewer renamed.txt");
+            } else if (step === 17) {
+                if (Backend.fileTransfer.busy || !previewSession.source.toString().endsWith("/viewer renamed.txt")) return;
+                Backend.openPreview(previewSession.source);
+                if (main.previewWindows.length !== previewCount) { console.error("CLIPBOARD UI FAILED: renamed preview duplicated"); Qt.exit(1); return; }
+                Backend.fileTransfer.move([previewSession.source], SOURCE_FOLDER);
+            } else if (step === 18) {
+                if (Backend.fileTransfer.busy || previewSession.source.toString() !== SOURCE_FOLDER + "/viewer renamed.txt") return;
+                if (!previewSession.saveText("Saved after move\\n")) { console.error("CLIPBOARD UI FAILED: moved preview save"); Qt.exit(1); return; }
+                Backend.openPreview(previewSession.source);
+                if (main.previewWindows.length !== previewCount) { console.error("CLIPBOARD UI FAILED: moved preview duplicated"); Qt.exit(1); return; }
+                console.log("CLIPBOARD UI PASSED: shared behavior, preview rename/move/save and existing session focus");
                 Qt.quit();
             }
             ++step;
@@ -247,4 +267,7 @@ assert (fixtures / 'source' / 'shared (2).txt').read_text() == 'shared clipboard
 assert (fixtures / 'destination' / 'renamed fixture.txt').read_text() == 'shared clipboard fixture\n'
 assert (fixtures / 'destination' / 'clicked away.txt').read_text() == 'shared clipboard fixture\n'
 assert not (fixtures / 'destination' / 'cancelled.txt').exists()
-print('PASS: standalone behavior, all Files views, rename, duplicate and cancel')
+assert not (fixtures / 'destination' / 'viewer.txt').exists()
+assert not (fixtures / 'destination' / 'viewer renamed.txt').exists()
+assert (fixtures / 'source' / 'viewer renamed.txt').read_text() == 'Saved after move\n'
+print('PASS: shared file behavior and preview rename/move/save/session reuse')

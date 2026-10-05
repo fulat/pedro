@@ -21,7 +21,7 @@ FFmpeg command-line tool separately only if the GStreamer generator is unavailab
 The check covers Glycin image loading, PDF page pixels/navigation, literal text,
 large-text bounds, unsupported/corrupt files, superseded loads, GStreamer video
 frames/audio, pause/resume, seeking, volume/mute, sibling navigation, closing the
-window and closing during an asynchronous load. It fails on QML engine warnings.
+window and closing during an asynchronous load. It also checks external image/PDF/video renames, preserved zoom/page/playback/window geometry, renames after atomic text saves, native PAPI rename/cut, moves of containing folders, clean external text refresh and draft protection after conflicts/deletion. It fails on QML engine warnings.
 
 See `papi/gui/preview/readme.md` for the provider API and current format boundaries.
 `pedro-gui --preview /absolute/file` is also available for development diagnostics;

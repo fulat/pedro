@@ -14,6 +14,8 @@ namespace Pedro::Papi::Gui::Preview::Text {
 
             void open(const QUrl& source) override;
 
+            void relocate(const QUrl& destination) override;
+
         private:
 
             QUrl currentSource;

@@ -41,6 +41,16 @@ namespace Pedro::Papi::Io::Transfer {
             QMetaObject::invokeMethod(progress->manager, "updateProgress", Qt::QueuedConnection, Q_ARG(double, total > 0 ? static_cast<double>(done) / total : 0));
         }
 
+        void moved(GFile* source, GFile* destination, Manager* manager) {
+            auto* from = g_file_get_uri(source);
+            auto* to = g_file_get_uri(destination);
+            const auto original = QUrl::fromEncoded(from);
+            const auto target = QUrl::fromEncoded(to);
+            g_free(from);
+            g_free(to);
+            QMetaObject::invokeMethod(manager, [manager, original, target] { emit manager->moved(original, target); }, Qt::QueuedConnection);
+        }
+
         bool transferItem(GFile* source, GFile* target, bool cut, GCancellable* cancel, Progress* progress, GError** error) {
             auto* basename = g_file_get_basename(source);
             const auto name = QString::fromUtf8(basename);
@@ -49,6 +59,7 @@ namespace Pedro::Papi::Io::Transfer {
             progress->previous = -1;
             const auto flags = G_FILE_COPY_NOFOLLOW_SYMLINKS;
             if (cut && g_file_move(source, target, flags, cancel, report, progress, error)) {
+                moved(source, target, progress->manager);
                 return true;
             }
             if (cut) {
@@ -102,6 +113,9 @@ namespace Pedro::Papi::Io::Transfer {
             }
             if (success && cut) {
                 success = g_file_delete(source, cancel, error);
+                if (success) {
+                    moved(source, target, progress->manager);
+                }
             }
             return success;
         }

@@ -74,6 +74,10 @@ namespace Pedro::Papi::Gui::Preview::Text {
         });
     }
 
+    void Provider::relocate(const QUrl& destination) {
+        currentSource = destination;
+    }
+
     bool Provider::saveText(const QString& text) {
 
         if (!current.editable || current.busy) {

@@ -25,6 +25,8 @@ namespace Pedro::Papi::Gui::Preview {
 
             virtual void close();
 
+            virtual void relocate(const QUrl& destination);
+
             virtual bool saveText(const QString& text);
 
             virtual void setPage(int page);

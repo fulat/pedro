@@ -1,5 +1,6 @@
 #include <pedro/papi/gui/preview/manager.h>
 #include <pedro/papi/io/thumbnail/image.h>
+#include <pedro/papi/io/transfer/manager.hpp>
 #include <pedro/papi/gui/preview/text/provider.h>
 
 #include "preview/provider.h"
@@ -22,6 +23,7 @@
 #include <cairo-pdf.h>
 
 #include <cmath>
+#include <cstdio>
 #include <iostream>
 #include <memory>
 
@@ -69,6 +71,7 @@ int main(int argc, char** argv) {
 
     const QDir fixtures(QString::fromLocal8Bit(argv[2]));
     QDir().mkpath(fixtures.path());
+    const auto externalMove = [](const QString& source, const QString& destination) { return std::rename(QFile::encodeName(source).constData(), QFile::encodeName(destination).constData()) == 0; };
     const auto path = [&fixtures](const QString& name) { return fixtures.filePath(name); };
     const auto url = [&path](const QString& name) { return QUrl::fromLocalFile(path(name)); };
     const auto write = [&path](const QString& name, const QByteArray& bytes) {
@@ -236,6 +239,13 @@ int main(int argc, char** argv) {
         return 26;
     }
 
+    const auto retainedZoom = view->property("zoom").toDouble();
+    const auto imageRename = url("renamed image.png");
+    QFile::remove(imageRename.toLocalFile());
+    if (!require(externalMove(path("image.png"), imageRename.toLocalFile()) && waitFor([&] { return manager.source() == imageRename; }) && view->property("zoom").toDouble() == retainedZoom && view->property("rotationAngle").toInt() == 90, "Image rename preserves zoom and rotation"))
+        return 61;
+    if (!require(externalMove(imageRename.toLocalFile(), path("image.png")) && waitFor([&] { return manager.source() == url("image.png"); }), "Repeated image rename"))
+        return 61;
     QMetaObject::invokeMethod(informationPopup, "close");
 
     manager.next();
@@ -260,6 +270,35 @@ int main(int argc, char** argv) {
     if (!require(!text->property("readOnly").toBool() && !view->property("dirty").toBool() && manager.text() == "Edited document\n", "Immediate Qt text editing and autosave")) {
         return 34;
     }
+    const auto originalTextUrl = manager.source();
+    const auto relocatedTextUrl = url("renamed document.txt");
+    QFile::remove(relocatedTextUrl.toLocalFile());
+    if (!require(externalMove(originalTextUrl.toLocalFile(), relocatedTextUrl.toLocalFile()) && waitFor([&] { return manager.source() == relocatedTextUrl; }) && manager.text() == "Edited document\n" && manager.name() == "renamed document.txt", "External rename follows autosaved replacement inode")) {
+        std::cerr << "source=" << manager.source().toString().toStdString() << " name=" << manager.name().toStdString() << " text=" << manager.text().toStdString() << "\n";
+        return 50;
+    }
+    text->setProperty("text", QStringLiteral("Edited after rename\n"));
+    if (!require(manager.text() == "Edited after rename\n" && !QFileInfo::exists(originalTextUrl.toLocalFile()), "Renamed document saves only at its new location")) {
+        return 51;
+    }
+    // Put the original content back for the existing conflict checks.
+    text->setProperty("text", QStringLiteral("Edited document\n"));
+    Pedro::Papi::Io::Transfer::Manager transfer;
+    QObject::connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::renamed, &manager, &Pedro::Papi::Gui::Preview::Manager::relocate);
+    QObject::connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::moved, &manager, &Pedro::Papi::Gui::Preview::Manager::relocate);
+    QFile::remove(path("GIO renamed.txt"));
+    transfer.rename(manager.source(), QStringLiteral("GIO renamed.txt"));
+    if (!require(waitFor([&] { return !transfer.busy() && manager.source() == url("GIO renamed.txt"); }), "Native PAPI rename follows open document"))
+        return 58;
+    const auto destination = path("GIO destination");
+    QDir(destination).removeRecursively();
+    QDir().mkpath(destination);
+    transfer.move({manager.source()}, QUrl::fromLocalFile(destination));
+    if (!require(waitFor([&] { return !transfer.busy() && manager.source().toLocalFile() == destination + "/GIO renamed.txt"; }) && manager.saveText("Moved through PAPI"), "Native PAPI cut/move follows open document"))
+        return 59;
+    if (!require(externalMove(manager.source().toLocalFile(), relocatedTextUrl.toLocalFile()) && waitFor([&] { return manager.source() == relocatedTextUrl; }), "External rename after PAPI move"))
+        return 59;
+    text->setProperty("text", QStringLiteral("Edited document\n"));
     QFile saved(manager.source().toLocalFile());
     if (!saved.open(QIODevice::ReadOnly))
         return 35;
@@ -281,6 +320,8 @@ int main(int argc, char** argv) {
         return 37;
     }
 
+    if (!require(externalMove(relocatedTextUrl.toLocalFile(), originalTextUrl.toLocalFile()) && waitFor([&] { return manager.source() == originalTextUrl; }), "Restore sibling playlist after rename"))
+        return 60;
     manager.next();
 
     if (!require(ready() && manager.kind() == "document" && manager.pageCount() == 2 && manager.frame().pixelColor(100, 100).red() > 240, "PDF provider")) {
@@ -293,6 +334,13 @@ int main(int argc, char** argv) {
         return 11;
     }
 
+    const auto pdfRevision = manager.revision();
+    const auto renamedPdf = url("renamed document.pdf");
+    QFile::remove(renamedPdf.toLocalFile());
+    if (!require(externalMove(path("document.pdf"), renamedPdf.toLocalFile()) && waitFor([&] { return manager.source() == renamedPdf; }) && manager.page() == 1 && manager.revision() == pdfRevision, "PDF rename retains current page and rendered content"))
+        return 62;
+    if (!require(externalMove(renamedPdf.toLocalFile(), path("document.pdf")) && waitFor([&] { return manager.source() == url("document.pdf"); }), "Restore PDF playlist"))
+        return 62;
     manager.previous();
 
     if (!require(ready() && manager.kind() == "text", "Previous file")) {
@@ -358,6 +406,45 @@ int main(int argc, char** argv) {
         if (!require(manager.text() == "Autosaved extensionless document" && !view->property("dirty").toBool(), "Extensionless autosave"))
             return 41;
     }
+
+    const auto folderSource = path("watched folder");
+    const auto folderDestination = path("moved folder");
+    QDir(folderDestination).removeRecursively();
+    QDir(folderSource).removeRecursively();
+    QDir().mkpath(folderSource);
+    QFile nested(folderSource + "/nested.txt");
+    if (!nested.open(QIODevice::WriteOnly))
+        return 52;
+    nested.write("Nested document");
+    nested.close();
+    manager.open(QUrl::fromLocalFile(nested.fileName()));
+    if (!require(ready() && externalMove(folderSource, folderDestination) && waitFor([&] { return manager.source().toLocalFile() == folderDestination + "/nested.txt"; }), "External move of containing folder"))
+        return 52;
+    text->setProperty("text", QStringLiteral("Updated nested document"));
+    if (!require(manager.text() == "Updated nested document" && !QFileInfo::exists(folderSource), "Moved containing folder receives saves"))
+        return 53;
+    // External edits reload a clean editor, but never replace a failed-save draft.
+    QFile external(manager.source().toLocalFile());
+    if (!external.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return 54;
+    external.write("External clean edit");
+    external.close();
+    if (!require(waitFor([&] { return manager.text() == "External clean edit"; }), "Clean external document refresh"))
+        return 54;
+    if (!external.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return 55;
+    external.write("Conflicting edit");
+    external.close();
+    text->setProperty("text", QStringLiteral("Keep this draft"));
+    if (!require(view->property("dirty").toBool() && !manager.saveError().isEmpty(), "Conflict draft pending"))
+        return 55;
+    QFile::remove(external.fileName());
+    if (!require(waitFor([&] { return !manager.available(); }) && view->property("dirty").toBool() && text->property("text").toString() == "Keep this draft", "Deletion preserves unsaved draft"))
+        return 55;
+    QVariant deletedCanClose = true;
+    QMetaObject::invokeMethod(view, "requestClose", Q_RETURN_ARG(QVariant, deletedCanClose));
+    if (!require(!deletedCanClose.toBool(), "Deleted document cannot discard a failed-save draft"))
+        return 55;
 
     manager.open(url("binary.bin"));
 
@@ -426,6 +513,29 @@ int main(int argc, char** argv) {
     if (!require(manager.muted() && std::abs(manager.volume() - 0.25) < 0.001 && waitFor([&] { return manager.playing(); }), "Audio controls and resume")) {
         return 20;
     }
+
+    manager.togglePlayback();
+    if (!require(waitFor([&] { return !manager.playing(); }), "Pause before external video move"))
+        return 56;
+    const auto retainedPosition = manager.position();
+    const auto retainedRevision = manager.revision();
+    window->setProperty("width", 615);
+    window->setProperty("height", 410);
+    const auto movedVideo = url("moved video.mp4");
+    QFile::remove(movedVideo.toLocalFile());
+    if (!require(externalMove(path("video.mp4"), movedVideo.toLocalFile()) && waitFor([&] { return manager.source() == movedVideo; }) && manager.position() == retainedPosition && !manager.playing() && manager.revision() == retainedRevision && window->property("width").toInt() == 615 && window->property("height").toInt() == 410, "Video rename preserves stream, playback and manual window geometry")) {
+        std::cerr << "source=" << manager.source().toString().toStdString() << " pos=" << manager.position() << "/" << retainedPosition << " revision=" << manager.revision() << "/" << retainedRevision << " dimensions=" << window->property("width").toInt() << ":" << window->property("height").toInt() << " playing=" << manager.playing() << "\n";
+        return 56;
+    }
+    manager.seek(500);
+    if (!require(waitFor([&] { return manager.position() < 1000; }), "Seek after external video move"))
+        return 57;
+    manager.togglePlayback();
+    if (!require(waitFor([&] { return manager.playing(); }), "Resume after external video move"))
+        return 57;
+    externalMove(movedVideo.toLocalFile(), path("video.mp4"));
+    if (!require(waitFor([&] { return manager.source() == url("video.mp4"); }), "Repeated external rename"))
+        return 57;
 
     manager.open(url("portrait.mp4"));
 
@@ -510,7 +620,7 @@ int main(int argc, char** argv) {
         return 23;
     }
 
-    std::cout << "Preview providers and Liquid window: images, PDF pages, text, audio/video, seeking, navigation, replacement and close passed\n";
+    std::cout << "Preview providers and Liquid window: images, PDF pages, text, audio/video, seeking, relocation, draft protection and close passed\n";
 }
 
 #include "check.moc"

@@ -3,6 +3,8 @@
 
 #include <pedro/papi/gui/preview/registry.h>
 
+#include <pedro/papi/io/file/watch.h>
+
 #include <QMutex>
 #include <QVariantList>
 
@@ -19,6 +21,7 @@ namespace Pedro::Papi::Gui::Preview {
             Q_PROPERTY(bool editable READ editable NOTIFY changed)
             Q_PROPERTY(QString saveError READ saveError NOTIFY changed)
             Q_PROPERTY(bool textTruncated READ textTruncated NOTIFY changed)
+            Q_PROPERTY(bool available READ available NOTIFY changed)
             Q_PROPERTY(bool active READ active NOTIFY changed)
             Q_PROPERTY(bool busy READ busy NOTIFY changed)
             Q_PROPERTY(int page READ page NOTIFY changed)
@@ -64,6 +67,8 @@ namespace Pedro::Papi::Gui::Preview {
 
             bool active() const;
 
+            bool available() const;
+
             bool busy() const;
 
             int page() const;
@@ -100,6 +105,10 @@ namespace Pedro::Papi::Gui::Preview {
 
             Q_INVOKABLE void close();
 
+            Q_INVOKABLE void relocate(const QUrl& source, const QUrl& destination);
+
+            Q_INVOKABLE void reload();
+
             Q_INVOKABLE void next();
 
             Q_INVOKABLE void previous();
@@ -121,13 +130,21 @@ namespace Pedro::Papi::Gui::Preview {
 
             void opened();
 
+            void relocated(const QUrl& source, const QUrl& destination);
+
+            void fileChanged();
+
         private:
 
             void select(const QUrl& source);
 
             void update();
 
+            Pedro::Papi::Io::File::Watch watch;
+
             bool readOnly = false;
+
+            bool savingText = false;
 
             Registry registry;
 
