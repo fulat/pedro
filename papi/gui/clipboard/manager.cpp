@@ -99,6 +99,13 @@ namespace Pedro::Papi::Gui::Clipboard {
         return false;
     }
 
+    bool Manager::canCut(const QVariantList& urls) const {
+        return std::any_of(urls.cbegin(), urls.cend(), [this](const auto& value) {
+            const auto url = value.toUrl();
+            return url.isLocalFile() && !isCut(url);
+        });
+    }
+
     bool Manager::busy() const {
         return transfer.busy();
     }
@@ -108,6 +115,13 @@ namespace Pedro::Papi::Gui::Clipboard {
     }
 
     void Manager::copy(const QVariantList& values, bool cut) {
+        if (cut && !canCut(values)) {
+            return;
+        }
+        setFiles(values, cut);
+    }
+
+    void Manager::setFiles(const QVariantList& values, bool cut) {
         QList<QUrl> urls;
         QByteArray data = cut ? "cut" : "copy";
         for (const auto& value : values) {
@@ -149,7 +163,7 @@ namespace Pedro::Papi::Gui::Clipboard {
                 if (remaining.isEmpty()) {
                     QGuiApplication::clipboard()->clear();
                 } else {
-                    copy(remaining, true);
+                    setFiles(remaining, true);
                 }
             }
         });

@@ -10,6 +10,7 @@ Controls.Menu {
     property real maximumHeight: 600
     property string folderName
     property bool canPaste: false
+    property bool canCut: true
     property int selectionCount: 1
     property bool fileMode: false
     property bool imageFile: false

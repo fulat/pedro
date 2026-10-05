@@ -54,9 +54,13 @@ Rectangle {
     Shortcut {
         context: Qt.WindowShortcut
         sequence: "Ctrl+X"
-        enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
-            && !browser.controller.selectedEntry.inTrash
-            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined)
+        enabled: {
+            const pending = Backend.clipboard.cutFiles;
+            return browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
+                && !browser.controller.selectedEntry.inTrash
+                && Backend.clipboard.canCut([browser.controller.selectedEntry.url])
+                && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined);
+        }
         onActivated: browser.controller.entryAction("cut", browser.controller.selectedEntry)
     }
 

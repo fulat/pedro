@@ -61,6 +61,11 @@ Item {
             return;
         }
         menu.selectionCount = controller && controller.contextEntries ? controller.contextEntries(entry).length : 1;
+        menu.canCut = Qt.binding(() => {
+            const pending = Backend.clipboard.cutFiles;
+            const entries = controller && controller.contextEntries ? controller.contextEntries(entry) : [entry];
+            return Backend.clipboard.canCut(entries.map(item => item.url));
+        });
         menu.canPaste = Qt.binding(() => Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(entryItem.entry.url || ""));
         menu.folderName = entry.name || "";
         menu.fileMode = !folder;
@@ -109,13 +114,12 @@ Item {
     Icon.Tinted {
         objectName: "cutBadge"
         visible: entryItem.cutPending
-        anchors.right: fileIcon.right
-        anchors.top: fileIcon.top
-        width: Math.max(14, Math.min(24, entryItem.iconSize * 0.4))
+        anchors.centerIn: fileIcon
+        width: Math.max(16, Math.min(36, entryItem.iconSize * 0.65))
         height: width
         source: "../../../assets/icons/cut.svg"
         tint: "#b8bec7"
-        opacity: Theme.cutOpacity
+        opacity: 0.85
     }
     Text {
         opacity: entryItem.cutPending ? Theme.cutOpacity : 1

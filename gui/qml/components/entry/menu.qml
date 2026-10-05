@@ -13,6 +13,7 @@ Controls.Menu {
     property real maximumHeight: 600
     property string folderName
     property bool canPaste: false
+    property bool canCut: true
     property int selectionCount: 1
     property bool fileMode: false
     property bool imageFile: false
@@ -169,6 +170,7 @@ Controls.Menu {
     Entry {
         text: qsTranslate("Pedro", "folder.menu.cut")
         symbol: "cut"
+        enabled: root.canCut
         shortcutText: "Ctrl+X"
         onTriggered: root.actionRequested("cut")
     }

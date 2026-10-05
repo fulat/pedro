@@ -88,7 +88,7 @@ actions = '''
                 if (!item) return;
                 const icon = item.children.find(child => child.kind !== undefined);
                 const badge = item.children.find(child => child.objectName === "cutBadge");
-                if (!badge || !badge.visible || badge.opacity >= 1) {
+                if (!badge || !badge.visible || badge.opacity >= 1 || badge.anchors.centerIn !== icon) {
                     console.error("CLIPBOARD UI FAILED: missing cut scissors"); Qt.exit(1); return;
                 }
                 if (!item.cutPending || !icon || icon.opacity >= 1 || !item.enabled || item.opacity !== 1) {

@@ -58,6 +58,10 @@ int main(int argc, char** argv) {
     require(!error.isEmpty(), "Recursive folder paste must fail");
     error.clear();
     manager.copy({QUrl::fromLocalFile(file.fileName())}, true);
+    require(!manager.canCut({QUrl::fromLocalFile(file.fileName())}), "Repeated cut must be disabled");
+    const auto* cutMime = QGuiApplication::clipboard()->mimeData();
+    manager.copy({QUrl::fromLocalFile(file.fileName())}, true);
+    require(QGuiApplication::clipboard()->mimeData() == cutMime, "Repeated cut must not replace clipboard");
     require(!manager.canPasteInto(QUrl::fromLocalFile(root + "/source/folder")), "Cut cannot paste into its source directory");
     require(manager.canPasteInto(QUrl::fromLocalFile(root + "/destination")), "Cut can paste into another directory");
     require(QFile::link(root + "/source/folder", root + "/source-alias"), "Cannot create source alias");

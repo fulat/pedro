@@ -30,6 +30,8 @@ namespace Pedro::Papi::Gui::Clipboard {
 
             Q_INVOKABLE bool isCut(const QUrl& url) const;
 
+            Q_INVOKABLE bool canCut(const QVariantList& urls) const;
+
             Pedro::Papi::Io::Transfer::Manager* operation();
 
             Q_INVOKABLE void copy(const QVariantList& urls, bool cut = false);
@@ -44,6 +46,8 @@ namespace Pedro::Papi::Gui::Clipboard {
         private:
 
             void refreshCutFiles();
+
+            void setFiles(const QVariantList& urls, bool cut);
 
             QVariantList pendingCutFiles;
 

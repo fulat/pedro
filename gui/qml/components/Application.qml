@@ -131,8 +131,12 @@ ApplicationWindow {
     Shortcut {
         context: Qt.WindowShortcut
         sequence: "Ctrl+X"
-        enabled: window.active && window.selectedDesktopIds.length > 0
-            && !(window.activeFocusItem && window.activeFocusItem.selectedText !== undefined)
+        enabled: {
+            const pending = Backend.clipboard.cutFiles;
+            return window.active && window.selectedDesktopIds.length > 0
+                && Backend.clipboard.canCut(window.controller.contextEntries({id: window.selectedDesktopIds[0]}).map(item => item.url))
+                && !(window.activeFocusItem && window.activeFocusItem.selectedText !== undefined);
+        }
         onActivated: window.controller.entryAction("cut", {id: window.selectedDesktopIds[0]})
     }
 
