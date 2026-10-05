@@ -102,6 +102,17 @@ int main(int argc, char** argv) {
         const auto entry = value.toMap();
         require(entry.value("inTrash").toBool() && entry.value("canRestore").toBool() && !entry.value("originalPath").toString().isEmpty(), "Missing restoration metadata");
     }
+    Pedro::Papi::Io::Directory::Model independent;
+    directory.setSearch("FOTOGRAFÍA");
+    require(independent.search().isEmpty(), "Search must be independent per window");
+    require(directory.entriesModel()->rowCount() == 1 && directory.fileModel()->rowCount() == 1 && directory.folderModel()->rowCount() == 0 && directory.files().size() == 1 && directory.folders().isEmpty(), "Search must match Unicode names case insensitively across all views");
+    directory.setSearch("nested");
+    require(directory.folderModel()->rowCount() == 1 && directory.files().isEmpty(), "Search must include folders");
+    directory.setSearch(".*");
+    require(directory.entriesModel()->rowCount() == 0 && directory.count() == 2, "Search must be literal and preserve source entries");
+    directory.setSort("modified");
+    directory.setSearch("");
+    require(directory.entriesModel()->rowCount() == 2 && directory.files().size() == 1 && directory.folders().size() == 1, "Clearing search must restore results");
     require(!QFile::exists(path) && items().size() == 2, "Trash failed");
     QDir().mkpath(base + "/copies");
     Pedro::Papi::Io::Transfer::Manager transfer;
@@ -139,10 +150,20 @@ int main(int argc, char** argv) {
     const auto partialPath = base + "/partial.txt";
     write(partialPath);
     QThread::msleep(1100);
+    directory.setSearch("PARTIAL");
     manager.move({QUrl::fromLocalFile(partialPath), QUrl::fromLocalFile(base + "/missing")});
     wait(manager, false);
     waitItems(1);
     require(items().size() == 1, "Partial batch failed");
+    QElapsedTimer searchTimer;
+    searchTimer.start();
+    while ((directory.loading() || directory.fileModel()->rowCount() != 1) && searchTimer.elapsed() < 5000) {
+        QCoreApplication::processEvents();
+        while (g_main_context_iteration(nullptr, false)) {
+        }
+        QThread::msleep(20);
+    }
+    require(directory.files().size() == 1 && directory.files().first().toMap().value("name").toString() == "partial.txt", "Directory monitor must apply active search to new entries");
     QDir(base).removeRecursively();
     manager.restore(items());
     wait(manager);

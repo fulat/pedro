@@ -39,7 +39,10 @@ ScrollView {
                 function openEntry(entry) {
                     select(entry);
                     const locations = columns.locations.slice(0, index + 1);
-                    if (entry.isDirectory) locations.push(entry.url);
+                    if (entry.isDirectory) {
+                        columns.controller.directory.search = "";
+                        locations.push(entry.url);
+                    }
                     else columns.controller.previewEntry(entry);
                     columns.locations = locations;
                 }
@@ -48,6 +51,7 @@ ScrollView {
                 Directory {
                     id: directory
                     Component.onCompleted: { open(column.modelData); setSort(columns.controller.sortKey); }
+                    search: columns.controller.directory.search
                 }
                 DropArea {
                     anchors.fill: parent

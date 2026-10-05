@@ -1242,6 +1242,11 @@
             <translation>Public</translation>
         </message>
         <message>
+            <source>files.browser.noResults</source>
+            <extracomment>Stable Pedro key: files.browser.noResults</extracomment>
+            <translation>No matching files or folders</translation>
+        </message>
+        <message>
             <source>files.browser.empty</source>
             <extracomment>Stable Pedro key: files.browser.empty</extracomment>
             <translation>This location is empty</translation>

@@ -219,6 +219,14 @@ Rectangle {
                 color: browser.colors.muted
                 wrapMode: Text.WordWrap
             }
+            Text {
+                visible: !directory.loading && directory.search.length > 0 && browser.controller.files.length + browser.controller.folders.length === 0 && !directory.error.length
+                Layout.fillWidth: true
+                text: qsTranslate("Pedro", "files.browser.noResults")
+                color: browser.colors.muted
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
             ScrollView {
                 id: contentScroll
                 objectName: "filesBodyScroll"
@@ -283,7 +291,7 @@ Rectangle {
                         }
                     }
                     Text {
-                        visible: !directory.loading && directory.rowCount() === 0 && !directory.error.length
+                        visible: !directory.loading && !directory.search.length && directory.count === 0 && !directory.error.length
                         Layout.fillWidth: true
                         text: qsTranslate("Pedro", "files.browser.empty")
                         color: browser.colors.muted

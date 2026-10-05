@@ -27,7 +27,19 @@ namespace Pedro::Papi::Io::Directory {
 
                 QString key = "name";
 
+                void setSearch(const QString& text) {
+                    query = text;
+                    invalidateFilter();
+                }
+
+                QString query;
+
             protected:
+
+                bool filterAcceptsRow(int row, const QModelIndex& parent) const override {
+                    const auto name = sourceModel()->data(sourceModel()->index(row, 0, parent), entryRole).toMap().value("name").toString();
+                    return name.contains(query, Qt::CaseInsensitive);
+                }
 
                 bool lessThan(const QModelIndex& left, const QModelIndex& right) const override {
                     const auto first = sourceModel()->data(left, entryRole).toMap();
@@ -57,7 +69,7 @@ namespace Pedro::Papi::Io::Directory {
             protected:
 
                 bool filterAcceptsRow(int row, const QModelIndex& parent) const override {
-                    return sourceModel()->data(sourceModel()->index(row, 0, parent), entryRole).toMap().value("isDirectory").toBool() == folders;
+                    return Order::filterAcceptsRow(row, parent) && sourceModel()->data(sourceModel()->index(row, 0, parent), entryRole).toMap().value("isDirectory").toBool() == folders;
                 }
 
             private:
@@ -398,6 +410,27 @@ namespace Pedro::Papi::Io::Directory {
         return QUrl(state->location).fileName(QUrl::FullyDecoded);
     }
 
+    QString Model::search() const {
+        return state->all.query;
+    }
+
+    void Model::setSearch(const QString& text) {
+        if (search() == text) {
+            return;
+        }
+
+        for (Order* proxy : {&state->all, static_cast<Order*>(&state->folders), static_cast<Order*>(&state->files)}) {
+            proxy->setSearch(text);
+        }
+
+        emit searchChanged();
+        emit contentsChanged();
+    }
+
+    int Model::count() const {
+        return state->entries.size();
+    }
+
     QString Model::error() const {
         return state->error;
     }
@@ -441,7 +474,7 @@ namespace Pedro::Papi::Io::Directory {
 
         QVariantList result;
         for (const auto& item : state->entries) {
-            if (item.value("isDirectory").toBool()) {
+            if (item.value("isDirectory").toBool() && item.value("name").toString().contains(search(), Qt::CaseInsensitive)) {
                 result.append(item);
             }
         }
@@ -452,7 +485,7 @@ namespace Pedro::Papi::Io::Directory {
 
         QVariantList result;
         for (const auto& item : state->entries) {
-            if (!item.value("isDirectory").toBool()) {
+            if (!item.value("isDirectory").toBool() && item.value("name").toString().contains(search(), Qt::CaseInsensitive)) {
                 result.append(item);
             }
         }

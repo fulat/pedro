@@ -196,10 +196,11 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 - [x] Menú del espacio vacío para creación asíncrona y propiedades de la carpeta actual; selección limpia al pulsar fuera; menus contextuales pueden sobresalir de la ventana.
 - [x] Título alterna lateral completo/iconos, animación suave; controles de ventana y resize por bordes/esquinas.
 - [ ] Ajustar ancho del lateral arrastrando la división.
-- [ ] Conectar búsqueda local, filtros y edición de marcadores; la presentación existe. El soporte de etiquetas se registra en Extended File Metadata / Tags.
+- [x] Búsqueda por nombre dentro de la ubicación abierta, sin distinguir mayúsculas, mediante proxies Qt del modelo PAPI; incluye carpetas y archivos en las cuatro vistas.
+- [ ] Conectar filtros y edición de marcadores; la presentación existe. El soporte de etiquetas se registra en Extended File Metadata / Tags.
 - [x] Papelera real mediante GIO/GVfs: enviar desde Desktop/Files y arrastrar al dock, restaurar sin sobrescribir y eliminar/vaciar con confirmación.
 - [ ] Completar las demás operaciones de archivos desde Files; aplicar los jobs definidos en Storage & Filesystem.
-- [ ] Integrar los backends GIO/GVfs necesarios en la futura sesión de producción.
+- [ ] Integrar GIO/GVfs y sus backends de Papelera y volúmenes en la futura sesión de producción: distribuir las dependencias y activar sus servicios D-Bus; verificar `trash:///`, restauración, vaciado y monitorización dentro de la sesión propia de Pedro. La validación actual en Ubuntu/GNOME no completa esta integración.
 
 Detalle: [Pedro Files](files.md).
 

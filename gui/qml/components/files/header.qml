@@ -13,7 +13,7 @@ Item {
     readonly property real trailingWidth: 278 + (showEmpty ? emptyTrash.contentItem.implicitWidth + 40 : 0)
     readonly property real locationMinimumWidth: Math.min(220, Math.max(110, width - (searchExpanded ? 220 : 44) - header.trailingWidth))
     readonly property string currentPath: controller && controller.directory ? controller.directory.path || controller.directory.location : ""
-    readonly property bool showEmpty: !!controller && controller.directory.place === "trash" && controller.folders.length + controller.files.length > 0
+    readonly property bool showEmpty: !!controller && controller.directory.place === "trash" && controller.directory.count > 0
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     TextMetrics {
@@ -40,7 +40,7 @@ Item {
                 }
                 if (active && header.searchExpanded) {
                     const local = parent.mapToItem(searchInput, point.position.x, point.position.y);
-                    if (!searchInput.contains(local)) header.searchExpanded = false;
+                    if (!searchInput.contains(local) && !searchInput.text.length) header.searchExpanded = false;
                 }
             }
         }
@@ -50,7 +50,7 @@ Item {
         function onActiveChanged() {
             if (!header.Window.window || !header.Window.window.active) {
                 header.pathExpanded = false;
-                header.searchExpanded = false;
+                if (!searchInput.text.length) header.searchExpanded = false;
             }
         }
     }
@@ -132,13 +132,15 @@ Item {
             Layout.minimumWidth: 220
             Layout.maximumWidth: 220
             Layout.preferredHeight: 38
+            text: header.controller ? header.controller.directory.search : ""
+            onTextEdited: { if (header.controller) header.controller.directory.search = text; }
             placeholderText: qsTranslate("Pedro", "files.browser.search")
             color: header.colors.ink
             placeholderTextColor: header.colors.muted
             selectByMouse: true
             font.pixelSize: 13
             leftPadding: 38
-            Keys.onEscapePressed: { header.searchExpanded = false; focus = false; }
+            Keys.onEscapePressed: { if (header.controller) header.controller.directory.search = ""; header.searchExpanded = false; focus = false; }
             Icon.Tinted {
                 x: 12
                 anchors.verticalCenter: parent.verticalCenter

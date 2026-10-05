@@ -247,6 +247,7 @@
     "files.sample.modifiedDate": "Sep 27, 2025, 11:42",
     "files.browser.desktop": "Desktop",
     "files.browser.public": "Public",
+    "files.browser.noResults": "No matching files or folders",
     "files.browser.empty": "This location is empty",
     "files.view.grid": "Grid",
     "files.view.list": "List",

@@ -49,6 +49,16 @@ actions = '''
                     Qt.exit(1);
                     return;
                 }
+                const search = main.findTrashControl(surface, "filesSearchInput");
+                search.text = "pedro-impossible-match-[.*]";
+                search.textEdited();
+                if (controller.directory.search !== search.text || controller.directory.entriesModel.rowCount() !== 0
+                    || empty.visible !== (controller.directory.count > 0)) {
+                    console.error("TRASH UI FAILED: search binding or Trash action hidden by filter");
+                    Qt.exit(1);
+                    return;
+                }
+                controller.directory.search = "";
                 const entry = controller.files.concat(controller.folders)[0];
                 if (entry) controller.select(entry);
                 const component = Qt.createComponent("qml/components/entry/trash.qml");
@@ -80,6 +90,8 @@ actions = '''
             } else if (step === 3) {
                 const owner = main.controller.filesQuickWindow;
                 owner.contentItem.confirmationWindow.reject();
+                owner.controller.viewMode = "columns";
+                owner.controller.directory.search = "pedro-impossible-match-[.*]";
                 const component = Qt.createComponent("qml/components/confirmation/window.qml");
                 probe = component.createObject(main, {ownerWindow: owner, title: "Pedro test", message: "Reusable confirmation", confirmText: "Confirm"});
                 if (!probe) {
@@ -92,6 +104,20 @@ actions = '''
                 probe.open();
                 owner.requestActivate();
             } else if (step === 4) {
+                const owner = main.controller.filesQuickWindow;
+                const columns = main.findTrashControl(owner.contentItem.parent.parent, "filesColumns");
+                if (!columns || !columns.visible || owner.controller.directory.search !== "pedro-impossible-match-[.*]") {
+                    console.error("TRASH UI FAILED: column search");
+                    Qt.exit(1);
+                    return;
+                }
+                owner.controller.directory.open(owner.controller.directory.location);
+                if (owner.controller.directory.search.length) {
+                    console.error("TRASH UI FAILED: navigation must clear search");
+                    Qt.exit(1);
+                    return;
+                }
+                owner.controller.viewMode = "mixed";
                 const cancel = main.findTrashControl(probe.contentItem, "confirmationCancel");
                 if (!cancel || !cancel.activeFocus) {
                     console.error("TRASH UI FAILED: safe default focus");

@@ -16,6 +16,8 @@ QtObject {
 
     property Connections selectionConnection: Connections {
         target: controller.directory || null
+        function onLocationChanged() { controller.directory.search = ""; controller.selectedEntry = {}; }
+        function onSearchChanged() { controller.selectedEntry = {}; }
         function onContentsChanged() {
             if (!controller.selectedEntry.id) {
                 return;
