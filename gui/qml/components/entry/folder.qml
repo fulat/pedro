@@ -12,7 +12,7 @@ Loader {
     property string label: entry.name || ""
     property int nameAlignment: Text.AlignHCenter
     property int nameSize: 12
-    property bool nameBold: false
+    property int nameWeight: Font.Medium
     readonly property bool renaming: !!item && item.renaming
     readonly property var nameEditor: item ? item.nameEditor : null
     property bool inputEnabled: true
@@ -43,7 +43,7 @@ Loader {
         item.label = Qt.binding(() => root.label);
         item.nameAlignment = Qt.binding(() => root.nameAlignment);
         item.nameSize = Qt.binding(() => root.nameSize);
-        item.nameBold = Qt.binding(() => root.nameBold);
+        item.nameWeight = Qt.binding(() => root.nameWeight);
         item.inputEnabled = Qt.binding(() => root.inputEnabled);
         item.inputSurface = Qt.binding(() => root.inputSurface || item);
         item.activateOnClick = Qt.binding(() => root.activateOnClick);

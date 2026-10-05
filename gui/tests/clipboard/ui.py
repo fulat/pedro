@@ -19,8 +19,9 @@ for name in ('qml', 'config', 'assets'):
     link = target / name
     if not link.exists():
         link.symlink_to(root / 'gui' / name, target_is_directory=True)
-source = (root / 'gui/Main.qml').read_text().replace('import QtQuick', 'import gui\nimport QtQuick', 1)
+source = (root / 'gui/Main.qml').read_text().replace('import QtQuick', 'import gui\nimport QtTest\nimport QtQuick', 1)
 actions = '''
+    TestCase { id: pointerProbe; when: false }
     property QtObject transferProbe: QtObject {
         property bool busy: false
         property real progress: 0.55
@@ -200,7 +201,12 @@ actions = '''
                 item.cancelRename();
                 item.beginRename();
                 item.nameEditor.text = "clicked away.txt";
-                Qt.callLater(() => window.contentItem.forceActiveFocus());
+                Qt.callLater(() => {
+                    pointerProbe.mouseClick(item.nameEditor, item.nameEditor.width / 2, item.nameEditor.height / 2);
+                    if (!item.renaming) { console.error("CLIPBOARD UI FAILED: click inside editor committed"); Qt.exit(1); return; }
+                    pointerProbe.mouseClick(item, item.width / 2, 16);
+                    if (item.renaming) { console.error("CLIPBOARD UI FAILED: icon click did not commit"); Qt.exit(1); }
+                });
             } else if (step === 15) {
                 if (!controller.files.some(entry => entry.name === "clicked away.txt")) return;
                 console.log("CLIPBOARD UI PASSED: standalone behavior, four views, rename, duplicate and cancel");

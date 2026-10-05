@@ -5,7 +5,7 @@ import "../../scripts/theme.js" as Theme
 
 Item {
     id: name
-    property var behavior: ({renaming: false, label: "", textColor: "white", cutPending: false, nameSize: 12, nameBold: false, nameAlignment: Text.AlignHCenter})
+    property var behavior: ({renaming: false, label: "", textColor: "white", cutPending: false, nameSize: 12, nameWeight: Font.Medium, nameAlignment: Text.AlignHCenter})
     readonly property var editor: input
     property string appearanceMode: Backend.appearanceMode
     readonly property bool light: appearanceMode === "light"
@@ -19,14 +19,14 @@ Item {
         color: name.behavior.textColor
         opacity: name.behavior.cutPending ? Theme.cutOpacity : 1
         font.pixelSize: name.behavior.nameSize
-        font.bold: name.behavior.nameBold
+        font.weight: name.behavior.nameWeight
         horizontalAlignment: name.behavior.nameAlignment
         verticalAlignment: Text.AlignVCenter
         wrapMode: Text.Wrap
         maximumLineCount: 2
         textFormat: Text.PlainText
         style: Text.Raised
-        styleColor: "#70000000"
+        styleColor: "#c0000000"
     }
     Controls.TextField {
         id: input
@@ -35,7 +35,7 @@ Item {
         visible: name.behavior.renaming
         color: name.editorInk
         font.pixelSize: name.behavior.nameSize
-        font.bold: name.behavior.nameBold
+        font.weight: name.behavior.nameWeight
         horizontalAlignment: name.behavior.nameAlignment
         selectionColor: name.light ? "#405785bf" : "#555b91d1"
         selectedTextColor: name.editorInk

@@ -72,7 +72,6 @@ Item {
                             item.showName = false;
                             item.nameSurface = Qt.binding(() => nameSlot);
                             item.nameAlignment = Text.AlignLeft;
-                            item.nameBold = true;
                             item.textColor = Qt.binding(() => table.colors.ink);
                             item.inputSurface = row;
                             item.iconSize = 34;

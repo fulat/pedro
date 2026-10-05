@@ -19,7 +19,7 @@ Item {
     property string label: entry.name || ""
     property int nameAlignment: Text.AlignHCenter
     property int nameSize: 12
-    property bool nameBold: false
+    property int nameWeight: Font.Medium
     property bool renaming: false
     property url renameSource
     readonly property var nameEditor: nameLoader.item ? nameLoader.item.editor : null
@@ -111,13 +111,18 @@ Item {
         }
     }
 
-    TapHandler {
+    Item {
         parent: entryItem.registeredWindow ? entryItem.registeredWindow.contentItem : entryItem
-        enabled: entryItem.renaming
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onTapped: point => {
-            const local = parent.mapToItem(entryItem.nameEditor, point.position.x, point.position.y);
-            if (!entryItem.nameEditor.contains(local)) entryItem.finishRename(false);
+        anchors.fill: parent
+        z: 10000
+        visible: entryItem.renaming
+        PointHandler {
+            acceptedButtons: Qt.AllButtons
+            onActiveChanged: {
+                if (!active || !entryItem.renaming) return;
+                const local = parent.mapToItem(entryItem.nameEditor, point.position.x, point.position.y);
+                if (!entryItem.nameEditor.contains(local)) entryItem.finishRename(false);
+            }
         }
     }
 
