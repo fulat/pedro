@@ -19,14 +19,14 @@ Item {
         opacity: name.behavior.cutPending ? Theme.cutOpacity : 1
         Rectangle {
             id: shadowSurface
-            width: Math.min(display.width + 8, label.contentWidth + 16)
-            height: label.contentHeight + 6
-            x: label.horizontalAlignment === Text.AlignLeft ? -8
-                : label.horizontalAlignment === Text.AlignRight ? display.width - width + 8
+            width: Math.min(display.width, label.contentWidth)
+            height: label.contentHeight
+            x: label.horizontalAlignment === Text.AlignLeft ? 0
+                : label.horizontalAlignment === Text.AlignRight ? display.width - width
                 : (display.width - width) / 2
-            y: (display.height - height) / 2 + 1
+            y: (display.height - height) / 2
             radius: 8
-            color: "#8c000000"
+            color: "#66000000"
             visible: false
             layer.enabled: name.brightLabel
         }
