@@ -17,28 +17,6 @@ Item {
         anchors.fill: parent
         visible: !name.behavior.renaming
         opacity: name.behavior.cutPending ? Theme.cutOpacity : 1
-        Rectangle {
-            id: shadowSurface
-            width: Math.min(display.width, label.contentWidth)
-            height: label.contentHeight
-            x: label.horizontalAlignment === Text.AlignLeft ? 0
-                : label.horizontalAlignment === Text.AlignRight ? display.width - width
-                : (display.width - width) / 2
-            y: (display.height - height) / 2
-            radius: 8
-            color: "#55000000"
-            visible: false
-            layer.enabled: name.brightLabel
-        }
-        MultiEffect {
-            anchors.fill: shadowSurface
-            source: shadowSurface
-            visible: name.brightLabel
-            blurEnabled: true
-            blurMax: 12
-            blur: 1.0
-            autoPaddingEnabled: true
-        }
         Text {
             id: label
             objectName: "entryNameLabel"
@@ -52,6 +30,17 @@ Item {
             wrapMode: Text.Wrap
             maximumLineCount: 2
             textFormat: Text.PlainText
+            layer.enabled: name.brightLabel
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "#55000000"
+                shadowOpacity: 1.0
+                shadowBlur: 1.0
+                blurMax: 6
+                shadowHorizontalOffset: 0
+                shadowVerticalOffset: 1
+                autoPaddingEnabled: true
+            }
         }
     }
     Controls.TextField {
