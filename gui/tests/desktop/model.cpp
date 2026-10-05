@@ -145,6 +145,22 @@ int main(int argc, char** argv) {
     QFile::remove(added.fileName());
     waitFor([&] { return model.rowCount() == 5; });
 
+    const QPersistentModelIndex renamedIndex(model.index(0));
+    const auto original = entryAt(model, 0);
+    model.sort("size");
+    model.savePosition(original.value("id").toString(), 215, 325);
+    QSignalSpy removed(&model, &Model::rowsRemoved);
+    QSignalSpy inserted(&model, &Model::rowsInserted);
+    const auto originalPath = original.value("path").toString();
+    const auto renamedPath = originalPath + ".renamed";
+    require(QFile::rename(originalPath, renamedPath), "Cannot rename monitored file");
+    waitFor([&] { return renamedIndex.isValid() && renamedIndex.data(Qt::UserRole + 1).toMap().value("path") == renamedPath && renamedIndex.data(Qt::UserRole + 1).toMap().value("name").toString().endsWith(".renamed"); });
+    const auto renamedPosition = renamedIndex.data(Qt::UserRole + 1).toMap().value("position").toMap();
+    require(removed.isEmpty() && inserted.isEmpty(), "Rename must retain the desktop row and delegate");
+    require(renamedPosition.value("x") == 215 && renamedPosition.value("y") == 325, "Rename must retain its desktop position");
+    require(QFile::rename(renamedPath, originalPath), "Cannot restore renamed fixture");
+    waitFor([&] { return renamedIndex.data(Qt::UserRole + 1).toMap().value("path") == originalPath; });
+
     Model restored;
     waitFor([&] { return !restored.loading(); });
     require(restored.sortKey().isEmpty(), "New sessions must start without a selected sort");

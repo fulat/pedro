@@ -133,10 +133,16 @@ namespace Pedro::Papi::Io::Desktop {
                     }
             };
 
+            struct Batch {
+                    int remaining;
+                    QHash<QString, QVariantMap> entries;
+            };
+
             struct Query {
                     QPointer<Model> model;
                     QString uri;
                     quint64 revision;
+                    std::shared_ptr<Batch> batch;
             };
 
             explicit State(Model* model) : owner(model) {
@@ -194,10 +200,12 @@ namespace Pedro::Papi::Io::Desktop {
             void flush() {
 
                 const auto changes = std::exchange(pending, {});
+                auto batch = std::make_shared<Batch>();
+                batch->remaining = changes.size();
 
                 for (const auto& uri : changes) {
                     auto* file = g_file_new_for_uri(uri.toUtf8().constData());
-                    auto* query = new Query{owner, uri, revisions.value(uri)};
+                    auto* query = new Query{owner, uri, revisions.value(uri), batch};
                     g_file_query_info_async(
                         file, attributes, G_FILE_QUERY_INFO_NONE, G_PRIORITY_DEFAULT, cancellable,
                         [](GObject* source, GAsyncResult* result, gpointer data) {
@@ -207,9 +215,9 @@ namespace Pedro::Papi::Io::Desktop {
 
                             if (query->model && query->model->state->revisions.value(query->uri) == query->revision) {
                                 if (info) {
-                                    query->model->apply(query->uri, value(G_FILE(source), info));
+                                    query->batch->entries.insert(query->uri, value(G_FILE(source), info));
                                 } else if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
-                                    query->model->apply(query->uri, {});
+                                    query->batch->entries.insert(query->uri, {});
                                 } else if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
                                     query->model->setError(QString::fromUtf8(error->message));
                                 }
@@ -217,6 +225,31 @@ namespace Pedro::Papi::Io::Desktop {
                                 query->model->state->revisions.remove(query->uri);
                             }
 
+                            if (--query->batch->remaining == 0 && query->model) {
+                                // Resolve additions before removals: some filesystems report a
+                                // rename as delete/create rather than a paired move event.
+                                for (auto it = query->batch->entries.cbegin(); it != query->batch->entries.cend(); ++it) {
+                                    if (!it.value().isEmpty()) {
+                                        QString previousUri;
+                                        const auto identity = it.value().value("identity").toString();
+                                        if (!identity.isEmpty()) {
+                                            for (const auto& existing : query->model->state->entries) {
+                                                const auto id = existing.value("id").toString();
+                                                if (existing.value("identity").toString() == identity && query->batch->entries.contains(id) && query->batch->entries.value(id).isEmpty()) {
+                                                    previousUri = id;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        query->model->apply(it.key(), it.value(), previousUri);
+                                    }
+                                }
+                                for (auto it = query->batch->entries.cbegin(); it != query->batch->entries.cend(); ++it) {
+                                    if (it.value().isEmpty()) {
+                                        query->model->apply(it.key(), {});
+                                    }
+                                }
+                            }
                             if (info) {
                                 g_object_unref(info);
                             }
@@ -441,8 +474,27 @@ namespace Pedro::Papi::Io::Desktop {
                                          }
                                      }
 
+                                     // A rename changes the URL, not the desktop item. Keep its row
+                                     // and delegate alive instead of removing and reinserting it.
+                                     const auto oldId = QUrl(QString::fromUtf8(oldUri)).toString(QUrl::FullyEncoded);
+                                     const auto newUrl = QUrl(QString::fromUtf8(newUri));
+                                     state->pending.remove(QString::fromUtf8(oldUri));
+                                     state->revisions.remove(QString::fromUtf8(oldUri));
+                                     for (int row = 0; row < state->entries.size(); ++row) {
+                                         auto& entry = state->entries[row];
+                                         if (entry.value("id").toString() != oldId) {
+                                             continue;
+                                         }
+                                         entry["id"] = newUrl.toString(QUrl::FullyEncoded);
+                                         entry["url"] = newUrl;
+                                         entry["path"] = newUrl.toLocalFile();
+                                         emit state->owner->dataChanged(state->owner->index(row), state->owner->index(row), {entryRole});
+                                         break;
+                                     }
                                      g_free(oldUri);
                                      g_free(newUri);
+                                     state->queue(other);
+                                     return;
                                  }
 
                                  state->queue(file);
@@ -737,7 +789,7 @@ namespace Pedro::Papi::Io::Desktop {
         }
     }
 
-    void Model::apply(const QString& uri, const QVariantMap& value) {
+    void Model::apply(const QString& uri, const QVariantMap& value, const QString& previousUri) {
 
         auto entry = value;
 
@@ -755,8 +807,14 @@ namespace Pedro::Papi::Io::Desktop {
         }
 
         for (int row = 0; row < state->entries.size(); ++row) {
-            if (state->entries.at(row).value("id").toString() != uri) {
+            const auto previousEntry = state->entries.at(row);
+            const bool sameIdentity = !previousUri.isEmpty() && previousEntry.value("id").toString() == previousUri;
+            if (previousEntry.value("id").toString() != uri && !sameIdentity) {
                 continue;
+            }
+
+            if (sameIdentity && previousEntry.value("id").toString() != uri && previousEntry.contains("position")) {
+                entry.insert("position", previousEntry.value("position"));
             }
 
             if (entry.isEmpty()) {

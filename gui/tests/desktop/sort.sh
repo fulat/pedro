@@ -13,6 +13,8 @@ root = Path(sys.argv[1])
 (root / 'config/pedro/desktop.ini').unlink(missing_ok=True)
 (root / 'config/user-dirs.dirs').write_text(f'XDG_DESKTOP_DIR="{root}/desktop"\n')
 (root / 'desktop/new.txt').unlink(missing_ok=True)
+for path in (root / 'desktop').glob('*.renamed'):
+    path.unlink()
 for index, (name, size) in enumerate([('Alpha.txt', 10), ('Beta.svg', 100), ('node2.txt', 30), ('node10.txt', 200)]):
     path = root / 'desktop' / name
     path.write_text('x' * size)
@@ -25,9 +27,9 @@ PY
 commonSources=("$sourceDirectory/papi/io/content/icon.cpp" "$sourceDirectory/papi/io/desktop/model.cpp" "$taskDirectory/moc.cpp")
 read -r -a modelFlags <<< "$(pkg-config --cflags --libs Qt6Core Qt6Test gio-2.0 gio-unix-2.0)"
 read -r -a viewFlags <<< "$(pkg-config --cflags --libs Qt6Quick Qt6Qml gio-2.0 gio-unix-2.0)"
-c++ -std=c++17 -fPIC -I "$sourceDirectory/build/papi/include" \
+c++ -std=c++17 -fPIC -I "$sourceDirectory/build/dev/papi/include" \
     "$sourceDirectory/gui/tests/desktop/model.cpp" "${commonSources[@]}" "${modelFlags[@]}" -o "$taskDirectory/check"
-c++ -std=c++17 -fPIC -I "$sourceDirectory/build/papi/include" \
+c++ -std=c++17 -fPIC -I "$sourceDirectory/build/dev/papi/include" \
     "$sourceDirectory/gui/tests/desktop/view.cpp" "${commonSources[@]}" "${viewFlags[@]}" -o "$taskDirectory/view"
 
 XDG_CONFIG_HOME="$taskDirectory/config" "$taskDirectory/check"

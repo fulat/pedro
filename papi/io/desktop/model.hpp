@@ -83,7 +83,7 @@ namespace Pedro::Papi::Io::Desktop {
 
             struct State;
 
-            void apply(const QString& uri, const QVariantMap& entry);
+            void apply(const QString& uri, const QVariantMap& entry, const QString& previousUri = {});
 
             void setError(const QString& error);
 
