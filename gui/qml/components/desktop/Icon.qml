@@ -1,6 +1,7 @@
 import QtQuick
 
 import "../../scripts/theme.js" as Theme
+import "../icon" as Icon
 
 // Draws the presentation-only icon for a desktop shortcut.
 Item {
@@ -53,12 +54,19 @@ Item {
 
     Rectangle {
         visible: desktopIcon.kind === "video" && thumbnail.status === Image.Ready
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: 5
-        width: 19; height: 19; radius: 10
+        anchors.centerIn: parent
+        width: Math.min(34, desktopIcon.width * 0.46)
+        height: width
+        radius: width / 2
         color: "#b0202935"
-        Text { anchors.centerIn: parent; text: "▶"; color: "white"; font.pixelSize: 10 }
+
+        Icon.Tinted {
+            anchors.centerIn: parent
+            width: parent.width * 0.48
+            height: width
+            source: "../../../assets/icons/play.svg"
+            tint: "white"
+        }
     }
 
     Rectangle {
