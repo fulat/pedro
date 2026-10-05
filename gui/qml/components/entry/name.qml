@@ -10,6 +10,26 @@ Item {
     property string appearanceMode: Backend.appearanceMode
     readonly property bool light: appearanceMode === "light"
     readonly property color editorInk: light ? "#263b63" : "#e3ebf8"
+    readonly property bool brightLabel: label.color.r * 0.2126 + label.color.g * 0.7152 + label.color.b * 0.0722 > 0.55
+    Text {
+        // Native Qt text keeps the shadow aligned with the exact wrapped glyphs.
+        x: label.x
+        y: label.y + 2
+        width: label.width
+        height: label.height
+        visible: label.visible && name.brightLabel
+        text: label.text
+        font: label.font
+        color: "#d9000000"
+        opacity: label.opacity
+        horizontalAlignment: label.horizontalAlignment
+        verticalAlignment: label.verticalAlignment
+        wrapMode: label.wrapMode
+        maximumLineCount: label.maximumLineCount
+        textFormat: Text.PlainText
+        style: Text.Outline
+        styleColor: "#99000000"
+    }
     Text {
         id: label
         objectName: "entryNameLabel"
@@ -25,8 +45,8 @@ Item {
         wrapMode: Text.Wrap
         maximumLineCount: 2
         textFormat: Text.PlainText
-        style: Text.Raised
-        styleColor: "#c0000000"
+        style: name.brightLabel ? Text.Outline : Text.Normal
+        styleColor: "#a6000000"
     }
     Controls.TextField {
         id: input
