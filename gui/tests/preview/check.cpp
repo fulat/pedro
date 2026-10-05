@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     app.setQuitOnLastWindowClosed(false);
 
     if (argc != 4) {
-        std::cerr << "Usage: check preview/window.qml build/fixtures /path/to/ffmpeg\n";
+        std::cerr << "Usage: check preview/window.qml build/fixtures /path/to/media-generator\n";
         return 1;
     }
 
@@ -93,23 +93,27 @@ int main(int argc, char** argv) {
     cairo_destroy(context);
     cairo_surface_destroy(surface);
 
-    QProcess ffmpeg;
-    ffmpeg.start(QString::fromLocal8Bit(argv[3]), {"-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=160x90:rate=24", "-t", "3", "-c:v", "mpeg4", "-y", path("video.mp4")});
-
-    if (!ffmpeg.waitForFinished(30000) || ffmpeg.exitCode() != 0) {
-        std::cerr << ffmpeg.readAllStandardError().constData();
+    const auto mediaTool = QString::fromLocal8Bit(argv[3]);
+    const bool gstreamer = QFileInfo(mediaTool).fileName().startsWith("gst-launch");
+    const auto generate = [&mediaTool](const QStringList& arguments) {
+        QProcess process;
+        process.start(mediaTool, arguments);
+        if (!process.waitForFinished(30000) || process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
+            process.kill();
+            process.waitForFinished();
+            std::cerr << process.readAllStandardError().constData();
+            return false;
+        }
+        return true;
+    };
+    const auto video = [&path](const QString& name, int width, int height) { return QStringList{"-q", "videotestsrc", "num-buffers=72", "!", QStringLiteral("video/x-raw,width=%1,height=%2,framerate=24/1,pixel-aspect-ratio=1/1").arg(width).arg(height), "!", "avenc_mpeg4", "!", "mp4mux", "!", "filesink", "location=" + path(name)}; };
+    if (!generate(gstreamer ? video("video.mp4", 160, 90) : QStringList{"-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=160x90:rate=24", "-t", "3", "-c:v", "mpeg4", "-y", path("video.mp4")})) {
         return 3;
     }
-
-    ffmpeg.start(QString::fromLocal8Bit(argv[3]), {"-hide_banner", "-loglevel", "error", "-i", path("video.mp4"), "-vf", "scale=90:640,setsar=1", "-c:v", "mpeg4", "-y", path("portrait.mp4")});
-
-    if (!ffmpeg.waitForFinished(30000) || ffmpeg.exitCode() != 0) {
+    if (!generate(gstreamer ? video("portrait.mp4", 90, 640) : QStringList{"-hide_banner", "-loglevel", "error", "-i", path("video.mp4"), "-vf", "scale=90:640,setsar=1", "-c:v", "mpeg4", "-y", path("portrait.mp4")})) {
         return 31;
     }
-
-    ffmpeg.start(QString::fromLocal8Bit(argv[3]), {"-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "sine=frequency=440", "-t", "3", "-y", path("audio.wav")});
-
-    if (!ffmpeg.waitForFinished(30000) || ffmpeg.exitCode() != 0) {
+    if (!generate(gstreamer ? QStringList{"-q", "audiotestsrc", "num-buffers=130", "freq=440", "!", "wavenc", "!", "filesink", "location=" + path("audio.wav")} : QStringList{"-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "sine=frequency=440", "-t", "3", "-y", path("audio.wav")})) {
         return 4;
     }
 

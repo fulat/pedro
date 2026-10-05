@@ -2,8 +2,8 @@
 
 This check exercises the actual PAPI preview providers and the actual Liquid QML
 window. It generates all fixtures under the CMake binary directory using Qt,
-Cairo and FFmpeg. FFmpeg is needed only to generate test media, not by Pedro's
-runtime API.
+Cairo and either FFmpeg or GStreamer CLI. These tools generate test media;
+Pedro's runtime uses its existing native providers.
 
 ```bash
 cmake -S . -B build -G Ninja -DPEDRO_BUILD_IMAGE=OFF \
@@ -11,10 +11,12 @@ cmake -S . -B build -G Ninja -DPEDRO_BUILD_IMAGE=OFF \
 cmake --build build --target pedro-preview-check
 ```
 
-Use `-DPEDRO_PREVIEW_FFMPEG=/absolute/path/to/ffmpeg` if FFmpeg is not on PATH.
+The check finds `ffmpeg` or `gst-launch-1.0` on PATH. The GStreamer generator
+requires `videotestsrc`, `audiotestsrc`, `avenc_mpeg4`, `mp4mux` and `wavenc`.
+Use `-DPEDRO_PREVIEW_FFMPEG=/absolute/path/to/tool` to select the generator.
 Run `./setup.sh --preview` to install only the new native preview libraries,
 or `./setup.sh` for the complete host setup. Install the
-FFmpeg command-line tool separately for these checks. No OS image is built.
+FFmpeg command-line tool separately only if the GStreamer generator is unavailable. No OS image is built.
 
 The check covers Glycin image loading, PDF page pixels/navigation, literal text,
 large-text bounds, unsupported/corrupt files, superseded loads, GStreamer video

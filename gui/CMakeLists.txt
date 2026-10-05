@@ -398,7 +398,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets/wallpapers/" DESTINATION u
 # Preview integration checks use the same native providers and Liquid window.
 option(PEDRO_BUILD_PREVIEW_TESTS "Build the native preview integration check" OFF)
 if(PEDRO_BUILD_PREVIEW_TESTS)
-        find_program(PEDRO_PREVIEW_FFMPEG NAMES ffmpeg REQUIRED)
+        find_program(PEDRO_PREVIEW_FFMPEG NAMES ffmpeg gst-launch-1.0 REQUIRED)
         qt_add_executable(pedro_preview_check
                 tests/preview/check.cpp
                 backend/preview/provider.cpp)
