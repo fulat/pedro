@@ -392,6 +392,25 @@ namespace Pedro::Papi::Gui::Application {
         return reply.isValid() && reply.value();
     }
 
+    unsigned int Manager::placeWindowIdentity(unsigned int pid, const std::string& title, const std::string& shellTitle) const {
+
+        const QDBusReply<unsigned int> reply(callShell("PlaceWindowIdentity", {pid, QString::fromStdString(title), QString::fromStdString(shellTitle)}));
+        if (reply.isValid()) {
+            return reply.value();
+        }
+        // Existing sessions may still run the previous GNOME extension until login.
+        if (reply.error().type() == QDBusError::UnknownMethod) {
+            placeWindow(pid, title, shellTitle);
+        }
+        return 0;
+    }
+
+    bool Manager::activateWindowIdentity(unsigned int pid, unsigned int identity) const {
+
+        const QDBusReply<bool> reply(callShell("ActivateWindowIdentity", {pid, identity}));
+        return reply.isValid() && reply.value();
+    }
+
     void Manager::launch(const std::string& id) const {
 
         if (id.empty()) {

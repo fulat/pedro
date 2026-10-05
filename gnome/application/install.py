@@ -52,6 +52,10 @@ def main():
             print('Pedro stack window placement integration is active.')
         else:
             print('Stack window placement needs a GNOME logout and login to load PlaceWindow.')
+        if {'PlaceWindowIdentity', 'ActivateWindowIdentity'}.issubset(methods):
+            print('Pedro stable window identity integration is active.')
+        else:
+            print('Stable viewer identity needs a GNOME logout and login to load the new methods.')
         if 'ActivateWindow' in methods:
             print('Pedro viewer focus integration is active.')
         else:

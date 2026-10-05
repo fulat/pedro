@@ -15,6 +15,8 @@ const interfaceXml = `<node>
     <interface name="org.pedro.Applications">
         <method name="Activate"><arg type="s" direction="in" name="id"/></method>
         <method name="ActivateWindow"><arg type="u" direction="in" name="pid"/><arg type="s" direction="in" name="title"/><arg type="b" direction="out" name="success"/></method>
+        <method name="ActivateWindowIdentity"><arg type="u" direction="in" name="pid"/><arg type="u" direction="in" name="identity"/><arg type="b" direction="out" name="success"/></method>
+        <method name="PlaceWindowIdentity"><arg type="u" direction="in" name="pid"/><arg type="s" direction="in" name="title"/><arg type="s" direction="in" name="shellTitle"/><arg type="u" direction="out" name="identity"/></method>
         <method name="PlaceWindow"><arg type="u" direction="in" name="pid"/><arg type="s" direction="in" name="title"/><arg type="s" direction="in" name="shellTitle"/><arg type="b" direction="out" name="success"/></method>
         <method name="GetRunning"><arg type="as" direction="out" name="ids"/></method>
         <method name="Capture"><arg type="i" direction="in" name="x"/><arg type="i" direction="in" name="y"/><arg type="i" direction="in" name="width"/><arg type="i" direction="in" name="height"/><arg type="b" direction="in" name="video"/><arg type="b" direction="in" name="cursor"/><arg type="s" direction="in" name="filename"/><arg type="b" direction="out" name="success"/><arg type="s" direction="out" name="filename"/></method>
@@ -101,7 +103,22 @@ export default class Applications extends Extension {
         return true;
     }
 
-    PlaceWindowAsync([pid, title, shellTitle], invocation) {
+    ActivateWindowIdentity(pid, identity) {
+        const window = global.get_window_actors().map(actor => actor.meta_window)
+            .find(window => window.get_pid() === pid && window.get_stable_sequence() === identity);
+        if (!window) return false;
+        window.unminimize();
+        window.unset_demands_attention();
+        Main.activateWindow(window, global.display.get_current_time_roundtrip());
+        return true;
+    }
+
+    PlaceWindowAsync(arguments_, invocation) {
+        this.PlaceWindowIdentityAsync(arguments_, {
+            return_value: result => invocation.return_value(new GLib.Variant('(b)', [result.deep_unpack()[0] !== 0]))});
+    }
+
+    PlaceWindowIdentityAsync([pid, title, shellTitle], invocation) {
         let attempts = 0;
         const place = () => {
             const windows = global.get_window_actors().map(actor => actor.meta_window)
@@ -141,13 +158,15 @@ export default class Applications extends Extension {
             }
             window.move_frame(true, best.x, best.y);
             placed.add(window.get_stable_sequence());
-            return true;
+            return window.get_stable_sequence();
         };
-        const finish = success => invocation.return_value(new GLib.Variant('(b)', [success]));
-        if (place()) { finish(true); return; }
+        const finish = identity => invocation.return_value(new GLib.Variant('(u)', [identity || 0]));
+        const identity = place();
+        if (identity) { finish(identity); return; }
         // Qt can request placement before Mutter has mapped the new surface.
         GLib.timeout_add(GLib.PRIORITY_DEFAULT, 20, () => {
-            if (place()) { finish(true); return GLib.SOURCE_REMOVE; }
+            const identity = place();
+            if (identity) { finish(identity); return GLib.SOURCE_REMOVE; }
             if (++attempts >= 25) { finish(false); return GLib.SOURCE_REMOVE; }
             return GLib.SOURCE_CONTINUE;
         });

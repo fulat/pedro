@@ -21,6 +21,10 @@ namespace Pedro::Papi::Gui::Application {
 
             bool activateWindow(unsigned int pid, const std::string& title) const;
 
+            unsigned int placeWindowIdentity(unsigned int pid, const std::string& title, const std::string& shellTitle) const;
+
+            bool activateWindowIdentity(unsigned int pid, unsigned int identity) const;
+
             void setPinned(const std::string& id, bool pinned) const;
     };
 

@@ -141,6 +141,7 @@ Backend* Backend::create(QQmlEngine* engine, QJSEngine*) {
 }
 
 Backend::Backend(QObject* parent) : QObject(parent) {
+    placements_.setMaxThreadCount(1);
     auto documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     if (documents.isEmpty() || !QDir(documents).exists()) {
         documents = QDir::homePath();
@@ -666,11 +667,28 @@ void Backend::placeWindow(QObject* object, const QString& shellTitle) {
     if (!window) {
         return;
     }
+    if (window->property("pedroPlacementPending").toBool() || window->property("pedroWindowIdentity").toUInt()) {
+        return;
+    }
+    window->setProperty("pedroPlacementPending", true);
+    const QPointer<QQuickWindow> guardedWindow(window);
     const auto pid = static_cast<unsigned int>(QCoreApplication::applicationPid());
     const auto title = window->title().toStdString();
-    auto* watcher = new QFutureWatcher<bool>(this);
-    connect(watcher, &QFutureWatcher<bool>::finished, watcher, &QObject::deleteLater);
-    watcher->setFuture(QtConcurrent::run([pid, title, shellTitle] { return Pedro::Papi::Gui::Application::Manager{}.placeWindow(pid, title, shellTitle.toStdString()); }));
+    auto* watcher = new QFutureWatcher<unsigned int>(this);
+    connect(watcher, &QFutureWatcher<unsigned int>::finished, this, [this, guardedWindow, watcher] {
+        const auto identity = watcher->result();
+        watcher->deleteLater();
+        if (!guardedWindow) {
+            return;
+        }
+        guardedWindow->setProperty("pedroWindowIdentity", identity);
+        guardedWindow->setProperty("pedroPlacementPending", false);
+        if (guardedWindow->property("pedroActivationPending").toBool()) {
+            guardedWindow->setProperty("pedroActivationPending", false);
+            activateWindow(guardedWindow);
+        }
+    });
+    watcher->setFuture(QtConcurrent::run(&placements_, [pid, title, shellTitle] { return Pedro::Papi::Gui::Application::Manager{}.placeWindowIdentity(pid, title, shellTitle.toStdString()); }));
 }
 
 void Backend::activateWindow(QObject* object) {
@@ -680,6 +698,11 @@ void Backend::activateWindow(QObject* object) {
         return;
     }
 
+    if (window->property("pedroPlacementPending").toBool()) {
+        window->setProperty("pedroActivationPending", true);
+        return;
+    }
+    const auto identity = window->property("pedroWindowIdentity").toUInt();
     const auto pid = static_cast<unsigned int>(QCoreApplication::applicationPid());
     const auto title = window->title().toStdString();
     auto* watcher = new QFutureWatcher<bool>(this);
@@ -691,7 +714,10 @@ void Backend::activateWindow(QObject* object) {
             window->requestActivate();
         }
     });
-    watcher->setFuture(QtConcurrent::run([pid, title] { return Pedro::Papi::Gui::Application::Manager{}.activateWindow(pid, title); }));
+    watcher->setFuture(QtConcurrent::run([pid, title, identity] {
+        const Pedro::Papi::Gui::Application::Manager manager;
+        return identity ? manager.activateWindowIdentity(pid, identity) : manager.activateWindow(pid, title);
+    }));
 }
 
 void Backend::openPreview(const QUrl& source, const QVariantList& siblings, bool activateExisting) {

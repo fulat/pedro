@@ -27,6 +27,7 @@
 #include <QTimer>
 #include <QVariantList>
 #include <QSet>
+#include <QThreadPool>
 #include <QtQmlIntegration/qqmlintegration.h>
 
 #include <memory>
@@ -205,6 +206,8 @@ class Backend final : public QObject {
     private:
 
         void setStatusMessage(const QString& message);
+
+        QThreadPool placements_;
 
         Pedro::Papi::Gui::Clipboard::Manager clipboard_;
 
