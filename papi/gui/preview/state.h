@@ -3,6 +3,7 @@
 
 #include <QImage>
 #include <QString>
+#include <QStringConverter>
 
 namespace Pedro::Papi::Gui::Preview {
 
@@ -11,6 +12,8 @@ namespace Pedro::Papi::Gui::Preview {
             QString error;
             QString text;
             QByteArray originalText;
+            QStringConverter::Encoding textEncoding = QStringConverter::Utf8;
+            QByteArray textBom;
             bool editable = false;
             bool crlfText = false;
             QString saveError;

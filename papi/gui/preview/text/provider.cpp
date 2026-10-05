@@ -58,6 +58,15 @@ namespace Pedro::Papi::Gui::Preview::Text {
 
             result.text = lines.join('\n');
             result.originalText = bytes;
+            result.textEncoding = encoding;
+            QStringEncoder withBom(encoding, QStringConverter::Flag::WriteBom);
+            QStringEncoder withoutBom(encoding);
+            const QByteArray sample = withBom(QStringLiteral("x"));
+            const QByteArray plainSample = withoutBom(QStringLiteral("x"));
+            const QByteArray marker = sample.left(sample.size() - plainSample.size());
+            if (!marker.isEmpty() && bytes.startsWith(marker)) {
+                result.textBom = marker;
+            }
             result.crlfText = result.text.contains(QStringLiteral("\r\n"));
             result.editable = !result.textTruncated && QFileInfo(file).isWritable();
 
@@ -79,19 +88,12 @@ namespace Pedro::Papi::Gui::Preview::Text {
         }
         original.close();
 
-        const auto encoding = QStringConverter::encodingForData(current.originalText).value_or(QStringConverter::Utf8);
-        QStringEncoder withBom(encoding, QStringConverter::Flag::WriteBom);
-        QStringEncoder withoutBom(encoding);
-        const QByteArray sample = withBom(QStringLiteral("x"));
-        const QByteArray plainSample = withoutBom(QStringLiteral("x"));
-        const QByteArray marker = sample.left(sample.size() - plainSample.size());
-        const bool hadBom = !marker.isEmpty() && current.originalText.startsWith(marker);
-        QStringEncoder encoder(encoding, hadBom ? QStringConverter::Flag::WriteBom : QStringConverter::Flag::Default);
+        QStringEncoder encoder(current.textEncoding);
         QString contents = text;
         if (current.crlfText && !contents.contains("\r\n")) {
             contents.replace("\n", "\r\n");
         }
-        const QByteArray bytes = encoder(contents);
+        const QByteArray bytes = current.textBom + QByteArray(encoder(contents));
         QSaveFile output(currentSource.toLocalFile());
         if (bytes.size() > 128 * 1024 || encoder.hasError()) {
             current.saveError = QCoreApplication::translate("Pedro", "preview.edit.limit");

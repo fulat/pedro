@@ -314,6 +314,26 @@ int main(int argc, char** argv) {
     if (!require(encoded.readAll() == QByteArray::fromHex("efbbbf") + "Changed\r\nSecond\r\n", "Preserved BOM and CRLF"))
         return 39;
     encoded.close();
+    if (!require(manager.saveText("") && manager.saveText(QString::fromUtf8("é\n")), "Empty UTF-8 document round trip"))
+        return 39;
+    if (!encoded.open(QIODevice::ReadOnly))
+        return 39;
+    if (!require(encoded.readAll() == QByteArray::fromHex("efbbbfc3a90d0a"), "Preserved BOM and CRLF after clearing document"))
+        return 39;
+    encoded.close();
+
+    if (!encoded.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return 39;
+    encoded.write(QByteArray::fromHex("fffe41000a00"));
+    encoded.close();
+    manager.open(url("encoded.txt"));
+    if (!require(ready() && manager.saveText("") && manager.saveText(QString::fromUtf8("é")), "Empty UTF-16 document round trip"))
+        return 39;
+    if (!encoded.open(QIODevice::ReadOnly))
+        return 39;
+    if (!require(encoded.readAll() == QByteArray::fromHex("fffee900"), "Preserved UTF-16 encoding after clearing document"))
+        return 39;
+    encoded.close();
 
     for (const auto& name : {QStringLiteral("empty"), QStringLiteral("noextension")}) {
         QFile extensionless(url(name).toLocalFile());
