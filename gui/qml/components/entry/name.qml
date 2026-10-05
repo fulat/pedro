@@ -26,7 +26,7 @@ Item {
                 : (display.width - width) / 2
             y: (display.height - height) / 2
             radius: 8
-            color: "#66000000"
+            color: "#55000000"
             visible: false
             layer.enabled: name.brightLabel
         }
