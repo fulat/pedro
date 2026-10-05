@@ -80,7 +80,7 @@ Controls.Menu {
         text: qsTranslate("Pedro", "folder.menu.paste")
         symbol: "paste"
         visible: menu.canCreate
-        enabled: menu.canCreate && Backend.clipboard.canPaste
+        enabled: menu.canCreate && Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(menu.directory.location)
         onTriggered: Backend.clipboard.paste(menu.directory.location)
     }
     Controls.MenuSeparator {}

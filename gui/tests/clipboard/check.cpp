@@ -58,6 +58,12 @@ int main(int argc, char** argv) {
     require(!error.isEmpty(), "Recursive folder paste must fail");
     error.clear();
     manager.copy({QUrl::fromLocalFile(file.fileName())}, true);
+    require(!manager.canPasteInto(QUrl::fromLocalFile(root + "/source/folder")), "Cut cannot paste into its source directory");
+    require(manager.canPasteInto(QUrl::fromLocalFile(root + "/destination")), "Cut can paste into another directory");
+    require(QFile::link(root + "/source/folder", root + "/source-alias"), "Cannot create source alias");
+    require(!manager.canPasteInto(QUrl::fromLocalFile(root + "/source-alias")), "Source aliases must also disable cut paste");
+    manager.paste(QUrl::fromLocalFile(root + "/source/folder"));
+    require(!manager.busy() && manager.isCut(QUrl::fromLocalFile(file.fileName())), "Blocked paste must preserve cut clipboard");
     require(manager.isCut(QUrl::fromLocalFile(file.fileName())) && manager.cutFiles().size() == 1 && !manager.isCut(folder), "Cut state must identify only clipboard sources");
     manager.paste(QUrl::fromLocalFile(root + "/destination"));
     wait();
@@ -110,7 +116,7 @@ int main(int argc, char** argv) {
     wait();
     require(QFile::exists(root + "/destination/external.txt"), "External GNOME clipboard paste failed");
     const auto valid = QUrl::fromLocalFile(root + "/destination/external.txt");
-    const auto missing = QUrl::fromLocalFile(root + "/source/missing.txt");
+    const auto missing = QUrl::fromLocalFile(root + "/destination/missing.txt");
     manager.copy({valid, missing}, true);
     manager.paste(QUrl::fromLocalFile(root + "/source"));
     wait();

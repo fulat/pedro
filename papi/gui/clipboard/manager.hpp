@@ -22,6 +22,8 @@ namespace Pedro::Papi::Gui::Clipboard {
 
             bool canPaste() const;
 
+            Q_INVOKABLE bool canPasteInto(const QUrl& destination) const;
+
             bool busy() const;
 
             QVariantList cutFiles() const;

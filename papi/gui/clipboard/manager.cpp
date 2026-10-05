@@ -53,6 +53,22 @@ namespace Pedro::Papi::Gui::Clipboard {
         return !transfer.busy() && !urls.isEmpty() && std::all_of(urls.cbegin(), urls.cend(), [cut](const auto& url) { return (!cut && url.scheme() == "trash") || url.isLocalFile(); });
     }
 
+    bool Manager::canPasteInto(const QUrl& requestedDestination) const {
+        const auto destination = requestedDestination.scheme().isEmpty() ? QUrl::fromLocalFile(requestedDestination.toString()) : requestedDestination;
+        const QFileInfo target(destination.toLocalFile());
+        if (!canPaste() || !destination.isLocalFile() || !target.isDir()) {
+            return false;
+        }
+        const auto targetPath = target.canonicalFilePath();
+        for (const auto& value : pendingCutFiles) {
+            const QFileInfo source(value.toUrl().toLocalFile());
+            if (QFileInfo(source.absolutePath()).canonicalFilePath() == targetPath) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     void Manager::refreshCutFiles() {
         const auto* mime = QGuiApplication::clipboard()->mimeData();
         pendingCutFiles.clear();
@@ -112,7 +128,7 @@ namespace Pedro::Papi::Gui::Clipboard {
 
     void Manager::paste(const QUrl& requestedDestination) {
         const auto destination = requestedDestination.scheme().isEmpty() ? QUrl::fromLocalFile(requestedDestination.toString()) : requestedDestination;
-        if (!canPaste() || !destination.isLocalFile() || !QFileInfo(destination.toLocalFile()).isDir()) {
+        if (!canPasteInto(destination)) {
             return;
         }
         const auto urls = files();

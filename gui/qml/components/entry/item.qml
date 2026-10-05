@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Window
 import "../desktop" as Desktop
+import "../icon" as Icon
 import "../../scripts/theme.js" as Theme
 
 Item {
@@ -60,7 +61,7 @@ Item {
             return;
         }
         menu.selectionCount = controller && controller.contextEntries ? controller.contextEntries(entry).length : 1;
-        menu.canPaste = Qt.binding(() => Backend.clipboard.canPaste);
+        menu.canPaste = Qt.binding(() => Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(entryItem.entry.url || ""));
         menu.folderName = entry.name || "";
         menu.fileMode = !folder;
         menu.imageFile = entry.icon === "image";
@@ -93,6 +94,7 @@ Item {
     }
 
     Desktop.Icon {
+        id: fileIcon
         opacity: entryItem.cutPending ? Theme.cutOpacity : 1
         width: entryItem.iconSize
         height: width
@@ -103,6 +105,17 @@ Item {
         imageUrl: entryItem.entry.url || ""
         revision: entryItem.entry.modified || 0
         cornerRadius: entryItem.cornerRadius
+    }
+    Icon.Tinted {
+        objectName: "cutBadge"
+        visible: entryItem.cutPending
+        anchors.right: fileIcon.right
+        anchors.top: fileIcon.top
+        width: Math.max(14, Math.min(24, entryItem.iconSize * 0.4))
+        height: width
+        source: "../../../assets/icons/cut.svg"
+        tint: "#b8bec7"
+        opacity: Theme.cutOpacity
     }
     Text {
         opacity: entryItem.cutPending ? Theme.cutOpacity : 1

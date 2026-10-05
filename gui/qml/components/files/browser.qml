@@ -63,7 +63,7 @@ Rectangle {
     Shortcut {
         context: Qt.WindowShortcut
         sequence: "Ctrl+V"
-        enabled: browser.Window.window.active && browser.controller && Backend.clipboard.canPaste
+        enabled: browser.Window.window.active && browser.controller && Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(directory.location)
             && String(directory.location).startsWith("file:") && !directory.search.trim().length
             && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined)
         onActivated: Backend.clipboard.paste(directory.location)

@@ -139,7 +139,7 @@ ApplicationWindow {
     Shortcut {
         context: Qt.WindowShortcut
         sequence: "Ctrl+V"
-        enabled: window.active && Backend.clipboard.canPaste
+        enabled: window.active && Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(Backend.desktopModel.directory)
             && !(window.activeFocusItem && window.activeFocusItem.selectedText !== undefined)
         onActivated: Backend.clipboard.paste(Backend.desktopModel.directory)
     }

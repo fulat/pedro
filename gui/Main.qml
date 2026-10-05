@@ -191,7 +191,7 @@ Components.Application {
             item.backdrop = wallpaper;
             item.organization = Qt.binding(() => Backend.desktopModel.organization);
             item.keepAligned = Qt.binding(() => Backend.desktopModel.keepAligned);
-            item.canPaste = Qt.binding(() => Backend.clipboard.canPaste);
+            item.canPaste = Qt.binding(() => Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(Backend.desktopModel.directory));
             item.sortKey = Qt.binding(() => Backend.desktopModel.sortKey);
             item.actionRequested.connect(action => main.controller.wallpaperAction(action));
         }
