@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Controls.Basic as Controls
 import "../../scripts/theme.js" as Theme
 
@@ -11,42 +12,36 @@ Item {
     readonly property bool light: appearanceMode === "light"
     readonly property color editorInk: light ? "#263b63" : "#e3ebf8"
     readonly property bool brightLabel: label.color.r * 0.2126 + label.color.g * 0.7152 + label.color.b * 0.0722 > 0.55
-    Text {
-        // Native Qt text keeps the shadow aligned with the exact wrapped glyphs.
-        x: label.x
-        y: label.y + 2
-        width: label.width
-        height: label.height
-        visible: label.visible && name.brightLabel
-        text: label.text
-        font: label.font
-        color: "#d9000000"
-        opacity: label.opacity
-        horizontalAlignment: label.horizontalAlignment
-        verticalAlignment: label.verticalAlignment
-        wrapMode: label.wrapMode
-        maximumLineCount: label.maximumLineCount
-        textFormat: Text.PlainText
-        style: Text.Outline
-        styleColor: "#99000000"
-    }
-    Text {
-        id: label
-        objectName: "entryNameLabel"
+    Item {
+        id: display
         anchors.fill: parent
         visible: !name.behavior.renaming
-        text: Backend.elideEntryName(name.behavior.label, font, width, 2, !name.behavior.folder)
-        color: name.behavior.textColor
         opacity: name.behavior.cutPending ? Theme.cutOpacity : 1
-        font.pixelSize: name.behavior.nameSize
-        font.weight: name.behavior.nameWeight
-        horizontalAlignment: name.behavior.nameAlignment
-        verticalAlignment: Text.AlignVCenter
-        wrapMode: Text.Wrap
-        maximumLineCount: 2
-        textFormat: Text.PlainText
-        style: name.brightLabel ? Text.Outline : Text.Normal
-        styleColor: "#a6000000"
+        layer.enabled: name.brightLabel
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: "black"
+            shadowOpacity: 0.7
+            shadowBlur: 1.0
+            blurMax: 8
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 1
+            autoPaddingEnabled: true
+        }
+        Text {
+            id: label
+            objectName: "entryNameLabel"
+            anchors.fill: parent
+            text: Backend.elideEntryName(name.behavior.label, font, width, 2, !name.behavior.folder)
+            color: name.behavior.textColor
+            font.pixelSize: name.behavior.nameSize
+            font.weight: name.behavior.nameWeight
+            horizontalAlignment: name.behavior.nameAlignment
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.Wrap
+            maximumLineCount: 2
+            textFormat: Text.PlainText
+        }
     }
     Controls.TextField {
         id: input

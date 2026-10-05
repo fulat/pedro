@@ -131,7 +131,7 @@ actions = '''
                 if (!standaloneFile || !standaloneFolder) { console.error("CLIPBOARD UI FAILED: standalone components"); Qt.exit(1); return; }
                 standaloneFile.label = "Vacation photographs from Santo Domingo and the Caribbean coastline, final edited version.png";
                 const renderer = standaloneFile.nameEditor.parent;
-                const label = renderer.children.find(child => child.objectName === "entryNameLabel");
+                const label = main.clipboardControl(renderer, "entryNameLabel");
                 label.forceLayout();
                 if (label.lineCount > 2 || !label.text.endsWith(".png") || !label.text.includes("…")) { console.error("CLIPBOARD UI FAILED: multiline name elision"); Qt.exit(1); return; }
                 for (const mode of ["light", "dark"]) {
@@ -221,7 +221,7 @@ for key, value in {'DESTINATION': (fixtures / 'destination').as_uri(), 'SOURCE_F
 position = source.rfind('}')
 (target / 'Main.qml').write_text(source[:position] + actions + source[position:])
 environment = dict(os.environ, PEDRO_DEVELOPMENT_MODE='1', PEDRO_QML_DIR=str(target),
-                   QT_QPA_PLATFORM='offscreen', QT_QUICK_BACKEND='software', QT_QPA_PLATFORMTHEME='none')
+                   QT_QPA_PLATFORM='offscreen', QT_QUICK_BACKEND=os.environ.get('QT_QUICK_BACKEND', 'software'), QT_QPA_PLATFORMTHEME='none')
 result = subprocess.run([str(root / 'build/dev/gui/pedro-gui')], env=environment,
                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=35)
 (target / 'check.log').write_text(result.stdout)
