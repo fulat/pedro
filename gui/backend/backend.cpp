@@ -758,7 +758,7 @@ void Backend::requestWindowActivation(QObject* object, quint64 generation, int r
     }));
 }
 
-void Backend::openPreview(const QUrl& source, const QVariantList& siblings, bool activateExisting) {
+void Backend::openPreview(const QUrl& source, const QVariantList& siblings, bool activateExisting, bool readOnly) {
 
     if (source.isEmpty()) {
         return;
@@ -790,6 +790,7 @@ void Backend::openPreview(const QUrl& source, const QVariantList& siblings, bool
     auto* session = new Pedro::Papi::Gui::Preview::Manager(this);
     static quint64 nextSession = 0;
     session->setObjectName(QStringLiteral("previewSession%1").arg(++nextSession));
+    session->setReadOnly(readOnly);
     session->open(source, siblings);
     emit previewRequested(session);
 }

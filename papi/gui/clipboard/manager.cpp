@@ -41,7 +41,9 @@ namespace Pedro::Papi::Gui::Clipboard {
 
     bool Manager::canPaste() const {
         const auto urls = files();
-        return !transfer.busy() && !urls.isEmpty() && std::all_of(urls.cbegin(), urls.cend(), [](const auto& url) { return url.isLocalFile() && QFileInfo::exists(url.toLocalFile()); });
+        const auto* mime = QGuiApplication::clipboard()->mimeData();
+        const bool cut = mime && mime->data("x-special/gnome-copied-files").startsWith("cut\n");
+        return !transfer.busy() && !urls.isEmpty() && std::all_of(urls.cbegin(), urls.cend(), [cut](const auto& url) { return (!cut && url.scheme() == "trash") || (url.isLocalFile() && QFileInfo::exists(url.toLocalFile())); });
     }
 
     bool Manager::busy() const {
@@ -53,7 +55,7 @@ namespace Pedro::Papi::Gui::Clipboard {
         QByteArray data = cut ? "cut" : "copy";
         for (const auto& value : values) {
             const auto url = value.toUrl();
-            if (url.isLocalFile()) {
+            if (url.isLocalFile() || (!cut && url.scheme() == "trash")) {
                 urls.append(url);
                 data += '\n' + url.toEncoded();
             }

@@ -20,7 +20,7 @@ namespace Pedro::Papi::Io::Directory {
     namespace {
 
         constexpr int entryRole = Qt::UserRole + 1;
-        constexpr auto attributes = "standard::name,standard::display-name,standard::type,standard::is-hidden,standard::content-type,standard::size,time::modified,trash::orig-path,trash::deletion-date";
+        constexpr auto attributes = "standard::name,standard::display-name,standard::type,standard::is-hidden,standard::content-type,standard::size,time::modified,trash::orig-path,trash::deletion-date,standard::target-uri";
 
         class Order : public QSortFilterProxyModel {
             public:
@@ -130,6 +130,10 @@ namespace Pedro::Papi::Io::Directory {
             result["id"] = address;
             result["url"] = address;
             result["path"] = QUrl(address).isLocalFile() ? QUrl(address).toLocalFile() : QUrl(address).toDisplayString();
+            const auto* target = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_STANDARD_TARGET_URI);
+            result["targetUrl"] = target ? QString::fromUtf8(target) : QString{};
+            const auto* deleted = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_TRASH_DELETION_DATE);
+            result["deletedText"] = deleted ? QString::fromUtf8(deleted) : QString{};
             result["inTrash"] = QUrl(address).scheme() == "trash";
             const auto* original = g_file_info_get_attribute_byte_string(info, G_FILE_ATTRIBUTE_TRASH_ORIG_PATH);
             result["originalPath"] = original ? QString::fromLocal8Bit(original) : QString{};

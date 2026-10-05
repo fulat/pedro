@@ -10,8 +10,10 @@ Item {
     id: header
     property bool searchExpanded: false
     property bool pathExpanded: false
-    readonly property real locationMinimumWidth: Math.min(220, Math.max(110, width - (searchExpanded ? 220 : 44) - 278))
+    readonly property real trailingWidth: 278 + (showEmpty ? emptyTrash.contentItem.implicitWidth + 40 : 0)
+    readonly property real locationMinimumWidth: Math.min(220, Math.max(110, width - (searchExpanded ? 220 : 44) - header.trailingWidth))
     readonly property string currentPath: controller && controller.directory ? controller.directory.path || controller.directory.location : ""
+    readonly property bool showEmpty: !!controller && controller.directory.place === "trash" && controller.folders.length + controller.files.length > 0
     property var controller
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     TextMetrics {
@@ -65,7 +67,7 @@ Item {
             id: location
             objectName: "filesLocation"
             Layout.minimumWidth: header.locationMinimumWidth
-            Layout.maximumWidth: Math.max(header.locationMinimumWidth, Math.min(header.pathExpanded ? 480 : 320, header.width - (header.searchExpanded ? 220 : 44) - 278))
+            Layout.maximumWidth: Math.max(header.locationMinimumWidth, Math.min(header.pathExpanded ? 480 : 320, header.width - (header.searchExpanded ? 220 : 44) - header.trailingWidth))
             Layout.preferredWidth: Math.min(Layout.maximumWidth, Math.max(header.locationMinimumWidth, header.pathExpanded ? pathMetrics.advanceWidth + 20 : nameMetrics.advanceWidth + 50))
             Layout.preferredHeight: 38
             radius: 12
@@ -166,6 +168,54 @@ Item {
                 item.selectedKey = Qt.binding(() => header.controller ? header.controller.sortKey : "name");
                 item.chosen.connect(key => { header.controller.sortKey = key; header.controller.directory.setSort(key); });
             }
+        }
+        Button {
+            id: emptyTrash
+            objectName: "trashEmpty"
+            visible: header.showEmpty
+            enabled: !Backend.trash.busy
+            Layout.preferredHeight: 32
+            Layout.preferredWidth: contentItem.implicitWidth + 28
+            hoverEnabled: true
+            text: qsTranslate("Pedro", "trash.empty")
+            Accessible.name: text
+            onClicked: header.controller.emptyRequested()
+            contentItem: Row {
+                spacing: 7
+                Icon.Tinted {
+                    width: 15; height: 15
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "trash.svg"
+                    tint: header.colors.ink
+                }
+                Text {
+                    text: emptyTrash.text
+                    color: header.colors.ink
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+            background: Item {
+                opacity: emptyTrash.enabled ? 1 : 0.45
+                Loader {
+                    anchors.fill: parent
+                    source: "../entry/surface.qml"
+                    onLoaded: {
+                        item.sourceBackdrop = Qt.binding(() => header.Window.window ? header.Window.window.entryBackdrop : null);
+                        item.frosted = true;
+                        item.cornerRadius = 10;
+                    }
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 10
+                    color: emptyTrash.down ? header.colors.selected : emptyTrash.hovered ? header.colors.hover : "transparent"
+                    border.color: header.colors.line
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                }
+            }
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
         }
     }
 }

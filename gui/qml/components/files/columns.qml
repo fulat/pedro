@@ -32,10 +32,15 @@ ScrollView {
                     selected = entry.id;
                     columns.controller.select(entry);
                 }
+                function entryAction(action, entry) {
+                    if (action === "open") openEntry(entry);
+                    else columns.controller.entryAction(action, entry);
+                }
                 function openEntry(entry) {
                     select(entry);
                     const locations = columns.locations.slice(0, index + 1);
                     if (entry.isDirectory) locations.push(entry.url);
+                    else columns.controller.previewEntry(entry);
                     columns.locations = locations;
                 }
                 width: 240

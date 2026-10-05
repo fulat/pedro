@@ -84,7 +84,13 @@ namespace Pedro::Papi::Io::Trash {
         run(Operation::Empty, {});
     }
 
-    void Manager::run(Operation operation, const QVariantList& urls) {
+    void Manager::relocate(const QVariantList& urls, const QUrl& destination) {
+        if (destination.isLocalFile()) {
+            run(Operation::Relocate, urls, destination);
+        }
+    }
+
+    void Manager::run(Operation operation, const QVariantList& urls, const QUrl& destination) {
 
         if (active || (urls.isEmpty() && operation != Operation::Empty)) {
             return;
@@ -103,7 +109,7 @@ namespace Pedro::Papi::Io::Trash {
                 emit failed(failure);
             }
         });
-        watcher->setFuture(QtConcurrent::run([operation, urls] {
+        watcher->setFuture(QtConcurrent::run([operation, urls, destination] {
             QStringList locations;
             QStringList errors;
             QSet<QString> seen;
@@ -147,7 +153,24 @@ namespace Pedro::Papi::Io::Trash {
                 if (operation == Operation::Move && url.isLocalFile() && url.toLocalFile() != "/") {
                     success = g_file_trash(file, nullptr, &error);
                 } else if (operation != Operation::Move && isTrashItem(file)) {
-                    success = operation == Operation::Restore ? restoreItem(file, &error) : g_file_delete(file, nullptr, &error);
+                    if (operation == Operation::Relocate) {
+                        auto* info = g_file_query_info(file, G_FILE_ATTRIBUTE_TRASH_ORIG_PATH, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, nullptr, &error);
+                        if (info) {
+                            const auto* original = g_file_info_get_attribute_byte_string(info, G_FILE_ATTRIBUTE_TRASH_ORIG_PATH);
+                            if (original && g_path_is_absolute(original)) {
+                                auto* name = g_path_get_basename(original);
+                                auto* folder = g_file_new_for_uri(destination.toEncoded().constData());
+                                auto* target = g_file_get_child(folder, name);
+                                success = g_file_move(file, target, G_FILE_COPY_NONE, nullptr, nullptr, nullptr, &error);
+                                g_object_unref(target);
+                                g_object_unref(folder);
+                                g_free(name);
+                            }
+                            g_object_unref(info);
+                        }
+                    } else {
+                        success = operation == Operation::Restore ? restoreItem(file, &error) : g_file_delete(file, nullptr, &error);
+                    }
                 }
                 if (!success && errors.size() < 20) {
                     errors.append(url.fileName() + ": " + (error ? QString::fromUtf8(error->message) : QStringLiteral("Invalid location for this Trash operation.")));

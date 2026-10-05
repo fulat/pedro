@@ -1,3 +1,5 @@
+#include <gio/gio.h>
+
 #include <pedro/papi/io/transfer/manager.hpp>
 
 #include <QFileInfo>
@@ -54,7 +56,7 @@ namespace Pedro::Papi::Io::Transfer {
         QList<QUrl> urls;
         for (const auto& value : values) {
             const auto url = value.toUrl();
-            if (!url.isLocalFile() || !QFileInfo::exists(url.toLocalFile())) {
+            if ((!url.isLocalFile() || !QFileInfo::exists(url.toLocalFile())) && (cut || url.scheme() != "trash")) {
                 return;
             }
             if (!urls.contains(url)) {
@@ -79,8 +81,30 @@ namespace Pedro::Papi::Io::Transfer {
             try {
                 const fs::path folder(destination.toLocalFile().toStdString());
                 for (const auto& url : urls) {
-                    const fs::path source(url.toLocalFile().toStdString());
-                    auto target = folder / source.filename();
+                    fs::path source(url.toLocalFile().toStdString());
+                    fs::path name = source.filename();
+                    if (url.scheme() == "trash") {
+                        auto* file = g_file_new_for_uri(url.toEncoded().constData());
+                        GError* error = nullptr;
+                        auto* info = g_file_query_info(file, "standard::target-uri,trash::orig-path", G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, nullptr, &error);
+                        g_object_unref(file);
+                        if (!info) {
+                            const auto message = error ? QString::fromUtf8(error->message) : QStringLiteral("Cannot read trashed file");
+                            g_clear_error(&error);
+                            return message;
+                        }
+                        const auto* address = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_STANDARD_TARGET_URI);
+                        const QUrl targetUrl(address ? QString::fromUtf8(address) : QString{});
+                        const auto* original = g_file_info_get_attribute_byte_string(info, G_FILE_ATTRIBUTE_TRASH_ORIG_PATH);
+                        if (!targetUrl.isLocalFile()) {
+                            g_object_unref(info);
+                            return QStringLiteral("The trashed file has no local copy location");
+                        }
+                        source = fs::path(targetUrl.toLocalFile().toStdString());
+                        name = original ? fs::path(original).filename() : source.filename();
+                        g_object_unref(info);
+                    }
+                    auto target = folder / name;
                     // Never overwrite existing files or recurse into the source folder.
                     const auto canonicalSource = fs::weakly_canonical(source);
                     const auto canonicalFolder = fs::weakly_canonical(folder);
@@ -90,7 +114,7 @@ namespace Pedro::Papi::Io::Transfer {
                     }
                     int suffix = 2;
                     while (fs::exists(target) || fs::is_symlink(target)) {
-                        target = folder / (source.stem().string() + " (" + std::to_string(suffix++) + ")" + source.extension().string());
+                        target = folder / (name.stem().string() + " (" + std::to_string(suffix++) + ")" + name.extension().string());
                     }
                     if (cut) {
                         std::error_code error;

@@ -65,6 +65,7 @@ Item {
         if (entry.inTrash) {
             menu.canRestore = !!entry.canRestore;
             menu.canRemove = !!entry.canRemove;
+            menu.canRead = !!entry.targetUrl;
         }
         menu.popup(menuPoint.x, menuPoint.y);
     }

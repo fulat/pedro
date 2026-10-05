@@ -54,6 +54,8 @@ namespace Pedro::Papi::Gui::Preview {
 
             bool editable() const;
 
+            void setReadOnly(bool value);
+
             QString saveError() const;
 
             Q_INVOKABLE bool saveText(const QString& text);
@@ -124,6 +126,8 @@ namespace Pedro::Papi::Gui::Preview {
             void select(const QUrl& source);
 
             void update();
+
+            bool readOnly = false;
 
             Registry registry;
 

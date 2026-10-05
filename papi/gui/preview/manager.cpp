@@ -58,15 +58,20 @@ namespace Pedro::Papi::Gui::Preview {
     }
 
     bool Manager::editable() const {
-        return current.editable;
+        return current.editable && !readOnly;
     }
 
     QString Manager::saveError() const {
         return current.saveError;
     }
 
+    void Manager::setReadOnly(bool value) {
+        readOnly = value;
+        emit changed();
+    }
+
     bool Manager::saveText(const QString& text) {
-        return provider && provider->saveText(text);
+        return !readOnly && provider && provider->saveText(text);
     }
 
     bool Manager::textTruncated() const {

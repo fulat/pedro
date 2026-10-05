@@ -307,6 +307,11 @@ int main(int argc, char** argv) {
     encoded.write(QByteArray::fromHex("efbbbf") + "First\r\nSecond\r\n");
     encoded.close();
     manager.open(url("encoded.txt"));
+    manager.setReadOnly(true);
+    if (!require(ready() && !manager.editable() && !manager.saveText("Forbidden edit"), "Read-only preview must reject saves")) {
+        return 39;
+    }
+    manager.setReadOnly(false);
     if (!require(ready() && manager.editable() && manager.saveText("Changed\nSecond\n"), "Encoded text save"))
         return 38;
     if (!encoded.open(QIODevice::ReadOnly))

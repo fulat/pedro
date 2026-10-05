@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Window
+import QtQuick.Dialogs as Dialogs
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import Pedro.Files 1.0
@@ -12,6 +13,7 @@ Rectangle {
     readonly property var backgroundContextMenu: backgroundMenu.item
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
+    readonly property real toolbarHeight: controller && String(controller.directory.location).startsWith("trash:") ? 0 : 55
     color: colors.surface
 
     DropArea {
@@ -38,6 +40,13 @@ Rectangle {
     }
 
     Shortcut {
+        sequence: "Ctrl+C"
+        enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
+            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined)
+        onActivated: browser.controller.entryAction("copy", browser.controller.selectedEntry)
+    }
+
+    Shortcut {
         sequence: "Delete"
         enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
             && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.readOnly === false)
@@ -46,7 +55,17 @@ Rectangle {
 
     Connections {
         target: browser.controller
+        function onEmptyRequested() { confirmation.urls = []; confirmation.open(); }
+        function onMoveRequested(entry) { destination.entry = entry; destination.open(); }
+        function onInformationRequested(entry) { information.entry = entry; information.open(); }
         function onRemovalRequested(urls) { confirmation.urls = urls; confirmation.open(); }
+    }
+
+    Dialogs.FolderDialog {
+        id: destination
+        property var entry: ({})
+        title: qsTranslate("Pedro", "trash.move")
+        onAccepted: Backend.trash.relocate([entry.url], selectedFolder)
     }
 
     Dialog {
@@ -86,12 +105,13 @@ Rectangle {
         onLoaded: {
             item.parent = browser.Window.window.contentItem;
             item.backdrop = Qt.binding(() => browser.Window.window.entryBackdrop);
-            item.informationRequested.connect(() => information.open());
+            item.informationRequested.connect(() => { information.entry = null; information.open(); });
             item.emptyRequested.connect(() => { confirmation.urls = []; confirmation.open(); });
         }
     }
     Dialog {
         id: information
+        property var entry: null
         objectName: "filesDirectoryInformation"
         parent: browser.Window.window.contentItem
         x: (parent.width - width) / 2
@@ -112,7 +132,10 @@ Rectangle {
         }
         contentItem: Label {
             color: browser.colors.ink
-            text: backgroundMenu.item && backgroundMenu.item.directory
+            text: information.entry ? information.entry.name + "\n\n" + (information.entry.originalPath || information.entry.path)
+                + "\n\n" + (information.entry.type || "") + "  " + (information.entry.sizeText || "")
+                + (information.entry.deletedText ? "\n\n" + qsTranslate("Pedro", "trash.deleted") + ": " + information.entry.deletedText : "")
+                : backgroundMenu.item && backgroundMenu.item.directory
                 ? backgroundMenu.item.directory.name + "\n\n" + (backgroundMenu.item.directory.path || backgroundMenu.item.directory.location)
                     + "\n\n" + (backgroundMenu.item.directory.folders.length + backgroundMenu.item.directory.files.length) + " " + qsTranslate("Pedro", "files.sample.itemsLabel") : ""
             wrapMode: Text.WrapAnywhere
@@ -128,7 +151,7 @@ Rectangle {
                     return;
                 }
                 const position = point.position;
-                if (position.x <= sidebarPanel.width + 1 || position.x >= browser.width - 8 || position.y < 55) {
+                if (position.x <= sidebarPanel.width + 1 || position.x >= browser.width - 8 || position.y < browser.toolbarHeight) {
                     return;
                 }
                 const local = browser.mapToItem(contentLayout, position.x, position.y);
@@ -143,7 +166,7 @@ Rectangle {
         z: 2
         visible: !browser.controller || browser.controller.viewMode !== "columns"
         x: sidebarPanel.width + 1
-        y: 55
+        y: browser.toolbarHeight
         width: parent.width - x
         height: parent.height - y
         acceptedButtons: Qt.RightButton
@@ -184,11 +207,11 @@ Rectangle {
             spacing: 8
             Loader {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 55
+                visible: browser.controller && !String(browser.controller.directory.location).startsWith("trash:")
+                Layout.preferredHeight: visible ? 55 : 0
                 source: "toolbar.qml"
                 onLoaded: {
                     item.controller = Qt.binding(() => browser.controller);
-                    item.emptyRequested.connect(() => { confirmation.urls = []; confirmation.open(); });
                 }
             }
             Text {

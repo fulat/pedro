@@ -416,5 +416,7 @@
     "trash.confirm": "These files will be permanently deleted. This cannot be undone.",
     "trash.delete": "Delete permanently",
     "trash.empty": "Empty Trash",
-    "trash.restore": "Restore"
+    "trash.restore": "Restore",
+    "trash.move": "Move to…",
+    "trash.deleted": "Deleted"
 }

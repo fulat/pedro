@@ -2010,5 +2010,15 @@ or choose Open to get started.</translation>
       <extracomment>Stable Pedro key: trash.restore</extracomment>
       <translation>Restore</translation>
     </message>
+    <message>
+      <source>trash.move</source>
+      <extracomment>Stable Pedro key: trash.move</extracomment>
+      <translation>Move to…</translation>
+    </message>
+    <message>
+      <source>trash.deleted</source>
+      <extracomment>Stable Pedro key: trash.deleted</extracomment>
+      <translation>Deleted</translation>
+    </message>
 </context>
 </TS>

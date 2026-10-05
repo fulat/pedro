@@ -13,6 +13,14 @@ for name in ('qml', 'config', 'assets'):
         link.symlink_to(root / 'gui' / name, target_is_directory=True)
 source = (root / 'gui/Main.qml').read_text().replace('import QtQuick', 'import gui\nimport QtQuick', 1)
 actions = '''
+    function findTrashControl(item, name) {
+        if (item.objectName === name) return item;
+        for (const child of item.children || []) {
+            const result = findTrashControl(child, name);
+            if (result) return result;
+        }
+        return null;
+    }
     Timer {
         interval: 800
         running: true
@@ -28,6 +36,15 @@ actions = '''
                     Qt.exit(1);
                     return;
                 }
+                const surface = main.controller.filesQuickWindow.contentItem.parent.parent;
+                const empty = main.findTrashControl(surface, "trashEmpty");
+                const restore = main.findTrashControl(surface, "trashRestore");
+                if (!empty || restore || empty.visible !== (controller.files.length + controller.folders.length > 0)
+                    || empty.mapToItem(surface, 0, 0).y >= 58) {
+                    console.error("TRASH UI FAILED: header placement/visibility");
+                    Qt.exit(1);
+                    return;
+                }
                 const entry = controller.files.concat(controller.folders)[0];
                 if (entry) controller.select(entry);
                 const component = Qt.createComponent("qml/components/entry/trash.qml");
@@ -37,7 +54,7 @@ actions = '''
                     return;
                 }
                 const menu = component.createObject(main.contentItem, {canRestore: true, backdrop: main.entryBackdrop});
-                if (!menu || menu.count !== 2) {
+                if (!menu || menu.count !== 8) {
                     console.error("TRASH UI FAILED: restore/delete menu");
                     Qt.exit(1);
                     return;

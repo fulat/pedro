@@ -1,11 +1,13 @@
 #include <gio/gio.h>
 
 #include <pedro/papi/io/trash/manager.h>
+#include <pedro/papi/io/transfer/manager.hpp>
 #include <pedro/papi/io/directory/model.hpp>
 
 #include <QCoreApplication>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QFileInfo>
 #include <QDir>
 #include <QThread>
 #include <QUrl>
@@ -101,6 +103,18 @@ int main(int argc, char** argv) {
         require(entry.value("inTrash").toBool() && entry.value("canRestore").toBool() && !entry.value("originalPath").toString().isEmpty(), "Missing restoration metadata");
     }
     require(!QFile::exists(path) && items().size() == 2, "Trash failed");
+    QDir().mkpath(base + "/copies");
+    Pedro::Papi::Io::Transfer::Manager transfer;
+    QString transferError;
+    QObject::connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::finished, [&](const QString& error) { transferError = error; });
+    transfer.transfer(items(), QUrl::fromLocalFile(base + "/copies"), false);
+    QElapsedTimer copyTimer;
+    copyTimer.start();
+    while (transfer.busy() && copyTimer.elapsed() < 5000) {
+        QCoreApplication::processEvents();
+        QThread::msleep(10);
+    }
+    require(!transfer.busy() && transferError.isEmpty() && QFile::exists(base + "/copies/" + QFileInfo(path).fileName()) && QFile::exists(base + "/copies/nested/child.txt") && items().size() == 2, "Copy from Trash must preserve source and original names");
     write(path);
     manager.restore(items());
     wait(manager, false);
@@ -133,5 +147,19 @@ int main(int argc, char** argv) {
     manager.restore(items());
     wait(manager);
     require(QFile::exists(partialPath), "Restore must recreate original parent");
+    QDir().mkpath(base + "/moved");
+    QThread::msleep(1100);
+    manager.move({QUrl::fromLocalFile(partialPath)});
+    wait(manager);
+    waitItems(1);
+    write(base + "/moved/partial.txt");
+    manager.relocate(items(), QUrl::fromLocalFile(base + "/moved"));
+    wait(manager, false);
+    require(items().size() == 1, "Move conflict must preserve Trash item");
+    QFile::remove(base + "/moved/partial.txt");
+    manager.relocate(items(), QUrl::fromLocalFile(base + "/moved"));
+    wait(manager);
+    waitItems(0);
+    require(items().isEmpty() && QFile::exists(base + "/moved/partial.txt"), "Move out of Trash must clean metadata");
     std::cout << "PASS: trash, nested folders, hidden/Unicode names, restore/conflicts, protected removal, empty, symlinks, partial batches and missing parents\n";
 }

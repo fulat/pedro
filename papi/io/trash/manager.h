@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QVariantList>
+#include <QUrl>
 
 namespace Pedro::Papi::Io::Trash {
 
@@ -26,6 +27,8 @@ namespace Pedro::Papi::Io::Trash {
 
             Q_INVOKABLE void empty();
 
+            Q_INVOKABLE void relocate(const QVariantList& urls, const QUrl& destination);
+
         signals:
             void changed();
 
@@ -37,10 +40,11 @@ namespace Pedro::Papi::Io::Trash {
                 Move,
                 Restore,
                 Remove,
-                Empty
+                Empty,
+                Relocate
             };
 
-            void run(Operation operation, const QVariantList& urls);
+            void run(Operation operation, const QVariantList& urls, const QUrl& destination = {});
 
             bool active = false;
 

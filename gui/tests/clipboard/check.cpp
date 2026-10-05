@@ -64,6 +64,12 @@ int main(int argc, char** argv) {
     mime->setUrls({QUrl("https://example.com/file")});
     QGuiApplication::clipboard()->setMimeData(mime);
     require(!manager.canPaste(), "Web links must not enable file paste");
+    manager.copy({QUrl("trash:///pedro-test.txt")});
+    require(manager.canPaste() && QGuiApplication::clipboard()->mimeData()->urls().first().scheme() == "trash", "Trash copy must preserve the GIO URI");
+    auto* trashCut = new QMimeData;
+    trashCut->setData("x-special/gnome-copied-files", "cut\ntrash:///pedro-test.txt");
+    QGuiApplication::clipboard()->setMimeData(trashCut);
+    require(!manager.canPaste(), "Cut from Trash must use the metadata-aware move operation");
     Pedro::Papi::Io::Transfer::Manager transfer;
     const QVariantList moving{QUrl::fromLocalFile(root + "/destination/note.txt")};
     const auto destination = QUrl::fromLocalFile(root + "/destination/folder");

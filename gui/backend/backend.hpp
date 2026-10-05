@@ -186,7 +186,7 @@ class Backend final : public QObject {
 
         Q_INVOKABLE void activateWindow(QObject* window, bool restoring = false);
 
-        Q_INVOKABLE void openPreview(const QUrl& source, const QVariantList& siblings = {}, bool activateExisting = true);
+        Q_INVOKABLE void openPreview(const QUrl& source, const QVariantList& siblings = {}, bool activateExisting = true, bool readOnly = false);
 
         Q_INVOKABLE void releasePreview(QObject* session);
 

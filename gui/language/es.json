@@ -416,5 +416,7 @@
     "trash.confirm": "Estos archivos se eliminarán permanentemente. Esta acción no se puede deshacer.",
     "trash.delete": "Eliminar permanentemente",
     "trash.empty": "Vaciar Papelera",
-    "trash.restore": "Restaurar"
+    "trash.restore": "Restaurar",
+    "trash.move": "Mover a…",
+    "trash.deleted": "Eliminado"
 }
