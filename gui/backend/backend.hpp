@@ -22,6 +22,7 @@
 
 #include <pedro/papi/gui/preview/manager.h>
 
+#include <QFont>
 #include <QUrl>
 #include <QObject>
 #include <QString>
@@ -105,6 +106,8 @@ class Backend final : public QObject {
         QObject* fileTransfer();
 
         Q_INVOKABLE int dragFiles(QObject* source, const QVariantList& urls);
+
+        Q_INVOKABLE QString elideEntryName(const QString& text, const QFont& font, double width, int lines, bool file) const;
 
         QObject* screenBrightness();
 

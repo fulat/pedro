@@ -1,4 +1,5 @@
 #include "backend.hpp"
+#include "entry/name.h"
 
 #include <pedro/papi/io/filesystem/filesystem.hpp>
 #include <pedro/papi/utils/utils.hpp>
@@ -645,6 +646,10 @@ QObject* Backend::clipboard() {
 
 QObject* Backend::fileTransfer() {
     return clipboard_.operation();
+}
+
+QString Backend::elideEntryName(const QString& text, const QFont& font, double width, int lines, bool file) const {
+    return Pedro::Gui::Backend::Entry::elideName(text, font, width, lines, file);
 }
 
 int Backend::dragFiles(QObject* source, const QVariantList& values) {

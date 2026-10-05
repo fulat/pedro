@@ -39,6 +39,9 @@ set(PEDRO_GUI_SOURCES
         backend/backend.hpp
         backend/icons.hpp
 
+        backend/entry/name.h
+        backend/entry/name.cpp
+
         backend/application/icon/provider.cpp
         backend/application/icon/provider.hpp
 

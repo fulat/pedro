@@ -110,7 +110,7 @@ Item {
         id: nameSlot
         y: 63
         width: parent.width
-        height: 28
+        height: 36
         z: 5
     }
 

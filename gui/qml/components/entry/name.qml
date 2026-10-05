@@ -7,17 +7,24 @@ Item {
     id: name
     property var behavior: ({renaming: false, label: "", textColor: "white", cutPending: false, nameSize: 12, nameBold: false, nameAlignment: Text.AlignHCenter})
     readonly property var editor: input
+    property string appearanceMode: Backend.appearanceMode
+    readonly property bool light: appearanceMode === "light"
+    readonly property color editorInk: light ? "#263b63" : "#e3ebf8"
     Text {
+        id: label
+        objectName: "entryNameLabel"
         anchors.fill: parent
         visible: !name.behavior.renaming
-        text: name.behavior.label
+        text: Backend.elideEntryName(name.behavior.label, font, width, 2, !name.behavior.folder)
         color: name.behavior.textColor
         opacity: name.behavior.cutPending ? Theme.cutOpacity : 1
         font.pixelSize: name.behavior.nameSize
         font.bold: name.behavior.nameBold
         horizontalAlignment: name.behavior.nameAlignment
         verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideMiddle
+        wrapMode: Text.Wrap
+        maximumLineCount: 2
+        textFormat: Text.PlainText
         style: Text.Raised
         styleColor: "#70000000"
     }
@@ -26,16 +33,16 @@ Item {
         objectName: "entryNameEditor"
         anchors.fill: parent
         visible: name.behavior.renaming
-        color: name.behavior.textColor
+        color: name.editorInk
         font.pixelSize: name.behavior.nameSize
         font.bold: name.behavior.nameBold
         horizontalAlignment: name.behavior.nameAlignment
-        selectionColor: Theme.accent
-        selectedTextColor: Theme.white
+        selectionColor: name.light ? "#405785bf" : "#555b91d1"
+        selectedTextColor: name.editorInk
         padding: 3
         background: Rectangle {
             radius: 5
-            color: Backend.appearanceMode === "light" ? "#eaf0f8" : "#d9232e3c"
+            color: name.light ? "#cce8eef7" : "#a3232e3c"
             border.color: Backend.fileTransfer.validName(input.text) ? Theme.liquidEdge : "#ef7777"
         }
         onAccepted: name.behavior.finishRename()

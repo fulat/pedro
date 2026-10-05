@@ -114,7 +114,7 @@ ScrollView {
                         radius: 7
                         color: columns.controller && columns.controller.selectedEntry.id === entry.id ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
                         HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
-                        Item { id: nameSlot; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; height: 28; z: 5 }
+                        Item { id: nameSlot; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; height: 32; z: 5 }
                         Loader {
                             id: entryIcon
                             x: 8

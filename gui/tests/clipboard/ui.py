@@ -128,6 +128,18 @@ actions = '''
                 standaloneFile = fileComponent.createObject(main.contentItem, {entry: {name: "shared.txt", url: SOURCE_FILE}, width: 90, height: 100});
                 standaloneFolder = folderComponent.createObject(main.contentItem, {entry: {name: "destination", url: DESTINATION}, width: 90, height: 100});
                 if (!standaloneFile || !standaloneFolder) { console.error("CLIPBOARD UI FAILED: standalone components"); Qt.exit(1); return; }
+                standaloneFile.label = "Vacation photographs from Santo Domingo and the Caribbean coastline, final edited version.png";
+                const renderer = standaloneFile.nameEditor.parent;
+                const label = renderer.children.find(child => child.objectName === "entryNameLabel");
+                label.forceLayout();
+                if (label.lineCount > 2 || !label.text.endsWith(".png") || !label.text.includes("…")) { console.error("CLIPBOARD UI FAILED: multiline name elision"); Qt.exit(1); return; }
+                for (const mode of ["light", "dark"]) {
+                    renderer.appearanceMode = mode;
+                    if (standaloneFile.nameEditor.selectionColor.a >= 0.6 || String(standaloneFile.nameEditor.color) !== String(standaloneFile.nameEditor.selectedTextColor)) {
+                        console.error("CLIPBOARD UI FAILED: unreadable rename selection", mode); Qt.exit(1); return;
+                    }
+                }
+                standaloneFile.label = "shared.txt";
                 standaloneFile.dispatch("rename");
                 if (!standaloneFile.renaming || !standaloneFile.nameEditor.visible) { console.error("CLIPBOARD UI FAILED: standalone inline rename"); Qt.exit(1); return; }
                 standaloneFile.item.cancelRename();

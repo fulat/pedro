@@ -206,7 +206,7 @@ Item {
         id: defaultNameSurface
         y: entryItem.iconSize + 10
         width: entryItem.width
-        height: 28
+        height: 30
         z: 5
         visible: entryItem.showName || entryItem.renaming
     }

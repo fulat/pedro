@@ -59,7 +59,7 @@ Item {
                 anchors.fill: parent
                 Item {
                     width: table.width * 0.28; height: parent.height
-                    Item { id: nameSlot; x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; height: 28; z: 5 }
+                    Item { id: nameSlot; x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; height: 32; z: 5 }
                     Loader {
                         id: entryIcon
                         x: 12
