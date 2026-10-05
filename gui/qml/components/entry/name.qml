@@ -21,7 +21,7 @@ Item {
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowColor: "black"
-            shadowOpacity: 0.7
+            shadowOpacity: 0.95
             shadowBlur: 1.0
             blurMax: 8
             shadowHorizontalOffset: 0
