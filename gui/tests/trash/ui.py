@@ -26,6 +26,9 @@ actions = '''
         running: true
         repeat: true
         property int step: 0
+        property var probe: null
+        property int acceptedCount: 0
+        property int rejectedCount: 0
         onTriggered: {
             if (step === 0) {
                 main.controller.openTrashQuickWindow();
@@ -64,6 +67,62 @@ actions = '''
                 menu.destroy();
                 // Exercise the permanent-delete dialog, without accepting it.
                 controller.removalRequested(["trash:///pedro-test-not-a-real-item"]);
+            } else if (step === 2) {
+                const owner = main.controller.filesQuickWindow;
+                const confirmation = owner.contentItem.confirmationWindow;
+                if (!confirmation.visible || confirmation.transientParent !== owner || confirmation.modality !== Qt.WindowModal) {
+                    console.error("TRASH UI FAILED: independent confirmation window");
+                    Qt.exit(1);
+                    return;
+                }
+                confirmation.reject();
+                const component = Qt.createComponent("qml/components/confirmation/window.qml");
+                probe = component.createObject(main, {transientParent: owner, title: "Pedro test", message: "Reusable confirmation", confirmText: "Confirm"});
+                if (!probe) {
+                    console.error("TRASH UI FAILED", component.errorString());
+                    Qt.exit(1);
+                    return;
+                }
+                probe.accepted.connect(() => ++acceptedCount);
+                probe.rejected.connect(() => ++rejectedCount);
+                probe.open();
+            } else if (step === 3) {
+                const cancel = main.findTrashControl(probe.contentItem, "confirmationCancel");
+                if (!cancel || !cancel.activeFocus) {
+                    console.error("TRASH UI FAILED: safe default focus");
+                    Qt.exit(1);
+                    return;
+                }
+                const oldX = probe.x;
+                probe.x = oldX + 20;
+                if (probe.x !== oldX + 20) {
+                    console.error("TRASH UI FAILED: movable window");
+                    Qt.exit(1);
+                    return;
+                }
+                probe.close();
+                if (rejectedCount !== 1 || acceptedCount !== 0) {
+                    console.error("TRASH UI FAILED: close must cancel");
+                    Qt.exit(1);
+                    return;
+                }
+                probe.open();
+                probe.actionEnabled = false;
+                probe.accept();
+                if (acceptedCount !== 0 || !probe.visible) {
+                    console.error("TRASH UI FAILED: disabled confirmation");
+                    Qt.exit(1);
+                    return;
+                }
+                probe.actionEnabled = true;
+                probe.accept();
+                probe.accept();
+                if (acceptedCount !== 1 || rejectedCount !== 1 || probe.visible) {
+                    console.error("TRASH UI FAILED: exactly one result");
+                    Qt.exit(1);
+                    return;
+                }
+                probe.destroy();
             } else {
                 console.log("TRASH UI PASSED: listing, toolbar and deletion confirmation loaded");
                 Qt.quit();
@@ -84,6 +143,6 @@ except subprocess.TimeoutExpired as error:
     (target / 'check.log').write_text(output)
     raise SystemExit('Trash UI timed out:\n' + output)
 (target / 'check.log').write_text(result.stdout)
-if result.returncode or 'TRASH UI PASSED' not in result.stdout or any(error in result.stdout for error in ('ReferenceError', 'TypeError', 'Error:', 'TRASH UI FAILED')):
+if result.returncode or 'TRASH UI PASSED' not in result.stdout or any(error in result.stdout for error in ('ReferenceError', 'TypeError', 'Error:', 'TRASH UI FAILED', 'Binding loop detected for property "minimumHeight"')):
     raise SystemExit(result.stdout)
 print('PASS: real Pedro Trash listing, toolbar and confirmation UI')

@@ -6,11 +6,13 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import Pedro.Files 1.0
 import "palette.js" as Palette
+import "../confirmation" as Confirmation
 
 Rectangle {
     id: browser
     objectName: "filesBrowser"
     readonly property var backgroundContextMenu: backgroundMenu.item
+    readonly property var confirmationWindow: confirmation
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
     readonly property real toolbarHeight: controller && String(controller.directory.location).startsWith("trash:") ? 0 : 55
@@ -68,19 +70,17 @@ Rectangle {
         onAccepted: Backend.trash.relocate([entry.url], selectedFolder)
     }
 
-    Dialog {
+    Confirmation.Window {
         id: confirmation
         objectName: "trashConfirmation"
         property var urls: []
-        parent: browser.Window.window.contentItem
-        anchors.centerIn: parent
-        width: Math.min(400, parent.width - 32)
-        modal: true
+        transientParent: browser.Window.window
         title: qsTranslate("Pedro", urls.length ? "trash.delete" : "trash.empty")
-        standardButtons: Dialog.Cancel | Dialog.Ok
-        background: Rectangle { color: browser.colors.surface; radius: 12; border.color: browser.colors.line }
-        header: Label { text: confirmation.title; color: browser.colors.ink; padding: 16 }
-        contentItem: Label { text: qsTranslate("Pedro", "trash.confirm"); color: browser.colors.ink; wrapMode: Text.WordWrap }
+        message: qsTranslate("Pedro", "trash.confirm")
+        confirmText: title
+        symbol: "trash"
+        destructive: true
+        actionEnabled: !Backend.trash.busy
         onAccepted: {
             if (urls.length) Backend.trash.remove(urls);
             else Backend.trash.empty();
