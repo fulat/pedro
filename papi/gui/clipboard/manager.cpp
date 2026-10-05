@@ -39,7 +39,11 @@ namespace Pedro::Papi::Gui::Clipboard {
     Manager::Manager(QObject* parent) : QObject(parent) {
         connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::changed, this, &Manager::changed);
         connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::failed, this, &Manager::failed);
-        connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, this, &Manager::changed);
+        connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, this, [this] {
+            refreshCutFiles();
+            emit changed();
+        });
+        refreshCutFiles();
     }
 
     bool Manager::canPaste() const {
@@ -47,6 +51,36 @@ namespace Pedro::Papi::Gui::Clipboard {
         const auto* mime = QGuiApplication::clipboard()->mimeData();
         const bool cut = mime && mime->data("x-special/gnome-copied-files").startsWith("cut\n");
         return !transfer.busy() && !urls.isEmpty() && std::all_of(urls.cbegin(), urls.cend(), [cut](const auto& url) { return (!cut && url.scheme() == "trash") || url.isLocalFile(); });
+    }
+
+    void Manager::refreshCutFiles() {
+        const auto* mime = QGuiApplication::clipboard()->mimeData();
+        pendingCutFiles.clear();
+        if (!mime || !mime->data("x-special/gnome-copied-files").startsWith("cut\n")) {
+            return;
+        }
+        for (const auto& url : files()) {
+            if (url.isLocalFile()) {
+                pendingCutFiles.append(url);
+            }
+        }
+    }
+
+    QVariantList Manager::cutFiles() const {
+        return pendingCutFiles;
+    }
+
+    bool Manager::isCut(const QUrl& url) const {
+        if (!url.isLocalFile()) {
+            return false;
+        }
+        const auto normalized = url.adjusted(QUrl::NormalizePathSegments | QUrl::StripTrailingSlash);
+        for (const auto& value : cutFiles()) {
+            if (value.toUrl().adjusted(QUrl::NormalizePathSegments | QUrl::StripTrailingSlash) == normalized) {
+                return true;
+            }
+        }
+        return false;
     }
 
     bool Manager::busy() const {

@@ -4,6 +4,7 @@ import QtQuick.Window
 import QtQuick.Controls.Basic
 import Pedro.Files 1.0
 import "palette.js" as Palette
+import "../../scripts/theme.js" as Theme
 
 ScrollView {
     id: columns
@@ -128,7 +129,7 @@ ScrollView {
                                 item.controller = column;
                             }
                         }
-                        Text { x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; text: row.entry.name; color: columns.colors.ink; font.pixelSize: 12; elide: Text.ElideMiddle }
+                        Text { opacity: entryIcon.item && entryIcon.item.cutPending ? Theme.cutOpacity : 1; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; text: row.entry.name; color: columns.colors.ink; font.pixelSize: 12; elide: Text.ElideMiddle }
                         Text { visible: row.entry.isDirectory; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: columns.colors.muted }
                         MouseArea {
                             anchors.fill: parent

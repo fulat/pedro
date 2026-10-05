@@ -20,6 +20,7 @@ var vignetteTop = "#19000000"
 var white = "#ffffff"
 
 // Shared surfaces and interaction.
+var cutOpacity = 0.45
 var actionHover = "#26ffffff"
 var buttonBorder = "#40ffffff"
 var cardBorder = "#36ffffff"

@@ -45,6 +45,7 @@ int main(int argc, char** argv) {
     const auto folder = QUrl::fromLocalFile(root + "/source/folder");
     manager.copy({folder});
     require(manager.canPaste(), "Copied files must enable paste");
+    require(manager.cutFiles().isEmpty() && !manager.isCut(folder), "Copy must not mark an item as cut");
     manager.paste(QUrl::fromLocalFile(root + "/destination"));
     require(!manager.canPaste(), "Concurrent paste must be disabled");
     wait();
@@ -57,10 +58,12 @@ int main(int argc, char** argv) {
     require(!error.isEmpty(), "Recursive folder paste must fail");
     error.clear();
     manager.copy({QUrl::fromLocalFile(file.fileName())}, true);
+    require(manager.isCut(QUrl::fromLocalFile(file.fileName())) && manager.cutFiles().size() == 1 && !manager.isCut(folder), "Cut state must identify only clipboard sources");
     manager.paste(QUrl::fromLocalFile(root + "/destination"));
     wait();
     require(error.isEmpty() && !QFile::exists(file.fileName()) && QFile::exists(root + "/destination/note.txt"), "Cut paste must move the file");
     require(!manager.canPaste(), "Successful cut must clear the clipboard");
+    require(manager.cutFiles().isEmpty(), "Successful cut must clear visual state");
     auto* mime = new QMimeData;
     mime->setUrls({QUrl("https://example.com/file")});
     QGuiApplication::clipboard()->setMimeData(mime);
@@ -113,6 +116,7 @@ int main(int argc, char** argv) {
     wait();
     require(!manager.operation()->error().isEmpty() && manager.operation()->completed().contains(QVariant(valid)), "Partial batch must report successes and failures");
     require(QGuiApplication::clipboard()->mimeData()->urls() == QList<QUrl>{missing}, "Partial cut must retain only failed sources");
+    require(manager.isCut(missing) && !manager.isCut(valid), "Partial cuts must update visual state");
     QFile large(root + "/source/large.bin");
     require(large.open(QIODevice::WriteOnly) && large.resize(64 * 1024 * 1024), "Cannot create cancellation fixture");
     large.close();
@@ -122,6 +126,15 @@ int main(int argc, char** argv) {
     manager.operation()->cancel();
     wait();
     require(manager.operation()->cancelled() && QFile::exists(large.fileName()) && manager.canPaste(), "Canceled cut must retain its source and clipboard");
+    require(manager.isCut(largeUrl), "Cancellation must keep pending cut state");
+    auto* externalCut = new QMimeData;
+    externalCut->setData("x-special/gnome-copied-files", "cut\n" + largeUrl.toEncoded());
+    QGuiApplication::clipboard()->setMimeData(externalCut);
+    require(manager.isCut(largeUrl), "External GNOME cuts must mark matching entries");
+    manager.copy({largeUrl});
+    require(manager.cutFiles().isEmpty(), "Replacing cut with copy must clear visual state");
+    QGuiApplication::clipboard()->setText("replacement text");
+    require(manager.cutFiles().isEmpty(), "Ordinary clipboard content must clear cut state");
     const auto permissions = QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner;
     QDir().mkpath(root + "/source/private");
     require(QFile::setPermissions(root + "/source/private", permissions), "Cannot set directory permissions");

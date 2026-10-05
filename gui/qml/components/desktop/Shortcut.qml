@@ -160,6 +160,7 @@ Item {
         text: shortcut.stacked && shortcut.stack.leader && shortcut.stack.count > 1 && (shortcut.stackIndicator || !shortcut.stack.expanded)
             ? shell.controller.stackLabel(shortcut.stack.key) : shortcut.app ? shortcut.app.name : ""
         color: Theme.white
+        opacity: entryLoader.item && entryLoader.item.cutPending ? Theme.cutOpacity : 1
         style: Text.Outline
         styleColor: Theme.shortcutShadow
         font.pixelSize: 13

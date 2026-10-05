@@ -83,9 +83,21 @@ actions = '''
                 const entry = controller.files.find(entry => entry.name === "shared.txt");
                 if (!entry) return;
                 controller.entryAction("cut", entry);
+            } else if (step === 4) {
+                const item = main.clipboardControl(window.contentItem, "entryComponent-shared.txt");
+                if (!item) return;
+                const icon = item.children.find(child => child.kind !== undefined);
+                if (!item.cutPending || !icon || icon.opacity >= 1 || !item.enabled || item.opacity !== 1) {
+                    console.error("CLIPBOARD UI FAILED: cut must dim only visuals"); Qt.exit(1); return;
+                }
+                Backend.clipboard.copy([controller.files[0].url]);
+                if (item.cutPending || icon.opacity !== 1) {
+                    console.error("CLIPBOARD UI FAILED: copy must restore opacity"); Qt.exit(1); return;
+                }
+                controller.entryAction("cut", controller.files[0]);
                 // Paste through the Desktop dispatcher into a different folder.
                 main.controller.entryAction("paste", {isDirectory: true, url: SOURCE_FOLDER});
-            } else if (step === 4) {
+            } else if (step === 5) {
                 if (controller.files.some(entry => entry.name === "shared.txt")) return;
                 if (Backend.clipboard.canPaste) {
                     console.error("CLIPBOARD UI FAILED: cut clipboard not cleared"); Qt.exit(1); return;
@@ -95,7 +107,7 @@ actions = '''
                 if (!panel) { console.error("CLIPBOARD UI FAILED", component.errorString()); Qt.exit(1); return; }
                 main.transferProbe.busy = true;
                 main.transferProbe.changed();
-            } else if (step === 5) {
+            } else if (step === 6) {
                 if (!panel.visible) return;
                 if (panel.progress !== 0.55 || panel.blocking || panel.message !== "Fixture.bin") {
                     console.error("CLIPBOARD UI FAILED: progress panel"); Qt.exit(1); return;

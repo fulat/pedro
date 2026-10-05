@@ -6,6 +6,7 @@ Loader {
     id: root
     property var controller
     property var entry: ({})
+    readonly property bool cutPending: !!item && item.cutPending
     property bool showName: true
     property bool inputEnabled: true
     property real iconSize: 64

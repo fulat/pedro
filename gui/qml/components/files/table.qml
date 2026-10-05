@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import "palette.js" as Palette
+import "../../scripts/theme.js" as Theme
 
 Item {
     id: table
@@ -94,7 +95,7 @@ Item {
                             item.controller = Qt.binding(() => table.controller);
                         }
                     }
-                    Text { x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; elide: Text.ElideMiddle; text: row.modelData.name; color: table.colors.ink; font.pixelSize: 12; font.bold: true }
+                    Text { opacity: entryIcon.item && entryIcon.item.cutPending ? Theme.cutOpacity : 1; x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; elide: Text.ElideMiddle; text: row.modelData.name; color: table.colors.ink; font.pixelSize: 12; font.bold: true }
                 }
                 Text { width: table.width * 0.18; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.type; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
                 Text { width: table.width * 0.115; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.sizeText; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }

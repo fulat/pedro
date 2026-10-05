@@ -13,6 +13,7 @@ namespace Pedro::Papi::Gui::Clipboard {
             Q_OBJECT
             Q_PROPERTY(bool canPaste READ canPaste NOTIFY changed)
             Q_PROPERTY(bool busy READ busy NOTIFY changed)
+            Q_PROPERTY(QVariantList cutFiles READ cutFiles NOTIFY changed)
             Q_PROPERTY(Pedro::Papi::Io::Transfer::Manager* operation READ operation CONSTANT)
 
         public:
@@ -22,6 +23,10 @@ namespace Pedro::Papi::Gui::Clipboard {
             bool canPaste() const;
 
             bool busy() const;
+
+            QVariantList cutFiles() const;
+
+            Q_INVOKABLE bool isCut(const QUrl& url) const;
 
             Pedro::Papi::Io::Transfer::Manager* operation();
 
@@ -35,6 +40,10 @@ namespace Pedro::Papi::Gui::Clipboard {
             void failed(const QString& message);
 
         private:
+
+            void refreshCutFiles();
+
+            QVariantList pendingCutFiles;
 
             Pedro::Papi::Io::Transfer::Manager transfer;
     };

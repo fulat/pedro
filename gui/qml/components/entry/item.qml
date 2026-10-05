@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Window
 import "../desktop" as Desktop
+import "../../scripts/theme.js" as Theme
 
 Item {
     id: entryItem
@@ -9,6 +10,7 @@ Item {
     readonly property var menu: menuLoader.item
     property var controller
     property var entry: ({})
+    readonly property bool cutPending: Backend.clipboard.cutFiles.length > 0 && Backend.clipboard.isCut(entry.url || "")
     property bool folder: false
     property bool showName: true
     property bool inputEnabled: true
@@ -91,6 +93,7 @@ Item {
     }
 
     Desktop.Icon {
+        opacity: entryItem.cutPending ? Theme.cutOpacity : 1
         width: entryItem.iconSize
         height: width
         anchors.horizontalCenter: parent.horizontalCenter
@@ -102,6 +105,7 @@ Item {
         cornerRadius: entryItem.cornerRadius
     }
     Text {
+        opacity: entryItem.cutPending ? Theme.cutOpacity : 1
         visible: entryItem.showName
         y: entryItem.iconSize + 13
         anchors.left: parent.left
