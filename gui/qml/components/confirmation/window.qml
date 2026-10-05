@@ -10,12 +10,11 @@ import "../../scripts/theme.js" as Theme
 // A Pedro system confirmation. Content and actions belong to its caller.
 Window {
     id: confirmation
+    property Window ownerWindow: null
     property string message
     property string detail
-    property string symbol: "info"
     property string confirmText: title
     property string cancelText: qsTranslate("Pedro", "common.cancel")
-    property bool destructive: false
     property bool actionEnabled: true
     property bool resolved: true
     signal accepted()
@@ -23,23 +22,24 @@ Window {
 
     objectName: "pedroConfirmation"
     color: "transparent"
-    flags: Qt.Dialog | Qt.FramelessWindowHint
-    modality: Qt.WindowModal
+    flags: Qt.Window | Qt.FramelessWindowHint | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint
+    transientParent: null
+    modality: Qt.NonModal
     visible: false
-    readonly property real preferredWidth: Math.min(440, Screen.desktopAvailableWidth || 440)
+    readonly property real preferredWidth: Math.min(400, Screen.desktopAvailableWidth || 400)
     width: preferredWidth
-    height: Math.min(body.implicitHeight + 76, Screen.desktopAvailableHeight || 600)
+    height: Math.min(body.implicitHeight + 74, Screen.desktopAvailableHeight || 600)
     minimumWidth: preferredWidth
     maximumWidth: preferredWidth
-    minimumHeight: Math.min(180, Screen.desktopAvailableHeight || 600)
+    minimumHeight: Math.min(164, Screen.desktopAvailableHeight || 600)
     maximumHeight: Screen.desktopAvailableHeight || 600
 
     function open() {
         if (!visible) {
             resolved = false;
-            if (transientParent) {
-                x = Math.round(transientParent.x + (transientParent.width - width) / 2);
-                y = Math.round(transientParent.y + (transientParent.height - height) / 2);
+            if (ownerWindow) {
+                x = Math.round(ownerWindow.x + (ownerWindow.width - width) / 2);
+                y = Math.round(ownerWindow.y + (ownerWindow.height - height) / 2);
             }
             x = Math.max(Screen.virtualX, Math.min(x, Screen.virtualX + Screen.desktopAvailableWidth - width));
             y = Math.max(Screen.virtualY, Math.min(y, Screen.virtualY + Screen.desktopAvailableHeight - height));
@@ -93,17 +93,23 @@ Window {
         anchors.fill: parent
         backdrop: wallpaper
         frosted: true
-        cornerRadius: 22
+        cornerRadius: 14
     }
     Rectangle {
         anchors.fill: parent
-        radius: 22
+        radius: 14
         color: Backend.appearanceMode === "light" ? "#52eff4fc" : "#45101825"
         border.color: Theme.liquidEdge
     }
+    Connections {
+        target: confirmation.ownerWindow
+        function onVisibleChanged() {
+            if (!confirmation.ownerWindow.visible) confirmation.reject();
+        }
+    }
     Item {
         width: parent.width
-        height: 42 + heading.implicitHeight
+        height: 34
         DragHandler {
             objectName: "confirmationDrag"
             target: null
@@ -112,20 +118,42 @@ Window {
         Controls.Button {
             id: closeButton
             objectName: "confirmationClose"
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.top: parent.top
-            anchors.topMargin: 7
-            width: 28; height: 28
-            padding: 6
+            x: 10
+            anchors.verticalCenter: parent.verticalCenter
+            width: 22; height: 26
             hoverEnabled: true
             Accessible.name: qsTranslate("Pedro", "common.close")
             onClicked: confirmation.reject()
-            contentItem: Icon.Tinted {
-                source: "window-close.svg"
-                tint: Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff"
+            contentItem: Item {}
+            background: Item {
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 12; height: 12
+                    radius: 6
+                    color: "#ff5c5f"
+                    visible: !closeButton.hovered
+                }
+                Icon.Tinted {
+                    anchors.centerIn: parent
+                    width: 15; height: 15
+                    source: "window-close.svg"
+                    tint: "#ff5c5f"
+                    visible: closeButton.hovered
+                }
             }
-            background: Rectangle { radius: 8; color: closeButton.hovered ? "#20ffffff" : "transparent" }
+        }
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 42
+            anchors.right: parent.right
+            anchors.rightMargin: 16
+            anchors.verticalCenter: parent.verticalCenter
+            text: confirmation.title
+            color: Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff"
+            font.pixelSize: 13
+            font.weight: Font.Medium
+            elide: Text.ElideRight
+            textFormat: Text.PlainText
         }
     }
     ColumnLayout {
@@ -133,37 +161,10 @@ Window {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.leftMargin: 26
-        anchors.rightMargin: 26
-        anchors.topMargin: 42
+        anchors.leftMargin: 20
+        anchors.rightMargin: 20
+        anchors.topMargin: 52
         spacing: 14
-        RowLayout {
-            id: heading
-            Layout.fillWidth: true
-            spacing: 14
-            Rectangle {
-                Layout.preferredWidth: 48
-                Layout.preferredHeight: 48
-                radius: 14
-                color: "#20ffffff"
-                border.color: Theme.liquidEdge
-                Icon.Tinted {
-                    anchors.centerIn: parent
-                    width: 25; height: 25
-                    source: confirmation.symbol + ".svg"
-                    tint: Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff"
-                }
-            }
-            Text {
-                Layout.fillWidth: true
-                text: confirmation.title
-                color: Backend.appearanceMode === "light" ? "#10164d" : "#eef3ff"
-                font.pixelSize: 19
-                font.weight: Font.DemiBold
-                wrapMode: Text.WordWrap
-                textFormat: Text.PlainText
-            }
-        }
         Text {
             Layout.fillWidth: true
             text: confirmation.message
@@ -207,7 +208,7 @@ Window {
         id: button
         property bool primary: false
         implicitWidth: Math.max(104, contentItem.implicitWidth + 30)
-        implicitHeight: 36
+        implicitHeight: 32
         hoverEnabled: true
         contentItem: Text {
             text: button.text
@@ -218,8 +219,8 @@ Window {
             font.weight: Font.Medium
         }
         background: Rectangle {
-            radius: 11
-            color: button.primary ? confirmation.destructive ? "#da4552" : "#0877ff" : button.hovered ? "#35ffffff" : "#20ffffff"
+            radius: 8
+            color: button.primary ? "#0877ff" : button.hovered ? "#35ffffff" : "#20ffffff"
             border.color: button.activeFocus ? "#99ffffff" : button.primary ? "transparent" : Theme.liquidEdge
             opacity: button.enabled ? 1 : 0.45
             Behavior on color { ColorAnimation { duration: 120 } }

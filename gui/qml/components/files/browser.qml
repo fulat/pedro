@@ -74,12 +74,10 @@ Rectangle {
         id: confirmation
         objectName: "trashConfirmation"
         property var urls: []
-        transientParent: browser.Window.window
+        ownerWindow: browser.Window.window
         title: qsTranslate("Pedro", urls.length ? "trash.delete" : "trash.empty")
         message: qsTranslate("Pedro", "trash.confirm")
         confirmText: title
-        symbol: "trash"
-        destructive: true
         actionEnabled: !Backend.trash.busy
         onAccepted: {
             if (urls.length) Backend.trash.remove(urls);

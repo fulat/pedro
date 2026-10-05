@@ -70,14 +70,14 @@ actions = '''
             } else if (step === 2) {
                 const owner = main.controller.filesQuickWindow;
                 const confirmation = owner.contentItem.confirmationWindow;
-                if (!confirmation.visible || confirmation.transientParent !== owner || confirmation.modality !== Qt.WindowModal) {
+                if (!confirmation.visible || confirmation.ownerWindow !== owner || confirmation.transientParent !== null || confirmation.modality !== Qt.NonModal || (confirmation.flags & Qt.Dialog) === Qt.Dialog) {
                     console.error("TRASH UI FAILED: independent confirmation window");
                     Qt.exit(1);
                     return;
                 }
                 confirmation.reject();
                 const component = Qt.createComponent("qml/components/confirmation/window.qml");
-                probe = component.createObject(main, {transientParent: owner, title: "Pedro test", message: "Reusable confirmation", confirmText: "Confirm"});
+                probe = component.createObject(main, {ownerWindow: owner, title: "Pedro test", message: "Reusable confirmation", confirmText: "Confirm"});
                 if (!probe) {
                     console.error("TRASH UI FAILED", component.errorString());
                     Qt.exit(1);
@@ -93,9 +93,11 @@ actions = '''
                     Qt.exit(1);
                     return;
                 }
+                const ownerX = probe.ownerWindow.x;
+                const ownerY = probe.ownerWindow.y;
                 const oldX = probe.x;
                 probe.x = oldX + 20;
-                if (probe.x !== oldX + 20) {
+                if (probe.x !== oldX + 20 || probe.ownerWindow.x !== ownerX || probe.ownerWindow.y !== ownerY) {
                     console.error("TRASH UI FAILED: movable window");
                     Qt.exit(1);
                     return;
