@@ -219,6 +219,7 @@ Detalle: [idiomas y configuración](language.md).
 ## Aplicaciones y sesión
 
 - [x] Activación desde el dock en Ubuntu/GNOME mediante PAPI y applications@pedro: Shell.App.activate_full() enfoca/restaura ventanas existentes o inicia la aplicación cerrada; indicadores basados en ventanas de GNOME.
+- [ ] **Minimizar hacia el dock de Pedro** — conectar el destino de la animación con la posición real del icono correspondiente en el dock de Pedro. Pospuesto para la integración del gestor/compositor definitivo; en la sesión actual GNOME/Ubuntu controla la animación y usa su propio dock. Esta limitación pertenece a la integración con GNOME, no a Parallels; abandonar la VM por sí solo no la resuelve. Mantener la gestión de ventanas en el compositor y la representación del dock en Qt/QML.
 - [ ] Menú explícito para abrir una nueva ventana.
 - [ ] Distribuir la integración en la futura sesión GNOME de producción cuando se defina su boot/session flow. La integración actual del overlay no confirma el funcionamiento de la ISO.
 
