@@ -2055,5 +2055,15 @@ or choose Open to get started.</translation>
       <extracomment>Stable Pedro key: transfer.progress</extracomment>
       <translation>Progress of the current file</translation>
     </message>
+    <message>
+      <source>file.menu.open.loading</source>
+      <extracomment>Stable Pedro key: file.menu.open.loading</extracomment>
+      <translation>Loading applications…</translation>
+    </message>
+    <message>
+      <source>file.menu.open.empty</source>
+      <extracomment>Stable Pedro key: file.menu.open.empty</extracomment>
+      <translation>No compatible applications</translation>
+    </message>
 </context>
 </TS>

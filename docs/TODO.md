@@ -117,7 +117,7 @@ Pedro → Mutter → GPU/DRM/KMS → physical display
 
 - [ ] **Startup Applications / Open at Login** — permitir elegir qué aplicaciones deben iniciarse automáticamente cuando el usuario inicia sesión.
 
-- [ ] **Default Applications / MIME Associations & UI** — Open With y una UI sencilla para elegir navegador, reproductor, editor, mail app y aplicaciones predeterminadas por tipo mediante las asociaciones MIME existentes. La clasificación visual de archivos ya existe; falta integrar su apertura y configuración de asociaciones.
+- [ ] **Default Applications / MIME Associations & UI** — parcial: Abrir con muestra y lanza aplicaciones compatibles reales mediante GIO/GAppInfo desde File/Folder, destacando la predeterminada. Falta la UI para cambiar aplicaciones predeterminadas (navegador, reproductor, editor, mail) y elegir aplicaciones no asociadas al MIME; integrar estas opciones mediante las asociaciones existentes de GNOME, sin inventar un registro paralelo.
 
 - [ ] **Application Updates** — integrar actualización de aplicaciones desde Pedro App Store o la infraestructura correspondiente, mostrando claramente versiones disponibles y estado de instalación.
 

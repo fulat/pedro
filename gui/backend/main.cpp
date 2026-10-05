@@ -1,4 +1,5 @@
 #include <pedro/papi/io/directory/model.hpp>
+#include <pedro/papi/io/content/applications.hpp>
 
 #include "backend.hpp"
 #include "application/icon/provider.hpp"
@@ -94,6 +95,7 @@ int main(int argc, char* argv[]) {
     QObject::connect(&backend, &Backend::languageChanged, &engine, translate);
     translate();
 
+    qmlRegisterType<Pedro::Papi::Io::Content::Applications>("Pedro.Files", 1, 0, "Applications");
     qmlRegisterType<Pedro::Papi::Io::Directory::Model>("Pedro.Files", 1, 0, "Directory");
     engine.rootContext()->setContextProperty(QStringLiteral("Backend"), &backend);
 

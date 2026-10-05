@@ -49,6 +49,7 @@ actions = '''
         property var panel: null
         property var standaloneFile: null
         property var standaloneFolder: null
+        property bool applicationsChecked: false
         onTriggered: {
             if (++ticks > 100) { console.error("CLIPBOARD UI FAILED: timeout"); Qt.exit(1); return; }
             if (Backend.fileTransfer.error.length && !Backend.fileTransfer.cancelled) {
@@ -152,8 +153,23 @@ actions = '''
                 standaloneFile.openMenu(10, 10);
                 if (standaloneFile.cutPending || !standaloneFile.item.menu.visible) { console.error("CLIPBOARD UI FAILED: standalone menu"); Qt.exit(1); return; }
                 standaloneFile.closeMenu();
-                if (!standaloneFolder.dropFiles([SOURCE_FILE])) { console.error("CLIPBOARD UI FAILED: standalone folder drop"); Qt.exit(1); return; }
             } else if (step === 7) {
+                if (!applicationsChecked) {
+                    const menu = standaloneFile.item.menu;
+                    let openWith = null;
+                    for (let i = 0; i < menu.count; ++i) {
+                        const candidate = menu.itemAt(i).subMenu;
+                        if (candidate && candidate.applications !== undefined) openWith = candidate;
+                    }
+                    if (!openWith) { console.error("CLIPBOARD UI FAILED: shared Open with submenu missing"); Qt.exit(1); return; }
+                    if (openWith.discovering) return;
+                    if (!openWith.applications.length) { console.error("CLIPBOARD UI FAILED: no MIME application choices"); Qt.exit(1); return; }
+                    const first = openWith.itemAt(0);
+                    if (first.objectName !== "openWith-" + openWith.applications[0].id) { console.error("CLIPBOARD UI FAILED: application menu not populated"); Qt.exit(1); return; }
+                    applicationsChecked = true;
+                    if (!standaloneFolder.dropFiles([SOURCE_FILE])) { console.error("CLIPBOARD UI FAILED: standalone folder drop"); Qt.exit(1); return; }
+                    return;
+                }
                 if (Backend.fileTransfer.busy) return;
                 standaloneFile.destroy();
                 standaloneFolder.destroy();

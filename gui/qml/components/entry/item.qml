@@ -154,6 +154,7 @@ Item {
         });
         menu.canPaste = Qt.binding(() => Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(entryItem.entry.url || ""));
         menu.folderName = entry.name || "";
+        if (!entry.inTrash) menu.fileUrl = entry.url || "";
         menu.fileMode = !folder;
         menu.imageFile = entry.icon === "image";
         if (entry.inTrash) {

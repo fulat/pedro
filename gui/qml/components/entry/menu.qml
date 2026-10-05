@@ -1,6 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Window
+import Pedro.Files 1.0
 import QtQuick.Controls.Basic as Controls
 import "../icon" as Icon
 import ".." as Components
@@ -12,6 +14,7 @@ Controls.Menu {
     property Item backdrop
     property real maximumHeight: 600
     property string folderName
+    property url fileUrl
     property bool canPaste: false
     property bool canCut: true
     property int selectionCount: 1
@@ -54,6 +57,7 @@ Controls.Menu {
 
         property string symbol: subMenu === openWithMenu ? "tab" : subMenu === compressionMenu ? "archive" : subMenu === sharingMenu ? "share" : ""
         property string shortcutText: ""
+        property string applicationIcon: ""
 
         hoverEnabled: true
         visible: subMenu !== openWithMenu || (root.fileMode && root.selectionCount <= 1)
@@ -64,12 +68,22 @@ Controls.Menu {
         contentItem: Row {
             spacing: 12
 
-            Icon.Tinted {
+            Item {
                 width: 18
                 height: 18
                 anchors.verticalCenter: parent.verticalCenter
-                source: entry.symbol.length ? "../../../assets/icons/" + entry.symbol + ".svg" : ""
-                opacity: entry.enabled ? 1 : 0.4
+                Image {
+                    anchors.fill: parent
+                    visible: entry.applicationIcon.length > 0
+                    source: visible ? "image://applications/" + encodeURIComponent(entry.applicationIcon) : ""
+                    sourceSize: Qt.size(18, 18)
+                }
+                Icon.Tinted {
+                    anchors.fill: parent
+                    visible: !entry.applicationIcon.length
+                    source: entry.symbol.length ? "../../../assets/icons/" + entry.symbol + ".svg" : ""
+                    opacity: entry.enabled ? 1 : 0.4
+                }
             }
 
             Controls.Label {
@@ -139,8 +153,10 @@ Controls.Menu {
 
     Controls.Menu {
         id: openWithMenu
+        readonly property var applications: handlers.applications
+        readonly property bool discovering: handlers.loading
         title: qsTranslate("Pedro", "file.menu.open.with")
-        width: 210
+        width: 280
         padding: 6
         height: Math.max(1, Math.min(contentItem.implicitHeight + topPadding + bottomPadding, root.maximumHeight))
         popupType: Controls.Popup.Window
@@ -151,10 +167,46 @@ Controls.Menu {
             blurAmount: 1.0
             cornerRadius: 12
         }
+        Applications {
+            id: handlers
+            source: root.fileMode && root.selectionCount === 1 ? root.fileUrl : ""
+            onFailed: message => {
+                const component = Qt.createComponent("../confirmation/window.qml");
+                const alert = component.createObject(root, {
+                    ownerWindow: root.parent ? root.parent.Window.window : null,
+                    title: qsTranslate("Pedro", "file.menu.open.with"),
+                    message: message,
+                    showCancel: false
+                });
+                if (alert) {
+                    alert.accepted.connect(() => alert.destroy());
+                    alert.rejected.connect(() => alert.destroy());
+                    alert.open();
+                }
+            }
+        }
+        onAboutToShow: handlers.refresh()
+        Instantiator {
+            model: handlers.applications
+            delegate: Entry {
+                required property var modelData
+                objectName: "openWith-" + modelData.id
+                text: modelData.name
+                symbol: "window"
+                applicationIcon: modelData.icon
+                shortcutText: modelData.isDefault ? "✓" : ""
+                enabled: !handlers.loading
+                onTriggered: handlers.launch(modelData.id)
+            }
+            onObjectAdded: (index, object) => openWithMenu.insertItem(index, object)
+            onObjectRemoved: (index, object) => openWithMenu.removeItem(object)
+        }
         Entry {
-            text: qsTranslate("Pedro", "file.menu.application")
-            symbol: "window"
-            onTriggered: root.actionRequested("application")
+            visible: handlers.loading || handlers.error.length > 0 || !handlers.applications.length
+            implicitHeight: visible ? 34 : 0
+            enabled: false
+            text: handlers.error.length ? handlers.error : handlers.loading
+                ? qsTranslate("Pedro", "file.menu.open.loading") : qsTranslate("Pedro", "file.menu.open.empty")
         }
     }
 

@@ -425,5 +425,7 @@
     "common.ok": "OK",
     "transfer.title": "Transferring files",
     "transfer.error": "File transfer could not finish",
-    "transfer.progress": "Progress of the current file"
+    "transfer.progress": "Progress of the current file",
+    "file.menu.open.loading": "Loading applications…",
+    "file.menu.open.empty": "No compatible applications"
 }

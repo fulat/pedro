@@ -425,5 +425,7 @@
     "common.ok": "Aceptar",
     "transfer.title": "Transfiriendo archivos",
     "transfer.error": "No se pudo completar la transferencia",
-    "transfer.progress": "Progreso del archivo actual"
+    "transfer.progress": "Progreso del archivo actual",
+    "file.menu.open.loading": "Cargando aplicaciones…",
+    "file.menu.open.empty": "No hay aplicaciones compatibles"
 }
