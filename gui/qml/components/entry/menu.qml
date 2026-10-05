@@ -195,12 +195,14 @@ Controls.Menu {
         visible: root.selectionCount <= 1
         text: qsTranslate("Pedro", "folder.menu.rename")
         symbol: "rename"
+        enabled: !Backend.fileTransfer.busy
         shortcutText: "F2"
         onTriggered: root.actionRequested("rename")
     }
 
     Entry {
-        visible: root.fileMode && root.selectionCount <= 1
+        visible: root.selectionCount <= 1
+        enabled: !Backend.fileTransfer.busy
         text: qsTranslate("Pedro", "file.menu.duplicate")
         symbol: "copy"
         shortcutText: "Ctrl+D"

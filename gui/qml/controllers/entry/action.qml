@@ -5,6 +5,7 @@ QtObject {
     property var entry: ({})
     property var owner: null
     property var window: null
+    property var renameDialog: null
     signal requested(string action, var entry)
 
     function entries(value = entry) {
@@ -39,6 +40,18 @@ QtObject {
         const urls = selection.map(item => item.url).filter(url => !!url);
         if (action === "copy" || action === "cut") {
             Backend.clipboard.copy(urls, action === "cut");
+        } else if (action === "duplicate" && !value.inTrash) {
+            if (selection.length === 1) Backend.fileTransfer.duplicate(value.url);
+        } else if (action === "rename" && !value.inTrash && selection.length === 1) {
+            if (Backend.fileTransfer.busy) return;
+            if (renameDialog && renameDialog.visible) { renameDialog.activateAlert(); return; }
+            const component = Qt.createComponent("../../components/entry/rename.qml");
+            const dialog = component.createObject(window || owner, {entry: value, ownerWindow: window});
+            if (dialog) {
+                renameDialog = dialog;
+                dialog.visibleChanged.connect(() => { if (!dialog.visible) renameDialog = null; });
+                dialog.open();
+            }
         } else if (action === "paste") {
             Backend.clipboard.paste(value.isDirectory ? value.url : owner && owner.directory ? (owner.directory.location || owner.directory.directory) : "");
         } else if (action === "trash") {

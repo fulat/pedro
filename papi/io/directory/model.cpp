@@ -21,7 +21,7 @@ namespace Pedro::Papi::Io::Directory {
     namespace {
 
         constexpr int entryRole = Qt::UserRole + 1;
-        constexpr auto attributes = "standard::name,standard::display-name,standard::type,standard::is-hidden,standard::content-type,standard::size,time::modified,trash::orig-path,trash::deletion-date,standard::target-uri";
+        constexpr auto attributes = "standard::name,standard::display-name,standard::edit-name,standard::type,standard::is-hidden,standard::content-type,standard::size,time::modified,trash::orig-path,trash::deletion-date,standard::target-uri";
 
         class Order : public QSortFilterProxyModel {
             public:
@@ -157,6 +157,7 @@ namespace Pedro::Papi::Io::Directory {
             g_clear_object(&parent);
             g_object_unref(trash);
             result["name"] = QString::fromUtf8(g_file_info_get_display_name(info));
+            result["editName"] = QString::fromUtf8(g_file_info_get_edit_name(info));
             result["isDirectory"] = folder;
             result["icon"] = folder ? "folder" : contentType && g_content_type_is_a(contentType, "image/*") ? "image" : "file";
             const auto type = contentType ? QString::fromUtf8(contentType) : QString{};

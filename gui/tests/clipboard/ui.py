@@ -158,9 +158,30 @@ actions = '''
                 else if (step === 9) controller.viewMode = "grid";
                 else if (step === 10) controller.viewMode = "mixed";
                 else {
-                console.log("CLIPBOARD UI PASSED: Desktop/Files interoperability, folder paste and cancelable Liquid progress");
-                Qt.quit();
+                    const entry = controller.files.find(entry => entry.name === "shared.txt");
+                    controller.entryAction("rename", entry);
                 }
+            } else if (step === 12) {
+                const dialog = controller.fileBehavior.renameDialog;
+                if (!dialog || !dialog.visible || dialog.actionEnabled) { console.error("CLIPBOARD UI FAILED: rename prompt"); Qt.exit(1); return; }
+                dialog.editor.text = "../bad";
+                if (dialog.actionEnabled) { console.error("CLIPBOARD UI FAILED: rename path validation"); Qt.exit(1); return; }
+                dialog.editor.text = "renamed fixture.txt";
+                if (!dialog.actionEnabled) { console.error("CLIPBOARD UI FAILED: valid rename disabled"); Qt.exit(1); return; }
+                dialog.accept();
+            } else if (step === 13) {
+                const entry = controller.files.find(entry => entry.name === "renamed fixture.txt");
+                if (!entry) return;
+                controller.entryAction("duplicate", entry);
+            } else if (step === 14) {
+                const duplicate = controller.files.find(entry => entry.name === "renamed fixture (2).txt");
+                if (!duplicate) return;
+                controller.entryAction("rename", duplicate);
+                const dialog = controller.fileBehavior.renameDialog;
+                dialog.editor.text = "cancelled.txt";
+                dialog.reject();
+                console.log("CLIPBOARD UI PASSED: standalone behavior, four views, rename, duplicate and cancel");
+                Qt.quit();
             }
             ++step;
         }
@@ -178,5 +199,7 @@ result = subprocess.run([str(root / 'build/dev/gui/pedro-gui')], env=environment
 if result.returncode or 'CLIPBOARD UI PASSED' not in result.stdout or any(error in result.stdout for error in ('ReferenceError', 'TypeError', 'CLIPBOARD UI FAILED')):
     raise SystemExit(result.stdout)
 assert (fixtures / 'source' / 'shared (2).txt').read_text() == 'shared clipboard fixture\n'
-assert (fixtures / 'destination' / 'shared.txt').read_text() == 'shared clipboard fixture\n'
-print('PASS: standalone file/folder behavior, all Files views and shared Desktop clipboard workflow')
+assert (fixtures / 'destination' / 'renamed fixture.txt').read_text() == 'shared clipboard fixture\n'
+assert (fixtures / 'destination' / 'renamed fixture (2).txt').read_text() == 'shared clipboard fixture\n'
+assert not (fixtures / 'destination' / 'cancelled.txt').exists()
+print('PASS: standalone behavior, all Files views, rename, duplicate and cancel')

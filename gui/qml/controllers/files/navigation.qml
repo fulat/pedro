@@ -9,6 +9,7 @@ QtObject {
     property string sortKey: "name"
     onSortKeyChanged: { if (directory) directory.setSort(sortKey); }
     property var directory: null
+    property var window: null
     property var selectedEntry: ({})
     readonly property string title: directory && directory.globalSearch && directory.search.trim().length ? qsTranslate("Pedro", "files.browser.searchResults") : directory ? directory.place.length ? qsTranslate("Pedro", "files.browser." + directory.place) : directory.name || qsTranslate("Pedro", "files.browser.computer") : ""
     readonly property var folders: directory ? directory.folders : []
@@ -72,6 +73,7 @@ QtObject {
     Component.onCompleted: {
         const component = Qt.createComponent("../entry/action.qml");
         fileBehavior = component.createObject(controller, {owner: controller});
+        fileBehavior.window = Qt.binding(() => controller.window);
     }
 
     function entryAction(action, entry) {

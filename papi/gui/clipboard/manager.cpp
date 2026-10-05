@@ -39,6 +39,19 @@ namespace Pedro::Papi::Gui::Clipboard {
     Manager::Manager(QObject* parent) : QObject(parent) {
         connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::changed, this, &Manager::changed);
         connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::failed, this, &Manager::failed);
+        connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::renamed, this, [this](const QUrl& source, const QUrl& destination) {
+            const auto urls = files();
+            if (!urls.contains(source)) {
+                return;
+            }
+            const auto* mime = QGuiApplication::clipboard()->mimeData();
+            const bool cut = mime && mime->data("x-special/gnome-copied-files").startsWith("cut\n");
+            QVariantList updated;
+            for (const auto& url : urls) {
+                updated.append(url == source ? destination : url);
+            }
+            setFiles(updated, cut);
+        });
         connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, this, [this] {
             refreshCutFiles();
             emit changed();

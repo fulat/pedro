@@ -19,6 +19,8 @@ Window {
     property bool blocking: true
     property bool keepOnTop: true
     property bool actionEnabled: true
+    property bool acceptOnReturn: false
+    property alias extraContent: extra.data
     property bool resolved: true
     signal accepted()
     signal rejected()
@@ -86,7 +88,7 @@ Window {
         sequences: ["Return", "Enter"]
         enabled: confirmation.visible
         onActivated: {
-            if (acceptButton.activeFocus) confirmation.accept();
+            if (confirmation.acceptOnReturn || acceptButton.activeFocus) confirmation.accept();
             else confirmation.reject();
         }
     }
@@ -186,6 +188,12 @@ Window {
             font.pixelSize: 12
             wrapMode: Text.WrapAnywhere
             textFormat: Text.PlainText
+        }
+        Item {
+            id: extra
+            Layout.fillWidth: true
+            implicitHeight: childrenRect.height
+            visible: children.length > 0
         }
         Controls.ProgressBar {
             Layout.fillWidth: true

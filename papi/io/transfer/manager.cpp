@@ -190,6 +190,79 @@ namespace Pedro::Papi::Io::Transfer {
         }
     }
 
+    bool Manager::validName(const QString& name) const {
+        return !name.trimmed().isEmpty() && name != "." && name != ".." && !name.contains('/') && !name.contains(QChar::Null);
+    }
+
+    void Manager::duplicate(const QUrl& url) {
+        if (!url.isLocalFile() || QDir::cleanPath(url.toLocalFile()) == "/") {
+            return;
+        }
+        transfer({url}, QUrl::fromLocalFile(QFileInfo(url.toLocalFile()).absolutePath()), false);
+    }
+
+    void Manager::rename(const QUrl& url, const QString& name) {
+        if (transferring) {
+            return;
+        }
+        if (!url.isLocalFile() || QDir::cleanPath(url.toLocalFile()) == "/" || !validName(name)) {
+            failure = QStringLiteral("Invalid file name or location");
+            emit changed();
+            emit failed(failure);
+            return;
+        }
+        cancellation = std::shared_ptr<GCancellable>(g_cancellable_new(), g_object_unref);
+        fraction = 0;
+        wasCancelled = false;
+        failure.clear();
+        successes.clear();
+        current = QFileInfo(url.toLocalFile()).fileName();
+        transferring = true;
+        emit changed();
+        using Result = QPair<QString, QUrl>;
+        auto* watcher = new QFutureWatcher<Result>(this);
+        connect(watcher, &QFutureWatcher<Result>::finished, this, [this, watcher, url] {
+            const auto result = watcher->result();
+            watcher->deleteLater();
+            failure = result.first;
+            wasCancelled = cancellation && g_cancellable_is_cancelled(cancellation.get());
+            fraction = failure.isEmpty() ? 1 : 0;
+            transferring = false;
+            if (failure.isEmpty()) {
+                successes.append(url);
+                emit renamed(url, result.second);
+            }
+            emit changed();
+            if (!failure.isEmpty() && !wasCancelled) {
+                emit failed(failure);
+            }
+            emit finished(failure);
+        });
+        const auto cancel = cancellation;
+        watcher->setFuture(QtConcurrent::run([url, name, cancel] {
+            GError* error = nullptr;
+            auto* source = g_file_new_for_uri(url.toEncoded().constData());
+            auto* parent = g_file_get_parent(source);
+            auto* info = g_file_query_info(source, "standard::type", G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, cancel.get(), &error);
+            auto* target = info && parent ? g_file_get_child_for_display_name(parent, name.toUtf8().constData(), &error) : nullptr;
+            g_clear_object(&info);
+            QUrl destination;
+            QString failure;
+            if (target && (g_file_equal(source, target) || g_file_move(source, target, G_FILE_COPY_NOFOLLOW_SYMLINKS, cancel.get(), nullptr, nullptr, &error))) {
+                auto* uri = g_file_get_uri(target);
+                destination = QUrl(QString::fromUtf8(uri));
+                g_free(uri);
+            } else {
+                failure = error ? QString::fromUtf8(error->message) : QStringLiteral("The file cannot be renamed");
+            }
+            g_clear_error(&error);
+            g_clear_object(&target);
+            g_clear_object(&parent);
+            g_object_unref(source);
+            return Result{failure, destination};
+        }));
+    }
+
     void Manager::transfer(const QVariantList& values, const QUrl& requestedDestination, bool cut) {
         const auto destination = requestedDestination.scheme().isEmpty() ? QUrl::fromLocalFile(requestedDestination.toString()) : requestedDestination;
         if (transferring || values.isEmpty() || !destination.isLocalFile() || !QFileInfo(destination.toLocalFile()).isDir()) {

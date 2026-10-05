@@ -138,7 +138,7 @@ QtObject {
     property var fileBehavior: null
     Component.onCompleted: {
         const component = Qt.createComponent("entry/action.qml");
-        fileBehavior = component.createObject(controller, {owner: controller});
+        fileBehavior = component.createObject(controller, {owner: controller, window: controller.window});
     }
 
     function entryAction(action, entry) {

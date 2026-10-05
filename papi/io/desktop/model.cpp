@@ -21,7 +21,7 @@ namespace Pedro::Papi::Io::Desktop {
 
     namespace {
 
-        constexpr auto attributes = "id::file,standard::name,standard::display-name,standard::type,standard::is-hidden,standard::content-type,standard::size,time::modified";
+        constexpr auto attributes = "id::file,standard::name,standard::display-name,standard::edit-name,standard::type,standard::is-hidden,standard::content-type,standard::size,time::modified";
         QString positionKey(const QString& uri) {
 
             return QString::fromLatin1(QCryptographicHash::hash(uri.toUtf8(), QCryptographicHash::Sha256).toHex());
@@ -85,6 +85,7 @@ namespace Pedro::Papi::Io::Desktop {
             entry["id"] = url.toString(QUrl::FullyEncoded);
             entry["identity"] = identity ? QString::fromUtf8(identity) : QString{};
             entry["name"] = QString::fromUtf8(g_file_info_get_display_name(info));
+            entry["editName"] = QString::fromUtf8(g_file_info_get_edit_name(info));
             entry["url"] = url;
             entry["path"] = url.toLocalFile();
             entry["isDirectory"] = folder;

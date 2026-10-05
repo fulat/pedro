@@ -48,4 +48,16 @@ Item {
         enabled: shortcuts.available && shortcuts.urls.length > 0 && !Backend.trash.busy
         onActivated: shortcuts.actionRequested(shortcuts.entries[0].inTrash ? "remove" : "trash")
     }
+    Shortcut {
+        context: Qt.WindowShortcut
+        sequence: "F2"
+        enabled: shortcuts.available && shortcuts.entries.length === 1 && !shortcuts.entries[0].inTrash && !Backend.fileTransfer.busy
+        onActivated: shortcuts.actionRequested("rename")
+    }
+    Shortcut {
+        context: Qt.WindowShortcut
+        sequence: "Ctrl+D"
+        enabled: shortcuts.available && shortcuts.entries.length === 1 && !shortcuts.entries[0].inTrash && !Backend.fileTransfer.busy
+        onActivated: shortcuts.actionRequested("duplicate")
+    }
 }

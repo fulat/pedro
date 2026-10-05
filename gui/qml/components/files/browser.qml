@@ -78,7 +78,7 @@ Rectangle {
     Loader {
         id: controllerLoader
         source: "../../controllers/files/navigation.qml"
-        onLoaded: item.directory = directory
+        onLoaded: { item.directory = directory; item.window = Qt.binding(() => browser.Window.window); }
     }
 
     function openBackgroundMenu(target, point) {

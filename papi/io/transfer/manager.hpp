@@ -50,6 +50,12 @@ namespace Pedro::Papi::Io::Transfer {
 
             Q_INVOKABLE void move(const QVariantList& urls, const QUrl& destination);
 
+            Q_INVOKABLE void duplicate(const QUrl& url);
+
+            Q_INVOKABLE bool validName(const QString& name) const;
+
+            Q_INVOKABLE void rename(const QUrl& url, const QString& name);
+
             void transfer(const QVariantList& urls, const QUrl& destination, bool cut);
 
         signals:
@@ -58,6 +64,8 @@ namespace Pedro::Papi::Io::Transfer {
             void failed(const QString& message);
 
             void finished(const QString& error);
+
+            void renamed(const QUrl& source, const QUrl& destination);
 
         private:
 
