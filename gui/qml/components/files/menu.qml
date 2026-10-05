@@ -75,6 +75,14 @@ Controls.Menu {
         enabled: !!menu.directory && !Backend.trash.busy && menu.directory.folders.length + menu.directory.files.length > 0
         onTriggered: menu.emptyRequested()
     }
+    Action {
+        objectName: "filesPaste"
+        text: qsTranslate("Pedro", "folder.menu.paste")
+        symbol: "paste"
+        visible: menu.canCreate
+        enabled: menu.canCreate && Backend.clipboard.canPaste
+        onTriggered: Backend.clipboard.paste(menu.directory.location)
+    }
     Controls.MenuSeparator {}
     Action {
         text: qsTranslate("Pedro", "folder.menu.properties")

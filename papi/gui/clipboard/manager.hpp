@@ -13,6 +13,7 @@ namespace Pedro::Papi::Gui::Clipboard {
             Q_OBJECT
             Q_PROPERTY(bool canPaste READ canPaste NOTIFY changed)
             Q_PROPERTY(bool busy READ busy NOTIFY changed)
+            Q_PROPERTY(Pedro::Papi::Io::Transfer::Manager* operation READ operation CONSTANT)
 
         public:
 
@@ -21,6 +22,8 @@ namespace Pedro::Papi::Gui::Clipboard {
             bool canPaste() const;
 
             bool busy() const;
+
+            Pedro::Papi::Io::Transfer::Manager* operation();
 
             Q_INVOKABLE void copy(const QVariantList& urls, bool cut = false);
 

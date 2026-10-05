@@ -35,7 +35,7 @@ Registro permanente del desarrollo. No implica implementar todas las tareas inme
 - [ ] **General Hardware Detection** — unificar eventos de conexión/desconexión en PAPI; las integraciones específicas de Wi-Fi/Bluetooth no cubren hardware general.
 - [x] **Filesystem Monitoring** — Desktop y Pedro Files usan GFileMonitor, agrupan eventos y actualizan el modelo incrementalmente, sin polling ni refrescos por frame. Files reemplaza el monitor al navegar; el monitoreo permanece invisible. Véanse [Desktop](desktop.md) y [Files](files.md).
 - [x] **Carpetas estándar mediante XDG** — Desktop y Files resuelven las carpetas del usuario activo mediante g_get_user_special_dir; la lógica vive en PAPI. El mismo código sirve en desarrollo y producción, sin rutas /home/<usuario> hardcodeadas.
-- [ ] **Operaciones asíncronas completas** — parcial: enumeración, creación de carpetas/archivos y renombrado ya usan APIs asíncronas o workers. Faltan copiar, mover, comprimir, extraer y descargar con progreso, cancelación y errores; modelar jobs independientes cuando corresponda. Priorizar GLib/GIO y mantener interactiva la UI.
+- [ ] **Operaciones asíncronas completas** — parcial: enumeración, creación de carpetas/archivos y renombrado ya usan APIs asíncronas o workers. Copiar/cortar/pegar y arrastrar comparten un gestor GIO cancelable, con progreso del archivo actual y errores parciales. Faltan comprimir, extraer y descargar, además de una cola de jobs simultáneos; modelar jobs independientes cuando corresponda. Priorizar GLib/GIO y mantener interactiva la UI.
 
 ### Printers
 
@@ -182,7 +182,7 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 - [x] Gap de 8 px entre elementos en Cuadrícula y Pila, incluyendo áreas de selección; Libre permite superposición.
 - [x] Arrastre visual en pilas: representación bajo el cursor, resaltado de destino y retorno sin modificar posiciones; permite arrastrar elementos de pilas expandidas.
 - [ ] Conectar el drop a movimiento asíncrono de archivos/carpetas mediante PAPI, validando destinos, colisiones, errores y progreso. El gesto visual no mueve contenido.
-- [ ] Conectar Pegar al portapapeles PAPI y mostrarlo únicamente con archivos compatibles.
+- [x] Copiar/cortar/pegar compartidos en Desktop y Files mediante el portapapeles nativo y MIME de GNOME; menús y Ctrl+C/X/V respetan el foco de campos de texto. Un único gestor PAPI/GIO para pegado y arrastre, progreso Liquid cancelable y conflictos conservando ambos nombres.
 - [ ] Conectar Seleccionar todo y orden por nombre/tipo/fecha/tamaño del menú del wallpaper; ampliar agrupación por nombre/fecha. El orden de Files no completa estas acciones del Desktop.
 - [ ] Conectar Ajustes de pantalla a la capacidad Displays y la gestión de widgets a su UI; los menús existentes son presentación.
 - [x] Sombra mínima de un píxel únicamente en los nombres del componente compartido de carpetas/archivos, para mejorar contraste sobre wallpapers claros.

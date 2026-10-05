@@ -35,6 +35,7 @@ Rectangle {
     }
 
     Shortcut {
+        context: Qt.WindowShortcut
         sequence: "Space"
         enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
             && !browser.controller.selectedEntry.isDirectory && !browser.controller.selectedEntry.inTrash
@@ -43,6 +44,7 @@ Rectangle {
     }
 
     Shortcut {
+        context: Qt.WindowShortcut
         sequence: "Ctrl+C"
         enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
             && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined)
@@ -50,6 +52,25 @@ Rectangle {
     }
 
     Shortcut {
+        context: Qt.WindowShortcut
+        sequence: "Ctrl+X"
+        enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
+            && !browser.controller.selectedEntry.inTrash
+            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined)
+        onActivated: browser.controller.entryAction("cut", browser.controller.selectedEntry)
+    }
+
+    Shortcut {
+        context: Qt.WindowShortcut
+        sequence: "Ctrl+V"
+        enabled: browser.Window.window.active && browser.controller && Backend.clipboard.canPaste
+            && String(directory.location).startsWith("file:") && !directory.search.trim().length
+            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined)
+        onActivated: Backend.clipboard.paste(directory.location)
+    }
+
+    Shortcut {
+        context: Qt.WindowShortcut
         sequence: "Delete"
         enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
             && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.readOnly === false)

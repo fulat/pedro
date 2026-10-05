@@ -11,6 +11,7 @@ Window {
     id: confirmation
     property Window ownerWindow: null
     property string message
+    property real progress: -1
     property string detail
     property string confirmText: qsTranslate("Pedro", "common.ok")
     property bool showCancel: true
@@ -185,6 +186,17 @@ Window {
             font.pixelSize: 12
             wrapMode: Text.WrapAnywhere
             textFormat: Text.PlainText
+        }
+        Controls.ProgressBar {
+            Layout.fillWidth: true
+            visible: confirmation.progress >= 0
+            value: Math.max(0, Math.min(1, confirmation.progress))
+            padding: 0
+            background: Rectangle { implicitHeight: 6; radius: 3; color: Theme.sliderTrack }
+            contentItem: Item {
+                implicitHeight: 6
+                Rectangle { width: parent.width * Math.max(0, Math.min(1, confirmation.progress)); height: 6; radius: 3; color: Theme.sliderFill }
+            }
         }
         Item { Layout.fillHeight: true }
         Rectangle {

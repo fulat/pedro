@@ -644,7 +644,7 @@ QObject* Backend::clipboard() {
 }
 
 QObject* Backend::fileTransfer() {
-    return &transfer_;
+    return clipboard_.operation();
 }
 
 int Backend::dragFiles(QObject* source, const QVariantList& values) {

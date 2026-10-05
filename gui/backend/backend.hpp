@@ -223,7 +223,6 @@ class Backend final : public QObject {
 
         Pedro::Papi::Gui::Clipboard::Manager clipboard_;
 
-        Pedro::Papi::Io::Transfer::Manager transfer_;
 
         std::unique_ptr<Pedro::Papi::Io::Desktop::Model> desktop_;
 

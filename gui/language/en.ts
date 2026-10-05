@@ -2040,5 +2040,20 @@ or choose Open to get started.</translation>
       <extracomment>Stable Pedro key: common.ok</extracomment>
       <translation>OK</translation>
     </message>
+    <message>
+      <source>transfer.title</source>
+      <extracomment>Stable Pedro key: transfer.title</extracomment>
+      <translation>Transferring files</translation>
+    </message>
+    <message>
+      <source>transfer.error</source>
+      <extracomment>Stable Pedro key: transfer.error</extracomment>
+      <translation>File transfer could not finish</translation>
+    </message>
+    <message>
+      <source>transfer.progress</source>
+      <extracomment>Stable Pedro key: transfer.progress</extracomment>
+      <translation>Progress of the current file</translation>
+    </message>
 </context>
 </TS>

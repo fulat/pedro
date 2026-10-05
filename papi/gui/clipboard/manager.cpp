@@ -20,6 +20,9 @@ namespace Pedro::Papi::Gui::Clipboard {
             if (mime->hasFormat("x-special/gnome-copied-files")) {
                 QList<QUrl> urls;
                 const auto lines = mime->data("x-special/gnome-copied-files").split('\n');
+                if (lines.isEmpty() || (lines.first() != "copy" && lines.first() != "cut")) {
+                    return {};
+                }
                 for (int index = 1; index < lines.size(); ++index) {
                     const QUrl url(QString::fromUtf8(lines.at(index)));
                     if (url.isValid() && !url.isEmpty()) {
@@ -43,11 +46,15 @@ namespace Pedro::Papi::Gui::Clipboard {
         const auto urls = files();
         const auto* mime = QGuiApplication::clipboard()->mimeData();
         const bool cut = mime && mime->data("x-special/gnome-copied-files").startsWith("cut\n");
-        return !transfer.busy() && !urls.isEmpty() && std::all_of(urls.cbegin(), urls.cend(), [cut](const auto& url) { return (!cut && url.scheme() == "trash") || (url.isLocalFile() && QFileInfo::exists(url.toLocalFile())); });
+        return !transfer.busy() && !urls.isEmpty() && std::all_of(urls.cbegin(), urls.cend(), [cut](const auto& url) { return (!cut && url.scheme() == "trash") || url.isLocalFile(); });
     }
 
     bool Manager::busy() const {
         return transfer.busy();
+    }
+
+    Pedro::Papi::Io::Transfer::Manager* Manager::operation() {
+        return &transfer;
     }
 
     void Manager::copy(const QVariantList& values, bool cut) {
@@ -81,8 +88,19 @@ namespace Pedro::Papi::Gui::Clipboard {
         auto connection = std::make_shared<QMetaObject::Connection>();
         *connection = connect(&transfer, &Pedro::Papi::Io::Transfer::Manager::finished, this, [this, cut, original, urls, connection](const QString& error) {
             disconnect(*connection);
-            if (error.isEmpty() && cut && files() == urls && QGuiApplication::clipboard()->mimeData()->data("x-special/gnome-copied-files") == original) {
-                QGuiApplication::clipboard()->clear();
+            const auto* current = QGuiApplication::clipboard()->mimeData();
+            if (cut && files() == urls && current && current->data("x-special/gnome-copied-files") == original) {
+                QVariantList remaining;
+                for (const auto& url : urls) {
+                    if (!transfer.completed().contains(QVariant(url))) {
+                        remaining.append(url);
+                    }
+                }
+                if (remaining.isEmpty()) {
+                    QGuiApplication::clipboard()->clear();
+                } else {
+                    copy(remaining, true);
+                }
             }
         });
         QVariantList values;

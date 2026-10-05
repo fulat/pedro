@@ -422,5 +422,8 @@
     "trash.restore": "Restaurar",
     "trash.move": "Mover a…",
     "trash.deleted": "Eliminado",
-    "common.ok": "Aceptar"
+    "common.ok": "Aceptar",
+    "transfer.title": "Transfiriendo archivos",
+    "transfer.error": "No se pudo completar la transferencia",
+    "transfer.progress": "Progreso del archivo actual"
 }

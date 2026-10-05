@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QFileInfo>
 #include <QGuiApplication>
 #include <QMimeData>
 #include <QThread>
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
     manager.paste(QUrl::fromLocalFile(root + "/destination"));
     require(!manager.canPaste(), "Concurrent paste must be disabled");
     wait();
-    require(error.isEmpty() && QFile::exists(root + "/destination/folder/note.txt"), "Folder contents must be copied");
+    require(error.isEmpty() && QFile::exists(root + "/destination/folder/note.txt"), qPrintable(QStringLiteral("Folder contents must be copied: ") + error));
     manager.paste(QUrl::fromLocalFile(root + "/destination"));
     wait();
     require(QFile::exists(root + "/destination/folder (2)/note.txt"), "Collision must preserve both folders");
@@ -94,5 +95,50 @@ int main(int argc, char** argv) {
         QThread::msleep(5);
     }
     require(!transfer.busy() && !QFile::exists(root + "/source/folder") && QDir(root + "/destination/folder (3)").exists(), "Folder drop must move the directory and preserve collisions");
+    QFile externalFile(root + "/source/external.txt");
+    require(externalFile.open(QIODevice::WriteOnly), "Cannot create external clipboard fixture");
+    externalFile.write("GNOME clipboard fixture");
+    externalFile.close();
+    auto* external = new QMimeData;
+    external->setData("x-special/gnome-copied-files", "copy\n" + QUrl::fromLocalFile(externalFile.fileName()).toEncoded());
+    QGuiApplication::clipboard()->setMimeData(external);
+    require(manager.canPaste(), "GNOME file clipboard must be accepted");
+    manager.paste(QUrl::fromLocalFile(root + "/destination"));
+    wait();
+    require(QFile::exists(root + "/destination/external.txt"), "External GNOME clipboard paste failed");
+    const auto valid = QUrl::fromLocalFile(root + "/destination/external.txt");
+    const auto missing = QUrl::fromLocalFile(root + "/source/missing.txt");
+    manager.copy({valid, missing}, true);
+    manager.paste(QUrl::fromLocalFile(root + "/source"));
+    wait();
+    require(!manager.operation()->error().isEmpty() && manager.operation()->completed().contains(QVariant(valid)), "Partial batch must report successes and failures");
+    require(QGuiApplication::clipboard()->mimeData()->urls() == QList<QUrl>{missing}, "Partial cut must retain only failed sources");
+    QFile large(root + "/source/large.bin");
+    require(large.open(QIODevice::WriteOnly) && large.resize(64 * 1024 * 1024), "Cannot create cancellation fixture");
+    large.close();
+    const auto largeUrl = QUrl::fromLocalFile(large.fileName());
+    manager.copy({largeUrl}, true);
+    manager.paste(QUrl::fromLocalFile(root + "/destination"));
+    manager.operation()->cancel();
+    wait();
+    require(manager.operation()->cancelled() && QFile::exists(large.fileName()) && manager.canPaste(), "Canceled cut must retain its source and clipboard");
+    const auto permissions = QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner;
+    QDir().mkpath(root + "/source/private");
+    require(QFile::setPermissions(root + "/source/private", permissions), "Cannot set directory permissions");
+    manager.copy({QUrl::fromLocalFile(root + "/source/private")});
+    manager.paste(QUrl::fromLocalFile(root + "/destination"));
+    wait();
+    const auto others = QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther;
+    require(!(QFile::permissions(root + "/destination/private") & others), "Copy must preserve private directory permissions");
+    require(QFile::link(root + "/source/absent", root + "/source/dangling"), "Cannot create dangling link");
+    manager.copy({QUrl::fromLocalFile(root + "/source/dangling")});
+    require(manager.canPaste(), "Dangling symlinks are valid file clipboard entries");
+    manager.paste(QUrl::fromLocalFile(root + "/destination"));
+    wait();
+    require(QFileInfo(root + "/destination/dangling").isSymLink(), "Copy must preserve symlinks without following their targets");
+    auto* malformed = new QMimeData;
+    malformed->setData("x-special/gnome-copied-files", "invalid\n" + largeUrl.toEncoded());
+    QGuiApplication::clipboard()->setMimeData(malformed);
+    require(!manager.canPaste(), "Malformed GNOME clipboard must not enable paste");
     std::cout << "Clipboard: copy, cut, collision, recursive protection and availability passed\n";
 }
