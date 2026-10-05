@@ -30,13 +30,14 @@ ScrollView {
                 required property string modelData
                 required property int index
                 property string selected: ""
+                readonly property var directory: directoryModel
                 function select(entry) {
                     selected = entry.id;
                     columns.controller.select(entry);
                 }
-                function entryAction(action, entry) {
+                function handleEntryAction(action, entry) {
                     if (action === "open") openEntry(entry);
-                    else columns.controller.entryAction(action, entry);
+                    else columns.controller.handleEntryAction(action, entry);
                 }
                 function openEntry(entry) {
                     select(entry);
@@ -51,24 +52,24 @@ ScrollView {
                 width: 240
                 height: parent.height
                 Directory {
-                    id: directory
+                    id: directoryModel
                     Component.onCompleted: { open(column.modelData); setSort(columns.controller.sortKey); }
                 }
                 DropArea {
                     anchors.fill: parent
                     enabled: !columns.controller.directory.search.trim().length
                     keys: ["text/uri-list"]
-                    onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, directory.location); }
+                    onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, directoryModel.location); }
                     onDropped: drop => {
-                        if (Backend.fileTransfer.canMove(drop.urls, directory.location)) {
-                            Backend.fileTransfer.move(drop.urls, directory.location);
+                        if (Backend.fileTransfer.canMove(drop.urls, directoryModel.location)) {
+                            Backend.fileTransfer.move(drop.urls, directoryModel.location);
                             drop.accept(Qt.MoveAction);
                         }
                     }
                 }
                 Connections {
                     target: columns.controller
-                    function onSortKeyChanged() { directory.setSort(columns.controller.sortKey); }
+                    function onSortKeyChanged() { directoryModel.setSort(columns.controller.sortKey); }
                 }
                 MouseArea {
                     z: 2
@@ -79,7 +80,7 @@ ScrollView {
                             mouse.accepted = false;
                         }
                     }
-                    onClicked: mouse => columns.backgroundRequested(directory,
+                    onClicked: mouse => columns.backgroundRequested(directoryModel,
                         mapToItem(columns.Window.window.contentItem, mouse.x, mouse.y))
                 }
                 ListView {
@@ -87,7 +88,7 @@ ScrollView {
                     anchors.fill: parent
                     anchors.rightMargin: 9
                     clip: true
-                    model: columns.controller.directory.search.length ? columns.controller.directory.entriesModel : directory.entriesModel
+                    model: columns.controller.directory.search.length ? columns.controller.directory.entriesModel : directoryModel.entriesModel
                     ScrollBar.vertical: ScrollBar {
                         orientation: Qt.Vertical
                         anchors.right: parent.right
@@ -124,26 +125,14 @@ ScrollView {
                             onLoaded: {
                                 item.entry = Qt.binding(() => row.entry);
                                 item.showName = false;
-                                item.inputEnabled = false;
+                                item.inputSurface = row;
+                                item.activateOnClick = true;
                                 item.iconSize = 28;
                                 item.controller = column;
                             }
                         }
                         Text { opacity: entryIcon.item && entryIcon.item.cutPending ? Theme.cutOpacity : 1; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; text: row.entry.name; color: columns.colors.ink; font.pixelSize: 12; elide: Text.ElideMiddle }
                         Text { visible: row.entry.isDirectory; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: columns.colors.muted }
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onClicked: mouse => {
-                                if (mouse.button === Qt.RightButton) {
-                                    const point = row.mapToItem(entryIcon, mouse.x, mouse.y);
-                                    entryIcon.item.openMenu(point.x, point.y);
-                                } else {
-                                    entryIcon.item.activate();
-                                }
-                            }
-                        }
                     }
                 }
                 Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: columns.colors.line }

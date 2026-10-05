@@ -108,51 +108,15 @@ ApplicationWindow {
         }
     }
 
-    Shortcut {
-        sequence: "Space"
-        enabled: window.active && window.selectedDesktopIds.length === 1
-            && !(window.activeFocusItem && window.activeFocusItem.readOnly === false)
-        onActivated: {
-            const entry = window.controller.contextEntries({id: window.selectedDesktopIds[0]})[0];
-            if (entry && !entry.isDirectory) window.controller.previewEntry(entry);
-        }
-    }
-
     Transfer.Window { operation: Backend.fileTransfer; ownerWindow: window }
 
-    Shortcut {
-        context: Qt.WindowShortcut
-        sequence: "Ctrl+C"
-        enabled: window.active && window.selectedDesktopIds.length > 0
-            && !(window.activeFocusItem && window.activeFocusItem.selectedText !== undefined)
-        onActivated: window.controller.entryAction("copy", {id: window.selectedDesktopIds[0]})
-    }
-
-    Shortcut {
-        context: Qt.WindowShortcut
-        sequence: "Ctrl+X"
-        enabled: {
-            const pending = Backend.clipboard.cutFiles;
-            return window.active && window.selectedDesktopIds.length > 0
-                && Backend.clipboard.canCut(window.controller.contextEntries({id: window.selectedDesktopIds[0]}).map(item => item.url))
-                && !(window.activeFocusItem && window.activeFocusItem.selectedText !== undefined);
+    Loader {
+        source: "entry/shortcuts.qml"
+        onLoaded: {
+            item.entries = Qt.binding(() => window.selectedDesktopIds.length ? window.controller.contextEntries({id: window.selectedDesktopIds[0]}) : []);
+            item.destination = Qt.binding(() => Backend.desktopModel.directory);
+            item.actionRequested.connect(action => window.controller.entryAction(action, {id: window.selectedDesktopIds[0]}));
         }
-        onActivated: window.controller.entryAction("cut", {id: window.selectedDesktopIds[0]})
-    }
-
-    Shortcut {
-        context: Qt.WindowShortcut
-        sequence: "Ctrl+V"
-        enabled: window.active && Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(Backend.desktopModel.directory)
-            && !(window.activeFocusItem && window.activeFocusItem.selectedText !== undefined)
-        onActivated: Backend.clipboard.paste(Backend.desktopModel.directory)
-    }
-
-    Shortcut {
-        sequence: "Delete"
-        enabled: window.active && window.selectedDesktopIds.length > 0 && !Backend.trash.busy
-            && !(window.activeFocusItem && window.activeFocusItem.readOnly === false)
-        onActivated: window.controller.entryAction("trash", {id: window.selectedDesktopIds[0]})
     }
 
     function captureWindows() {

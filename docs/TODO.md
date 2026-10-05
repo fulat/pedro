@@ -192,7 +192,7 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 - [x] Ventana Qt Quick desde dock/lateral, UI light/dark e inglés/español dividida en componentes.
 - [x] Modelos PAPI e historial independientes por ventana; listados reales, Inicio y carpetas XDG, Este equipo mediante montajes GIO, Papelera mediante GVfs, Favoritos/Recientes mediante registros GTK. La Papelera se abre desde el dock.
 - [x] Vistas cuadrícula, lista, columnas y mixta; orden por nombre, tipo (carpetas primero), tamaño y fecha mediante proxies Qt; scroll del cuerpo completo.
-- [x] Componentes compartidos de carpeta/archivo con selección, doble clic y menú contextual; abrir una carpeta del Desktop presenta Files en su ruta real.
+- [x] File/Folder reutilizables con comportamiento propio: menú, copia/corte, Papelera, arrastre nativo y drop a carpetas. Lista y columnas delegan toda la superficie de interacción; los atajos comparten una política única. El host solo aporta selección, navegación, diálogos y organización del escritorio; verificación con componentes aislados y las cuatro vistas.
 - [x] Menú del espacio vacío para creación asíncrona y propiedades de la carpeta actual; selección limpia al pulsar fuera; menus contextuales pueden sobresalir de la ventana.
 - [x] Título alterna lateral completo/iconos, animación suave; controles de ventana y resize por bordes/esquinas.
 - [ ] Ajustar ancho del lateral arrastrando la división.
@@ -200,7 +200,7 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 - [ ] Distribuir LocalSearch/TinySPARQL (o Tracker 3 según la versión de GNOME) y activar su indexador en la sesión de producción; validar búsqueda de archivos/carpetas y actualización del índice. Ofrecer configuración de ubicaciones personales indexadas, incluidas carpetas compartidas y volúmenes externos; respetar exclusiones de GNOME sin recorrer archivos internos del sistema.
 - [ ] Conectar filtros y edición de marcadores; la presentación existe. El soporte de etiquetas se registra en Extended File Metadata / Tags.
 - [x] Papelera real mediante GIO/GVfs: enviar desde Desktop/Files y arrastrar al dock, restaurar sin sobrescribir y eliminar/vaciar con confirmación.
-- [ ] Completar las demás operaciones de archivos desde Files; aplicar los jobs definidos en Storage & Filesystem.
+- [ ] Completar las demás operaciones de archivos desde el comportamiento común de File/Folder, sin implementarlas por vista; aplicar los jobs definidos en Storage & Filesystem. Reutilizar también los diálogos de navegación, propiedades y confirmación para futuros consumidores mediante `navigationRequested`.
 - [ ] Integrar GIO/GVfs y sus backends de Papelera y volúmenes en la futura sesión de producción: distribuir las dependencias y activar sus servicios D-Bus; verificar `trash:///`, restauración, vaciado y monitorización dentro de la sesión propia de Pedro. La validación actual en Ubuntu/GNOME no completa esta integración.
 
 Detalle: [Pedro Files](files.md).

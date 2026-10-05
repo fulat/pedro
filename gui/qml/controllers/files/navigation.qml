@@ -68,16 +68,22 @@ QtObject {
     signal informationRequested(var entry)
     signal removalRequested(var urls)
 
+    property var fileBehavior: null
+    Component.onCompleted: {
+        const component = Qt.createComponent("../entry/action.qml");
+        fileBehavior = component.createObject(controller, {owner: controller});
+    }
+
     function entryAction(action, entry) {
-        if (action === "trash") Backend.trash.move([entry.url]);
-        else if (action === "restore") Backend.trash.restore([entry.url]);
-        else if (action === "remove" && entry.canRemove) removalRequested([entry.url]);
+        fileBehavior.dispatch(action, entry);
+    }
+
+    function handleEntryAction(action, entry) {
+        if (action === "remove" && entry.canRemove) removalRequested([entry.url]);
         else if (action === "open") openEntry(entry);
         else if (action === "preview") previewEntry(entry);
-        else if (action === "copy" || action === "cut") Backend.clipboard.copy([entry.url], action === "cut");
         else if (action === "relocate" && entry.canRemove) moveRequested(entry);
         else if (action === "properties") informationRequested(entry);
-        else if (action === "paste") Backend.clipboard.paste(entry.isDirectory ? entry.url : directory.location);
     }
 
     function openEntry(entry) {

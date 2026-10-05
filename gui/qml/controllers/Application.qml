@@ -133,9 +133,21 @@ QtObject {
         return entries;
     }
 
+    readonly property var directory: Backend.desktopModel
+
+    property var fileBehavior: null
+    Component.onCompleted: {
+        const component = Qt.createComponent("entry/action.qml");
+        fileBehavior = component.createObject(controller, {owner: controller});
+    }
+
     function entryAction(action, entry) {
+        fileBehavior.dispatch(action, entry);
+    }
+
+    function handleEntryAction(action, entry) {
         const entries = contextEntries(entry);
-        if (action === "open") {
+        if (action === "open" || action === "preview") {
             for (const item of entries) {
                 if (item.isDirectory && item.url) {
                     window.openFolderWindow(item.url, entries.length > 1);
@@ -143,12 +155,6 @@ QtObject {
                     filePreviewRequested(item, entries.length > 1);
                 }
             }
-        } else if (action === "trash") {
-            Backend.trash.move(entries.map(item => item.url));
-        } else if (action === "copy" || action === "cut") {
-            Backend.clipboard.copy(entries.map(item => item.url), action === "cut");
-        } else if (action === "paste") {
-            Backend.clipboard.paste(entry.isDirectory ? entry.url : Backend.desktopModel.directory);
         }
     }
 
@@ -605,7 +611,7 @@ QtObject {
             }
             if (point.x >= candidate.x && point.x <= candidate.x + candidate.width
                     && point.y >= candidate.y && point.y <= candidate.y + candidate.height
-                    && Backend.fileTransfer.canMove(urls, candidate.app.url)) {
+                    && candidate.canDrop(urls)) {
                 stackDropTargetId = candidate.app.id;
                 break;
             }
@@ -613,7 +619,7 @@ QtObject {
         const globalPoint = shortcut.mapToGlobal(localX, localY);
         if (window.fileDropWindowAt && window.fileDropWindowAt(globalPoint)) {
             externalDesktopDrag = true;
-            Backend.dragFiles(shortcut, urls);
+            shortcut.dragFiles(urls);
             externalDesktopDrag = false;
             for (const entry of desktopDragItems) {
                 if (entry.item) {
@@ -641,8 +647,8 @@ QtObject {
         const urls = draggedDesktopUrls();
         for (let index = 0; index < desktopShortcutRepeater.count; ++index) {
             const candidate = desktopShortcutRepeater.itemAt(index);
-            if (candidate && candidate.app.id === stackDropTargetId && Backend.fileTransfer.canMove(urls, candidate.app.url)) {
-                Backend.fileTransfer.move(urls, candidate.app.url);
+            if (candidate && candidate.app.id === stackDropTargetId && candidate.canDrop(urls)) {
+                candidate.dropFiles(urls);
                 for (const entry of desktopDragItems) {
                     entry.item.x = entry.x;
                     entry.item.y = entry.y;

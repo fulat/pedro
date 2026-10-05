@@ -9,12 +9,16 @@ Item {
     id: entryItem
     objectName: "entryComponent-" + (entry.name || "")
     readonly property var menu: menuLoader.item
-    property var controller
+    property var controller: null
     property var entry: ({})
     readonly property bool cutPending: Backend.clipboard.cutFiles.length > 0 && Backend.clipboard.isCut(entry.url || "")
     property bool folder: false
     property bool showName: true
     property bool inputEnabled: true
+    property Item inputSurface: entryItem
+    property bool activateOnClick: false
+    property bool keyboardEnabled: !controller
+    signal navigationRequested(string action, var entry)
     property real iconSize: 64
     property real cornerRadius: iconSize < 40 ? 2 : 5
     property color textColor: "white"
@@ -27,8 +31,10 @@ Item {
         id: interaction
         source: "../../controllers/entry/action.qml"
         onLoaded: {
-            item.entry = Qt.binding(() => entryItem.entry);
+            item.entry = Qt.binding(() => Object.assign({}, entryItem.entry, {isDirectory: entryItem.folder}));
             item.owner = Qt.binding(() => entryItem.controller);
+            item.window = Qt.binding(() => entryItem.Window.window);
+            item.requested.connect((action, entry) => entryItem.navigationRequested(action, entry));
         }
     }
 
@@ -38,6 +44,22 @@ Item {
 
     function activate() {
         if (interaction.item) interaction.item.activate();
+    }
+
+    function dispatch(action) {
+        if (interaction.item) interaction.item.dispatch(action);
+    }
+
+    function dragFiles(source = entryItem, urls = undefined) {
+        return interaction.item ? interaction.item.drag(source, urls) : Qt.IgnoreAction;
+    }
+
+    function canDrop(urls) {
+        return interaction.item && interaction.item.canDrop(urls);
+    }
+
+    function dropFiles(urls) {
+        return interaction.item && interaction.item.drop(urls);
     }
 
     function openMenu(x, y) {
@@ -79,13 +101,13 @@ Item {
     }
 
     DropArea {
+        parent: entryItem.inputSurface
         anchors.fill: parent
-        enabled: entryItem.folder
+        enabled: entryItem.folder && !entryItem.entry.inTrash
         keys: ["text/uri-list"]
-        onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, entryItem.entry.url); }
+        onEntered: drag => { drag.accepted = entryItem.canDrop(drag.urls); }
         onDropped: drop => {
-            if (Backend.fileTransfer.canMove(drop.urls, entryItem.entry.url)) {
-                Backend.fileTransfer.move(drop.urls, entryItem.entry.url);
+            if (entryItem.dropFiles(drop.urls)) {
                 drop.accept(Qt.MoveAction);
             }
         }
@@ -138,17 +160,50 @@ Item {
         elide: Text.ElideMiddle
     }
     MouseArea {
+        parent: entryItem.inputSurface
+        property point origin
+        property bool dragged: false
         anchors.fill: parent
         enabled: entryItem.inputEnabled
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
+        onPressed: mouse => {
+            origin = Qt.point(mouse.x, mouse.y);
+            dragged = false;
+            if (mouse.button === Qt.LeftButton) {
+                if (entryItem.keyboardEnabled) entryItem.forceActiveFocus();
+                entryItem.select();
+            }
+        }
+        onPositionChanged: mouse => {
+            if (!(pressedButtons & Qt.LeftButton) || dragged) return;
+            const distance = Math.hypot(mouse.x - origin.x, mouse.y - origin.y);
+            if (distance < Qt.styleHints.startDragDistance) return;
+            dragged = true;
+            entryItem.dragFiles();
+        }
         onClicked: mouse => {
-            if (mouse.button === Qt.RightButton) entryItem.openMenu(mouse.x, mouse.y);
+            if (dragged) return;
+            if (mouse.button === Qt.RightButton) {
+                const point = mapToItem(entryItem, mouse.x, mouse.y);
+                entryItem.openMenu(point.x, point.y);
+            }
+            else if (entryItem.activateOnClick) entryItem.activate();
             else entryItem.select();
         }
         onDoubleClicked: mouse => {
-            if (mouse.button === Qt.LeftButton) entryItem.activate();
+            if (!dragged && !entryItem.activateOnClick && mouse.button === Qt.LeftButton) entryItem.activate();
+        }
+    }
+    Loader {
+        active: entryItem.keyboardEnabled
+        source: "shortcuts.qml"
+        onLoaded: {
+            item.entries = Qt.binding(() => entryItem.activeFocus ? [entryItem.entry] : []);
+            item.destination = Qt.binding(() => entryItem.folder ? entryItem.entry.url : "");
+            item.enabledForView = Qt.binding(() => entryItem.activeFocus);
+            item.actionRequested.connect(action => entryItem.dispatch(action));
         }
     }
     Loader {

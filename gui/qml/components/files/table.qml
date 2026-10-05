@@ -54,27 +54,6 @@ Item {
             width: table.width; height: 43; radius: 9
             color: table.controller && table.controller.selectedEntry.id === modelData.id ? table.colors.selected : hover.hovered ? table.colors.hover : "transparent"
             border.color: "transparent"
-            DropArea {
-                anchors.fill: parent
-                enabled: row.entry.isDirectory
-                keys: ["text/uri-list"]
-                onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, row.entry.url); }
-                onDropped: drop => {
-                    if (Backend.fileTransfer.canMove(drop.urls, row.entry.url)) {
-                        Backend.fileTransfer.move(drop.urls, row.entry.url);
-                        drop.accept(Qt.MoveAction);
-                    }
-                }
-            }
-            TapHandler { onTapped: entryIcon.item.select(); onDoubleTapped: entryIcon.item.activate() }
-            MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.RightButton
-                onClicked: mouse => {
-                    const point = row.mapToItem(entryIcon, mouse.x, mouse.y);
-                    entryIcon.item.openMenu(point.x, point.y);
-                }
-            }
             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
             Row {
                 anchors.fill: parent
@@ -90,7 +69,7 @@ Item {
                         onLoaded: {
                             item.entry = Qt.binding(() => row.modelData);
                             item.showName = false;
-                            item.inputEnabled = false;
+                            item.inputSurface = row;
                             item.iconSize = 34;
                             item.controller = Qt.binding(() => table.controller);
                         }

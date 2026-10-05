@@ -203,6 +203,10 @@ Item {
         Keys.onEscapePressed: shell.controller.renamingDesktopId = ""
     }
 
+    function dragFiles(urls) { return entryLoader.item.dragFiles(shortcut, urls); }
+    function canDrop(urls) { return entryLoader.item.canDrop(urls); }
+    function dropFiles(urls) { return entryLoader.item.dropFiles(urls); }
+
     MouseArea {
         id: shortcutMouse
 

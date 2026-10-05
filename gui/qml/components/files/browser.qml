@@ -34,51 +34,14 @@ Rectangle {
         }
     }
 
-    Shortcut {
-        context: Qt.WindowShortcut
-        sequence: "Space"
-        enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
-            && !browser.controller.selectedEntry.isDirectory && !browser.controller.selectedEntry.inTrash
-            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.readOnly === false)
-        onActivated: browser.controller.previewEntry(browser.controller.selectedEntry)
-    }
-
-    Shortcut {
-        context: Qt.WindowShortcut
-        sequence: "Ctrl+C"
-        enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
-            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined)
-        onActivated: browser.controller.entryAction("copy", browser.controller.selectedEntry)
-    }
-
-    Shortcut {
-        context: Qt.WindowShortcut
-        sequence: "Ctrl+X"
-        enabled: {
-            const pending = Backend.clipboard.cutFiles;
-            return browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
-                && !browser.controller.selectedEntry.inTrash
-                && Backend.clipboard.canCut([browser.controller.selectedEntry.url])
-                && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined);
+    Loader {
+        source: "../entry/shortcuts.qml"
+        onLoaded: {
+            item.entries = Qt.binding(() => browser.controller && browser.controller.selectedEntry.url ? [browser.controller.selectedEntry] : []);
+            item.destination = Qt.binding(() => directory.location);
+            item.pasteEnabled = Qt.binding(() => !directory.search.trim().length);
+            item.actionRequested.connect(action => browser.controller.entryAction(action, browser.controller.selectedEntry));
         }
-        onActivated: browser.controller.entryAction("cut", browser.controller.selectedEntry)
-    }
-
-    Shortcut {
-        context: Qt.WindowShortcut
-        sequence: "Ctrl+V"
-        enabled: browser.Window.window.active && browser.controller && Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(directory.location)
-            && String(directory.location).startsWith("file:") && !directory.search.trim().length
-            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.selectedText !== undefined)
-        onActivated: Backend.clipboard.paste(directory.location)
-    }
-
-    Shortcut {
-        context: Qt.WindowShortcut
-        sequence: "Delete"
-        enabled: browser.Window.window.active && browser.controller && !!browser.controller.selectedEntry.url
-            && !(browser.Window.window.activeFocusItem && browser.Window.window.activeFocusItem.readOnly === false)
-        onActivated: browser.controller.entryAction(browser.controller.selectedEntry.inTrash ? "remove" : "trash", browser.controller.selectedEntry)
     }
 
     Connections {

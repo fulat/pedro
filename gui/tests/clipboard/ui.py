@@ -46,6 +46,8 @@ actions = '''
         property int step: 0
         property int ticks: 0
         property var panel: null
+        property var standaloneFile: null
+        property var standaloneFolder: null
         onTriggered: {
             if (++ticks > 100) { console.error("CLIPBOARD UI FAILED: timeout"); Qt.exit(1); return; }
             if (Backend.fileTransfer.error.length && !Backend.fileTransfer.cancelled) {
@@ -121,8 +123,44 @@ actions = '''
                     console.error("CLIPBOARD UI FAILED: progress cancel"); Qt.exit(1); return;
                 }
                 panel.destroy();
+                const fileComponent = Qt.createComponent("qml/components/entry/file.qml");
+                const folderComponent = Qt.createComponent("qml/components/entry/folder.qml");
+                standaloneFile = fileComponent.createObject(main.contentItem, {entry: {name: "shared.txt", url: SOURCE_FILE}, width: 90, height: 100});
+                standaloneFolder = folderComponent.createObject(main.contentItem, {entry: {name: "destination", url: DESTINATION}, width: 90, height: 100});
+                if (!standaloneFile || !standaloneFolder) { console.error("CLIPBOARD UI FAILED: standalone components"); Qt.exit(1); return; }
+                standaloneFile.dispatch("cut");
+                if (!standaloneFile.cutPending || !standaloneFolder.canDrop([SOURCE_FILE]) || standaloneFolder.canDrop([DESTINATION])) {
+                    console.error("CLIPBOARD UI FAILED: behavior requires a host controller"); Qt.exit(1); return;
+                }
+                standaloneFile.dispatch("copy");
+                standaloneFile.openMenu(10, 10);
+                if (standaloneFile.cutPending || !standaloneFile.item.menu.visible) { console.error("CLIPBOARD UI FAILED: standalone menu"); Qt.exit(1); return; }
+                standaloneFile.closeMenu();
+                if (!standaloneFolder.dropFiles([SOURCE_FILE])) { console.error("CLIPBOARD UI FAILED: standalone folder drop"); Qt.exit(1); return; }
+            } else if (step === 7) {
+                if (Backend.fileTransfer.busy) return;
+                standaloneFile.destroy();
+                standaloneFolder.destroy();
+                controller.directory.open(DESTINATION);
+                controller.viewMode = "list";
+            } else if (step === 8 || step === 9 || step === 10 || step === 11) {
+                const item = main.clipboardControl(window.contentItem, "entryComponent-shared.txt");
+                if (!item) return;
+                if ((step === 8 || step === 9) && item.inputSurface.width <= item.iconSize) {
+                    console.error("CLIPBOARD UI FAILED: row does not use shared interaction surface"); Qt.exit(1); return;
+                }
+                item.dispatch("cut");
+                item.openMenu(10, 10);
+                if (!item.menu.visible || item.menu.canCut || !item.cutPending) { console.error("CLIPBOARD UI FAILED: view behavior differs"); Qt.exit(1); return; }
+                item.menu.close();
+                item.dispatch("copy");
+                if (step === 8) controller.viewMode = "columns";
+                else if (step === 9) controller.viewMode = "grid";
+                else if (step === 10) controller.viewMode = "mixed";
+                else {
                 console.log("CLIPBOARD UI PASSED: Desktop/Files interoperability, folder paste and cancelable Liquid progress");
                 Qt.quit();
+                }
             }
             ++step;
         }
@@ -140,4 +178,5 @@ result = subprocess.run([str(root / 'build/dev/gui/pedro-gui')], env=environment
 if result.returncode or 'CLIPBOARD UI PASSED' not in result.stdout or any(error in result.stdout for error in ('ReferenceError', 'TypeError', 'CLIPBOARD UI FAILED')):
     raise SystemExit(result.stdout)
 assert (fixtures / 'source' / 'shared (2).txt').read_text() == 'shared clipboard fixture\n'
-print('PASS: shared Desktop and Files clipboard workflow')
+assert (fixtures / 'destination' / 'shared.txt').read_text() == 'shared clipboard fixture\n'
+print('PASS: standalone file/folder behavior, all Files views and shared Desktop clipboard workflow')
