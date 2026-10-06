@@ -391,3 +391,7 @@ El objetivo es extender Pedro Global Search/Spotlight para que pueda entender co
 ### Menús rápidos del escritorio
 
 - Mantener paneles compactos en píxeles lógicos, con Liquid compartido: Ethernet 300 × 270; Bluetooth/Wi-Fi 304 de ancho y altura según estado/lista, limitada a cuatro filas antes de desplazar. Control Center 328 de ancho y altura derivada del contenido; System 288 × 288. Priorizar reducir espacio sobrante frente a encoger texto y conservar listas desplazables.
+
+### Seguimiento de estabilidad de Files
+
+- [x] Reproducir y corregir el cierre al navegar carpetas: GDB capturó `free(): invalid pointer` en `g_mount_spec_unref`, desde el objeto `trash:///` que PAPI creaba para cada entrada local en consultas concurrentes. Se elimina esa creación innecesaria y se consulta el padre únicamente para entradas de la papelera. La regresión cubre carpetas vacías, navegación profunda, scroll y retirada segura de columnas.

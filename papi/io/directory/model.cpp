@@ -150,12 +150,14 @@ namespace Pedro::Papi::Io::Directory {
             result["inTrash"] = QUrl(address).scheme() == "trash";
             const auto* original = g_file_info_get_attribute_byte_string(info, G_FILE_ATTRIBUTE_TRASH_ORIG_PATH);
             result["originalPath"] = original ? QString::fromLocal8Bit(original) : QString{};
-            auto* parent = g_file_get_parent(file);
-            auto* trash = g_file_new_for_uri("trash:///");
-            result["canRemove"] = parent && g_file_equal(parent, trash);
-            result["canRestore"] = original && g_path_is_absolute(original) && result["canRemove"].toBool();
-            g_clear_object(&parent);
-            g_object_unref(trash);
+            bool canRemove = false;
+            if (result["inTrash"].toBool()) {
+                auto* parent = g_file_get_parent(file);
+                canRemove = parent && uri(parent) == QStringLiteral("trash:///");
+                g_clear_object(&parent);
+            }
+            result["canRemove"] = canRemove;
+            result["canRestore"] = original && g_path_is_absolute(original) && canRemove;
             result["name"] = QString::fromUtf8(g_file_info_get_display_name(info));
             result["editName"] = QString::fromUtf8(g_file_info_get_edit_name(info));
             result["isDirectory"] = folder;
