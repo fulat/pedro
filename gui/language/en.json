@@ -427,5 +427,9 @@
     "transfer.error": "File transfer could not finish",
     "transfer.progress": "Progress of the current file",
     "file.menu.open.loading": "Loading applications…",
-    "file.menu.open.empty": "No compatible applications"
+    "file.menu.open.empty": "No compatible applications",
+    "files.menu.view": "View as",
+    "files.menu.sort": "Sort by",
+    "files.menu.kind": "Group by kind",
+    "files.menu.options": "View options…"
 }

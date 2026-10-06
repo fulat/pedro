@@ -20,9 +20,30 @@ ScrollView {
         function onLocationChanged() { columns.locations = [columns.controller.directory.location]; }
         function onSearchChanged() { if (columns.controller.directory.search.length) columns.locations = [columns.controller.directory.location]; }
     }
+    property Item contextSurface: Item {
+        parent: columns
+        anchors.fill: parent
+        z: 2
+        PointHandler {
+            acceptedButtons: Qt.RightButton
+            onActiveChanged: {
+                if (!active || !columns.controller) return;
+                const local = parent.mapToItem(columnRow, point.position.x, point.position.y);
+                if (columns.controller.containsEntry(columnRow, local)) return;
+                const index = Math.max(0, Math.min(columnRepeater.count - 1, Math.floor(local.x / 240)));
+                const column = columnRepeater.itemAt(index);
+                if (!column) return;
+                columns.controller.clearSelection();
+                columns.backgroundRequested(column.directory,
+                    parent.mapToItem(columns.Window.window.contentItem, point.position.x, point.position.y));
+            }
+        }
+    }
     Row {
+        id: columnRow
         height: columns.availableHeight
         Repeater {
+            id: columnRepeater
             model: columns.locations
             delegate: Item {
                 id: column
@@ -54,33 +75,17 @@ ScrollView {
                     id: directoryModel
                     Component.onCompleted: { open(column.modelData); setSort(columns.controller.sortKey); }
                 }
-                DropArea {
+                Loader {
                     anchors.fill: parent
-                    enabled: !columns.controller.directory.search.trim().length
-                    keys: ["text/uri-list"]
-                    onEntered: drag => { drag.accepted = Backend.fileTransfer.canMove(drag.urls, directoryModel.location); }
-                    onDropped: drop => {
-                        if (Backend.fileTransfer.canMove(drop.urls, directoryModel.location)) {
-                            Backend.fileTransfer.move(drop.urls, directoryModel.location);
-                            drop.accept(Qt.MoveAction);
-                        }
+                    source: "../entry/destination.qml"
+                    onLoaded: {
+                        item.acceptsFiles = Qt.binding(() => !columns.controller.directory.search.trim().length);
+                        item.location = Qt.binding(() => directoryModel.location);
                     }
                 }
                 Connections {
                     target: columns.controller
                     function onSortKeyChanged() { directoryModel.setSort(columns.controller.sortKey); }
-                }
-                MouseArea {
-                    z: 2
-                    anchors.fill: parent
-                    acceptedButtons: Qt.RightButton
-                    onPressed: mouse => {
-                        if (columns.controller.containsEntry(columnList, mapToItem(columnList, mouse.x, mouse.y))) {
-                            mouse.accepted = false;
-                        }
-                    }
-                    onClicked: mouse => columns.backgroundRequested(directoryModel,
-                        mapToItem(columns.Window.window.contentItem, mouse.x, mouse.y))
                 }
                 ListView {
                     id: columnList

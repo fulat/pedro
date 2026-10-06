@@ -18,19 +18,13 @@ Rectangle {
     readonly property real toolbarHeight: controller && String(controller.directory.location).startsWith("trash:") ? 0 : 55
     color: colors.surface
 
-    DropArea {
+    Loader {
         anchors.fill: parent
-        enabled: !(directory.globalSearch && directory.search.trim().length)
-        keys: ["text/uri-list"]
-        onEntered: drag => { drag.accepted = String(directory.location).startsWith("trash:") ? drag.urls.length > 0 && !Backend.trash.busy : Backend.fileTransfer.canMove(drag.urls, directory.location); }
-        onDropped: drop => {
-            if (String(directory.location).startsWith("trash:") && drop.urls.length && !Backend.trash.busy) {
-                Backend.trash.move(drop.urls);
-                drop.accept(Qt.MoveAction);
-            } else if (Backend.fileTransfer.canMove(drop.urls, directory.location)) {
-                Backend.fileTransfer.move(drop.urls, directory.location);
-                drop.accept(Qt.MoveAction);
-            }
+        source: "../entry/destination.qml"
+        onLoaded: {
+            item.objectName = "filesDropDestination";
+            item.acceptsFiles = Qt.binding(() => !(directory.globalSearch && directory.search.trim().length));
+            item.location = Qt.binding(() => directory.location);
         }
     }
 
@@ -82,7 +76,7 @@ Rectangle {
     }
 
     function openBackgroundMenu(target, point) {
-        if (directory.globalSearch && directory.search.trim().length) return;
+        if (!backgroundMenu.item || (directory.globalSearch && directory.search.trim().length)) return;
         backgroundMenu.item.directory = target;
         backgroundMenu.item.popup(point.x, point.y);
     }
@@ -91,7 +85,8 @@ Rectangle {
         id: backgroundMenu
         source: "menu.qml"
         onLoaded: {
-            item.parent = browser.Window.window.contentItem;
+            item.parent = Qt.binding(() => browser.Window.window ? browser.Window.window.contentItem : browser);
+            item.controller = Qt.binding(() => browser.controller);
             item.backdrop = Qt.binding(() => browser.Window.window.entryBackdrop);
             item.informationRequested.connect(() => { information.entry = null; information.open(); });
             item.emptyRequested.connect(() => { confirmation.urls = []; confirmation.open(); });
@@ -150,23 +145,25 @@ Rectangle {
         }
     }
 
-    MouseArea {
+    Item {
         z: 2
         visible: !browser.controller || browser.controller.viewMode !== "columns"
         x: sidebarPanel.width + 1
         y: browser.toolbarHeight
         width: parent.width - x
         height: parent.height - y
-        acceptedButtons: Qt.RightButton
-        onPressed: mouse => {
-            const point = mapToItem(contentLayout, mouse.x, mouse.y);
-            if (browser.controller.containsEntry(contentLayout, point)) {
-                mouse.accepted = false;
+        PointHandler {
+            acceptedButtons: Qt.RightButton
+            onActiveChanged: {
+                if (!active || !browser.controller) return;
+                const position = point.position;
+                const local = parent.mapToItem(contentLayout, position.x, position.y);
+                if (!browser.controller.containsEntry(contentLayout, local)) {
+                    browser.controller.clearSelection();
+                    const target = parent.mapToItem(browser.Window.window.contentItem, position.x, position.y);
+                    browser.openBackgroundMenu(directory, target);
+                }
             }
-        }
-        onClicked: mouse => {
-            const point = mapToItem(browser.Window.window.contentItem, mouse.x, mouse.y);
-            browser.openBackgroundMenu(directory, point);
         }
     }
 

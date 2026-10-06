@@ -3,11 +3,13 @@ import QtQuick
 import QtQuick.Controls.Basic as Controls
 import QtQuick.Window
 import "../icon" as Icon
+import "options.js" as Options
 
 Controls.Menu {
     id: menu
     objectName: "filesBackgroundMenu"
     property var directory
+    property var controller
     property Item backdrop
     readonly property bool canCreate: !!directory && String(directory.location).startsWith("file:")
     signal informationRequested()
@@ -16,7 +18,10 @@ Controls.Menu {
     height: Math.max(1, contentItem.implicitHeight + topPadding + bottomPadding)
     padding: 6
     popupType: Controls.Popup.Window
-    background: Loader {
+    cascade: true
+    delegate: Action {}
+    background: Surface {}
+    component Surface: Loader {
         source: "../entry/surface.qml"
         onLoaded: {
             item.sourceBackdrop = Qt.binding(() => menu.backdrop);
@@ -26,25 +31,43 @@ Controls.Menu {
     }
     component Action: Controls.MenuItem {
         id: action
-        property string symbol
+        property string symbol: subMenu === viewMenu ? "view" : subMenu === sortMenu ? "sort" : ""
         implicitHeight: visible ? 36 : 0
         hoverEnabled: true
-        contentItem: Row {
-            spacing: 12
+        indicator: Item {}
+        contentItem: Item {
             Icon.Tinted {
                 width: 18
                 height: 18
                 anchors.verticalCenter: parent.verticalCenter
-                source: "../../../assets/icons/" + action.symbol + ".svg"
+                source: action.symbol.length ? "../../../assets/icons/" + action.symbol + ".svg" : ""
                 opacity: action.enabled ? 1 : 0.4
             }
             Text {
+                x: 30
+                width: Math.max(0, parent.width - 52)
                 text: action.text
                 color: "white"
                 font.pixelSize: 13
+                elide: Text.ElideRight
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.verticalCenterOffset: 1
                 opacity: action.enabled ? 1 : 0.4
+            }
+            Text {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                visible: action.checked
+                text: "✓"
+                color: "white"
+            }
+            Icon.Tinted {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                width: 10
+                height: 10
+                visible: !!action.subMenu
+                source: "../../../assets/icons/chevron.svg"
+                tint: "white"
             }
         }
         background: Rectangle {
@@ -82,6 +105,64 @@ Controls.Menu {
         visible: menu.canCreate
         enabled: menu.canCreate && Backend.clipboard.canPaste && Backend.clipboard.canPasteInto(menu.directory.location)
         onTriggered: Backend.clipboard.paste(menu.directory.location)
+    }
+    Controls.MenuSeparator {}
+    Controls.Menu {
+        id: viewMenu
+        title: qsTranslate("Pedro", "files.menu.view")
+        objectName: "filesBackgroundViewMenu"
+        enabled: !!menu.controller
+        width: 224
+        padding: 6
+        popupType: Controls.Popup.Window
+        background: Surface {}
+        Repeater {
+            model: Options.views()
+            delegate: Action {
+                required property var modelData
+                objectName: "filesBackgroundView-" + modelData.key
+                text: qsTranslate("Pedro", modelData.label)
+                symbol: modelData.icon
+                checkable: true
+                checked: !!menu.controller && menu.controller.viewMode === modelData.key
+                onTriggered: { menu.controller.viewMode = modelData.key; menu.close(); }
+            }
+        }
+    }
+    Controls.Menu {
+        id: sortMenu
+        title: qsTranslate("Pedro", "files.menu.sort")
+        objectName: "filesBackgroundSortMenu"
+        enabled: !!menu.controller
+        width: 224
+        padding: 6
+        popupType: Controls.Popup.Window
+        background: Surface {}
+        Repeater {
+            model: Options.sorting()
+            delegate: Action {
+                required property var modelData
+                objectName: "filesBackgroundSort-" + modelData.key
+                text: qsTranslate("Pedro", modelData.label)
+                symbol: modelData.icon
+                checkable: true
+                checked: !!menu.controller && menu.controller.sortKey === modelData.key
+                onTriggered: { menu.controller.sortKey = modelData.key; menu.close(); }
+            }
+        }
+    }
+    Action {
+        text: qsTranslate("Pedro", "files.menu.kind")
+        objectName: "filesBackgroundKind"
+        symbol: "file"
+        enabled: !!menu.controller
+        onTriggered: menu.controller.sortKey = "type"
+    }
+    Action {
+        text: qsTranslate("Pedro", "files.menu.options")
+        objectName: "filesBackgroundOptions"
+        symbol: "settings"
+        enabled: false
     }
     Controls.MenuSeparator {}
     Action {

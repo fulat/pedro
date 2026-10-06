@@ -12,9 +12,10 @@ fixtures = target / 'fixtures'
 import shutil
 if fixtures.exists():
     shutil.rmtree(fixtures)
-for directory in ('source', 'destination'):
+for directory in ('source', 'destination', 'desktop'):
     (fixtures / directory).mkdir(parents=True)
 (fixtures / 'source' / 'shared.txt').write_text('shared clipboard fixture\n')
+(fixtures / 'source' / 'drop.txt').write_text('Shared drop fixture\n')
 (fixtures / 'destination' / 'viewer.txt').write_text('Viewer tracking fixture\n')
 for name in ('qml', 'config', 'assets'):
     link = target / name
@@ -23,6 +24,14 @@ for name in ('qml', 'config', 'assets'):
 source = (root / 'gui/Main.qml').read_text().replace('import QtQuick', 'import gui\nimport QtTest\nimport QtQuick', 1)
 actions = '''
     TestCase { id: pointerProbe; when: false }
+    property var dragPointer: null
+    Timer {
+        id: dragRelease
+        interval: 60
+        onTriggered: {
+            if (main.dragPointer) pointerProbe.mouseRelease(main.dragPointer, 48, 16, Qt.LeftButton, Qt.NoModifier, 0);
+        }
+    }
     property QtObject transferProbe: QtObject {
         property bool busy: false
         property real progress: 0.55
@@ -54,7 +63,7 @@ actions = '''
         property var previewSession: null
         property int previewCount: 0
         onTriggered: {
-            if (++ticks > 100) { console.error("CLIPBOARD UI FAILED: timeout"); Qt.exit(1); return; }
+            if (++ticks > 100) { console.error("CLIPBOARD UI FAILED: timeout", step); Qt.exit(1); return; }
             if (Backend.fileTransfer.error.length && !Backend.fileTransfer.cancelled) {
                 console.error("CLIPBOARD UI FAILED", Backend.fileTransfer.error); Qt.exit(1); return;
             }
@@ -80,7 +89,32 @@ actions = '''
                 main.controller.entryAction("copy", entry);
                 main.controller.desktopShortcutRepeater = original;
                 const menu = window.contentItem.backgroundContextMenu;
-                menu.directory = controller.directory;
+                pointerProbe.mouseClick(window.contentItem, window.contentItem.width - 40,
+                    window.contentItem.height - 45, Qt.RightButton);
+                if (!menu.visible) { console.error("CLIPBOARD UI FAILED: background right click did not open menu"); Qt.exit(1); return; }
+                const createFolder = main.clipboardControl(menu.contentItem, "filesCreateFolder");
+                const createFile = main.clipboardControl(menu.contentItem, "filesCreateFile");
+                createFolder.text = "context folder";
+                createFolder.triggered();
+                createFile.text = "context.txt";
+                createFile.triggered();
+                const submenus = [];
+                for (let index = 0; index < menu.count; ++index) {
+                    if (menu.itemAt(index).subMenu) submenus.push(menu.itemAt(index).subMenu);
+                }
+                const viewMenu = submenus.find(child => child.objectName === "filesBackgroundViewMenu");
+                const sortMenu = submenus.find(child => child.objectName === "filesBackgroundSortMenu");
+                if (!viewMenu || !sortMenu || viewMenu.count !== 4 || sortMenu.count !== 4) {
+                    console.error("CLIPBOARD UI FAILED: shared view/sort choices missing"); Qt.exit(1); return;
+                }
+                viewMenu.itemAt(1).triggered();
+                sortMenu.itemAt(1).triggered();
+                if (controller.viewMode !== "list" || controller.sortKey !== "type") {
+                    console.error("CLIPBOARD UI FAILED: context choices do not update header state"); Qt.exit(1); return;
+                }
+                controller.viewMode = "mixed";
+                controller.sortKey = "name";
+                menu.close();
                 const paste = main.clipboardControl(menu.contentItem, "filesPaste");
                 if (!paste || !paste.enabled || !Backend.clipboard.canPaste) {
                     console.error("CLIPBOARD UI FAILED: folder paste unavailable"); Qt.exit(1); return;
@@ -89,6 +123,19 @@ actions = '''
             } else if (step === 3) {
                 const entry = controller.files.find(entry => entry.name === "shared.txt");
                 if (!entry) return;
+                const component = main.clipboardControl(window.contentItem, "entryComponent-shared.txt");
+                if (!component) return;
+                main.dragPointer = component.inputSurface.children.find(child => child.objectName === "entryPointer");
+                if (!main.dragPointer || !main.dragPointer.preventStealing) { console.error("CLIPBOARD UI FAILED: shared drag input"); Qt.exit(1); return; }
+                pointerProbe.mousePress(main.dragPointer, 16, 16, Qt.LeftButton, Qt.NoModifier, 0);
+                dragRelease.start();
+                pointerProbe.mouseMove(main.dragPointer, 48, 16, 0, Qt.LeftButton);
+                if (!main.dragPointer.dragged) { console.error("CLIPBOARD UI FAILED: source component did not initiate drag"); Qt.exit(1); return; }
+                if (dragRelease.running) {
+                    dragRelease.stop();
+                    pointerProbe.mouseRelease(main.dragPointer, 48, 16, Qt.LeftButton, Qt.NoModifier, 0);
+                }
+                main.dragPointer = null;
                 controller.entryAction("cut", entry);
             } else if (step === 4) {
                 const item = main.clipboardControl(window.contentItem, "entryComponent-shared.txt");
@@ -101,11 +148,11 @@ actions = '''
                 if (!item.cutPending || !icon || icon.opacity >= 1 || !item.enabled || item.opacity !== 1) {
                     console.error("CLIPBOARD UI FAILED: cut must dim only visuals"); Qt.exit(1); return;
                 }
-                Backend.clipboard.copy([controller.files[0].url]);
+                Backend.clipboard.copy([item.entry.url]);
                 if (item.cutPending || icon.opacity !== 1) {
                     console.error("CLIPBOARD UI FAILED: copy must restore opacity"); Qt.exit(1); return;
                 }
-                controller.entryAction("cut", controller.files[0]);
+                controller.entryAction("cut", item.entry);
                 // Paste through the Desktop dispatcher into a different folder.
                 main.controller.entryAction("paste", {isDirectory: true, url: SOURCE_FOLDER});
             } else if (step === 5) {
@@ -185,9 +232,13 @@ actions = '''
                     console.error("CLIPBOARD UI FAILED: row does not use shared interaction surface"); Qt.exit(1); return;
                 }
                 item.dispatch("cut");
-                item.openMenu(10, 10);
+                pointerProbe.mouseClick(item.inputSurface, 20, 16, Qt.RightButton);
                 if (!item.menu.visible || item.menu.canCut || !item.cutPending) { console.error("CLIPBOARD UI FAILED: view behavior differs"); Qt.exit(1); return; }
                 item.menu.close();
+                pointerProbe.mouseClick(window.contentItem, window.contentItem.width - 40,
+                    window.contentItem.height - 45, Qt.RightButton);
+                if (!window.contentItem.backgroundContextMenu.visible) { console.error("CLIPBOARD UI FAILED: background menu in view", controller.viewMode); Qt.exit(1); return; }
+                window.contentItem.backgroundContextMenu.close();
                 item.dispatch("copy");
                 item.dispatch("rename");
                 if (!item.renaming || !item.nameEditor.visible || item.nameEditor.Window.window !== window) { console.error("CLIPBOARD UI FAILED: inline editor missing from view", step); Qt.exit(1); return; }
@@ -245,14 +296,24 @@ actions = '''
                 if (!previewSession.saveText("Saved after move\\n")) { console.error("CLIPBOARD UI FAILED: moved preview save"); Qt.exit(1); return; }
                 Backend.openPreview(previewSession.source);
                 if (main.previewWindows.length !== previewCount) { console.error("CLIPBOARD UI FAILED: moved preview duplicated"); Qt.exit(1); return; }
-                console.log("CLIPBOARD UI PASSED: shared behavior, preview rename/move/save and existing session focus");
+            } else if (step === 19) {
+                const target = main.clipboardControl(main.contentItem, "desktopDropDestination");
+                if (!target) { console.error("CLIPBOARD UI FAILED: desktop has no shared drop destination"); Qt.exit(1); return; }
+                target.location = DESKTOP;
+                if (!target.dropFiles([SOURCE_FOLDER + "/drop.txt"])) { console.error("CLIPBOARD UI FAILED: file drop on desktop"); Qt.exit(1); return; }
+            } else if (step === 20) {
+                const target = main.clipboardControl(window.contentItem, "filesDropDestination");
+                if (!target || !target.dropFiles([DESKTOP + "/drop.txt"])) { console.error("CLIPBOARD UI FAILED: desktop file drop into Finder"); Qt.exit(1); return; }
+            } else if (step === 21) {
+                if (!controller.files.some(entry => entry.name === "drop.txt")) return;
+                console.log("CLIPBOARD UI PASSED: shared drag input, both location drops, background menu and preview tracking");
                 Qt.quit();
             }
             ++step;
         }
     }
 '''
-for key, value in {'DESTINATION': (fixtures / 'destination').as_uri(), 'SOURCE_FILE': (fixtures / 'source' / 'shared.txt').as_uri(), 'SOURCE_FOLDER': (fixtures / 'source').as_uri()}.items():
+for key, value in {'DESKTOP': (fixtures / 'desktop').as_uri(), 'DESTINATION': (fixtures / 'destination').as_uri(), 'SOURCE_FILE': (fixtures / 'source' / 'shared.txt').as_uri(), 'SOURCE_FOLDER': (fixtures / 'source').as_uri()}.items():
     actions = actions.replace(key, json.dumps(value))
 position = source.rfind('}')
 (target / 'Main.qml').write_text(source[:position] + actions + source[position:])
@@ -261,13 +322,18 @@ environment = dict(os.environ, PEDRO_DEVELOPMENT_MODE='1', PEDRO_QML_DIR=str(tar
 result = subprocess.run([str(root / 'build/dev/gui/pedro-gui')], env=environment,
                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=35)
 (target / 'check.log').write_text(result.stdout)
-if result.returncode or 'CLIPBOARD UI PASSED' not in result.stdout or any(error in result.stdout for error in ('ReferenceError', 'TypeError', 'Binding loop detected', 'Failed to get image from provider', 'CLIPBOARD UI FAILED')):
+if result.returncode or 'CLIPBOARD UI PASSED' not in result.stdout or any(error in result.stdout for error in ('ReferenceError', 'TypeError', 'Binding loop detected', 'Failed to get image from provider', 'cannot show menu: parent is null', 'CLIPBOARD UI FAILED')):
     raise SystemExit(result.stdout)
 assert (fixtures / 'source' / 'shared (2).txt').read_text() == 'shared clipboard fixture\n'
 assert (fixtures / 'destination' / 'renamed fixture.txt').read_text() == 'shared clipboard fixture\n'
 assert (fixtures / 'destination' / 'clicked away.txt').read_text() == 'shared clipboard fixture\n'
 assert not (fixtures / 'destination' / 'cancelled.txt').exists()
+assert (fixtures / 'destination' / 'context folder').is_dir()
+assert (fixtures / 'destination' / 'context.txt').is_file()
+assert (fixtures / 'destination' / 'drop.txt').read_text() == 'Shared drop fixture\n'
+assert not (fixtures / 'desktop' / 'drop.txt').exists()
+assert not (fixtures / 'source' / 'drop.txt').exists()
 assert not (fixtures / 'destination' / 'viewer.txt').exists()
 assert not (fixtures / 'destination' / 'viewer renamed.txt').exists()
 assert (fixtures / 'source' / 'viewer renamed.txt').read_text() == 'Saved after move\n'
-print('PASS: shared file behavior and preview rename/move/save/session reuse')
+print('PASS: shared drag input, location drops, all view context menus and preview tracking')

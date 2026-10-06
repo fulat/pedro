@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import "../icon" as Icon
 import "palette.js" as Palette
+import "options.js" as Options
 
 Item {
     id: header
@@ -156,7 +157,7 @@ Item {
             onLoaded: {
                 item.objectName = "filesViewDropdown";
                 item.symbol = "view";
-                item.options = [{key: "grid", icon: "grid", label: "files.view.grid"}, {key: "list", icon: "list", label: "files.view.list"}, {key: "columns", icon: "columns", label: "files.view.columns"}, {key: "mixed", icon: "mixed", label: "files.view.mixed"}];
+                item.options = Options.views();
                 item.selectedKey = Qt.binding(() => header.controller ? header.controller.viewMode : "mixed");
                 item.chosen.connect(key => header.controller.viewMode = key);
             }
@@ -166,7 +167,7 @@ Item {
             onLoaded: {
                 item.objectName = "filesSortDropdown";
                 item.symbol = "sort";
-                item.options = [{key: "name", icon: "sort", label: "files.sample.name"}, {key: "type", icon: "file", label: "files.sample.type"}, {key: "size", icon: "size", label: "files.sample.size"}, {key: "modified", icon: "calendar", label: "files.sample.modified"}];
+                item.options = Options.sorting();
                 item.selectedKey = Qt.binding(() => header.controller ? header.controller.sortKey : "name");
                 item.chosen.connect(key => { header.controller.sortKey = key; header.controller.directory.setSort(key); });
             }

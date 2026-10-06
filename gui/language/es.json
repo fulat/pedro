@@ -427,5 +427,9 @@
     "transfer.error": "No se pudo completar la transferencia",
     "transfer.progress": "Progreso del archivo actual",
     "file.menu.open.loading": "Cargando aplicaciones…",
-    "file.menu.open.empty": "No hay aplicaciones compatibles"
+    "file.menu.open.empty": "No hay aplicaciones compatibles",
+    "files.menu.view": "Ver como",
+    "files.menu.sort": "Ordenar por",
+    "files.menu.kind": "Agrupar por tipo",
+    "files.menu.options": "Opciones de visualización…"
 }
