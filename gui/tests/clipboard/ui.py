@@ -387,9 +387,18 @@ actions = '''
             } else if (step === 26) {
                 const columns = main.clipboardControl(window.contentItem, "filesColumns");
                 const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
-                if (columns.locations.length !== 1 || !details || details.width !== 320 || !details.columnMode || main.clipboardControl(window.contentItem, "filesDirectoryColumn-1")) {
+                if (columns.locations.length !== 1 || !details || Math.abs(details.width - Math.max(260, columns.availableWidth - main.clipboardControl(window.contentItem, "filesDirectoryColumn-0").width)) > 1 || !details.columnMode || main.clipboardControl(window.contentItem, "filesDirectoryColumn-1")) {
                     console.error("CLIPBOARD UI FAILED: compact file information hierarchy"); Qt.exit(1); return;
                 }
+                if (main.clipboardControl(details, "filesColumnResizeHandle")) { console.error("CLIPBOARD UI FAILED: trailing information divider"); Qt.exit(1); return; }
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                const handle = main.clipboardControl(column, "filesColumnResizeHandle");
+                const before = column.width;
+                pointerProbe.mousePress(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
+                pointerProbe.mouseMove(handle, 24, 40, 0, Qt.LeftButton);
+                pointerProbe.mouseRelease(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
+                pointerProbe.wait(20);
+                if (column.width <= before || Math.abs(details.width - Math.max(260, columns.availableWidth - column.width)) > 1) { console.error("CLIPBOARD UI FAILED: information must fill space after folder resize"); Qt.exit(1); return; }
                 if (main.Screen.width > 1000 && Qt.platform.os === "linux") {
                     window.contentItem.grabToImage(result => result.saveToFile(CAPTURE_PATH));
                 }

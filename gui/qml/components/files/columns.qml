@@ -11,7 +11,6 @@ ScrollView {
     property var controller
     signal backgroundRequested(var directory, point position)
     property bool detailsEnabled: true
-    property real informationWidth: 320
     property var detailEntry: null
     property var detailController: null
     property var locations: controller && controller.directory ? [controller.directory.location] : []
@@ -89,7 +88,11 @@ ScrollView {
                 let column = null;
                 for (let index = 0; index < columnRepeater.count; ++index) {
                     const candidate = columnRepeater.itemAt(index);
-                    if (local.x >= candidate.x && local.x < candidate.x + candidate.width) { column = candidate; break; }
+                    if (local.x >= candidate.x && local.x < candidate.x + candidate.width) {
+                        if (local.x >= candidate.x + candidate.width - 9) return;
+                        column = candidate;
+                        break;
+                    }
                 }
                 if (!column && local.x >= columnRow.width) column = columnRepeater.itemAt(columnRepeater.count - 1);
                 if (!column) return;
@@ -102,139 +105,143 @@ ScrollView {
     Row {
         id: columnRow
         height: columns.availableHeight
-        Repeater {
-            id: columnRepeater
-            model: columns.locations.length
-            delegate: Item {
-                id: column
-                objectName: "filesDirectoryColumn-" + index
-                readonly property string location: columns.locations[index] || ""
-                required property int index
-                property string selected: ""
-                readonly property var directory: directoryModel
-                function select(entry, contextMenu = false) {
-                    selected = entry.id;
-                    columns.controller.select(entry, contextMenu, directoryModel);
-                    if (!entry.isDirectory && !contextMenu) {
-                        columns.updateLocations(columns.locations.slice(0, index + 1));
-                        columns.detailController = column;
-                        columns.detailEntry = entry;
-                    }
-                }
-                function contextEntries(entry) { return columns.controller.contextEntries(entry); }
-                function handleEntryAction(action, entry) {
-                    if (action === "open") openEntry(entry);
-                    else columns.controller.handleEntryAction(action, entry);
-                }
-                function openEntry(entry) {
-                    select(entry);
-                    const locations = columns.locations.slice(0, index + 1);
-                    if (entry.isDirectory) {
-                        columns.controller.directory.search = "";
-                        columns.detailEntry = null;
-                        locations.push(entry.url);
-                        columns.controller.rememberPlaceLocation(entry.url);
-                    }
-                    else columns.controller.previewEntry(entry);
-                    columns.updateLocations(locations);
-                }
-                property real preferredWidth: 240
-                width: preferredWidth
-                height: parent.height
-                Directory {
-                    id: directoryModel
-                    Component.onCompleted: {
-                        open(column.location);
-                        setSort(columns.controller.sortKey);
-                        if (column.index === columns.locations.length - 1) columns.controller.selectionModel = directoryModel;
-                    }
-                }
-                Loader {
-                    anchors.fill: parent
-                    source: "../entry/destination.qml"
-                    onLoaded: {
-                        item.acceptsFiles = Qt.binding(() => !columns.controller.directory.search.trim().length);
-                        item.location = Qt.binding(() => directoryModel.location);
-                    }
-                }
-                Connections {
-                    target: column
-                    function onLocationChanged() { Qt.callLater(() => { if (column.location.length) directoryModel.open(column.location); }); }
-                }
-                Connections {
-                    target: directoryModel
-                    function onContentsChanged() { columns.controller.refreshSelection(directoryModel); }
-                }
-                Connections {
-                    target: columns.controller
-                    function onSortKeyChanged() { directoryModel.setSort(columns.controller.sortKey); }
-                }
-                ListView {
-                    id: columnList
-                    anchors.fill: parent
-                    anchors.rightMargin: 9
-                    clip: true
-                    model: columns.controller.directory.search.length ? columns.controller.directory.entriesModel : directoryModel.entriesModel
-                    ScrollBar.vertical: ScrollBar {
-                        orientation: Qt.Vertical
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        width: 8
-                        visible: size < 1
-                        policy: ScrollBar.AsNeeded
-                        contentItem: Rectangle {
-                            implicitWidth: 6
-                            implicitHeight: 6
-                            radius: 3
-                            color: "#c2bdba"
-                            opacity: parent.pressed ? 1 : parent.hovered ? 0.9 : 0.7
+        Row {
+            id: directoryRow
+            height: columnRow.height
+            Repeater {
+                id: columnRepeater
+                model: columns.locations.length
+                delegate: Item {
+                    id: column
+                    objectName: "filesDirectoryColumn-" + index
+                    readonly property string location: columns.locations[index] || ""
+                    required property int index
+                    property string selected: ""
+                    readonly property var directory: directoryModel
+                    function select(entry, contextMenu = false) {
+                        selected = entry.id;
+                        columns.controller.select(entry, contextMenu, directoryModel);
+                        if (!entry.isDirectory && !contextMenu) {
+                            columns.updateLocations(columns.locations.slice(0, index + 1));
+                            columns.detailController = column;
+                            columns.detailEntry = entry;
                         }
-                        background: Item {}
                     }
-                    delegate: Rectangle {
-                        id: row
-                        objectName: "filesColumn-" + column.index + "-" + entry.name
-                        required property var entry
-                        width: ListView.view.width
-                        height: 38
-                        radius: 7
-                        color: column.selected === entry.id || (columns.controller && columns.controller.isSelected(entry)) ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
-                        HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
-                        Item { id: nameSlot; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; height: 32; z: 5 }
-                        Loader {
-                            id: entryIcon
-                            x: 8
-                            y: 5
-                            width: 28
-                            height: 28
-                            source: row.entry.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
-                            onLoaded: {
-                                item.entry = Qt.binding(() => row.entry);
-                                item.showName = false;
-                                item.nameSurface = Qt.binding(() => nameSlot);
-                                item.nameAlignment = Text.AlignLeft;
-                                item.textColor = Qt.binding(() => columns.colors.ink);
-                                item.inputSurface = row;
-                                item.activateOnClick = Qt.binding(() => row.entry.isDirectory);
-                                item.iconSize = 28;
-                                item.controller = column;
-                            }
+                    function contextEntries(entry) { return columns.controller.contextEntries(entry); }
+                    function handleEntryAction(action, entry) {
+                        if (action === "open") openEntry(entry);
+                        else columns.controller.handleEntryAction(action, entry);
+                    }
+                    function openEntry(entry) {
+                        select(entry);
+                        const locations = columns.locations.slice(0, index + 1);
+                        if (entry.isDirectory) {
+                            columns.controller.directory.search = "";
+                            columns.detailEntry = null;
+                            locations.push(entry.url);
+                            columns.controller.rememberPlaceLocation(entry.url);
                         }
-                        Text { visible: row.entry.isDirectory; anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: columns.colors.muted }
+                        else columns.controller.previewEntry(entry);
+                        columns.updateLocations(locations);
                     }
-                }
-                Loader {
-                    anchors.right: parent.right
+                    property real preferredWidth: 240
+                    width: preferredWidth
                     height: parent.height
-                    width: 9
-                    z: 10
-                    source: "divider.qml"
-                    onLoaded: {
-                        item.currentWidth = Qt.binding(() => column.preferredWidth);
-                        item.minimumWidth = 180;
-                        item.maximumWidth = 280;
-                        item.resized.connect(value => { column.preferredWidth = value; });
+                    Directory {
+                        id: directoryModel
+                        Component.onCompleted: {
+                            open(column.location);
+                            setSort(columns.controller.sortKey);
+                            if (column.index === columns.locations.length - 1) columns.controller.selectionModel = directoryModel;
+                        }
+                    }
+                    Loader {
+                        anchors.fill: parent
+                        source: "../entry/destination.qml"
+                        onLoaded: {
+                            item.acceptsFiles = Qt.binding(() => !columns.controller.directory.search.trim().length);
+                            item.location = Qt.binding(() => directoryModel.location);
+                        }
+                    }
+                    Connections {
+                        target: column
+                        function onLocationChanged() { Qt.callLater(() => { if (column.location.length) directoryModel.open(column.location); }); }
+                    }
+                    Connections {
+                        target: directoryModel
+                        function onContentsChanged() { columns.controller.refreshSelection(directoryModel); }
+                    }
+                    Connections {
+                        target: columns.controller
+                        function onSortKeyChanged() { directoryModel.setSort(columns.controller.sortKey); }
+                    }
+                    ListView {
+                        id: columnList
+                        anchors.fill: parent
+                        anchors.rightMargin: 9
+                        clip: true
+                        model: columns.controller.directory.search.length ? columns.controller.directory.entriesModel : directoryModel.entriesModel
+                        ScrollBar.vertical: ScrollBar {
+                            orientation: Qt.Vertical
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            width: 8
+                            visible: size < 1
+                            policy: ScrollBar.AsNeeded
+                            contentItem: Rectangle {
+                                implicitWidth: 6
+                                implicitHeight: 6
+                                radius: 3
+                                color: "#c2bdba"
+                                opacity: parent.pressed ? 1 : parent.hovered ? 0.9 : 0.7
+                            }
+                            background: Item {}
+                        }
+                        delegate: Rectangle {
+                            id: row
+                            objectName: "filesColumn-" + column.index + "-" + entry.name
+                            required property var entry
+                            width: ListView.view.width
+                            height: 38
+                            radius: 7
+                            color: column.selected === entry.id || (columns.controller && columns.controller.isSelected(entry)) ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
+                            HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
+                            Item { id: nameSlot; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; height: 32; z: 5 }
+                            Loader {
+                                id: entryIcon
+                                x: 8
+                                y: 5
+                                width: 28
+                                height: 28
+                                source: row.entry.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
+                                onLoaded: {
+                                    item.entry = Qt.binding(() => row.entry);
+                                    item.showName = false;
+                                    item.nameSurface = Qt.binding(() => nameSlot);
+                                    item.nameAlignment = Text.AlignLeft;
+                                    item.textColor = Qt.binding(() => columns.colors.ink);
+                                    item.inputSurface = row;
+                                    item.activateOnClick = Qt.binding(() => row.entry.isDirectory);
+                                    item.iconSize = 28;
+                                    item.controller = column;
+                                }
+                            }
+                            Text { visible: row.entry.isDirectory; anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: columns.colors.muted }
+                        }
+                    }
+                    Loader {
+                        anchors.right: parent.right
+                        height: parent.height
+                        width: 9
+                        z: 10
+                        source: "divider.qml"
+                        onLoaded: {
+                            item.currentWidth = Qt.binding(() => column.preferredWidth);
+                            item.minimumWidth = 180;
+                            item.maximumWidth = 280;
+                            item.resized.connect(value => { column.preferredWidth = value; });
+                        }
                     }
                 }
             }
@@ -243,7 +250,7 @@ ScrollView {
             id: informationColumn
             active: columns.detailsEnabled && !!columns.detailEntry
             visible: active
-            width: active ? columns.informationWidth : 0
+            width: active ? Math.max(260, columns.availableWidth - directoryRow.width) : 0
             height: parent.height
             source: "details.qml"
             onLoaded: {
@@ -253,20 +260,6 @@ ScrollView {
                 item.closeRequested.connect(() => { columns.detailEntry = null; });
             }
         }
-        Loader {
-            parent: informationColumn
-            anchors.right: parent.right
-            visible: informationColumn.active
-            width: 9
-            height: parent.height
-            z: 10
-            source: "divider.qml"
-            onLoaded: {
-                item.currentWidth = Qt.binding(() => columns.informationWidth);
-                item.minimumWidth = 260;
-                item.maximumWidth = 360;
-                item.resized.connect(value => { columns.informationWidth = value; });
-            }
-        }
+
     }
 }
