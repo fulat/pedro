@@ -34,13 +34,14 @@ Item {
         objectName: "filesInformationContent"
         anchors.fill: parent
         anchors.margins: 14
+        anchors.rightMargin: 22
         contentWidth: availableWidth
         contentHeight: informationBody.implicitHeight + 20
         Controls.ScrollBar.vertical: Controls.ScrollBar {
             objectName: "filesInformationScrollBar"
             parent: details
             anchors.right: parent.right
-            anchors.rightMargin: 2
+            anchors.rightMargin: 4
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: 8
@@ -50,7 +51,7 @@ Item {
                 implicitWidth: 6
                 implicitHeight: 6
                 radius: 3
-                color: details.colors.muted
+                color: details.colors.light ? "#5e6b7c" : "#69798e"
                 opacity: parent.pressed ? 1 : parent.hovered ? 0.9 : 0.7
             }
             background: Item {}
@@ -64,16 +65,25 @@ Item {
             Item {
                 width: parent.width; height: 28
                 Controls.ToolButton {
-                    objectName: "filesInformationMenu"
+                    id: closeButton
+                    objectName: "filesInformationClose"
                     anchors.right: parent.right
-                    text: "⋯"
-                    palette.buttonText: details.colors.ink
-                    onClicked: more.open()
-                    Controls.Menu {
-                        id: more
-                        popupType: Controls.Popup.Window
-                        Controls.MenuItem { text: qsTranslate("Pedro", "files.info.refresh"); onTriggered: information.refresh() }
-                        Controls.MenuItem { text: qsTranslate("Pedro", "files.info.close"); onTriggered: details.closeRequested() }
+                    width: 28
+                    height: 28
+                    hoverEnabled: true
+                    Accessible.name: qsTranslate("Pedro", "files.info.close")
+                    Controls.ToolTip.visible: hovered
+                    Controls.ToolTip.text: Accessible.name
+                    Controls.ToolTip.delay: 500
+                    onClicked: details.closeRequested()
+                    contentItem: Icon.Tinted {
+                        source: "../../../assets/icons/capture/close.svg"
+                        tint: details.colors.ink
+                    }
+                    padding: 5
+                    background: Rectangle {
+                        radius: 7
+                        color: closeButton.hovered || closeButton.down ? details.colors.hover : "transparent"
                     }
                 }
             }
