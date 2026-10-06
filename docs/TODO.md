@@ -397,3 +397,7 @@ El objetivo es extender Pedro Global Search/Spotlight para que pueda entender co
 - [x] Reproducir y corregir el cierre al navegar carpetas: GDB capturó `free(): invalid pointer` en `g_mount_spec_unref`, desde el objeto `trash:///` que PAPI creaba para cada entrada local en consultas concurrentes. Se elimina esa creación innecesaria y se consulta el padre únicamente para entradas de la papelera. La regresión cubre carpetas vacías, navegación profunda, scroll y retirada segura de columnas.
 
 - [ ] Revisar la comprobación de redimensionado del panel externo de Información en la suite GUI completa de Wayland: falla con la secuencia de eventos sintéticos de QtTest, mientras la suite offscreen y la ejecución nativa enfocada en cierre/reapertura de Información y rueda suave pasan. Verificar la secuencia y la entrada nativa antes de atribuirlo a un fallo del producto.
+
+### Regla permanente de interfaz: barras de desplazamiento
+
+- Las barras de scroll de Pedro se muestran **solamente cuando el contenido desborda el área visible en ese eje**. Si todo cabe, la barra se oculta; se recalcula al cambiar el contenido, el ancho o la altura. Usar `ScrollBar.AsNeeded` y, en barras personalizadas, vincular también `visible` al desbordamiento (`size < 1`). Esta regla aplica a columnas, Información, listas, visores, editores y paneles del sistema. No usar `AlwaysOn` como valor predeterminado.

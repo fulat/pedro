@@ -223,11 +223,15 @@ Item {
                     smooth: true
                     mipmap: !view.media
                 }
-                Controls.ScrollBar.horizontal: Controls.ScrollBar {}
-                Controls.ScrollBar.vertical: Controls.ScrollBar {}
+                Controls.ScrollBar.horizontal: Controls.ScrollBar { policy: Controls.ScrollBar.AsNeeded; visible: size < 1 }
+                Controls.ScrollBar.vertical: Controls.ScrollBar { policy: Controls.ScrollBar.AsNeeded; visible: size < 1 }
             }
 
             Controls.ScrollView {
+                Controls.ScrollBar.vertical.policy: Controls.ScrollBar.AsNeeded
+                Controls.ScrollBar.vertical.visible: Controls.ScrollBar.vertical.size < 1
+                Controls.ScrollBar.horizontal.policy: Controls.ScrollBar.AsNeeded
+                Controls.ScrollBar.horizontal.visible: Controls.ScrollBar.horizontal.size < 1
                 anchors.fill: parent
                 anchors.margins: 16
                 visible: view.preview.kind === "text" && !view.preview.error.length

@@ -19,6 +19,7 @@ Item {
         clip: true
         contentWidth: availableWidth
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ScrollBar.vertical.visible: ScrollBar.vertical.size < 1
         Column {
             width: parent.width
             spacing: 12

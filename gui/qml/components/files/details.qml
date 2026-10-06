@@ -46,6 +46,7 @@ Item {
             anchors.bottom: parent.bottom
             width: 8
             policy: Controls.ScrollBar.AsNeeded
+            visible: size < 1
             interactive: true
             contentItem: Rectangle {
                 implicitWidth: 6

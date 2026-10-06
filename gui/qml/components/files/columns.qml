@@ -91,6 +91,7 @@ ScrollView {
     ScrollBar.horizontal.interactive: true
     ScrollBar.vertical.policy: ScrollBar.AlwaysOff
     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
+    ScrollBar.horizontal.visible: ScrollBar.horizontal.size < 1
     Connections {
         target: columns.controller ? columns.controller.directory : null
         function onLocationChanged() { columns.updateLocations([columns.controller.directory.location]); columns.detailEntry = null; }

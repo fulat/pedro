@@ -113,6 +113,8 @@ Rectangle {
 
                 clip: true
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.vertical.policy: ScrollBar.AsNeeded
+                ScrollBar.vertical.visible: ScrollBar.vertical.size < 1
 
                 Control.Center {
                     id: control

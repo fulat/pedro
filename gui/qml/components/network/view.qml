@@ -53,6 +53,8 @@ Pane {
             Layout.fillHeight: true
             clip: true
             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            ScrollBar.vertical.policy: ScrollBar.AsNeeded
+            ScrollBar.vertical.visible: ScrollBar.vertical.size < 1
             ColumnLayout {
                 width: settingsScroll.availableWidth
                 spacing: 10

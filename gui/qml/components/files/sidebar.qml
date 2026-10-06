@@ -12,6 +12,10 @@ Rectangle {
     color: "transparent"
     ScrollView {
         id: sidebarScroll
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ScrollBar.vertical.visible: ScrollBar.vertical.size < 1
+        ScrollBar.horizontal.policy: ScrollBar.AsNeeded
+        ScrollBar.horizontal.visible: ScrollBar.horizontal.size < 1
         Binding { target: sidebarScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
         Binding { target: sidebarScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
         anchors.fill: parent

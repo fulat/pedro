@@ -414,6 +414,10 @@ actions = '''
                 const content = main.clipboardControl(details, "filesInformationContent");
                 if (!content || !content.clip || !content.contentItem || content.contentItem.contentY === undefined) { console.error("CLIPBOARD UI FAILED: information must scroll vertically"); Qt.exit(1); return; }
                 originalHeight = window.height;
+                window.height = 1200;
+                pointerProbe.wait(40);
+                const fittedBar = main.clipboardControl(details, "filesInformationScrollBar");
+                if (fittedBar.visible) { console.error("CLIPBOARD UI FAILED: scrollbar must hide when information fits"); Qt.exit(1); return; }
                 window.height = 360;
             } else if (step === 27) {
                 const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
@@ -421,6 +425,7 @@ actions = '''
                 const bar = main.clipboardControl(details, "filesInformationScrollBar");
                 if (!bar || bar.parent !== details || bar.x < viewport.x + viewport.width) { console.error("CLIPBOARD UI FAILED: information scrollbar overlaps data"); Qt.exit(1); return; }
                 const scroll = viewport.contentItem;
+                if (!bar.visible) { console.error("CLIPBOARD UI FAILED: scrollbar must appear when information overflows"); Qt.exit(1); return; }
                 const end = scroll.contentHeight - scroll.height;
                 scroll.contentY = Math.max(0, end);
                 if (end <= 0 || scroll.contentY <= 0) { console.error("CLIPBOARD UI FAILED: compact information vertical scroll"); Qt.exit(1); return; }
@@ -474,6 +479,8 @@ actions = '''
             } else if (step === 34) {
                 const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-1");
                 if (!column || column.directory.loading) return;
+                const emptyBar = main.clipboardControl(column, "filesColumnScrollBar");
+                if (emptyBar.visible) { console.error("CLIPBOARD UI FAILED: empty-column scrollbar must hide"); Qt.exit(1); return; }
                 if (column.directory.count !== 0) { console.error("CLIPBOARD UI FAILED: empty folder fixture"); Qt.exit(1); return; }
                 pointerProbe.mouseClick(column, 80, column.height - 40, Qt.LeftButton);
                 if (++emptyCycles < 60) { step = 33; return; }
