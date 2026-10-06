@@ -11,7 +11,7 @@ ScrollView {
     property var controller
     signal backgroundRequested(var directory, point position)
     property bool detailsEnabled: true
-    property real informationWidth: 240
+    property real informationWidth: 320
     property var detailEntry: null
     property var detailController: null
     property var locations: controller && controller.directory ? [controller.directory.location] : []
@@ -112,6 +112,7 @@ ScrollView {
                         columns.controller.directory.search = "";
                         columns.detailEntry = null;
                         locations.push(entry.url);
+                        columns.controller.rememberPlaceLocation(entry.url);
                     }
                     else columns.controller.previewEntry(entry);
                     columns.updateLocations(locations);
@@ -211,7 +212,7 @@ ScrollView {
                     onLoaded: {
                         item.currentWidth = Qt.binding(() => column.preferredWidth);
                         item.minimumWidth = 180;
-                        item.maximumWidth = 240;
+                        item.maximumWidth = 280;
                         item.resized.connect(value => { column.preferredWidth = value; });
                     }
                 }
@@ -241,8 +242,8 @@ ScrollView {
             source: "divider.qml"
             onLoaded: {
                 item.currentWidth = Qt.binding(() => columns.informationWidth);
-                item.minimumWidth = 200;
-                item.maximumWidth = 240;
+                item.minimumWidth = 260;
+                item.maximumWidth = 360;
                 item.resized.connect(value => { columns.informationWidth = value; });
             }
         }

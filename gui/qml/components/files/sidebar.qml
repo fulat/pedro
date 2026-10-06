@@ -44,11 +44,13 @@ Rectangle {
                         anchors.fill: parent
                         radius: 18
                         visible: !row.modelData.divider
-                        color: sidebar.controller && row.modelData.name === sidebar.controller.directory.place ? sidebar.colors.selected : rowHover.hovered ? sidebar.colors.hover : "transparent"
+                        color: sidebar.controller && row.modelData.name === sidebar.controller.activePlace ? sidebar.colors.selected : rowHover.hovered ? sidebar.colors.hover : "transparent"
                     }
-                    TapHandler {
+                    MouseArea {
+                        anchors.fill: parent
                         enabled: !row.modelData.divider
-                        onTapped: sidebar.controller.openPlace(row.modelData.name)
+                        onClicked: sidebar.controller.openPlace(row.modelData.name)
+                        onDoubleClicked: sidebar.controller.resetPlace(row.modelData.name)
                     }
                     HoverHandler { id: rowHover; enabled: !row.modelData.divider; cursorShape: Qt.PointingHandCursor }
                     Icon.Tinted {
@@ -64,7 +66,7 @@ Rectangle {
                         text: row.modelData.name ? qsTranslate("Pedro", "files.browser." + row.modelData.name) : ""
                         color: sidebar.colors.ink
                         font.pixelSize: 14
-                        font.bold: sidebar.controller && row.modelData.name === sidebar.controller.directory.place
+                        font.bold: sidebar.controller && row.modelData.name === sidebar.controller.activePlace
                     }
                 }
             }

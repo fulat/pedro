@@ -5,6 +5,8 @@ QtObject {
     id: controller
     objectName: "filesController"
     property bool sidebarCollapsed: false
+    property string activePlace: directory ? directory.place : ""
+    property string computerLocation: "pedro:computer"
     property string viewMode: "mixed"
     property string sortKey: "name"
     onSortKeyChanged: { if (directory) directory.setSort(sortKey); }
@@ -21,7 +23,7 @@ QtObject {
 
     property Connections selectionConnection: Connections {
         target: controller.directory || null
-        function onLocationChanged() { controller.directory.search = ""; controller.clearSelection(); }
+        function onLocationChanged() { controller.rememberPlaceLocation(controller.directory.location); controller.directory.search = ""; controller.clearSelection(); }
         function onSearchChanged() { controller.clearSelection(); }
         function onContentsChanged() { controller.refreshSelection(controller.directory); }
     }
@@ -45,7 +47,20 @@ QtObject {
         return false;
     }
 
+    function rememberPlaceLocation(location) {
+        if (activePlace === "computer") computerLocation = String(location);
+    }
+
     function openPlace(place) {
+        activePlace = place;
+        clearSelection();
+        if (place === "computer" && computerLocation !== "pedro:computer") directory.open(computerLocation);
+        else directory.openPlace(place);
+    }
+
+    function resetPlace(place) {
+        activePlace = place;
+        if (place === "computer") computerLocation = "pedro:computer";
         clearSelection();
         directory.openPlace(place);
     }

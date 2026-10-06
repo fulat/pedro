@@ -380,24 +380,45 @@ actions = '''
             } else if (step === 26) {
                 const columns = main.clipboardControl(window.contentItem, "filesColumns");
                 const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
-                if (columns.locations.length !== 1 || !details || details.width !== 240 || !details.columnMode || main.clipboardControl(window.contentItem, "filesDirectoryColumn-1")) {
+                if (columns.locations.length !== 1 || !details || details.width !== 320 || !details.columnMode || main.clipboardControl(window.contentItem, "filesDirectoryColumn-1")) {
                     console.error("CLIPBOARD UI FAILED: compact file information hierarchy"); Qt.exit(1); return;
+                }
+                if (main.Screen.width > 1000 && Qt.platform.os === "linux") {
+                    window.contentItem.grabToImage(result => result.saveToFile(CAPTURE_PATH));
                 }
                 controller.informationRequested(details.entry);
                 if (!columns.detailEntry) { console.error("CLIPBOARD UI FAILED: information hierarchy command"); Qt.exit(1); return; }
-                console.log("CLIPBOARD UI PASSED: shared behavior, real information and compact column hierarchy");
+                const content = main.clipboardControl(details, "filesInformationContent");
+                if (!content || !content.clip || content.contentY !== undefined) { console.error("CLIPBOARD UI FAILED: information must stay fixed and clipped"); Qt.exit(1); return; }
+            } else if (step === 27) {
+                controller.viewMode = "list";
+                controller.openPlace("computer");
+            } else if (step === 28) {
+                controller.openEntry({isDirectory: true, url: SOURCE_FOLDER});
+            } else if (step === 29) {
+                controller.openPlace("desktop");
+            } else if (step === 30) {
+                const place = main.clipboardControl(window.contentItem, "filesPlace-computer");
+                pointerProbe.mouseClick(place, 25, 18, Qt.LeftButton);
+            } else if (step === 31) {
+                if (controller.directory.location !== SOURCE_FOLDER) { console.error("CLIPBOARD UI FAILED: computer should restore last location"); Qt.exit(1); return; }
+                const place = main.clipboardControl(window.contentItem, "filesPlace-computer");
+                pointerProbe.mouseDoubleClickSequence(place, 25, 18, Qt.LeftButton);
+            } else if (step === 32) {
+                if (controller.directory.place !== "computer" || controller.computerLocation !== "pedro:computer") { console.error("CLIPBOARD UI FAILED: double click should reset computer"); Qt.exit(1); return; }
+                console.log("CLIPBOARD UI PASSED: shared behavior, fixed information and sidebar navigation");
                 Qt.quit();
             }
             ++step;
         }
     }
 '''
-for key, value in {'DESKTOP': (fixtures / 'desktop').as_uri(), 'DESTINATION': (fixtures / 'destination').as_uri(), 'SOURCE_FILE': (fixtures / 'source' / 'shared.txt').as_uri(), 'SOURCE_FOLDER': (fixtures / 'source').as_uri()}.items():
+for key, value in {'DESKTOP': (fixtures / 'desktop').as_uri(), 'DESTINATION': (fixtures / 'destination').as_uri(), 'SOURCE_FILE': (fixtures / 'source' / 'shared.txt').as_uri(), 'SOURCE_FOLDER': (fixtures / 'source').as_uri(), 'CAPTURE_PATH': str(target / 'information.png')}.items():
     actions = actions.replace(key, json.dumps(value))
 position = source.rfind('}')
 (target / 'Main.qml').write_text(source[:position] + actions + source[position:])
 environment = dict(os.environ, PEDRO_DEVELOPMENT_MODE='1', PEDRO_QML_DIR=str(target),
-                   QT_QPA_PLATFORM='offscreen', QT_QUICK_BACKEND=os.environ.get('QT_QUICK_BACKEND', 'software'), QT_QPA_PLATFORMTHEME='none')
+                   QT_QPA_PLATFORM=os.environ.get('PEDRO_UI_TEST_PLATFORM', 'offscreen'), QT_QUICK_BACKEND=os.environ.get('QT_QUICK_BACKEND', 'software'), QT_QPA_PLATFORMTHEME='none')
 result = subprocess.run([str(root / 'build/dev/gui/pedro-gui')], env=environment,
                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=35)
 (target / 'check.log').write_text(result.stdout)
