@@ -83,6 +83,7 @@ ApplicationWindow {
                 item.minimumWidth = 340;
                 item.minimumHeight = 420;
                 item.headerHeight = 34;
+                item.contentMargin = 0;
                 item.contentSource = "../files/details.qml";
                 item.contentItemChanged.connect(() => {
                     if (item.contentItem) {

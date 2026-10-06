@@ -41,7 +41,7 @@ Item {
             objectName: "filesInformationScrollBar"
             parent: details
             anchors.right: parent.right
-            anchors.rightMargin: 4
+            anchors.rightMargin: 1
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: 8
@@ -63,13 +63,13 @@ Item {
             width: informationScroll.availableWidth
             spacing: 10
             Item {
-                width: parent.width; height: 28
+                width: parent.width; height: 30
                 Controls.ToolButton {
                     id: closeButton
                     objectName: "filesInformationClose"
                     anchors.right: parent.right
-                    width: 28
-                    height: 28
+                    width: 32
+                    height: 30
                     hoverEnabled: true
                     Accessible.name: qsTranslate("Pedro", "files.info.close")
                     Controls.ToolTip.visible: hovered
@@ -78,12 +78,14 @@ Item {
                     onClicked: details.closeRequested()
                     contentItem: Icon.Tinted {
                         source: "../../../assets/icons/capture/close.svg"
-                        tint: details.colors.ink
+                        tint: details.colors.accent
                     }
-                    padding: 5
+                    padding: 7
                     background: Rectangle {
-                        radius: 7
-                        color: closeButton.hovered || closeButton.down ? details.colors.hover : "transparent"
+                        radius: 10
+                        color: closeButton.down ? details.colors.selected : closeButton.hovered ? details.colors.hover : details.colors.card
+                        border.color: details.colors.line
+                        Behavior on color { ColorAnimation { duration: 150 } }
                     }
                 }
             }

@@ -164,7 +164,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.leftMargin: 17
-            Layout.rightMargin: 16
+            Layout.rightMargin: browser.controller && browser.controller.viewMode === "columns" ? 0 : 16
             spacing: 8
             Loader {
                 Layout.fillWidth: true
