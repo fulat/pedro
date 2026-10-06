@@ -35,7 +35,7 @@ Item {
         }
         onReleased: {
             divider.dragFinished();
-            if (divider.collapsible && divider.currentWidth < 70) divider.collapseRequested();
+            if (divider.collapsible && divider.currentWidth <= 150) divider.collapseRequested();
         }
         onCanceled: divider.dragFinished()
         onPositionChanged: mouse => {

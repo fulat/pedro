@@ -35,7 +35,7 @@ Item {
         anchors.fill: parent
         anchors.margins: 14
         anchors.rightMargin: 22
-        contentWidth: availableWidth
+        contentWidth: Math.max(availableWidth, details.columnMode ? 260 : 0)
         contentHeight: informationBody.implicitHeight + 20
         Controls.ScrollBar.vertical: Controls.ScrollBar {
             objectName: "filesInformationScrollBar"
@@ -61,7 +61,7 @@ Item {
         clip: true
         Column {
             id: informationBody
-            width: informationScroll.availableWidth
+            width: informationScroll.contentWidth
             spacing: 10
             Loader {
                 width: 64; height: 64

@@ -16,7 +16,7 @@ Rectangle {
     property real informationWidth: 360
     property bool informationClosing: false
     onInformationEntryChanged: { if (informationEntry) { informationClose.stop(); informationClosing = false; } }
-    Timer { id: informationClose; interval: 180; onTriggered: { browser.informationEntry = null; browser.informationClosing = false; browser.informationWidth = 360; } }
+    Timer { id: informationClose; interval: 260; onTriggered: { browser.informationEntry = null; browser.informationClosing = false; browser.informationWidth = 360; } }
     readonly property var confirmationWindow: confirmation
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
@@ -324,8 +324,8 @@ Rectangle {
             Layout.preferredWidth: visible ? Math.min(browser.informationWidth, browser.width * 0.6) : 0
             Layout.minimumWidth: 0
             clip: true
-            opacity: browser.informationClosing ? 0 : Math.min(1, width / 120)
-            Behavior on opacity { NumberAnimation { duration: 180 } }
+            opacity: browser.informationClosing ? 0 : Math.max(0, Math.min(1, (width - 60) / 180))
+            Behavior on opacity { NumberAnimation { duration: 260; easing.type: Easing.InOutCubic } }
             Layout.fillHeight: true
             visible: !!browser.informationEntry && browser.controller.viewMode !== "columns"
             active: visible

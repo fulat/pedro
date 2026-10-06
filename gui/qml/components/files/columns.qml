@@ -22,14 +22,14 @@ ScrollView {
         }
     }
     function finishInformationResize(column) {
-        if (column.index === columns.locations.length - 1 && informationColumn.active && informationColumn.width < 70) {
+        if (column.index === columns.locations.length - 1 && informationColumn.active && informationColumn.width <= 150) {
             closingColumn = column;
             closeInformation.start();
         }
     }
     SequentialAnimation {
         id: closeInformation
-        NumberAnimation { target: columns.closingColumn; property: "preferredWidth"; to: columns.informationSpan; duration: 180; easing.type: Easing.InOutCubic }
+        NumberAnimation { target: columns.closingColumn; property: "preferredWidth"; to: columns.informationSpan; duration: 260; easing.type: Easing.InOutCubic }
         ScriptAction { script: { columns.detailEntry = null; columns.detailController = null; columns.informationSpan = -1; } }
     }
     property var detailEntry: null
@@ -302,7 +302,8 @@ ScrollView {
                 ? Math.max(0, columns.informationSpan - columnRepeater.itemAt(columnRepeater.count - 1).width)
                 : Math.max(260, columns.availableWidth - directoryRow.width) : 0
             clip: true
-            opacity: Math.min(1, width / 120)
+            opacity: Math.max(0, Math.min(1, (width - 60) / 180))
+            Behavior on opacity { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
             height: parent.height
             source: "details.qml"
             onLoaded: {

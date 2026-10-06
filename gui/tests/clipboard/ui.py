@@ -515,7 +515,7 @@ actions = '''
                 const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
                 if (!details) return;
                 const handle = main.clipboardControl(column, "filesColumnResizeHandle");
-                const distance = details.width - 40;
+                const distance = details.width - 140;
                 pointerProbe.mousePress(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
                 pointerProbe.mouseMove(handle, 4 + distance, 40, 0, Qt.LeftButton);
                 pointerProbe.mouseRelease(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
