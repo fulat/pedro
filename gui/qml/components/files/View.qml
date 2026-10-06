@@ -47,6 +47,9 @@ Item {
             }
         }
         ScrollView {
+            id: editorScroll
+            Binding { target: editorScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
+            Binding { target: editorScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
             Layout.fillWidth: true
             Layout.fillHeight: true
             TextArea {

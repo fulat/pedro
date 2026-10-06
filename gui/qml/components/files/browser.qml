@@ -199,6 +199,8 @@ Rectangle {
             }
             ScrollView {
                 id: contentScroll
+                Binding { target: contentScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
+                Binding { target: contentScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
                 objectName: "filesBodyScroll"
                 visible: !browser.controller || browser.controller.viewMode === "grid" || browser.controller.viewMode === "mixed"
                 Layout.fillWidth: true
@@ -231,6 +233,8 @@ Rectangle {
                     spacing: 12
                     GridView {
                         id: folderGrid
+                        boundsBehavior: Flickable.StopAtBounds
+                        boundsMovement: Flickable.StopAtBounds
                         objectName: "filesFolderGrid"
                         visible: !browser.controller || browser.controller.viewMode !== "list"
                         readonly property bool mixed: !browser.controller || browser.controller.viewMode === "mixed"

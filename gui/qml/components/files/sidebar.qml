@@ -11,6 +11,9 @@ Rectangle {
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     color: "transparent"
     ScrollView {
+        id: sidebarScroll
+        Binding { target: sidebarScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
+        Binding { target: sidebarScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
         anchors.fill: parent
         anchors.margins: sidebar.controller && sidebar.controller.sidebarCollapsed ? 7 : 14
         clip: true

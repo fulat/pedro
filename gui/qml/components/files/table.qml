@@ -22,6 +22,8 @@ Item {
     }
     ListView {
         id: fileList
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds
         y: 33
         objectName: table.embedded ? "filesMixedList" : "filesFileList"
         width: table.width

@@ -25,6 +25,8 @@ Item {
     }
     Controls.ScrollView {
         id: informationScroll
+        Binding { target: informationScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
+        Binding { target: informationScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
         objectName: "filesInformationContent"
         anchors.fill: parent
         anchors.margins: 14

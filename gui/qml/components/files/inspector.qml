@@ -12,6 +12,9 @@ Item {
     readonly property var entry: controller ? controller.selectedEntry : ({})
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     ScrollView {
+        id: inspectorScroll
+        Binding { target: inspectorScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
+        Binding { target: inspectorScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
         anchors.fill: parent
         clip: true
         contentWidth: availableWidth

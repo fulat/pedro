@@ -7,6 +7,8 @@ import "palette.js" as Palette
 
 ScrollView {
     id: columns
+    Binding { target: columns.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
+    Binding { target: columns.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
     objectName: "filesColumns"
     property var controller
     signal backgroundRequested(var directory, point position)
@@ -177,6 +179,8 @@ ScrollView {
                     }
                     ListView {
                         id: columnList
+                        boundsBehavior: Flickable.StopAtBounds
+                        boundsMovement: Flickable.StopAtBounds
                         anchors.fill: parent
                         anchors.rightMargin: 9
                         clip: true
