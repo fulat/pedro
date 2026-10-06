@@ -94,7 +94,14 @@ ScrollView {
     ScrollBar.horizontal.visible: ScrollBar.horizontal.size < 1
     Connections {
         target: columns.controller ? columns.controller.directory : null
-        function onLocationChanged() { columns.updateLocations([columns.controller.directory.location]); columns.detailEntry = null; }
+        function onLocationChanged() {
+            for (let index = 0; index < columnRepeater.count; ++index) {
+                const column = columnRepeater.itemAt(index);
+                if (column) column.selected = "";
+            }
+            columns.updateLocations([columns.controller.directory.location]);
+            columns.detailEntry = null;
+        }
         function onSearchChanged() { if (columns.controller.directory.search.length) columns.updateLocations([columns.controller.directory.location]); }
     }
     Connections {
@@ -173,7 +180,7 @@ ScrollView {
                             columns.controller.directory.search = "";
                             columns.detailEntry = null;
                             locations.push(entry.url);
-                            columns.controller.rememberPlaceLocation(entry.url);
+                            columns.controller.activePlace = "";
                         }
                         else columns.controller.previewEntry(entry);
                         columns.updateLocations(locations);

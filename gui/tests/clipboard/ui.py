@@ -380,7 +380,9 @@ actions = '''
             } else if (step === 24) {
                 const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
                 if (!column || column.directory.loading) return;
+                controller.activePlace = "computer";
                 column.openEntry(column.directory.folders.find(entry => entry.name === "nested"));
+                if (controller.activePlace === "computer") { console.error("CLIPBOARD UI FAILED: computer must deselect during column navigation"); Qt.exit(1); return; }
             } else if (step === 25) {
                 const columns = main.clipboardControl(window.contentItem, "filesColumns");
                 const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
@@ -455,16 +457,17 @@ actions = '''
             } else if (step === 28) {
                 controller.openEntry({isDirectory: true, url: SOURCE_FOLDER});
             } else if (step === 29) {
+                if (controller.activePlace === "computer") { console.error("CLIPBOARD UI FAILED: computer must deselect inside folders"); Qt.exit(1); return; }
                 controller.openPlace("desktop");
             } else if (step === 30) {
                 const place = main.clipboardControl(window.contentItem, "filesPlace-computer");
                 pointerProbe.mouseClick(place, 25, 18, Qt.LeftButton);
             } else if (step === 31) {
-                if (controller.directory.location !== SOURCE_FOLDER) { console.error("CLIPBOARD UI FAILED: computer should restore last location"); Qt.exit(1); return; }
+                if (controller.directory.location !== "pedro:computer" || controller.activePlace !== "computer") { console.error("CLIPBOARD UI FAILED: computer must always return to its root view"); Qt.exit(1); return; }
                 const place = main.clipboardControl(window.contentItem, "filesPlace-computer");
                 pointerProbe.mouseDoubleClickSequence(place, 25, 18, Qt.LeftButton);
             } else if (step === 32) {
-                if (controller.directory.place !== "computer" || controller.computerLocation !== "pedro:computer") { console.error("CLIPBOARD UI FAILED: double click should reset computer"); Qt.exit(1); return; }
+                if (controller.directory.place !== "computer" || controller.directory.location !== "pedro:computer") { console.error("CLIPBOARD UI FAILED: double click should reset computer"); Qt.exit(1); return; }
                 controller.directory.open(DESTINATION);
                 controller.viewMode = "columns";
             } else if (step === 33) {
