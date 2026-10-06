@@ -44,7 +44,12 @@ Rectangle {
         target: browser.controller
         function onEmptyRequested() { confirmation.urls = []; confirmation.open(); }
         function onMoveRequested(entry) { destination.entry = entry; destination.open(); }
-        function onInformationRequested(entry) { browser.informationEntry = entry; }
+        function onInformationRequested(entry) {
+            if (browser.controller.viewMode === "columns" && columnsPanel.item) {
+                browser.informationEntry = null;
+                columnsPanel.item.showInformation(entry);
+            } else browser.informationEntry = entry;
+        }
         function onSelectedEntryChanged() { if (browser.informationEntry && browser.controller.selectedEntry.url) browser.informationEntry = browser.controller.selectedEntry; }
         function onRemovalRequested(urls) { confirmation.urls = urls; confirmation.open(); }
     }
@@ -273,6 +278,7 @@ Rectangle {
                 onLoaded: { item.controller = Qt.binding(() => browser.controller); item.all = true; item.embedded = false; }
             }
             Loader {
+                id: columnsPanel
                 visible: browser.controller && browser.controller.viewMode === "columns"
                 active: visible
                 Layout.fillWidth: true
@@ -280,13 +286,13 @@ Rectangle {
                 source: "columns.qml"
                 onLoaded: {
                     item.controller = Qt.binding(() => browser.controller);
-                    item.detailsEnabled = Qt.binding(() => !browser.informationEntry);
+                    item.detailsEnabled = true;
                     item.backgroundRequested.connect((target, point) => browser.openBackgroundMenu(target, point));
                 }
             }
         }
         Loader {
-            visible: !!browser.informationEntry
+            visible: !!browser.informationEntry && browser.controller.viewMode !== "columns"
             Layout.preferredWidth: visible ? 9 : 0
             Layout.fillHeight: true
             source: "divider.qml"
@@ -302,7 +308,7 @@ Rectangle {
             Layout.preferredWidth: visible ? Math.min(browser.informationWidth, browser.width * 0.6) : 0
             Layout.minimumWidth: visible ? 280 : 0
             Layout.fillHeight: true
-            visible: !!browser.informationEntry
+            visible: !!browser.informationEntry && browser.controller.viewMode !== "columns"
             active: visible
             source: "details.qml"
             onLoaded: {

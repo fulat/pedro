@@ -16,6 +16,7 @@ for directory in ('source', 'destination', 'desktop'):
     (fixtures / directory).mkdir(parents=True)
 (fixtures / 'source' / 'shared.txt').write_text('shared clipboard fixture\n')
 (fixtures / 'source' / 'drop.txt').write_text('Shared drop fixture\n')
+(fixtures / 'destination' / 'nested').mkdir()
 (fixtures / 'destination' / 'viewer.txt').write_text('Viewer tracking fixture\n')
 for name in ('qml', 'config', 'assets'):
     link = target / name
@@ -89,6 +90,10 @@ actions = '''
                 main.controller.entryAction("copy", entry);
                 main.controller.desktopShortcutRepeater = original;
                 const menu = window.contentItem.backgroundContextMenu;
+                if (controller.viewMode === "columns") {
+                    main.clipboardControl(window.contentItem, "filesColumns").detailEntry = null;
+                    pointerProbe.wait(20);
+                }
                 pointerProbe.mouseClick(window.contentItem, window.contentItem.width - 40,
                     window.contentItem.height - 45, Qt.RightButton);
                 if (!menu.visible) { console.error("CLIPBOARD UI FAILED: background right click did not open menu"); Qt.exit(1); return; }
@@ -260,6 +265,10 @@ actions = '''
                 pointerProbe.mouseClick(item.inputSurface, 20, 16, Qt.RightButton);
                 if (!item.menu.visible || item.menu.canCut || !item.cutPending) { console.error("CLIPBOARD UI FAILED: view behavior differs"); Qt.exit(1); return; }
                 item.menu.close();
+                if (controller.viewMode === "columns") {
+                    main.clipboardControl(window.contentItem, "filesColumns").detailEntry = null;
+                    pointerProbe.wait(20);
+                }
                 pointerProbe.mouseClick(window.contentItem, window.contentItem.width - 40,
                     window.contentItem.height - 45, Qt.RightButton);
                 if (!window.contentItem.backgroundContextMenu.visible) { console.error("CLIPBOARD UI FAILED: background menu in view", controller.viewMode); Qt.exit(1); return; }
@@ -356,7 +365,27 @@ actions = '''
                 main.openInformationWindow(loader.entry);
                 if (main.informationWindows.length !== 1) { console.error("CLIPBOARD UI FAILED: duplicate information window"); Qt.exit(1); return; }
                 loader.item.close();
-                console.log("CLIPBOARD UI PASSED: shared behavior and real reusable file information");
+                controller.viewMode = "columns";
+            } else if (step === 24) {
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                if (!column || column.directory.loading) return;
+                column.openEntry(column.directory.folders.find(entry => entry.name === "nested"));
+            } else if (step === 25) {
+                const columns = main.clipboardControl(window.contentItem, "filesColumns");
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                if (columns.locations.length !== 2 || columns.detailEntry || !main.clipboardControl(window.contentItem, "filesDirectoryColumn-1")) {
+                    console.error("CLIPBOARD UI FAILED: folder contents hierarchy"); Qt.exit(1); return;
+                }
+                column.select(column.directory.files.find(entry => entry.name === "drop.txt"));
+            } else if (step === 26) {
+                const columns = main.clipboardControl(window.contentItem, "filesColumns");
+                const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
+                if (columns.locations.length !== 1 || !details || details.width !== 240 || !details.columnMode || main.clipboardControl(window.contentItem, "filesDirectoryColumn-1")) {
+                    console.error("CLIPBOARD UI FAILED: compact file information hierarchy"); Qt.exit(1); return;
+                }
+                controller.informationRequested(details.entry);
+                if (!columns.detailEntry) { console.error("CLIPBOARD UI FAILED: information hierarchy command"); Qt.exit(1); return; }
+                console.log("CLIPBOARD UI PASSED: shared behavior, real information and compact column hierarchy");
                 Qt.quit();
             }
             ++step;

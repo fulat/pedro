@@ -36,7 +36,7 @@ Item {
     Rectangle { anchors.fill: parent; anchors.margins: details.columnMode ? 0 : 8; color: "transparent"; radius: details.columnMode ? 0 : 18; border.color: details.colors.line }
     Controls.ScrollView {
         anchors.fill: parent
-        anchors.margins: 24
+        anchors.margins: details.columnMode ? 16 : 24
         contentWidth: availableWidth
         clip: true
         Column {
@@ -133,9 +133,10 @@ Item {
         property string symbol
         property string value
         width: parent.width
-        height: Math.max(28, labelText.implicitHeight, valueLabel.implicitHeight)
+        readonly property bool compact: details.width < 300
+        height: compact ? labelText.implicitHeight + valueLabel.implicitHeight + 10 : Math.max(28, labelText.implicitHeight, valueLabel.implicitHeight)
         Icon.Tinted { width: 20; height: 20; anchors.verticalCenter: parent.verticalCenter; source: "../../../assets/icons/" + parent.symbol + ".svg"; tint: details.colors.ink }
-        Text { id: labelText; x: 32; width: parent.width * 0.4 - 32; anchors.verticalCenter: parent.verticalCenter; text: qsTranslate("Pedro", parent.label); color: details.colors.ink; font.pixelSize: 13; wrapMode: Text.Wrap }
-        Text { id: valueLabel; x: parent.width * 0.42; width: parent.width - x; anchors.verticalCenter: parent.verticalCenter; text: parent.value; color: details.colors.muted; font.pixelSize: 13; horizontalAlignment: Text.AlignRight; wrapMode: Text.Wrap }
+        Text { id: labelText; x: 32; width: parent.compact ? parent.width - 32 : parent.width * 0.4 - 32; y: parent.compact ? 0 : (parent.height - height) / 2; text: qsTranslate("Pedro", parent.label); color: details.colors.ink; font.pixelSize: 13; wrapMode: Text.Wrap }
+        Text { id: valueLabel; x: parent.compact ? 32 : parent.width * 0.42; y: parent.compact ? labelText.implicitHeight + 6 : (parent.height - height) / 2; width: parent.width - x; text: parent.value; color: details.colors.muted; font.pixelSize: 13; horizontalAlignment: parent.compact ? Text.AlignLeft : Text.AlignRight; wrapMode: Text.Wrap }
     }
 }
