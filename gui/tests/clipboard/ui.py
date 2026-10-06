@@ -405,7 +405,7 @@ actions = '''
                 pointerProbe.mouseMove(handle, 24, 40, 0, Qt.LeftButton);
                 pointerProbe.mouseRelease(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
                 pointerProbe.wait(20);
-                if (column.width <= before || Math.abs(details.width - Math.max(260, columns.availableWidth - column.width)) > 1) { console.error("CLIPBOARD UI FAILED: information must fill space after folder resize"); Qt.exit(1); return; }
+                if (column.width <= before || Math.abs(details.width - (columns.informationSpan >= 0 ? Math.max(0, columns.informationSpan - column.width) : Math.max(260, columns.availableWidth - column.width))) > 1) { console.error("CLIPBOARD UI FAILED: information must fill space after folder resize"); Qt.exit(1); return; }
                 if (main.Screen.width > 1000 && Qt.platform.os === "linux") {
                     window.contentItem.grabToImage(result => result.saveToFile(CAPTURE_PATH));
                 }
@@ -425,12 +425,25 @@ actions = '''
                 scroll.contentY = Math.max(0, end);
                 if (end <= 0 || scroll.contentY <= 0) { console.error("CLIPBOARD UI FAILED: compact information vertical scroll"); Qt.exit(1); return; }
                 const effect = main.clipboardControl(details, "filesScrollEdge");
+                scroll.contentY = 0;
+                pointerProbe.mouseWheel(viewport, viewport.width / 2, viewport.height / 2, 0, -120, Qt.NoButton, Qt.NoModifier, 0);
+                const initial = scroll.contentY;
+                pointerProbe.wait(70);
+                if (scroll.contentY <= initial || scroll.contentY >= 36) { console.error("CLIPBOARD UI FAILED: wheel scrolling must interpolate smoothly"); Qt.exit(1); return; }
+                pointerProbe.wait(200);
+                scroll.contentY = end;
                 effect.pulse();
                 pointerProbe.wait(110);
                 const shift = effect.surface.transform[effect.surface.transform.length - 1];
                 if (shift.y >= 0 || shift.y < -4) { console.error("CLIPBOARD UI FAILED: subtle end-scroll push"); Qt.exit(1); return; }
                 pointerProbe.wait(220);
                 if (Math.abs(shift.y) > 0.01) { console.error("CLIPBOARD UI FAILED: end-scroll motion must return without bounce"); Qt.exit(1); return; }
+                pointerProbe.mouseWheel(viewport, viewport.width / 2, viewport.height / 2, 0, -120, Qt.NoButton, Qt.NoModifier, 0);
+                pointerProbe.wait(70);
+                if (shift.y >= 0 || shift.y < -10) { console.error("CLIPBOARD UI FAILED: bounded continued end-scroll push"); Qt.exit(1); return; }
+                pointerProbe.wait(350);
+                if (Math.abs(shift.y) > 0.01) { console.error("CLIPBOARD UI FAILED: scroll release must settle"); Qt.exit(1); return; }
+                if (main.clipboardControl(details, "filesInformationClose")) { console.error("CLIPBOARD UI FAILED: information close button must be removed"); Qt.exit(1); return; }
                 window.height = originalHeight;
                 controller.viewMode = "list";
                 controller.openPlace("computer");
@@ -487,7 +500,27 @@ actions = '''
             } else if (step === 37) {
                 const columns = main.clipboardControl(window.contentItem, "filesColumns");
                 if (columns.locations.length !== 1) { console.error("CLIPBOARD UI FAILED: remove nested columns safely"); Qt.exit(1); return; }
-                console.log("CLIPBOARD UI PASSED: scrollable information, deep columns, sidebar and repeated empty-folder clicks");
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                if (column.directory.loading) return;
+                column.select(column.directory.files.find(entry => entry.name === "drop.txt"));
+            } else if (step === 38) {
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
+                if (!details) return;
+                const handle = main.clipboardControl(column, "filesColumnResizeHandle");
+                const distance = details.width - 40;
+                pointerProbe.mousePress(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
+                pointerProbe.mouseMove(handle, 4 + distance, 40, 0, Qt.LeftButton);
+                pointerProbe.mouseRelease(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
+            } else if (step === 39) {
+                const columns = main.clipboardControl(window.contentItem, "filesColumns");
+                if (columns.detailEntry) return;
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                column.select(column.directory.files.find(entry => entry.name === "drop.txt"));
+            } else if (step === 40) {
+                const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
+                if (!details || details.width < 260) { console.error("CLIPBOARD UI FAILED: information must reopen after collapse"); Qt.exit(1); return; }
+                console.log("CLIPBOARD UI PASSED: information collapse/reopen, smooth scrolling, deep columns and empty folders");
                 Qt.quit();
             }
             ++step;

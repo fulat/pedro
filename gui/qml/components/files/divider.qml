@@ -8,6 +8,11 @@ Item {
     property real minimumWidth: 180
     property real maximumWidth: 600
     property int direction: 1
+    property bool collapsible: false
+    readonly property bool dragging: mouse.pressed
+    signal dragStarted()
+    signal dragFinished()
+    signal collapseRequested()
     signal resized(real value)
     Rectangle {
         anchors.centerIn: parent
@@ -16,6 +21,7 @@ Item {
         color: Palette.colors(Backend.appearanceMode).line
     }
     MouseArea {
+        id: mouse
         objectName: "filesColumnResizeHandle"
         anchors.fill: parent
         cursorShape: Qt.SplitHCursor
@@ -25,7 +31,13 @@ Item {
         onPressed: mouse => {
             initialX = mapToGlobal(mouse.x, mouse.y).x;
             initialWidth = divider.currentWidth;
+            divider.dragStarted();
         }
+        onReleased: {
+            divider.dragFinished();
+            if (divider.collapsible && divider.currentWidth < 70) divider.collapseRequested();
+        }
+        onCanceled: divider.dragFinished()
         onPositionChanged: mouse => {
             if (!pressed) return;
             const delta = mapToGlobal(mouse.x, mouse.y).x - initialX;

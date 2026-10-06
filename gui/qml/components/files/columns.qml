@@ -13,6 +13,25 @@ ScrollView {
     property var controller
     signal backgroundRequested(var directory, point position)
     property bool detailsEnabled: true
+    property real informationSpan: -1
+    property var closingColumn: null
+    function beginInformationResize(column) {
+        if (column.index === columns.locations.length - 1 && informationColumn.active) {
+            closeInformation.stop();
+            informationSpan = column.width + informationColumn.width;
+        }
+    }
+    function finishInformationResize(column) {
+        if (column.index === columns.locations.length - 1 && informationColumn.active && informationColumn.width < 70) {
+            closingColumn = column;
+            closeInformation.start();
+        }
+    }
+    SequentialAnimation {
+        id: closeInformation
+        NumberAnimation { target: columns.closingColumn; property: "preferredWidth"; to: columns.informationSpan; duration: 180; easing.type: Easing.InOutCubic }
+        ScriptAction { script: { columns.detailEntry = null; columns.detailController = null; columns.informationSpan = -1; } }
+    }
     property var detailEntry: null
     property var detailController: null
     property var locations: controller && controller.directory ? [controller.directory.location] : []
@@ -56,7 +75,14 @@ ScrollView {
                 columns.contentItem.contentX = Math.max(0, columnRow.width - columns.availableWidth);
         });
     }
-    onDetailEntryChanged: revealLastColumn()
+    onDetailEntryChanged: {
+        if (!detailEntry) {
+            closeInformation.stop();
+            informationSpan = -1;
+        }
+        revealLastColumn();
+    }
+    onAvailableWidthChanged: { closeInformation.stop(); informationSpan = -1; }
     onLocationsChanged: revealLastColumn()
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     clip: true
@@ -121,6 +147,11 @@ ScrollView {
                     property string selected: ""
                     readonly property var directory: directoryModel
                     function select(entry, contextMenu = false) {
+                        if (entry.id !== selected || (!entry.isDirectory && !columns.detailEntry)) {
+                            closeInformation.stop();
+                            columns.informationSpan = -1;
+                            preferredWidth = Math.min(preferredWidth, 280);
+                        }
                         selected = entry.id;
                         columns.controller.select(entry, contextMenu, directoryModel);
                         if (!entry.isDirectory && !contextMenu) {
@@ -185,7 +216,7 @@ ScrollView {
                             onLoaded: item.flickable = Qt.binding(() => columnList);
                         }
                         bottomMargin: 20
-                        boundsBehavior: Flickable.StopAtBounds
+                        boundsBehavior: Flickable.DragOverBounds
                         boundsMovement: Flickable.StopAtBounds
                         anchors.fill: parent
                         anchors.rightMargin: 20
@@ -252,7 +283,10 @@ ScrollView {
                         onLoaded: {
                             item.currentWidth = Qt.binding(() => column.preferredWidth);
                             item.minimumWidth = 180;
-                            item.maximumWidth = 280;
+                            item.maximumWidth = Qt.binding(() => column.index === columns.locations.length - 1 && informationColumn.active
+                                ? Math.max(280, columns.informationSpan >= 0 ? columns.informationSpan : column.width + informationColumn.width) : 280);
+                            item.dragStarted.connect(() => columns.beginInformationResize(column));
+                            item.dragFinished.connect(() => columns.finishInformationResize(column));
                             item.resized.connect(value => { column.preferredWidth = value; });
                         }
                     }
@@ -263,7 +297,11 @@ ScrollView {
             id: informationColumn
             active: columns.detailsEnabled && !!columns.detailEntry
             visible: active
-            width: active ? Math.max(260, columns.availableWidth - directoryRow.width) : 0
+            width: active ? columns.informationSpan >= 0
+                ? Math.max(0, columns.informationSpan - columnRepeater.itemAt(columnRepeater.count - 1).width)
+                : Math.max(260, columns.availableWidth - directoryRow.width) : 0
+            clip: true
+            opacity: Math.min(1, width / 120)
             height: parent.height
             source: "details.qml"
             onLoaded: {

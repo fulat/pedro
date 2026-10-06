@@ -14,6 +14,9 @@ Rectangle {
     readonly property var backgroundContextMenu: backgroundMenu.item
     property var informationEntry: null
     property real informationWidth: 360
+    property bool informationClosing: false
+    onInformationEntryChanged: { if (informationEntry) { informationClose.stop(); informationClosing = false; } }
+    Timer { id: informationClose; interval: 180; onTriggered: { browser.informationEntry = null; browser.informationClosing = false; browser.informationWidth = 360; } }
     readonly property var confirmationWindow: confirmation
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
@@ -203,7 +206,7 @@ Rectangle {
                     source: "../scroll/edge.qml"
                     onLoaded: item.flickable = Qt.binding(() => contentScroll.contentItem);
                 }
-                Binding { target: contentScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
+                Binding { target: contentScroll.contentItem; property: "boundsBehavior"; value: Flickable.DragOverBounds }
                 Binding { target: contentScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
                 objectName: "filesBodyScroll"
                 visible: !browser.controller || browser.controller.viewMode === "grid" || browser.controller.viewMode === "mixed"
@@ -309,7 +312,9 @@ Rectangle {
             source: "divider.qml"
             onLoaded: {
                 item.currentWidth = Qt.binding(() => browser.informationWidth);
-                item.minimumWidth = 280;
+                item.minimumWidth = 0;
+                item.collapsible = true;
+                item.collapseRequested.connect(() => { browser.informationClosing = true; informationClose.start(); });
                 item.maximumWidth = Qt.binding(() => Math.max(280, Math.min(600, browser.width * 0.6)));
                 item.direction = -1;
                 item.resized.connect(value => { browser.informationWidth = value; });
@@ -317,7 +322,10 @@ Rectangle {
         }
         Loader {
             Layout.preferredWidth: visible ? Math.min(browser.informationWidth, browser.width * 0.6) : 0
-            Layout.minimumWidth: visible ? 280 : 0
+            Layout.minimumWidth: 0
+            clip: true
+            opacity: browser.informationClosing ? 0 : Math.min(1, width / 120)
+            Behavior on opacity { NumberAnimation { duration: 180 } }
             Layout.fillHeight: true
             visible: !!browser.informationEntry && browser.controller.viewMode !== "columns"
             active: visible

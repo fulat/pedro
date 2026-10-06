@@ -29,7 +29,7 @@ Item {
             source: "../scroll/edge.qml"
             onLoaded: item.flickable = Qt.binding(() => informationScroll.contentItem);
         }
-        Binding { target: informationScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
+        Binding { target: informationScroll.contentItem; property: "boundsBehavior"; value: Flickable.DragOverBounds }
         Binding { target: informationScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
         objectName: "filesInformationContent"
         anchors.fill: parent
@@ -62,33 +62,6 @@ Item {
             id: informationBody
             width: informationScroll.availableWidth
             spacing: 10
-            Item {
-                width: parent.width; height: 30
-                Controls.ToolButton {
-                    id: closeButton
-                    objectName: "filesInformationClose"
-                    anchors.right: parent.right
-                    width: 32
-                    height: 30
-                    hoverEnabled: true
-                    Accessible.name: qsTranslate("Pedro", "files.info.close")
-                    Controls.ToolTip.visible: hovered
-                    Controls.ToolTip.text: Accessible.name
-                    Controls.ToolTip.delay: 500
-                    onClicked: details.closeRequested()
-                    contentItem: Icon.Tinted {
-                        source: "../../../assets/icons/capture/close.svg"
-                        tint: details.colors.accent
-                    }
-                    padding: 7
-                    background: Rectangle {
-                        radius: 10
-                        color: closeButton.down ? details.colors.selected : closeButton.hovered ? details.colors.hover : details.colors.card
-                        border.color: details.colors.line
-                        Behavior on color { ColorAnimation { duration: 150 } }
-                    }
-                }
-            }
             Loader {
                 width: 64; height: 64
                 anchors.horizontalCenter: parent.horizontalCenter
