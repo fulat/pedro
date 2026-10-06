@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""GNOME/Wayland pointer regression using real Pedro Files and generated fixtures.
+Requires PyGObject, GStreamer/PipeWire and the Pedro GNOME extension. The default
+pointer coordinates are calibrated for the development display (1728x1084, 2x).
+Set DRAG_SOURCE_POINT and DRAG_TARGET_POINT for a different window placement.
+Only the diagnostic process is terminated; the user's Pedro process stays open.
+"""
+import os, json, signal, subprocess, time, queue, threading, shutil
+from pathlib import Path
+import gi
+gi.require_version('Gst','1.0')
+from gi.repository import Gio, GLib, Gst
+Gst.init(None)
+root=Path(__file__).resolve().parents[3]; target=root/'build/verification/drag/native'
+target.mkdir(parents=True,exist_ok=True)
+for name in ('qml','config','assets'):
+ link=target/name
+ if not link.exists():link.symlink_to(root/'gui'/name,target_is_directory=True)
+shutil.rmtree(target/'source',ignore_errors=True)
+for name in ('source','desktop'):(target/name).mkdir(exist_ok=True)
+(target/'source/Support').mkdir(exist_ok=True)
+entryName='Native text.txt'
+(target/'source'/entryName).write_text('Native drag regression fixture\n')
+(target/'desktop'/entryName).unlink(missing_ok=True)
+original=(root/'gui/Main.qml').read_text()
+fixture=r'''
+    property var dragProbeLoader: null
+    function dragProbeFind(item, name) {
+        if (!item) return null;
+        if (item.objectName === name) return item;
+        for (const child of item.children || []) {
+            const result = dragProbeFind(child, name);
+            if (result) return result;
+        }
+        return null;
+    }
+    Timer {
+        interval: 1200; running: true
+        onTriggered: {
+            main.title = "Pedro native drag diagnostic";
+            main.x = 0; main.y = 32;
+            const receiver = main.dragProbeFind(main.contentItem, "desktopDropDestination");
+            receiver.location = "@DESKTOP@";
+            main.dragProbeLoader = main.openFolderWindow("@SOURCE@");
+            main.dragProbeLoader.item.x = 100; main.dragProbeLoader.item.y = 120;
+            main.dragProbeLoader.item.width = 650; main.dragProbeLoader.item.height = 480;
+            coordinates.start();
+        }
+    }
+    Timer {
+        id: coordinates; interval: 500; repeat: true
+        onTriggered: {
+            const window = main.dragProbeLoader.item;
+            const entry = main.dragProbeFind(window.contentItem, "entryComponent-@ENTRY@");
+            if (!entry || window.controller.directory.loading) return;
+            Backend.activateWindow(window);
+            const p = entry.inputSurface.mapToGlobal(entry.inputSurface.width / 2, 24);
+            const d = main.contentItem.mapToGlobal(900, 550);
+            const local = entry.inputSurface.mapToItem(window.contentItem, entry.inputSurface.width / 2, 24);
+            Qt.callLater(() => console.log("DRAG_COORDINATES " + JSON.stringify({source: [p.x,p.y], local: [local.x,local.y], target: [d.x,d.y], ratio: main.Screen.devicePixelRatio, title: window.title, window: [window.x,window.y,window.width,window.height], screen: [main.Screen.width,main.Screen.height]})));
+            stop();
+        }
+    }
+'''
+
+fixture=fixture.replace('@SOURCE@',(target/'source').as_uri()).replace('@DESKTOP@',(target/'desktop').as_uri()).replace('@ENTRY@',entryName)
+position=original.rfind('}')
+(target/'Main.qml').write_text(original[:position]+fixture+original[position:])
+bus=Gio.bus_get_sync(Gio.BusType.SESSION,None); ctx=GLib.MainContext.default()
+r='org.gnome.Mutter.RemoteDesktop'; s='org.gnome.Mutter.ScreenCast'
+def call(dest,path,method,args=None):
+ return bus.call_sync(dest,path,*method.rsplit('.',1),args,None,Gio.DBusCallFlags.NONE,5000,None)
+def wait(seconds):
+ end=time.monotonic()+seconds
+ while time.monotonic()<end:
+  while ctx.pending():ctx.iteration(False)
+  time.sleep(.01)
+p=call(r,'/org/gnome/Mutter/RemoteDesktop',r+'.CreateSession').unpack()[0]
+id=call(r,p,'org.freedesktop.DBus.Properties.Get',GLib.Variant('(ss)',(r+'.Session','SessionId'))).unpack()[0]
+c=call(s,'/org/gnome/Mutter/ScreenCast',s+'.CreateSession',GLib.Variant('(a{sv})',({'remote-desktop-session-id':GLib.Variant('s',id)},))).unpack()[0]
+st=call(s,c,s+'.Session.RecordMonitor',GLib.Variant('(sa{sv})',('',{'cursor-mode':GLib.Variant('u',2)}))).unpack()[0]
+node=[]
+bus.signal_subscribe(s,s+'.Stream','PipeWireStreamAdded',st,None,Gio.DBusSignalFlags.NONE,lambda *args:node.append(args[-1].unpack()[0]))
+process=None; pipeline=None; started=False; pressed=False
+try:
+ call(r,p,r+'.Session.Start');started=True
+ for i in range(100):
+  wait(.05)
+  if node:break
+ print('STREAM',call(s,st,'org.freedesktop.DBus.Properties.Get',GLib.Variant('(ss)',(s+'.Stream','Parameters'))).unpack(), 'NODE',node,flush=True)
+ pipeline=Gst.parse_launch(f'pipewiresrc path={node[0]} ! queue leaky=downstream max-size-buffers=1 max-size-bytes=0 max-size-time=0 ! videoconvert ! videoscale ! videorate ! video/x-raw,width=1728,height=1084,framerate=5/1 ! pngenc compression-level=1 ! appsink name=frames max-buffers=1 drop=true sync=false')
+ pipeline.set_state(Gst.State.PLAYING); frames=pipeline.get_by_name('frames')
+ def capture(name):
+  sample=frames.emit('try-pull-sample',2000000000)
+  if sample:
+   buffer=sample.get_buffer();(target/name).write_bytes(buffer.extract_dup(0,buffer.get_size()));print('CAPTURE',name,flush=True)
+  else:print('CAPTURE FAILED',name,flush=True)
+ env=dict(os.environ,WAYLAND_DEBUG='client',QT_QPA_PLATFORM='wayland',PEDRO_QML_DIR=str(target),PEDRO_DEVELOPMENT_MODE='1',PEDRO_DRAG_DIAGNOSTICS='1',PEDRO_DRAG_CAPTURE_PATH=str(target/'pixmap.png'))
+ log=(target/'app.log').open('w')
+ process=subprocess.Popen([str(root/'build/dev/gui/pedro-gui')],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,start_new_session=True,bufsize=1)
+ lines=queue.Queue()
+ def reader():
+  for line in process.stdout:
+   log.write(line);log.flush();lines.put(line)
+ threading.Thread(target=reader,daemon=True).start()
+ coords=None; until=time.monotonic()+25
+ while time.monotonic()<until and not coords:
+  try:
+   line=lines.get(timeout=.1)
+   if 'DRAG_COORDINATES ' in line:coords=json.loads(line.split('DRAG_COORDINATES ',1)[1])
+  except queue.Empty:pass
+  wait(.01)
+ if not coords:raise RuntimeError('No native coordinates')
+ print('ACTIVATE', call('org.pedro.Applications','/org/pedro/Applications','org.pedro.Applications.ActivateWindow',GLib.Variant('(us)',(process.pid,coords['title']))).unpack(), flush=True)
+ wait(1)
+ print('COORDS',coords,flush=True)
+ def move(x,y):call(r,p,r+'.Session.NotifyPointerMotionAbsolute',GLib.Variant('(sdd)',(st,float(x),float(y))))
+ scale=float(os.environ.get('DRAG_COORDINATE_SCALE',coords['ratio']))
+ source=[float(v) for v in os.environ.get('DRAG_SOURCE_POINT','809,590').split(',')]; destination=[float(v) for v in os.environ.get('DRAG_TARGET_POINT','1320,800').split(',')]
+ x,y=[v*scale for v in source]; dx,dy=[v*scale for v in destination]
+ wait(.5);capture("settled.png");move(x,y);wait(.5);capture('before.png')
+ call(r,p,r+'.Session.NotifyPointerButton',GLib.Variant('(ib)',(272,True)));pressed=True
+ wait(.15)
+ for i in range(1,11):
+  move(x+(dx-x)*i/20,y+(dy-y)*i/20);wait(.08)
+ wait(.5);capture('during.png')
+ for i in range(11,21):
+  move(x+(dx-x)*i/20,y+(dy-y)*i/20);wait(.06)
+ wait(.3);capture('over-desktop.png')
+ call(r,p,r+'.Session.NotifyPointerButton',GLib.Variant('(ib)',(272,False)));pressed=False
+ wait(1);capture('after.png')
+ expected=target/os.environ.get('DRAG_EXPECTED_PATH','desktop/'+entryName)
+ assert expected.exists(), 'Native move failed; calibrate DRAG_SOURCE_POINT and DRAG_TARGET_POINT for this display'
+ wait(.1)
+ import re
+ trace=(target/'app.log').read_text()
+ match=re.search(r'start_drag\(wl_data_source#\d+, wl_surface#\d+, wl_surface#(\d+),',trace)
+ assert match, 'No native Wayland drag started'
+ tail=trace[match.end():]
+ assert 'wl_surface#'+match.group(1)+'.commit()' in tail, 'Drag feedback buffer never committed after start_drag'
+ print('PASS: native pointer drag, post-role icon commit and file move; screenshots under '+str(target),flush=True)
+
+finally:
+ if pressed:
+  call(r,p,r+'.Session.NotifyPointerButton',GLib.Variant('(ib)',(272,False)))
+ if process:
+  os.killpg(process.pid,signal.SIGTERM);process.wait(timeout=5)
+ if pipeline:pipeline.set_state(Gst.State.NULL)
+ if started:call(r,p,r+'.Session.Stop')
