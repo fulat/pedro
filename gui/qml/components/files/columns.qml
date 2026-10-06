@@ -179,6 +179,11 @@ ScrollView {
                     }
                     ListView {
                         id: columnList
+                        Loader {
+                            source: "../scroll/edge.qml"
+                            onLoaded: item.flickable = Qt.binding(() => columnList);
+                        }
+                        bottomMargin: 20
                         boundsBehavior: Flickable.StopAtBounds
                         boundsMovement: Flickable.StopAtBounds
                         anchors.fill: parent

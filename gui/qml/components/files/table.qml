@@ -22,6 +22,11 @@ Item {
     }
     ListView {
         id: fileList
+        Loader {
+            source: "../scroll/edge.qml"
+            onLoaded: item.flickable = Qt.binding(() => fileList);
+        }
+        bottomMargin: table.embedded ? 0 : 20
         boundsBehavior: Flickable.StopAtBounds
         boundsMovement: Flickable.StopAtBounds
         y: 33

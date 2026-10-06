@@ -61,6 +61,7 @@ actions = '''
         repeat: true
         property int step: 0
         property int ticks: 0
+        property bool executing: false
         property int emptyCycles: 0
         property real originalHeight: 0
         property int depth: 0
@@ -71,6 +72,9 @@ actions = '''
         property var previewSession: null
         property int previewCount: 0
         onTriggered: {
+            if (executing) return;
+            executing = true;
+            try {
             if (++ticks > 250) { console.error("CLIPBOARD UI FAILED: timeout", step); Qt.exit(1); return; }
             if (Backend.fileTransfer.error.length && !Backend.fileTransfer.cancelled) {
                 console.error("CLIPBOARD UI FAILED", Backend.fileTransfer.error); Qt.exit(1); return;
@@ -414,6 +418,13 @@ actions = '''
                 const end = scroll.contentHeight - scroll.height;
                 scroll.contentY = Math.max(0, end);
                 if (end <= 0 || scroll.contentY <= 0) { console.error("CLIPBOARD UI FAILED: compact information vertical scroll"); Qt.exit(1); return; }
+                const effect = main.clipboardControl(details, "filesScrollEdge");
+                effect.pulse();
+                pointerProbe.wait(110);
+                const shift = effect.surface.transform[effect.surface.transform.length - 1];
+                if (shift.y >= 0 || shift.y < -4) { console.error("CLIPBOARD UI FAILED: subtle end-scroll push"); Qt.exit(1); return; }
+                pointerProbe.wait(220);
+                if (Math.abs(shift.y) > 0.01) { console.error("CLIPBOARD UI FAILED: end-scroll motion must return without bounce"); Qt.exit(1); return; }
                 window.height = originalHeight;
                 controller.viewMode = "list";
                 controller.openPlace("computer");
@@ -474,6 +485,7 @@ actions = '''
                 Qt.quit();
             }
             ++step;
+            } finally { executing = false; }
         }
     }
 '''

@@ -199,6 +199,10 @@ Rectangle {
             }
             ScrollView {
                 id: contentScroll
+                Loader {
+                    source: "../scroll/edge.qml"
+                    onLoaded: item.flickable = Qt.binding(() => contentScroll.contentItem);
+                }
                 Binding { target: contentScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
                 Binding { target: contentScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
                 objectName: "filesBodyScroll"
@@ -209,7 +213,7 @@ Rectangle {
                 Layout.preferredHeight: 0
                 clip: true
                 contentWidth: availableWidth
-                contentHeight: body.implicitHeight
+                contentHeight: body.implicitHeight + 20
                 ScrollBar.vertical: ScrollBar {
                         orientation: Qt.Vertical
                         anchors.right: parent.right

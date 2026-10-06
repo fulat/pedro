@@ -25,17 +25,23 @@ Item {
     }
     Controls.ScrollView {
         id: informationScroll
+        Loader {
+            source: "../scroll/edge.qml"
+            onLoaded: item.flickable = Qt.binding(() => informationScroll.contentItem);
+        }
         Binding { target: informationScroll.contentItem; property: "boundsBehavior"; value: Flickable.StopAtBounds }
         Binding { target: informationScroll.contentItem; property: "boundsMovement"; value: Flickable.StopAtBounds }
         objectName: "filesInformationContent"
         anchors.fill: parent
         anchors.margins: 14
         contentWidth: availableWidth
+        contentHeight: informationBody.implicitHeight + 20
         Controls.ScrollBar.vertical.policy: Controls.ScrollBar.AsNeeded
         Controls.ScrollBar.vertical.interactive: true
         Controls.ScrollBar.horizontal.policy: Controls.ScrollBar.AlwaysOff
         clip: true
         Column {
+            id: informationBody
             width: informationScroll.availableWidth
             spacing: 10
             Item {
