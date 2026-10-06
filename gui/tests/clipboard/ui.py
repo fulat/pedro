@@ -402,10 +402,10 @@ actions = '''
                 const handle = main.clipboardControl(column, "filesColumnResizeHandle");
                 const before = column.width;
                 pointerProbe.mousePress(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
-                pointerProbe.mouseMove(handle, 24, 40, 0, Qt.LeftButton);
+                pointerProbe.mouseMove(handle, -16, 40, 0, Qt.LeftButton);
                 pointerProbe.mouseRelease(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
                 pointerProbe.wait(20);
-                if (column.width <= before || Math.abs(details.width - (columns.informationSpan >= 0 ? Math.max(0, columns.informationSpan - column.width) : Math.max(260, columns.availableWidth - column.width))) > 1) { console.error("CLIPBOARD UI FAILED: information must fill space after folder resize"); Qt.exit(1); return; }
+                if (column.width >= before || Math.abs(details.width - (columns.informationSpan >= 0 ? Math.max(0, columns.informationSpan - column.width) : Math.max(260, columns.availableWidth - column.width))) > 1) { console.error("CLIPBOARD UI FAILED: information must fill space after folder resize"); Qt.exit(1); return; }
                 if (main.Screen.width > 1000 && Qt.platform.os === "linux") {
                     window.contentItem.grabToImage(result => result.saveToFile(CAPTURE_PATH));
                 }
@@ -515,7 +515,7 @@ actions = '''
                 const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
                 if (!details) return;
                 const handle = main.clipboardControl(column, "filesColumnResizeHandle");
-                const distance = details.width - 140;
+                const distance = details.width - 250;
                 pointerProbe.mousePress(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
                 pointerProbe.mouseMove(handle, 4 + distance, 40, 0, Qt.LeftButton);
                 pointerProbe.mouseRelease(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);

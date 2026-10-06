@@ -22,7 +22,7 @@ ScrollView {
         }
     }
     function finishInformationResize(column) {
-        if (column.index === columns.locations.length - 1 && informationColumn.active && informationColumn.width <= 150) {
+        if (column.index === columns.locations.length - 1 && informationColumn.active && informationColumn.width <= 260) {
             closingColumn = column;
             closeInformation.start();
         }
