@@ -18,6 +18,7 @@
 #include <QMetaObject>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <pedro/papi/io/file/information.h>
 #include <QQuickWindow>
 #include <QTimer>
 #include <QTranslator>
@@ -96,6 +97,7 @@ int main(int argc, char* argv[]) {
     translate();
 
     qmlRegisterType<Pedro::Papi::Io::Content::Applications>("Pedro.Files", 1, 0, "Applications");
+    qmlRegisterType<Pedro::Papi::Io::File::Information>("Pedro.Files", 1, 0, "Information");
     qmlRegisterType<Pedro::Papi::Io::Directory::Model>("Pedro.Files", 1, 0, "Directory");
     engine.rootContext()->setContextProperty(QStringLiteral("Backend"), &backend);
 
