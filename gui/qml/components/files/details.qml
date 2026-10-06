@@ -36,8 +36,25 @@ Item {
         anchors.margins: 14
         contentWidth: availableWidth
         contentHeight: informationBody.implicitHeight + 20
-        Controls.ScrollBar.vertical.policy: Controls.ScrollBar.AsNeeded
-        Controls.ScrollBar.vertical.interactive: true
+        Controls.ScrollBar.vertical: Controls.ScrollBar {
+            objectName: "filesInformationScrollBar"
+            parent: details
+            anchors.right: parent.right
+            anchors.rightMargin: 2
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: 8
+            policy: Controls.ScrollBar.AsNeeded
+            interactive: true
+            contentItem: Rectangle {
+                implicitWidth: 6
+                implicitHeight: 6
+                radius: 3
+                color: details.colors.muted
+                opacity: parent.pressed ? 1 : parent.hovered ? 0.9 : 0.7
+            }
+            background: Item {}
+        }
         Controls.ScrollBar.horizontal.policy: Controls.ScrollBar.AlwaysOff
         clip: true
         Column {

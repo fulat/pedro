@@ -212,10 +212,13 @@ Rectangle {
                 Layout.minimumHeight: 0
                 Layout.preferredHeight: 0
                 clip: true
+                rightPadding: 12
                 contentWidth: availableWidth
                 contentHeight: body.implicitHeight + 20
                 ScrollBar.vertical: ScrollBar {
                         orientation: Qt.Vertical
+                        parent: contentScroll
+                        objectName: "filesBodyScrollBar"
                         anchors.right: parent.right
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom

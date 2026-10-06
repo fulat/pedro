@@ -91,7 +91,7 @@ ScrollView {
                 for (let index = 0; index < columnRepeater.count; ++index) {
                     const candidate = columnRepeater.itemAt(index);
                     if (local.x >= candidate.x && local.x < candidate.x + candidate.width) {
-                        if (local.x >= candidate.x + candidate.width - 9) return;
+                        if (local.x >= candidate.x + candidate.width - 20) return;
                         column = candidate;
                         break;
                     }
@@ -179,6 +179,7 @@ ScrollView {
                     }
                     ListView {
                         id: columnList
+                        objectName: "filesColumnList"
                         Loader {
                             source: "../scroll/edge.qml"
                             onLoaded: item.flickable = Qt.binding(() => columnList);
@@ -187,10 +188,13 @@ ScrollView {
                         boundsBehavior: Flickable.StopAtBounds
                         boundsMovement: Flickable.StopAtBounds
                         anchors.fill: parent
-                        anchors.rightMargin: 9
+                        anchors.rightMargin: 20
                         clip: true
                         model: columns.controller.directory.search.length ? columns.controller.directory.entriesModel : directoryModel.entriesModel
                         ScrollBar.vertical: ScrollBar {
+                            objectName: "filesColumnScrollBar"
+                            parent: column
+                            anchors.rightMargin: 9
                             orientation: Qt.Vertical
                             anchors.right: parent.right
                             anchors.top: parent.top

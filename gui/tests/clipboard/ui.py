@@ -387,6 +387,9 @@ actions = '''
                 if (columns.locations.length !== 2 || columns.detailEntry || !main.clipboardControl(window.contentItem, "filesDirectoryColumn-1")) {
                     console.error("CLIPBOARD UI FAILED: folder contents hierarchy"); Qt.exit(1); return;
                 }
+                const list = main.clipboardControl(column, "filesColumnList");
+                const bar = main.clipboardControl(column, "filesColumnScrollBar");
+                if (!bar || bar.parent !== column || bar.x < list.x + list.width) { console.error("CLIPBOARD UI FAILED: folder scrollbar overlaps column content"); Qt.exit(1); return; }
                 column.select(column.directory.files.find(entry => entry.name === "drop.txt"));
             } else if (step === 26) {
                 const columns = main.clipboardControl(window.contentItem, "filesColumns");
@@ -414,7 +417,10 @@ actions = '''
                 window.height = 360;
             } else if (step === 27) {
                 const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
-                const scroll = main.clipboardControl(details, "filesInformationContent").contentItem;
+                const viewport = main.clipboardControl(details, "filesInformationContent");
+                const bar = main.clipboardControl(details, "filesInformationScrollBar");
+                if (!bar || bar.parent !== details || bar.x < viewport.x + viewport.width) { console.error("CLIPBOARD UI FAILED: information scrollbar overlaps data"); Qt.exit(1); return; }
+                const scroll = viewport.contentItem;
                 const end = scroll.contentHeight - scroll.height;
                 scroll.contentY = Math.max(0, end);
                 if (end <= 0 || scroll.contentY <= 0) { console.error("CLIPBOARD UI FAILED: compact information vertical scroll"); Qt.exit(1); return; }

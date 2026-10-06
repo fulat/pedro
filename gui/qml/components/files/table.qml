@@ -7,6 +7,7 @@ import "palette.js" as Palette
 Item {
     id: table
     property bool embedded: true
+    readonly property real viewportWidth: Math.max(0, width - (embedded ? 0 : 12))
     property bool folders: false
     property bool all: true
     property var controller
@@ -17,7 +18,7 @@ Item {
         width: parent.width; height: 33
         Repeater {
             model: [{key: "name", ratio: 0.28}, {key: "type", ratio: 0.18}, {key: "size", ratio: 0.115}, {key: "modified", ratio: 0.195}, {key: "tags", ratio: 0.18}]
-            delegate: Text { required property var modelData; width: table.width * modelData.ratio; height: 33; verticalAlignment: Text.AlignVCenter; leftPadding: 7; text: qsTranslate("Pedro", "files.sample." + modelData.key) + (modelData.key === "name" ? "  ↑" : ""); color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
+            delegate: Text { required property var modelData; width: table.viewportWidth * modelData.ratio; height: 33; verticalAlignment: Text.AlignVCenter; leftPadding: 7; text: qsTranslate("Pedro", "files.sample." + modelData.key) + (modelData.key === "name" ? "  ↑" : ""); color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
         }
     }
     ListView {
@@ -31,17 +32,20 @@ Item {
         boundsMovement: Flickable.StopAtBounds
         y: 33
         objectName: table.embedded ? "filesMixedList" : "filesFileList"
-        width: table.width
+        width: table.viewportWidth
         height: table.embedded ? count * 43 : Math.max(0, table.height - 33)
         interactive: !table.embedded
         clip: true
         ScrollBar.vertical: ScrollBar {
+                        objectName: "filesListScrollBar"
+                        parent: table
+                        anchors.topMargin: 33
                         orientation: Qt.Vertical
                         anchors.right: parent.right
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         width: 8
-                        visible: size < 1
+                        visible: !table.embedded && size < 1
                         policy: ScrollBar.AsNeeded
                         contentItem: Rectangle {
                             implicitWidth: 6
@@ -57,7 +61,7 @@ Item {
             id: row
             required property var entry
             readonly property var modelData: entry
-            width: table.width; height: 43; radius: 9
+            width: table.viewportWidth; height: 43; radius: 9
             color: table.controller && table.controller.isSelected(modelData) ? table.colors.selected : hover.hovered ? table.colors.hover : "transparent"
             border.color: "transparent"
             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
@@ -65,7 +69,7 @@ Item {
                 z: 1
                 anchors.fill: parent
                 Item {
-                    width: table.width * 0.28; height: parent.height
+                    width: table.viewportWidth * 0.28; height: parent.height
                     Item { id: nameSlot; x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 68; height: 32; z: 5 }
                     Loader {
                         id: entryIcon
@@ -86,11 +90,11 @@ Item {
                         }
                     }
                 }
-                Text { width: table.width * 0.18; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.type; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
-                Text { width: table.width * 0.115; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.sizeText; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
-                Text { width: table.width * 0.195; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.modifiedText; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
+                Text { width: table.viewportWidth * 0.18; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.type; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
+                Text { width: table.viewportWidth * 0.115; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.sizeText; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
+                Text { width: table.viewportWidth * 0.195; height: parent.height; verticalAlignment: Text.AlignVCenter; text: row.modelData.modifiedText; color: table.colors.muted; font.pixelSize: 12; elide: Text.ElideRight }
                 Item {
-                    width: table.width * 0.18; height: parent.height
+                    width: table.viewportWidth * 0.18; height: parent.height
                     Text { anchors.verticalCenter: parent.verticalCenter; text: "—"; color: table.colors.muted; font.pixelSize: 12 }
                 }
             }
