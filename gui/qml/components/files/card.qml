@@ -10,7 +10,7 @@ Rectangle {
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     implicitHeight: 108
     radius: 10
-    color: controller && controller.selectedEntry.id === entry.id ? colors.selected : hover.hovered ? colors.hover : "transparent"
+    color: controller && controller.isSelected(entry) ? colors.selected : hover.hovered ? colors.hover : "transparent"
     HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
     Behavior on color { ColorAnimation { duration: 150 } }
     Loader {

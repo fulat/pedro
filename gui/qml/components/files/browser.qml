@@ -31,8 +31,8 @@ Rectangle {
     Loader {
         source: "../entry/shortcuts.qml"
         onLoaded: {
-            item.entries = Qt.binding(() => browser.controller && browser.controller.selectedEntry.url ? [browser.controller.selectedEntry] : []);
-            item.destination = Qt.binding(() => directory.location);
+            item.entries = Qt.binding(() => browser.controller ? browser.controller.selectedEntries : []);
+            item.destination = Qt.binding(() => browser.controller && browser.controller.selectionModel ? browser.controller.selectionModel.location : directory.location);
             item.pasteEnabled = Qt.binding(() => !directory.search.trim().length);
             item.actionRequested.connect(action => browser.controller.entryAction(action, browser.controller.selectedEntry));
         }
@@ -130,7 +130,7 @@ Rectangle {
         PointHandler {
             acceptedButtons: Qt.LeftButton
             onActiveChanged: {
-                if (!active || !browser.controller) {
+                if (!active || !browser.controller || browser.controller.viewMode === "columns") {
                     return;
                 }
                 const position = point.position;

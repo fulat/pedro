@@ -51,7 +51,7 @@ Item {
             required property var entry
             readonly property var modelData: entry
             width: table.width; height: 43; radius: 9
-            color: table.controller && table.controller.selectedEntry.id === modelData.id ? table.colors.selected : hover.hovered ? table.colors.hover : "transparent"
+            color: table.controller && table.controller.isSelected(modelData) ? table.colors.selected : hover.hovered ? table.colors.hover : "transparent"
             border.color: "transparent"
             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
             Row {

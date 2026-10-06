@@ -11,25 +11,19 @@ QtObject {
     property var directory: null
     property var window: null
     property var selectedEntry: ({})
+    property var selectedEntries: []
+    property string selectionDirectory: ""
+    property var selectionModel: directory
+    onViewModeChanged: { if (directory && selectionModel !== directory) clearSelection(directory); }
     readonly property string title: directory && directory.globalSearch && directory.search.trim().length ? qsTranslate("Pedro", "files.browser.searchResults") : directory ? directory.place.length ? qsTranslate("Pedro", "files.browser." + directory.place) : directory.name || qsTranslate("Pedro", "files.browser.computer") : ""
     readonly property var folders: directory ? directory.folders : []
     readonly property var files: directory ? directory.files : []
 
     property Connections selectionConnection: Connections {
         target: controller.directory || null
-        function onLocationChanged() { controller.directory.search = ""; controller.selectedEntry = {}; }
-        function onSearchChanged() { controller.selectedEntry = {}; }
-        function onContentsChanged() {
-            if (!controller.selectedEntry.id) {
-                return;
-            }
-            const entry = controller.folders.concat(controller.files).find(item => item.id === controller.selectedEntry.id);
-            if (entry) {
-                controller.selectedEntry = entry;
-            } else if (!controller.directory.loading) {
-                controller.selectedEntry = {};
-            }
-        }
+        function onLocationChanged() { controller.directory.search = ""; controller.clearSelection(); }
+        function onSearchChanged() { controller.clearSelection(); }
+        function onContentsChanged() { controller.refreshSelection(controller.directory); }
     }
 
     function containsEntry(item, point) {
@@ -52,16 +46,45 @@ QtObject {
     }
 
     function openPlace(place) {
-        selectedEntry = {};
+        clearSelection();
         directory.openPlace(place);
     }
 
-    function clearSelection() {
+    function clearSelection(target = directory) {
+        selectionModel = target;
+        selectedEntries = [];
         selectedEntry = {};
+        selectionDirectory = "";
     }
 
-    function select(entry) {
+    function isSelected(entry) {
+        return selectedEntries.some(value => value.id === entry.id);
+    }
+
+    function contextEntries(entry) {
+        return isSelected(entry) ? selectedEntries : [entry];
+    }
+
+    function select(entry, contextMenu = false, target = directory) {
+        if (contextMenu && isSelected(entry)) return;
+        selectedEntries = [entry];
         selectedEntry = entry;
+        selectionModel = target;
+        selectionDirectory = target ? String(target.location) : "";
+    }
+
+    function selectAll(target = selectionModel || directory) {
+        selectedEntries = target ? target.folders.concat(target.files) : [];
+        selectedEntry = selectedEntries.length ? selectedEntries[0] : {};
+        selectionModel = target;
+        selectionDirectory = target ? String(target.location) : "";
+    }
+
+    function refreshSelection(target) {
+        if (!target || target.loading || selectionDirectory !== String(target.location)) return;
+        const entries = target.folders.concat(target.files);
+        selectedEntries = selectedEntries.map(value => entries.find(entry => entry.id === value.id)).filter(value => !!value);
+        selectedEntry = selectedEntries.find(value => value.id === selectedEntry.id) || selectedEntries[0] || {};
     }
 
     signal emptyRequested()
@@ -81,7 +104,8 @@ QtObject {
     }
 
     function handleEntryAction(action, entry) {
-        if (action === "remove" && entry.canRemove) removalRequested([entry.url]);
+        if (action === "select") selectAll();
+        else if (action === "remove" && entry.canRemove) removalRequested([entry.url]);
         else if (action === "open") openEntry(entry);
         else if (action === "preview") previewEntry(entry);
         else if (action === "relocate" && entry.canRemove) moveRequested(entry);
@@ -90,7 +114,7 @@ QtObject {
 
     function openEntry(entry) {
         if (entry.isDirectory) {
-            selectedEntry = {};
+            clearSelection();
             directory.open(entry.url);
         } else if (entry.url) {
             previewEntry(entry);
@@ -104,12 +128,12 @@ QtObject {
     }
 
     function back() {
-        selectedEntry = {};
+        clearSelection();
         directory.goBack();
     }
 
     function forward() {
-        selectedEntry = {};
+        clearSelection();
         directory.goForward();
     }
 }

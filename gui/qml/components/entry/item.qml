@@ -256,11 +256,11 @@ Item {
                 const point = mapToItem(entryItem, mouse.x, mouse.y);
                 entryItem.openMenu(point.x, point.y);
             }
-            else if (entryItem.activateOnClick) entryItem.activate();
+            else if (entryItem.folder && entryItem.activateOnClick) entryItem.activate();
             else entryItem.select();
         }
         onDoubleClicked: mouse => {
-            if (!dragged && !entryItem.activateOnClick && mouse.button === Qt.LeftButton) entryItem.activate();
+            if (!dragged && (!entryItem.folder || !entryItem.activateOnClick) && mouse.button === Qt.LeftButton) entryItem.activate();
         }
     }
     Loader {

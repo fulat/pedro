@@ -98,17 +98,31 @@ actions = '''
                 createFolder.triggered();
                 createFile.text = "context.txt";
                 createFile.triggered();
-                const submenus = [];
-                for (let index = 0; index < menu.count; ++index) {
-                    if (menu.itemAt(index).subMenu) submenus.push(menu.itemAt(index).subMenu);
+                function submenu(root, name) {
+                    for (let index = 0; index < root.count; ++index) {
+                        const child = root.itemAt(index).subMenu;
+                        if (child && child.objectName === name) return child;
+                    }
+                    return null;
                 }
-                const viewMenu = submenus.find(child => child.objectName === "filesBackgroundViewMenu");
-                const sortMenu = submenus.find(child => child.objectName === "filesBackgroundSortMenu");
-                if (!viewMenu || !sortMenu || viewMenu.count !== 4 || sortMenu.count !== 4) {
-                    console.error("CLIPBOARD UI FAILED: shared view/sort choices missing"); Qt.exit(1); return;
+                const organization = submenu(menu, "filesBackgroundOrganizationMenu");
+                if (!organization || organization.title === "desktop.menu.organization") { console.error("CLIPBOARD UI FAILED: organization menu"); Qt.exit(1); return; }
+                const select = main.clipboardControl(menu.contentItem, "filesSelectAll");
+                select.triggered();
+                if (controller.selectedEntries.length !== controller.directory.count) { console.error("CLIPBOARD UI FAILED: select all"); Qt.exit(1); return; }
+                controller.clearSelection();
+                function action(root, name) {
+                    for (let index = 0; index < root.count; ++index) {
+                        if (root.itemAt(index).objectName === name) return root.itemAt(index);
+                    }
+                    return null;
                 }
-                viewMenu.itemAt(1).triggered();
-                sortMenu.itemAt(1).triggered();
+                const view = action(organization, "filesBackgroundView-list");
+                const sort = action(organization, "filesBackgroundSort-type");
+                const options = main.clipboardControl(menu.contentItem, "filesBackgroundOptions");
+                if (!view || !sort || !options || options.text === "files.menu.options") { console.error("CLIPBOARD UI FAILED: menu options or runtime translations"); Qt.exit(1); return; }
+                view.triggered();
+                sort.triggered();
                 if (controller.viewMode !== "list" || controller.sortKey !== "type") {
                     console.error("CLIPBOARD UI FAILED: context choices do not update header state"); Qt.exit(1); return;
                 }
@@ -230,6 +244,17 @@ actions = '''
                 if (!item) return;
                 if ((step === 8 || step === 9) && item.inputSurface.width <= item.iconSize) {
                     console.error("CLIPBOARD UI FAILED: row does not use shared interaction surface"); Qt.exit(1); return;
+                }
+                if (step === 9) {
+                    const count = main.previewWindows.length;
+                    pointerProbe.mouseClick(item.inputSurface, 20, 16, Qt.LeftButton);
+                    const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
+                    if (main.previewWindows.length !== count || !details || details.entry.name !== "shared.txt" || item.activateOnClick) {
+                        console.error("CLIPBOARD UI FAILED: single column click must show details, not open"); Qt.exit(1); return;
+                    }
+                    pointerProbe.mouseDoubleClickSequence(item.inputSurface, 20, 16, Qt.LeftButton);
+                    if (main.previewWindows.length !== count + 1) { console.error("CLIPBOARD UI FAILED: double column click must open"); Qt.exit(1); return; }
+                    main.previewWindows[main.previewWindows.length - 1].session.close();
                 }
                 item.dispatch("cut");
                 pointerProbe.mouseClick(item.inputSurface, 20, 16, Qt.RightButton);

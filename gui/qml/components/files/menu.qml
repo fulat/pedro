@@ -31,10 +31,13 @@ Controls.Menu {
     }
     component Action: Controls.MenuItem {
         id: action
-        property string symbol: subMenu === viewMenu ? "view" : subMenu === sortMenu ? "sort" : ""
-        implicitHeight: visible ? 36 : 0
+        property string symbol: subMenu === organizationMenu ? "organization" : ""
+        implicitHeight: visible ? 34 : 0
+        leftPadding: 12
+        rightPadding: 12
         hoverEnabled: true
         indicator: Item {}
+        arrow: Item {}
         contentItem: Item {
             Icon.Tinted {
                 width: 18
@@ -72,7 +75,7 @@ Controls.Menu {
         }
         background: Rectangle {
             radius: 6
-            color: action.enabled && action.hovered ? "#26ffffff" : "transparent"
+            color: action.enabled && (action.hovered || action.highlighted) ? "#26ffffff" : "transparent"
         }
     }
     Action {
@@ -107,15 +110,23 @@ Controls.Menu {
         onTriggered: Backend.clipboard.paste(menu.directory.location)
     }
     Controls.MenuSeparator {}
+    Action {
+        text: qsTranslate("Pedro", "desktop.menu.select")
+        objectName: "filesSelectAll"
+        symbol: "free"
+        enabled: !!menu.controller && !!menu.directory && menu.directory.count > 0
+        onTriggered: menu.controller.selectAll(menu.directory)
+    }
     Controls.Menu {
-        id: viewMenu
-        title: qsTranslate("Pedro", "files.menu.view")
-        objectName: "filesBackgroundViewMenu"
+        id: organizationMenu
+        title: qsTranslate("Pedro", "desktop.menu.organization")
+        objectName: "filesBackgroundOrganizationMenu"
         enabled: !!menu.controller
-        width: 224
+        width: 260
         padding: 6
         popupType: Controls.Popup.Window
         background: Surface {}
+        delegate: Action {}
         Repeater {
             model: Options.views()
             delegate: Action {
@@ -128,35 +139,26 @@ Controls.Menu {
                 onTriggered: { menu.controller.viewMode = modelData.key; menu.close(); }
             }
         }
-    }
-    Controls.Menu {
-        id: sortMenu
-        title: qsTranslate("Pedro", "files.menu.sort")
-        objectName: "filesBackgroundSortMenu"
-        enabled: !!menu.controller
-        width: 224
-        padding: 6
-        popupType: Controls.Popup.Window
-        background: Surface {}
+        Controls.MenuSeparator {}
         Repeater {
             model: Options.sorting()
             delegate: Action {
                 required property var modelData
                 objectName: "filesBackgroundSort-" + modelData.key
-                text: qsTranslate("Pedro", modelData.label)
+                text: qsTranslate("Pedro", "desktop.menu." + (modelData.key === "modified" ? "date" : modelData.key))
                 symbol: modelData.icon
                 checkable: true
                 checked: !!menu.controller && menu.controller.sortKey === modelData.key
                 onTriggered: { menu.controller.sortKey = modelData.key; menu.close(); }
             }
         }
-    }
-    Action {
-        text: qsTranslate("Pedro", "files.menu.kind")
-        objectName: "filesBackgroundKind"
-        symbol: "file"
-        enabled: !!menu.controller
-        onTriggered: menu.controller.sortKey = "type"
+        Controls.MenuSeparator {}
+        Action {
+            text: qsTranslate("Pedro", "files.menu.kind")
+            objectName: "filesBackgroundKind"
+            symbol: "file"
+            onTriggered: { menu.controller.sortKey = "type"; menu.close(); }
+        }
     }
     Action {
         text: qsTranslate("Pedro", "files.menu.options")

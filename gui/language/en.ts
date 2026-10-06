@@ -2065,5 +2065,25 @@ or choose Open to get started.</translation>
       <extracomment>Stable Pedro key: file.menu.open.empty</extracomment>
       <translation>No compatible applications</translation>
     </message>
+    <message>
+      <source>files.menu.view</source>
+      <extracomment>Stable Pedro key: files.menu.view</extracomment>
+      <translation>View as</translation>
+    </message>
+    <message>
+      <source>files.menu.sort</source>
+      <extracomment>Stable Pedro key: files.menu.sort</extracomment>
+      <translation>Sort by</translation>
+    </message>
+    <message>
+      <source>files.menu.kind</source>
+      <extracomment>Stable Pedro key: files.menu.kind</extracomment>
+      <translation>Group by kind</translation>
+    </message>
+    <message>
+      <source>files.menu.options</source>
+      <extracomment>Stable Pedro key: files.menu.options</extracomment>
+      <translation>View options…</translation>
+    </message>
 </context>
 </TS>

@@ -20,6 +20,12 @@ Item {
 
     Shortcut {
         context: Qt.WindowShortcut
+        sequence: "Ctrl+A"
+        enabled: shortcuts.available
+        onActivated: shortcuts.actionRequested("select")
+    }
+    Shortcut {
+        context: Qt.WindowShortcut
         sequence: "Ctrl+C"
         enabled: shortcuts.available && shortcuts.urls.length > 0
         onActivated: shortcuts.actionRequested("copy")

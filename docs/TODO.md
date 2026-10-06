@@ -105,7 +105,7 @@ Pedro → Mutter → GPU/DRM/KMS → physical display
 
 - [ ] **Clipboard History** — crear una experiencia nativa de Pedro para consultar elementos copiados recientemente, incluyendo texto, imágenes, links y otros tipos compatibles. Debe evitar almacenar contenido sensible cuando corresponda.
 
-- [ ] **Drag & Drop Between Applications** — parcial: File/Folder inicia el arrastre nativo Qt con `text/uri-list`; un receptor de ubicación compartido mueve archivos mediante PAPI/GIO en el fondo del Desktop, Files y columnas. El componente conserva el gesto dentro de vistas con scroll. Verificado el inicio del gesto y las transferencias de los receptores con fixtures de GUI; falta comprobar interoperabilidad con aplicaciones externas GTK/Wayland, portales y la futura sesión de producción.
+- [ ] **Drag & Drop Between Applications** — parcial: File/Folder inicia el arrastre nativo Qt con `text/uri-list`; un receptor de ubicación compartido mueve archivos mediante PAPI/GIO en el fondo del Desktop, Files y columnas. El componente conserva el gesto dentro de vistas con scroll y QDrag muestra una captura translúcida del archivo junto al cursor. Verificado el inicio del gesto y las transferencias de los receptores con fixtures de GUI; falta comprobar interoperabilidad con aplicaciones externas GTK/Wayland, portales y la futura sesión de producción.
 
 - [ ] **Share Sheet** — parcial: los menús de archivos/carpetas presentan Share, sin backend de transferencia. Crear una experiencia centralizada de `Share...` donde una aplicación pueda enviar contenido a otras aplicaciones o acciones compatibles sin implementar su propio menú de compartir.
 
@@ -191,9 +191,9 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 
 - [x] Ventana Qt Quick desde dock/lateral, UI light/dark e inglés/español dividida en componentes.
 - [x] Modelos PAPI e historial independientes por ventana; listados reales, Inicio y carpetas XDG, Este equipo mediante montajes GIO, Papelera mediante GVfs, Favoritos/Recientes mediante registros GTK. La Papelera se abre desde el dock.
-- [x] Vistas cuadrícula, lista, columnas y mixta; orden por nombre, tipo (carpetas primero), tamaño y fecha mediante proxies Qt; scroll del cuerpo completo.
+- [x] Vistas cuadrícula, lista, columnas y mixta; orden por nombre, tipo (carpetas primero), tamaño y fecha mediante proxies Qt; scroll del cuerpo completo. En columnas, un clic en archivo muestra detalles y el doble clic abre el visor; las carpetas navegan con un clic.
 - [x] File/Folder reutilizables con comportamiento propio: menú, copia/corte, Papelera, arrastre nativo y drop a carpetas. Lista y columnas delegan toda la superficie de interacción; los atajos comparten una política única. El host solo aporta selección, navegación, diálogos y organización del escritorio; verificación con componentes aislados y las cuatro vistas.
-- [x] Menú Liquid del espacio vacío, con asociación reactiva a la ventana, para crear carpetas/archivos, pegar, propiedades y las mismas opciones de vista/orden que la barra superior; clic derecho comprobado en cuadrícula, lista, columnas y mixta.
+- [x] Menú Liquid del espacio vacío, con asociación reactiva a la ventana, para crear carpetas/archivos, pegar, propiedades y las mismas opciones de vista/orden que la barra superior; clic derecho comprobado en cuadrícula, lista, columnas y mixta. Incluye Seleccionar todo, selección compartida para copiar/cortar y organización similar al escritorio; traducciones verificadas en los `.ts` compilados.
 - [ ] Implementar Opciones de visualización, incluyendo mostrar archivos ocultos mediante el modelo GIO. La entrada del menú está presente y deshabilitada hasta que tenga funcionalidad.
 - [x] Título alterna lateral completo/iconos, animación suave; controles de ventana y resize por bordes/esquinas.
 - [ ] Ajustar ancho del lateral arrastrando la división.
