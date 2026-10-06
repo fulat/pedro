@@ -11,6 +11,7 @@ ScrollView {
     property var controller
     signal backgroundRequested(var directory, point position)
     property bool detailsEnabled: true
+    property real informationWidth: 360
     property var detailEntry: null
     property var detailController: null
     property var locations: controller && controller.directory ? [controller.directory.location] : []
@@ -40,8 +41,12 @@ ScrollView {
                 if (!active || !columns.controller) return;
                 const local = parent.mapToItem(columnRow, point.position.x, point.position.y);
                 if (columns.controller.containsEntry(columnRow, local)) return;
-                const index = Math.max(0, Math.min(columnRepeater.count - 1, Math.floor(local.x / 240)));
-                const column = columnRepeater.itemAt(index);
+                let column = null;
+                for (let index = 0; index < columnRepeater.count; ++index) {
+                    const candidate = columnRepeater.itemAt(index);
+                    if (local.x >= candidate.x && local.x < candidate.x + candidate.width) { column = candidate; break; }
+                }
+                if (!column && local.x >= columnRow.width) column = columnRepeater.itemAt(columnRepeater.count - 1);
                 if (!column) return;
                 columns.controller.clearSelection(column.directory);
                 if (point.pressedButtons & Qt.RightButton) columns.backgroundRequested(column.directory,
@@ -86,7 +91,8 @@ ScrollView {
                     else columns.controller.previewEntry(entry);
                     columns.locations = locations;
                 }
-                width: 240
+                property real preferredWidth: 240
+                width: preferredWidth
                 height: parent.height
                 Directory {
                     id: directoryModel
@@ -167,19 +173,44 @@ ScrollView {
                         Text { visible: row.entry.isDirectory; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: columns.colors.muted }
                     }
                 }
-                Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: columns.colors.line }
+                Loader {
+                    anchors.right: parent.right
+                    height: parent.height
+                    width: 9
+                    z: 10
+                    source: "divider.qml"
+                    onLoaded: {
+                        item.currentWidth = Qt.binding(() => column.preferredWidth);
+                        item.minimumWidth = 180;
+                        item.maximumWidth = 600;
+                        item.resized.connect(value => { column.preferredWidth = value; });
+                    }
+                }
             }
         }
         Loader {
             active: columns.detailsEnabled && !!columns.detailEntry
             visible: active
-            width: active ? 360 : 0
+            width: active ? columns.informationWidth : 0
             height: parent.height
             source: "details.qml"
             onLoaded: {
+                item.columnMode = true;
                 item.entry = Qt.binding(() => columns.detailEntry);
                 item.controller = Qt.binding(() => columns.detailController);
                 item.closeRequested.connect(() => { columns.detailEntry = null; });
+            }
+        }
+        Loader {
+            visible: columns.detailsEnabled && !!columns.detailEntry
+            width: visible ? 9 : 0
+            height: parent.height
+            source: "divider.qml"
+            onLoaded: {
+                item.currentWidth = Qt.binding(() => columns.informationWidth);
+                item.minimumWidth = 280;
+                item.maximumWidth = 600;
+                item.resized.connect(value => { columns.informationWidth = value; });
             }
         }
     }

@@ -13,6 +13,7 @@ Rectangle {
     objectName: "filesBrowser"
     readonly property var backgroundContextMenu: backgroundMenu.item
     property var informationEntry: null
+    property real informationWidth: 360
     readonly property var confirmationWindow: confirmation
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
@@ -285,12 +286,27 @@ Rectangle {
             }
         }
         Loader {
-            Layout.preferredWidth: visible ? Math.min(360, browser.width * 0.45) : 0
+            visible: !!browser.informationEntry
+            Layout.preferredWidth: visible ? 9 : 0
+            Layout.fillHeight: true
+            source: "divider.qml"
+            onLoaded: {
+                item.currentWidth = Qt.binding(() => browser.informationWidth);
+                item.minimumWidth = 280;
+                item.maximumWidth = Qt.binding(() => Math.max(280, Math.min(600, browser.width * 0.6)));
+                item.direction = -1;
+                item.resized.connect(value => { browser.informationWidth = value; });
+            }
+        }
+        Loader {
+            Layout.preferredWidth: visible ? Math.min(browser.informationWidth, browser.width * 0.6) : 0
+            Layout.minimumWidth: visible ? 280 : 0
             Layout.fillHeight: true
             visible: !!browser.informationEntry
             active: visible
             source: "details.qml"
             onLoaded: {
+                item.columnMode = true;
                 item.entry = Qt.binding(() => browser.informationEntry);
                 item.controller = Qt.binding(() => browser.controller);
                 item.closeRequested.connect(() => { browser.informationEntry = null; });

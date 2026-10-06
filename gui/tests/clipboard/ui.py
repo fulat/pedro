@@ -339,6 +339,14 @@ actions = '''
                 if (panel.metadata.size !== 20 || !panel.metadata.owner || !panel.metadata.location) {
                     console.error("CLIPBOARD UI FAILED: real file information panel"); Qt.exit(1); return;
                 }
+                const handle = main.clipboardControl(window.contentItem, "filesColumnResizeHandle");
+                const before = panel.width;
+                if (!handle || !panel.columnMode) { console.error("CLIPBOARD UI FAILED: information column divider"); Qt.exit(1); return; }
+                pointerProbe.mousePress(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
+                pointerProbe.mouseMove(handle, -46, 40, 0, Qt.LeftButton);
+                pointerProbe.mouseRelease(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
+                pointerProbe.wait(20);
+                if (panel.width <= before) { console.error("CLIPBOARD UI FAILED: information column resize"); Qt.exit(1); return; }
                 const entry = controller.files.find(entry => entry.name === "drop.txt");
                 main.controller.entryAction("properties", entry);
             } else if (step === 23) {

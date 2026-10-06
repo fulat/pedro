@@ -9,6 +9,7 @@ import "palette.js" as Palette
 Item {
     id: details
     objectName: "filesColumnDetails"
+    property bool columnMode: false
     property var controller
     property var entry
     readonly property var colors: Palette.colors(Backend.appearanceMode)
@@ -24,15 +25,15 @@ Item {
     }
     Loader {
         anchors.fill: parent
-        anchors.margins: 8
+        anchors.margins: details.columnMode ? 0 : 8
         source: "../entry/surface.qml"
         onLoaded: {
             item.sourceBackdrop = Qt.binding(() => details.Window.window ? details.Window.window.entryBackdrop || null : null);
-            item.cornerRadius = 18;
+            item.cornerRadius = Qt.binding(() => details.columnMode ? 0 : 18);
             item.frosted = true;
         }
     }
-    Rectangle { anchors.fill: parent; anchors.margins: 8; color: "transparent"; radius: 18; border.color: details.colors.line }
+    Rectangle { anchors.fill: parent; anchors.margins: details.columnMode ? 0 : 8; color: "transparent"; radius: details.columnMode ? 0 : 18; border.color: details.colors.line }
     Controls.ScrollView {
         anchors.fill: parent
         anchors.margins: 24

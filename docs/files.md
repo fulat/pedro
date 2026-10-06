@@ -165,3 +165,7 @@ Ejemplo en esa sesión: `DRAG_COORDINATE_SCALE=2 DRAG_SOURCE_POINT=809,590 DRAG_
 `Papi::Io::File::Information` consulta los atributos nativos mediante GIO fuera del hilo visual, cancela consultas anteriores y descarta resultados de fuentes obsoletas. Reutiliza el observador de archivos de PAPI para refrescar cambios y movimientos. La GUI consume únicamente este modelo. Get Info de Files abre la misma información como panel derecho, y Desktop puede abrirla en una ventana interna independiente; volver a pedir la misma información enfoca esa ventana. La vista de columnas usa el mismo contenido al seleccionar un archivo.
 
 `bash gui/tests/content/information.sh` comprueba metadatos reales, rutas ausentes y cancelación/supersedencia. La prueba de clipboard GUI comprueba el panel de Files y la ventana reutilizada desde el escritorio, además de conservar las interacciones de File/Folder.
+
+### Resizable columns
+
+Files column view uses draggable vertical dividers. Folder columns start at 240 pixels and can be resized between 180 and 600 pixels. Information fills its column without floating-card margins; its width ranges from 280 to 600 pixels. The separate information pane in other views is also resizable and capped relative to the browser width. Standalone information windows retain their Liquid card presentation. Background hit testing follows the actual column widths.
