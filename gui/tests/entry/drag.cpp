@@ -7,6 +7,7 @@
 #include <QQuickWindow>
 #include <QtTest>
 
+#include <cmath>
 #include <iostream>
 #include <memory>
 
@@ -16,7 +17,7 @@ int main(int argc, char** argv) {
     QQuickWindow window;
     window.resize(220, 180);
     QQmlComponent component(&engine);
-    component.setData("import QtQuick\nRectangle { width: 64; height: 64; color: '#4088ff' }", QUrl());
+    component.setData("import QtQuick\nItem { width: 64; height: 64; Rectangle { objectName: 'fileDragVisual'; x: 18; y: 18; width: 24; height: 24; color: '#4088ff' } }", QUrl());
     std::unique_ptr<QObject> object(component.create());
     auto* item = qobject_cast<QQuickItem*>(object.get());
     if (!item) {
@@ -34,7 +35,14 @@ int main(int argc, char** argv) {
         std::cerr << "Native drag preview missing or not translucent: null=" << preview.isNull() << " alpha=" << (preview.isNull() ? -1 : preview.toImage().pixelColor(10, 10).alpha()) << "\n";
         return 3;
     }
-    item->setWidth(200);
+    auto* visual = item->findChild<QQuickItem*>(QStringLiteral("fileDragVisual"));
+    if (!visual || std::abs(preview.deviceIndependentSize().width() - 48) > 1) {
+        std::cerr << "visual=" << bool(visual) << " logical=" << preview.deviceIndependentSize().width() << " dpr=" << window.devicePixelRatio() << "\n";
+        return 6;
+    }
+    visual->setWidth(200);
+    visual->setHeight(64);
+    item->setWidth(220);
     const auto wide = Pedro::Gui::Backend::Entry::Drag::image(item);
     if (wide.isNull() || wide.deviceIndependentSize().width() > 141) {
         return 4;

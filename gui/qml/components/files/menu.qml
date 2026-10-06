@@ -152,13 +152,7 @@ Controls.Menu {
                 onTriggered: { menu.controller.sortKey = modelData.key; menu.close(); }
             }
         }
-        Controls.MenuSeparator {}
-        Action {
-            text: qsTranslate("Pedro", "files.menu.kind")
-            objectName: "filesBackgroundKind"
-            symbol: "file"
-            onTriggered: { menu.controller.sortKey = "type"; menu.close(); }
-        }
+
     }
     Action {
         text: qsTranslate("Pedro", "files.menu.options")

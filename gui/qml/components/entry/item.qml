@@ -187,6 +187,7 @@ Item {
 
     Desktop.Icon {
         id: fileIcon
+        objectName: "fileDragVisual"
         opacity: entryItem.cutPending ? Theme.cutOpacity : 1
         width: entryItem.iconSize
         height: width
