@@ -1,6 +1,7 @@
 #include "backend.hpp"
 #include "entry/name.h"
 #include "entry/drag/image.h"
+#include "entry/drag/feedback.h"
 
 #include <pedro/papi/io/filesystem/filesystem.hpp>
 #include <pedro/papi/utils/utils.hpp>
@@ -668,6 +669,13 @@ int Backend::dragFiles(QObject* source, const QVariantList& values) {
         urls.append(value.toUrl());
     }
     mime->setUrls(urls);
+    if (qEnvironmentVariableIsSet("PEDRO_DRAG_DIAGNOSTICS")) {
+        qInfo() << "drag.preview" << preview.size() << preview.deviceIndependentSize() << "source" << item->objectName();
+        const auto path = qEnvironmentVariable("PEDRO_DRAG_CAPTURE_PATH");
+        if (!path.isEmpty() && !preview.isNull()) {
+            preview.save(path);
+        }
+    }
     QDrag drag(item->window());
     drag.setMimeData(mime);
     if (!preview.isNull()) {
@@ -675,6 +683,7 @@ int Backend::dragFiles(QObject* source, const QVariantList& values) {
         const auto size = preview.deviceIndependentSize();
         drag.setHotSpot(QPoint(std::round(size.width() / 2), std::round(size.height() / 2)));
     }
+    Pedro::Gui::Backend::Entry::Drag::prepareFeedback(&drag);
     return drag.exec(Qt::MoveAction, Qt::MoveAction);
 }
 

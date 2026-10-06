@@ -44,6 +44,8 @@ set(PEDRO_GUI_SOURCES
 
         backend/entry/drag/image.h
         backend/entry/drag/image.cpp
+        backend/entry/drag/feedback.h
+        backend/entry/drag/feedback.cpp
 
         backend/application/icon/provider.cpp
         backend/application/icon/provider.hpp
