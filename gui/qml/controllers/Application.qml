@@ -147,7 +147,9 @@ QtObject {
 
     function handleEntryAction(action, entry) {
         const entries = contextEntries(entry);
-        if (action === "open" || action === "preview") {
+        if (action === "properties") {
+            window.openInformationWindow(entry);
+        } else if (action === "open" || action === "preview") {
             for (const item of entries) {
                 if (item.isDirectory && item.url) {
                     window.openFolderWindow(item.url, entries.length > 1);

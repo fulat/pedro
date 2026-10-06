@@ -2085,5 +2085,91 @@ or choose Open to get started.</translation>
       <extracomment>Stable Pedro key: files.menu.options</extracomment>
       <translation>View options…</translation>
     </message>
+    <message>
+      <source>files.info.bytes</source>
+      <extracomment>Stable Pedro key: files.info.bytes</extracomment>
+      <translation>bytes</translation>
+    </message>
+    <message>
+      <source>files.info.location</source>
+      <extracomment>Stable Pedro key: files.info.location</extracomment>
+      <translation>Location</translation>
+    </message>
+    <message>
+      <source>files.info.created</source>
+      <extracomment>Stable Pedro key: files.info.created</extracomment>
+      <translation>Created</translation>
+    </message>
+    <message>
+      <source>files.info.accessed</source>
+      <extracomment>Stable Pedro key: files.info.accessed</extracomment>
+      <translation>Last accessed</translation>
+    </message>
+    <message>
+      <source>files.info.tags</source>
+      <extracomment>Stable Pedro key: files.info.tags</extracomment>
+      <translation>Tags</translation>
+    </message>
+    <message>
+      <source>files.info.untagged</source>
+      <extracomment>Stable Pedro key: files.info.untagged</extracomment>
+      <translation>No tags</translation>
+    </message>
+    <message>
+      <source>files.info.addtag</source>
+      <extracomment>Stable Pedro key: files.info.addtag</extracomment>
+      <translation>Add tag</translation>
+    </message>
+    <message>
+      <source>files.info.edittags</source>
+      <extracomment>Stable Pedro key: files.info.edittags</extracomment>
+      <translation>Edit tags</translation>
+    </message>
+    <message>
+      <source>files.info.owner</source>
+      <extracomment>Stable Pedro key: files.info.owner</extracomment>
+      <translation>Owner</translation>
+    </message>
+    <message>
+      <source>files.info.permissions</source>
+      <extracomment>Stable Pedro key: files.info.permissions</extracomment>
+      <translation>Permissions</translation>
+    </message>
+    <message>
+      <source>files.info.readwrite</source>
+      <extracomment>Stable Pedro key: files.info.readwrite</extracomment>
+      <translation>Read and write</translation>
+    </message>
+    <message>
+      <source>files.info.read</source>
+      <extracomment>Stable Pedro key: files.info.read</extracomment>
+      <translation>Read only</translation>
+    </message>
+    <message>
+      <source>files.info.write</source>
+      <extracomment>Stable Pedro key: files.info.write</extracomment>
+      <translation>Write only</translation>
+    </message>
+    <message>
+      <source>files.info.none</source>
+      <extracomment>Stable Pedro key: files.info.none</extracomment>
+      <translation>No access</translation>
+    </message>
+    <message>
+      <source>files.info.refresh</source>
+      <extracomment>Stable Pedro key: files.info.refresh</extracomment>
+      <translation>Refresh information</translation>
+    </message>
+    <message>
+      <source>files.info.close</source>
+      <extracomment>Stable Pedro key: files.info.close</extracomment>
+      <translation>Close information</translation>
+    </message>
+    <message>
+      <source>files.info.dateformat</source>
+      <extracomment>Stable Pedro key: files.info.dateformat</extracomment>
+      <translation>ddd, MMM d, yyyy
+h:mm AP</translation>
+    </message>
 </context>
 </TS>

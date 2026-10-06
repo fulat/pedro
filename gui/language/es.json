@@ -431,5 +431,22 @@
     "files.menu.view": "Ver como",
     "files.menu.sort": "Ordenar por",
     "files.menu.kind": "Agrupar por tipo",
-    "files.menu.options": "Opciones de visualización…"
+    "files.menu.options": "Opciones de visualización…",
+    "files.info.bytes": "bytes",
+    "files.info.location": "Ubicación",
+    "files.info.created": "Creado",
+    "files.info.accessed": "Último acceso",
+    "files.info.tags": "Etiquetas",
+    "files.info.untagged": "Sin etiquetas",
+    "files.info.addtag": "Agregar etiqueta",
+    "files.info.edittags": "Editar etiquetas",
+    "files.info.owner": "Propietario",
+    "files.info.permissions": "Permisos",
+    "files.info.readwrite": "Lectura y escritura",
+    "files.info.read": "Solo lectura",
+    "files.info.write": "Solo escritura",
+    "files.info.none": "Sin acceso",
+    "files.info.refresh": "Actualizar información",
+    "files.info.close": "Cerrar información",
+    "files.info.dateformat": "ddd, d 'de' MMM yyyy\nh:mm AP"
 }

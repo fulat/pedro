@@ -69,6 +69,49 @@ ApplicationWindow {
         onLoaded: window.configureFilesWindow(item)
     }
 
+    property var informationWindows: []
+    Component {
+        id: informationComponent
+        Loader {
+            id: informationLoader
+            property var entry
+            source: "window/frame.qml"
+            onLoaded: {
+                item.title = entry.name || "";
+                item.width = 400;
+                item.height = Math.min(900, item.Screen.desktopAvailableHeight * 0.9);
+                item.minimumWidth = 340;
+                item.minimumHeight = 420;
+                item.headerHeight = 34;
+                item.contentSource = "../files/details.qml";
+                item.contentItemChanged.connect(() => {
+                    if (item.contentItem) {
+                        item.contentItem.entry = Qt.binding(() => informationLoader.entry);
+                        item.contentItem.closeRequested.connect(() => item.close());
+                    }
+                });
+                if (item.contentItem) {
+                    item.contentItem.entry = Qt.binding(() => informationLoader.entry);
+                    item.contentItem.closeRequested.connect(() => item.close());
+                }
+                item.closing.connect(() => {
+                    window.informationWindows = window.informationWindows.filter(value => value !== informationLoader);
+                    Qt.callLater(() => informationLoader.destroy());
+                });
+                window.placeQuickWindow(item);
+                item.show();
+                window.placeMappedWindow(item);
+                Backend.activateWindow(item);
+            }
+        }
+    }
+    function openInformationWindow(entry) {
+        const existing = informationWindows.find(loader => String(loader.entry.url) === String(entry.url));
+        if (existing && existing.item) { Backend.activateWindow(existing.item, true); return; }
+        const loader = informationComponent.createObject(window, {entry: entry});
+        informationWindows = informationWindows.concat([loader]);
+    }
+
     property var previewWindows: []
 
     Component {

@@ -331,7 +331,24 @@ actions = '''
                 if (!target || !target.dropFiles([DESKTOP + "/drop.txt"])) { console.error("CLIPBOARD UI FAILED: desktop file drop into Finder"); Qt.exit(1); return; }
             } else if (step === 21) {
                 if (!controller.files.some(entry => entry.name === "drop.txt")) return;
-                console.log("CLIPBOARD UI PASSED: shared drag input, both location drops, background menu and preview tracking");
+                const entry = controller.files.find(entry => entry.name === "drop.txt");
+                controller.informationRequested(entry);
+            } else if (step === 22) {
+                const panel = main.clipboardControl(window.contentItem, "filesColumnDetails");
+                if (!panel || panel.metadata.size === undefined) return;
+                if (panel.metadata.size !== 20 || !panel.metadata.owner || !panel.metadata.location) {
+                    console.error("CLIPBOARD UI FAILED: real file information panel"); Qt.exit(1); return;
+                }
+                const entry = controller.files.find(entry => entry.name === "drop.txt");
+                main.controller.entryAction("properties", entry);
+            } else if (step === 23) {
+                const loader = main.informationWindows[0];
+                if (!loader || !loader.item || !loader.item.contentItem || loader.item.contentItem.metadata.size === undefined) return;
+                if (loader.item.contentItem.metadata.size !== 20) { console.error("CLIPBOARD UI FAILED: shared desktop information window"); Qt.exit(1); return; }
+                main.openInformationWindow(loader.entry);
+                if (main.informationWindows.length !== 1) { console.error("CLIPBOARD UI FAILED: duplicate information window"); Qt.exit(1); return; }
+                loader.item.close();
+                console.log("CLIPBOARD UI PASSED: shared behavior and real reusable file information");
                 Qt.quit();
             }
             ++step;

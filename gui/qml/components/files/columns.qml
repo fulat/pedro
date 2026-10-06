@@ -10,6 +10,7 @@ ScrollView {
     objectName: "filesColumns"
     property var controller
     signal backgroundRequested(var directory, point position)
+    property bool detailsEnabled: true
     property var detailEntry: null
     property var detailController: null
     property var locations: controller && controller.directory ? [controller.directory.location] : []
@@ -170,14 +171,15 @@ ScrollView {
             }
         }
         Loader {
-            active: !!columns.detailEntry
+            active: columns.detailsEnabled && !!columns.detailEntry
             visible: active
-            width: active ? 260 : 0
+            width: active ? 360 : 0
             height: parent.height
             source: "details.qml"
             onLoaded: {
                 item.entry = Qt.binding(() => columns.detailEntry);
                 item.controller = Qt.binding(() => columns.detailController);
+                item.closeRequested.connect(() => { columns.detailEntry = null; });
             }
         }
     }

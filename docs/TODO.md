@@ -189,6 +189,9 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 
 ## Pedro Files
 
+- [x] Panel de información Liquid inspirado en la referencia: icono/nombre reutilizan File/Folder, metadatos GIO reales de tamaño, ubicación, fechas, propietario y permisos. Compartido en columnas, Get Info de Files y una ventana interna desde Desktop; consultas cancelables y protección ante fuentes obsoletas.
+- [ ] Conectar Agregar/Editar etiquetas del panel de información a escritura de metadatos GIO/GVfs (`metadata::pedro-tags`) con validación y monitorización; los controles están visibles y deshabilitados. Verificar persistencia y disponibilidad del backend de metadatos en producción.
+
 - [x] Ventana Qt Quick desde dock/lateral, UI light/dark e inglés/español dividida en componentes.
 - [x] Modelos PAPI e historial independientes por ventana; listados reales, Inicio y carpetas XDG, Este equipo mediante montajes GIO, Papelera mediante GVfs, Favoritos/Recientes mediante registros GTK. La Papelera se abre desde el dock.
 - [x] Vistas cuadrícula, lista, columnas y mixta; orden por nombre, tipo (carpetas primero), tamaño y fecha mediante proxies Qt; scroll del cuerpo completo. En columnas, un clic en archivo muestra detalles y el doble clic abre el visor; las carpetas navegan con un clic.

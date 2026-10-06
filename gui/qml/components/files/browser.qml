@@ -12,6 +12,7 @@ Rectangle {
     id: browser
     objectName: "filesBrowser"
     readonly property var backgroundContextMenu: backgroundMenu.item
+    property var informationEntry: null
     readonly property var confirmationWindow: confirmation
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
@@ -42,7 +43,8 @@ Rectangle {
         target: browser.controller
         function onEmptyRequested() { confirmation.urls = []; confirmation.open(); }
         function onMoveRequested(entry) { destination.entry = entry; destination.open(); }
-        function onInformationRequested(entry) { information.entry = entry; information.open(); }
+        function onInformationRequested(entry) { browser.informationEntry = entry; }
+        function onSelectedEntryChanged() { if (browser.informationEntry && browser.controller.selectedEntry.url) browser.informationEntry = browser.controller.selectedEntry; }
         function onRemovalRequested(urls) { confirmation.urls = urls; confirmation.open(); }
     }
 
@@ -88,40 +90,8 @@ Rectangle {
             item.parent = Qt.binding(() => browser.Window.window ? browser.Window.window.contentItem : browser);
             item.controller = Qt.binding(() => browser.controller);
             item.backdrop = Qt.binding(() => browser.Window.window.entryBackdrop);
-            item.informationRequested.connect(() => { information.entry = null; information.open(); });
+            item.informationRequested.connect(() => { const target = item.directory; browser.informationEntry = {url: target.location, name: target.name, isDirectory: true, visualType: "folder"}; });
             item.emptyRequested.connect(() => { confirmation.urls = []; confirmation.open(); });
-        }
-    }
-    Dialog {
-        id: information
-        property var entry: null
-        objectName: "filesDirectoryInformation"
-        parent: browser.Window.window.contentItem
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        width: Math.min(400, parent.width - 32)
-        title: qsTranslate("Pedro", "folder.menu.properties")
-        header: Label {
-            text: information.title
-            color: browser.colors.ink
-            font.pixelSize: 14
-            padding: 16
-        }
-        standardButtons: Dialog.Ok
-        background: Rectangle {
-            color: browser.colors.light ? "#f1f5fb" : "#202b3a"
-            radius: 12
-            border.color: browser.colors.line
-        }
-        contentItem: Label {
-            color: browser.colors.ink
-            text: information.entry ? information.entry.name + "\n\n" + (information.entry.originalPath || information.entry.path)
-                + "\n\n" + (information.entry.type || "") + "  " + (information.entry.sizeText || "")
-                + (information.entry.deletedText ? "\n\n" + qsTranslate("Pedro", "trash.deleted") + ": " + information.entry.deletedText : "")
-                : backgroundMenu.item && backgroundMenu.item.directory
-                ? backgroundMenu.item.directory.name + "\n\n" + (backgroundMenu.item.directory.path || backgroundMenu.item.directory.location)
-                    + "\n\n" + (backgroundMenu.item.directory.folders.length + backgroundMenu.item.directory.files.length) + " " + qsTranslate("Pedro", "files.sample.itemsLabel") : ""
-            wrapMode: Text.WrapAnywhere
         }
     }
     Item {
@@ -309,8 +279,21 @@ Rectangle {
                 source: "columns.qml"
                 onLoaded: {
                     item.controller = Qt.binding(() => browser.controller);
+                    item.detailsEnabled = Qt.binding(() => !browser.informationEntry);
                     item.backgroundRequested.connect((target, point) => browser.openBackgroundMenu(target, point));
                 }
+            }
+        }
+        Loader {
+            Layout.preferredWidth: visible ? Math.min(360, browser.width * 0.45) : 0
+            Layout.fillHeight: true
+            visible: !!browser.informationEntry
+            active: visible
+            source: "details.qml"
+            onLoaded: {
+                item.entry = Qt.binding(() => browser.informationEntry);
+                item.controller = Qt.binding(() => browser.controller);
+                item.closeRequested.connect(() => { browser.informationEntry = null; });
             }
         }
     }

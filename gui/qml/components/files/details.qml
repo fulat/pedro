@@ -1,5 +1,9 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Window
+import QtQuick.Controls.Basic as Controls
+import Pedro.Files 1.0
+import "../icon" as Icon
 import "palette.js" as Palette
 
 Item {
@@ -8,40 +12,129 @@ Item {
     property var controller
     property var entry
     readonly property var colors: Palette.colors(Backend.appearanceMode)
-    Rectangle { width: 1; height: parent.height; color: details.colors.line }
-    Column {
-        x: 20
-        y: 28
-        width: parent.width - 40
-        spacing: 14
-        Loader {
-            width: 100
-            height: 100
-            anchors.horizontalCenter: parent.horizontalCenter
-            source: "../entry/file.qml"
-            onLoaded: {
-                item.entry = Qt.binding(() => details.entry || ({}));
-                item.controller = Qt.binding(() => details.controller);
-                item.iconSize = 100;
-                item.showName = false;
-                item.nameSurface = Qt.binding(() => nameSlot);
-                item.nameSize = 14;
-                item.textColor = Qt.binding(() => details.colors.ink);
-            }
+    readonly property var metadata: information.data
+    signal closeRequested()
+    Information { id: information; source: details.entry ? details.entry.url || "" : "" }
+
+    function date(value) { return value && !isNaN(value.getTime()) ? value.toLocaleString(Qt.locale(), qsTranslate("Pedro", "files.info.dateformat")) : "—"; }
+    function size() { return metadata.size !== undefined && !metadata.folder ? metadata.size + " " + qsTranslate("Pedro", "files.info.bytes") : "—"; }
+    function permissions() {
+        if (metadata.readable === undefined) return "—";
+        return qsTranslate("Pedro", metadata.readable && metadata.writable ? "files.info.readwrite" : metadata.readable ? "files.info.read" : metadata.writable ? "files.info.write" : "files.info.none");
+    }
+    Loader {
+        anchors.fill: parent
+        anchors.margins: 8
+        source: "../entry/surface.qml"
+        onLoaded: {
+            item.sourceBackdrop = Qt.binding(() => details.Window.window ? details.Window.window.entryBackdrop || null : null);
+            item.cornerRadius = 18;
+            item.frosted = true;
         }
-        Item { id: nameSlot; width: parent.width; height: 48 }
-        Repeater {
-            model: details.entry ? [
-                {label: "files.sample.type", value: details.entry.type || ""},
-                {label: "files.sample.size", value: details.entry.sizeText || ""},
-                {label: "files.sample.modified", value: details.entry.modifiedText || ""}] : []
-            delegate: Column {
-                required property var modelData
-                width: parent.width
-                spacing: 4
-                Text { text: qsTranslate("Pedro", modelData.label); color: details.colors.muted; font.pixelSize: 11 }
-                Text { width: parent.width; text: modelData.value; color: details.colors.ink; font.pixelSize: 12; wrapMode: Text.Wrap }
+    }
+    Rectangle { anchors.fill: parent; anchors.margins: 8; color: "transparent"; radius: 18; border.color: details.colors.line }
+    Controls.ScrollView {
+        anchors.fill: parent
+        anchors.margins: 24
+        contentWidth: availableWidth
+        clip: true
+        Column {
+            width: parent.width
+            spacing: 18
+            Item {
+                width: parent.width; height: 28
+                Controls.ToolButton {
+                    objectName: "filesInformationMenu"
+                    anchors.right: parent.right
+                    text: "⋯"
+                    palette.buttonText: details.colors.ink
+                    onClicked: more.open()
+                    Controls.Menu {
+                        id: more
+                        popupType: Controls.Popup.Window
+                        Controls.MenuItem { text: qsTranslate("Pedro", "files.info.refresh"); onTriggered: information.refresh() }
+                        Controls.MenuItem { text: qsTranslate("Pedro", "files.info.close"); onTriggered: details.closeRequested() }
+                    }
+                }
             }
+            Loader {
+                width: 120; height: 120
+                anchors.horizontalCenter: parent.horizontalCenter
+                source: details.entry && details.entry.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
+                onLoaded: {
+                    item.entry = Qt.binding(() => details.entry || ({}));
+                    item.controller = Qt.binding(() => details.controller);
+                    item.iconSize = 120;
+                    item.showName = false;
+                    item.nameSurface = Qt.binding(() => nameSlot);
+                    item.nameSize = 20;
+                    item.textColor = Qt.binding(() => details.colors.ink);
+                }
+            }
+            Item { id: nameSlot; width: parent.width; height: 46 }
+            Text { width: parent.width; text: details.metadata.type || (details.entry ? details.entry.type || "" : ""); font.pixelSize: 14; color: details.colors.muted; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap }
+            Text { width: parent.width; visible: information.error.length > 0; text: information.error; color: details.colors.muted; wrapMode: Text.Wrap; font.pixelSize: 12 }
+            Divider {}
+            Repeater {
+                model: [{label: "files.sample.type", icon: "file", value: details.metadata.type || "—"},
+                        {label: "files.sample.size", icon: "size", value: details.size()},
+                        {label: "files.info.location", icon: "folder", value: details.metadata.location || "—"}]
+                delegate: Field { required property var modelData; label: modelData.label; symbol: modelData.icon; value: modelData.value }
+            }
+            Divider {}
+            Repeater {
+                model: [{label: "files.info.created", icon: "calendar", value: details.date(details.metadata.created)},
+                        {label: "files.sample.modified", icon: "calendar", value: details.date(details.metadata.modified)},
+                        {label: "files.info.accessed", icon: "clock", value: details.date(details.metadata.accessed)}]
+                delegate: Field { required property var modelData; label: modelData.label; symbol: modelData.icon; value: modelData.value }
+            }
+            Divider {}
+            Column {
+                width: parent.width; spacing: 12
+                Text { text: qsTranslate("Pedro", "files.info.tags"); color: details.colors.ink; font.pixelSize: 14; font.weight: Font.Medium }
+                Flow {
+                    width: parent.width; spacing: 8
+                    Repeater {
+                        model: details.metadata.tags || []
+                        delegate: Rectangle {
+                            required property string modelData
+                            width: tagLabel.implicitWidth + 24; height: 30; radius: 15
+                            color: details.colors.accent
+                            Text { id: tagLabel; anchors.centerIn: parent; text: parent.modelData; color: "white"; font.pixelSize: 12 }
+                        }
+                    }
+                    Text { visible: !(details.metadata.tags || []).length; text: qsTranslate("Pedro", "files.info.untagged"); color: details.colors.muted; font.pixelSize: 12 }
+                }
+                Flow {
+                    width: parent.width; spacing: 10
+                    Controls.Button {
+                        text: "+  " + qsTranslate("Pedro", "files.info.addtag"); enabled: false
+                        background: Rectangle { radius: 17; color: "transparent"; border.color: details.colors.line }
+                        contentItem: Text { text: parent.text; color: details.colors.muted; font.pixelSize: 12; opacity: 0.6 }
+                        leftPadding: 14; rightPadding: 14; topPadding: 8; bottomPadding: 8
+                    }
+                    Controls.Button {
+                        text: qsTranslate("Pedro", "files.info.edittags"); enabled: false
+                        background: Item {}
+                        contentItem: Text { text: parent.text; color: details.colors.accent; font.pixelSize: 12; opacity: 0.6 }
+                        topPadding: 8; bottomPadding: 8
+                    }
+                }
+            }
+            Divider {}
+            Field { label: "files.info.owner"; symbol: "user"; value: details.metadata.owner || "—" }
+            Field { label: "files.info.permissions"; symbol: "lock"; value: details.permissions() }
         }
+    }
+    component Divider: Rectangle { width: parent.width; height: 1; color: details.colors.line }
+    component Field: Item {
+        property string label
+        property string symbol
+        property string value
+        width: parent.width
+        height: Math.max(28, labelText.implicitHeight, valueLabel.implicitHeight)
+        Icon.Tinted { width: 20; height: 20; anchors.verticalCenter: parent.verticalCenter; source: "../../../assets/icons/" + parent.symbol + ".svg"; tint: details.colors.ink }
+        Text { id: labelText; x: 32; width: parent.width * 0.4 - 32; anchors.verticalCenter: parent.verticalCenter; text: qsTranslate("Pedro", parent.label); color: details.colors.ink; font.pixelSize: 13; wrapMode: Text.Wrap }
+        Text { id: valueLabel; x: parent.width * 0.42; width: parent.width - x; anchors.verticalCenter: parent.verticalCenter; text: parent.value; color: details.colors.muted; font.pixelSize: 13; horizontalAlignment: Text.AlignRight; wrapMode: Text.Wrap }
     }
 }

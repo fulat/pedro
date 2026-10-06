@@ -56,6 +56,8 @@ QtObject {
             owner.handleEntryAction(action, value);
         } else if (action === "open" && owner && owner.openEntry) {
             owner.openEntry(value);
+        } else if (action === "properties" && window && window.openInformationWindow) {
+            window.openInformationWindow(value);
         } else if (action === "open" && value.isDirectory && window && window.openFolderWindow) {
             window.openFolderWindow(value.url);
         } else if ((action === "open" || action === "preview") && !value.isDirectory && value.url) {
