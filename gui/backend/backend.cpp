@@ -1,5 +1,6 @@
 #include "backend.hpp"
 #include "entry/name.h"
+#include "entry/drag/image.h"
 
 #include <pedro/papi/io/filesystem/filesystem.hpp>
 #include <pedro/papi/utils/utils.hpp>
@@ -653,8 +654,12 @@ QString Backend::elideEntryName(const QString& text, const QFont& font, double w
 }
 
 int Backend::dragFiles(QObject* source, const QVariantList& values) {
-    auto* item = qobject_cast<QQuickItem*>(source);
+    const QPointer<QQuickItem> item(qobject_cast<QQuickItem*>(source));
     if (!item || !item->window()) {
+        return Qt::IgnoreAction;
+    }
+    const auto preview = Pedro::Gui::Backend::Entry::Drag::image(item);
+    if (!item || !item->window() || !(QGuiApplication::mouseButtons() & Qt::LeftButton)) {
         return Qt::IgnoreAction;
     }
     auto* mime = new QMimeData;
@@ -665,6 +670,11 @@ int Backend::dragFiles(QObject* source, const QVariantList& values) {
     mime->setUrls(urls);
     QDrag drag(item->window());
     drag.setMimeData(mime);
+    if (!preview.isNull()) {
+        drag.setPixmap(preview);
+        const auto size = preview.deviceIndependentSize();
+        drag.setHotSpot(QPoint(std::round(size.width() / 2), std::round(size.height() / 2)));
+    }
     return drag.exec(Qt::MoveAction, Qt::MoveAction);
 }
 
