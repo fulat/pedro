@@ -225,11 +225,13 @@ Item {
         onLoaded: item.behavior = entryItem
     }
     MouseArea {
+        objectName: "entryPointer"
         parent: entryItem.inputSurface
         property point origin
         property bool dragged: false
         anchors.fill: parent
         enabled: entryItem.inputEnabled
+        preventStealing: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor

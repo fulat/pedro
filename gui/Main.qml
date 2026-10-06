@@ -71,6 +71,15 @@ Components.Application {
 
         anchors.fill: parent
 
+        Loader {
+            anchors.fill: parent
+            source: "qml/components/entry/destination.qml"
+            onLoaded: {
+                item.objectName = "desktopDropDestination";
+                item.location = Qt.binding(() => Backend.desktopModel.directory);
+            }
+        }
+
         MouseArea {
             id: desktopSelectionArea
 
