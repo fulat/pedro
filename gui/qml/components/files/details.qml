@@ -23,25 +23,19 @@ Item {
         if (metadata.readable === undefined) return "—";
         return qsTranslate("Pedro", metadata.readable && metadata.writable ? "files.info.readwrite" : metadata.readable ? "files.info.read" : metadata.writable ? "files.info.write" : "files.info.none");
     }
-    Loader {
-        anchors.fill: parent
-        anchors.margins: details.columnMode ? 0 : 8
-        source: "../entry/surface.qml"
-        onLoaded: {
-            item.sourceBackdrop = Qt.binding(() => details.Window.window ? details.Window.window.entryBackdrop || null : null);
-            item.cornerRadius = Qt.binding(() => details.columnMode ? 0 : 18);
-            item.frosted = true;
-        }
-    }
-    Rectangle { anchors.fill: parent; anchors.margins: details.columnMode ? 0 : 8; color: "transparent"; radius: details.columnMode ? 0 : 18; border.color: details.colors.line }
-    Item {
+    Controls.ScrollView {
+        id: informationScroll
         objectName: "filesInformationContent"
         anchors.fill: parent
-        anchors.margins: details.columnMode ? 16 : 24
+        anchors.margins: 14
+        contentWidth: availableWidth
+        Controls.ScrollBar.vertical.policy: Controls.ScrollBar.AsNeeded
+        Controls.ScrollBar.vertical.interactive: true
+        Controls.ScrollBar.horizontal.policy: Controls.ScrollBar.AlwaysOff
         clip: true
         Column {
-            width: parent.width
-            spacing: 18
+            width: informationScroll.availableWidth
+            spacing: 10
             Item {
                 width: parent.width; height: 28
                 Controls.ToolButton {
@@ -59,21 +53,21 @@ Item {
                 }
             }
             Loader {
-                width: 120; height: 120
+                width: 64; height: 64
                 anchors.horizontalCenter: parent.horizontalCenter
                 source: details.entry && details.entry.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
                 onLoaded: {
                     item.entry = Qt.binding(() => details.entry || ({}));
                     item.controller = Qt.binding(() => details.controller);
-                    item.iconSize = 120;
+                    item.iconSize = 64;
                     item.showName = false;
                     item.nameSurface = Qt.binding(() => nameSlot);
-                    item.nameSize = 20;
+                    item.nameSize = 16;
                     item.textColor = Qt.binding(() => details.colors.ink);
                 }
             }
-            Item { id: nameSlot; width: parent.width; height: 46 }
-            Text { width: parent.width; text: details.metadata.type || (details.entry ? details.entry.type || "" : ""); font.pixelSize: 14; color: details.colors.muted; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap }
+            Item { id: nameSlot; width: parent.width; height: 34 }
+            Text { width: parent.width; text: details.metadata.type || (details.entry ? details.entry.type || "" : ""); font.pixelSize: 13; color: details.colors.muted; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap }
             Text { width: parent.width; visible: information.error.length > 0; text: information.error; color: details.colors.muted; wrapMode: Text.Wrap; font.pixelSize: 12 }
             Divider {}
             Repeater {
@@ -91,8 +85,8 @@ Item {
             }
             Divider {}
             Column {
-                width: parent.width; spacing: 12
-                Text { text: qsTranslate("Pedro", "files.info.tags"); color: details.colors.ink; font.pixelSize: 14; font.weight: Font.Medium }
+                width: parent.width; spacing: 8
+                Text { text: qsTranslate("Pedro", "files.info.tags"); color: details.colors.ink; font.pixelSize: 13; font.weight: Font.Medium }
                 Flow {
                     width: parent.width; spacing: 8
                     Repeater {

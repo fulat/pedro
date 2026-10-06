@@ -15,8 +15,26 @@ ScrollView {
     property var detailEntry: null
     property var detailController: null
     property var locations: controller && controller.directory ? [controller.directory.location] : []
+    property var pendingLocations: null
     function updateLocations(locations) {
-        if (locations.length === columns.locations.length && locations.every((location, index) => String(location) === String(columns.locations[index]))) return;
+        pendingLocations = locations;
+        // Keep delegates alive until the current pointer/signal delivery finishes.
+        Qt.callLater(applyLocations);
+    }
+    function applyLocations() {
+        const locations = pendingLocations;
+        pendingLocations = null;
+        if (!locations || (locations.length === columns.locations.length && locations.every((location, index) => String(location) === String(columns.locations[index])))) return;
+        for (let index = 0; index < columnRepeater.count; ++index) {
+            const column = columnRepeater.itemAt(index);
+            if (column && (index >= locations.length || String(locations[index]) !== String(columns.locations[index]))) {
+                if (columns.controller.selectionModel === column.directory) columns.controller.clearSelection(columns.controller.directory);
+                if (columns.detailController === column) {
+                    columns.detailController = null;
+                    columns.detailEntry = null;
+                }
+            }
+        }
         columns.locations = locations;
     }
     function showInformation(entry) {
@@ -41,12 +59,15 @@ ScrollView {
     onLocationsChanged: revealLastColumn()
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     clip: true
+    contentWidth: columnRow.width
     contentHeight: availableHeight
+    ScrollBar.horizontal.interactive: true
+    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
     Connections {
         target: columns.controller ? columns.controller.directory : null
-        function onLocationChanged() { columns.locations = [columns.controller.directory.location]; columns.detailEntry = null; }
-        function onSearchChanged() { if (columns.controller.directory.search.length) columns.locations = [columns.controller.directory.location]; }
+        function onLocationChanged() { columns.updateLocations([columns.controller.directory.location]); columns.detailEntry = null; }
+        function onSearchChanged() { if (columns.controller.directory.search.length) columns.updateLocations([columns.controller.directory.location]); }
     }
     Connections {
         target: columns.controller
@@ -138,7 +159,7 @@ ScrollView {
                 }
                 Connections {
                     target: column
-                    function onLocationChanged() { directoryModel.open(column.location); }
+                    function onLocationChanged() { Qt.callLater(() => { if (column.location.length) directoryModel.open(column.location); }); }
                 }
                 Connections {
                     target: directoryModel

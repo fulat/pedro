@@ -17,6 +17,10 @@ for directory in ('source', 'destination', 'desktop'):
 (fixtures / 'source' / 'shared.txt').write_text('shared clipboard fixture\n')
 (fixtures / 'source' / 'drop.txt').write_text('Shared drop fixture\n')
 (fixtures / 'destination' / 'nested').mkdir()
+chain = fixtures / 'destination' / 'Deep'
+for level in range(8):
+    chain.mkdir()
+    chain = chain / ('level' + str(level + 1))
 (fixtures / 'destination' / 'viewer.txt').write_text('Viewer tracking fixture\n')
 for name in ('qml', 'config', 'assets'):
     link = target / name
@@ -57,6 +61,9 @@ actions = '''
         repeat: true
         property int step: 0
         property int ticks: 0
+        property int emptyCycles: 0
+        property real originalHeight: 0
+        property int depth: 0
         property var panel: null
         property var standaloneFile: null
         property var standaloneFolder: null
@@ -64,7 +71,7 @@ actions = '''
         property var previewSession: null
         property int previewCount: 0
         onTriggered: {
-            if (++ticks > 100) { console.error("CLIPBOARD UI FAILED: timeout", step); Qt.exit(1); return; }
+            if (++ticks > 250) { console.error("CLIPBOARD UI FAILED: timeout", step); Qt.exit(1); return; }
             if (Backend.fileTransfer.error.length && !Backend.fileTransfer.cancelled) {
                 console.error("CLIPBOARD UI FAILED", Backend.fileTransfer.error); Qt.exit(1); return;
             }
@@ -352,10 +359,10 @@ actions = '''
                 const before = panel.width;
                 if (!handle || !panel.columnMode) { console.error("CLIPBOARD UI FAILED: information column divider"); Qt.exit(1); return; }
                 pointerProbe.mousePress(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
-                pointerProbe.mouseMove(handle, -46, 40, 0, Qt.LeftButton);
+                pointerProbe.mouseMove(handle, 54, 40, 0, Qt.LeftButton);
                 pointerProbe.mouseRelease(handle, 4, 40, Qt.LeftButton, Qt.NoModifier, 0);
                 pointerProbe.wait(20);
-                if (panel.width <= before) { console.error("CLIPBOARD UI FAILED: information column resize"); Qt.exit(1); return; }
+                if (panel.width >= before) { console.error("CLIPBOARD UI FAILED: information column resize"); Qt.exit(1); return; }
                 const entry = controller.files.find(entry => entry.name === "drop.txt");
                 main.controller.entryAction("properties", entry);
             } else if (step === 23) {
@@ -389,8 +396,16 @@ actions = '''
                 controller.informationRequested(details.entry);
                 if (!columns.detailEntry) { console.error("CLIPBOARD UI FAILED: information hierarchy command"); Qt.exit(1); return; }
                 const content = main.clipboardControl(details, "filesInformationContent");
-                if (!content || !content.clip || content.contentY !== undefined) { console.error("CLIPBOARD UI FAILED: information must stay fixed and clipped"); Qt.exit(1); return; }
+                if (!content || !content.clip || !content.contentItem || content.contentItem.contentY === undefined) { console.error("CLIPBOARD UI FAILED: information must scroll vertically"); Qt.exit(1); return; }
+                originalHeight = window.height;
+                window.height = 360;
             } else if (step === 27) {
+                const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
+                const scroll = main.clipboardControl(details, "filesInformationContent").contentItem;
+                const end = scroll.contentHeight - scroll.height;
+                scroll.contentY = Math.max(0, end);
+                if (end <= 0 || scroll.contentY <= 0) { console.error("CLIPBOARD UI FAILED: compact information vertical scroll"); Qt.exit(1); return; }
+                window.height = originalHeight;
                 controller.viewMode = "list";
                 controller.openPlace("computer");
             } else if (step === 28) {
@@ -406,7 +421,47 @@ actions = '''
                 pointerProbe.mouseDoubleClickSequence(place, 25, 18, Qt.LeftButton);
             } else if (step === 32) {
                 if (controller.directory.place !== "computer" || controller.computerLocation !== "pedro:computer") { console.error("CLIPBOARD UI FAILED: double click should reset computer"); Qt.exit(1); return; }
-                console.log("CLIPBOARD UI PASSED: shared behavior, fixed information and sidebar navigation");
+                controller.directory.open(DESTINATION);
+                controller.viewMode = "columns";
+            } else if (step === 33) {
+                const columns = main.clipboardControl(window.contentItem, "filesColumns");
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                if (!column || column.directory.loading) return;
+                columns.contentItem.contentX = 0;
+                const name = emptyCycles % 2 ? "context folder" : "nested";
+                const row = main.clipboardControl(window.contentItem, "filesColumn-0-" + name);
+                if (!row) return;
+                pointerProbe.mouseClick(row, 20, 16, Qt.LeftButton);
+            } else if (step === 34) {
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-1");
+                if (!column || column.directory.loading) return;
+                if (column.directory.count !== 0) { console.error("CLIPBOARD UI FAILED: empty folder fixture"); Qt.exit(1); return; }
+                pointerProbe.mouseClick(column, 80, column.height - 40, Qt.LeftButton);
+                if (++emptyCycles < 60) { step = 33; return; }
+            } else if (step === 35) {
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                column.openEntry(column.directory.folders.find(entry => entry.name === "Deep"));
+            } else if (step === 36) {
+                const columns = main.clipboardControl(window.contentItem, "filesColumns");
+                const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-" + (depth + 1));
+                if (!column || column.directory.loading) return;
+                if (depth < 7) {
+                    column.openEntry(column.directory.folders[0]);
+                    ++depth;
+                    return;
+                }
+                const scroll = columns.contentItem;
+                const end = scroll.contentWidth - scroll.width;
+                scroll.contentX = 0;
+                if (end <= 0 || scroll.contentX !== 0) { console.error("CLIPBOARD UI FAILED: horizontal column scroll start"); Qt.exit(1); return; }
+                scroll.contentX = end;
+                if (scroll.contentX !== end) { console.error("CLIPBOARD UI FAILED: horizontal column scroll end"); Qt.exit(1); return; }
+                pointerProbe.mouseClick(column, 80, column.height - 40, Qt.LeftButton);
+                controller.directory.open(DESTINATION);
+            } else if (step === 37) {
+                const columns = main.clipboardControl(window.contentItem, "filesColumns");
+                if (columns.locations.length !== 1) { console.error("CLIPBOARD UI FAILED: remove nested columns safely"); Qt.exit(1); return; }
+                console.log("CLIPBOARD UI PASSED: scrollable information, deep columns, sidebar and repeated empty-folder clicks");
                 Qt.quit();
             }
             ++step;
@@ -419,8 +474,11 @@ position = source.rfind('}')
 (target / 'Main.qml').write_text(source[:position] + actions + source[position:])
 environment = dict(os.environ, PEDRO_DEVELOPMENT_MODE='1', PEDRO_QML_DIR=str(target),
                    QT_QPA_PLATFORM=os.environ.get('PEDRO_UI_TEST_PLATFORM', 'offscreen'), QT_QUICK_BACKEND=os.environ.get('QT_QUICK_BACKEND', 'software'), QT_QPA_PLATFORMTHEME='none')
-result = subprocess.run([str(root / 'build/dev/gui/pedro-gui')], env=environment,
-                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=35)
+command = [str(root / 'build/dev/gui/pedro-gui')]
+if os.environ.get('PEDRO_UI_TEST_DEBUG'):
+    command = ['gdb', '-batch', '-ex', 'run', '-ex', 'thread apply all bt', '--args'] + command
+result = subprocess.run(command, env=environment,
+                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=120)
 (target / 'check.log').write_text(result.stdout)
 if result.returncode or 'CLIPBOARD UI PASSED' not in result.stdout or any(error in result.stdout for error in ('ReferenceError', 'TypeError', 'Binding loop detected', 'Failed to get image from provider', 'cannot show menu: parent is null', 'CLIPBOARD UI FAILED')):
     raise SystemExit(result.stdout)
