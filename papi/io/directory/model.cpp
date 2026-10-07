@@ -630,6 +630,11 @@ namespace Pedro::Papi::Io::Directory {
 
     void Model::open(const QString& address) {
 
+        if (address == QStringLiteral("pedro:computer") || address == QStringLiteral("pedro:favorites") || address == QStringLiteral("pedro:recent")) {
+            openPlace(address.mid(6));
+            return;
+        }
+
         const QUrl url(address);
         if (url.isValid() && (url.isLocalFile() || url.scheme() == "trash" || url.scheme() == "smb" || url.scheme() == "mtp" || url.scheme() == "afp" || url.scheme() == "sftp" || url.scheme() == "dav" || url.scheme() == "davs")) {
             navigate(address, {}, true);
@@ -687,40 +692,47 @@ namespace Pedro::Papi::Io::Directory {
             if (generation != state->generation) {
                 return;
             }
-            // Reconcile by URI so monitor events do not reset the entire item model.
-            QSet<QString> ids;
-            for (const auto& item : snapshot.entries) {
-                ids.insert(item.value("id").toString());
-            }
-            for (int row = state->entries.size() - 1; row >= 0; --row) {
-                if (!ids.contains(state->entries.at(row).value("id").toString())) {
-                    beginRemoveRows({}, row, row);
-                    state->entries.removeAt(row);
-                    endRemoveRows();
+            if (state->entries.isEmpty() && !snapshot.entries.isEmpty()) {
+                // A new location arrives as one batch; monitor updates retain URI reconciliation.
+                beginInsertRows({}, 0, snapshot.entries.size() - 1);
+                state->entries = snapshot.entries;
+                endInsertRows();
+            } else {
+                // Reconcile by URI so monitor events do not reset the entire item model.
+                QSet<QString> ids;
+                for (const auto& item : snapshot.entries) {
+                    ids.insert(item.value("id").toString());
                 }
-            }
-            for (int row = 0; row < snapshot.entries.size(); ++row) {
-                const auto& item = snapshot.entries.at(row);
-                int existing = -1;
-                for (int index = row; index < state->entries.size(); ++index) {
-                    if (state->entries.at(index).value("id") == item.value("id")) {
-                        existing = index;
-                        break;
+                for (int row = state->entries.size() - 1; row >= 0; --row) {
+                    if (!ids.contains(state->entries.at(row).value("id").toString())) {
+                        beginRemoveRows({}, row, row);
+                        state->entries.removeAt(row);
+                        endRemoveRows();
                     }
                 }
-                if (existing < 0) {
-                    beginInsertRows({}, row, row);
-                    state->entries.insert(row, item);
-                    endInsertRows();
-                } else {
-                    if (existing != row) {
-                        beginMoveRows({}, existing, existing, {}, row);
-                        state->entries.move(existing, row);
-                        endMoveRows();
+                for (int row = 0; row < snapshot.entries.size(); ++row) {
+                    const auto& item = snapshot.entries.at(row);
+                    int existing = -1;
+                    for (int index = row; index < state->entries.size(); ++index) {
+                        if (state->entries.at(index).value("id") == item.value("id")) {
+                            existing = index;
+                            break;
+                        }
                     }
-                    if (state->entries.at(row) != item) {
-                        state->entries[row] = item;
-                        emit dataChanged(index(row), index(row), {entryRole});
+                    if (existing < 0) {
+                        beginInsertRows({}, row, row);
+                        state->entries.insert(row, item);
+                        endInsertRows();
+                    } else {
+                        if (existing != row) {
+                            beginMoveRows({}, existing, existing, {}, row);
+                            state->entries.move(existing, row);
+                            endMoveRows();
+                        }
+                        if (state->entries.at(row) != item) {
+                            state->entries[row] = item;
+                            emit dataChanged(index(row), index(row), {entryRole});
+                        }
                     }
                 }
             }
