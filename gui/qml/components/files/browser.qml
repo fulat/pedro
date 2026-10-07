@@ -21,6 +21,19 @@ Rectangle {
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
     readonly property real toolbarHeight: typeFilters.visible ? typeFilters.height : 0
+    function showInformation(entry) {
+        const window = browser.Window.window;
+        const alreadyVisible = !!informationEntry || (columnsPanel.item && !!columnsPanel.item.detailEntry);
+        if (window && !alreadyVisible && window.visibility !== Window.Maximized && window.visibility !== Window.FullScreen) {
+            const available = window.Screen.desktopAvailableWidth || window.width;
+            const extra = controller.viewMode === "columns" ? 320 : informationWidth + 9;
+            window.width = Math.max(window.width, Math.min(available * 0.96, window.width + extra));
+        }
+        if (controller.viewMode === "columns" && columnsPanel.item) {
+            informationEntry = null;
+            columnsPanel.item.showInformation(entry);
+        } else informationEntry = entry;
+    }
     color: colors.surface
 
     Loader {
@@ -47,12 +60,7 @@ Rectangle {
         target: browser.controller
         function onEmptyRequested() { confirmation.urls = []; confirmation.open(); }
         function onMoveRequested(entry) { destination.entry = entry; destination.open(); }
-        function onInformationRequested(entry) {
-            if (browser.controller.viewMode === "columns" && columnsPanel.item) {
-                browser.informationEntry = null;
-                columnsPanel.item.showInformation(entry);
-            } else browser.informationEntry = entry;
-        }
+        function onInformationRequested(entry) { browser.showInformation(entry); }
         function onSelectedEntryChanged() { if (browser.informationEntry && browser.controller.selectedEntry.url) browser.informationEntry = browser.controller.selectedEntry; }
         function onRemovalRequested(urls) { confirmation.urls = urls; confirmation.open(); }
     }
@@ -99,7 +107,7 @@ Rectangle {
             item.parent = Qt.binding(() => browser.Window.window ? browser.Window.window.contentItem : browser);
             item.controller = Qt.binding(() => browser.controller);
             item.backdrop = Qt.binding(() => browser.Window.window.entryBackdrop);
-            item.informationRequested.connect(() => { const target = item.directory; browser.informationEntry = {url: target.location, name: target.name, isDirectory: true, visualType: "folder"}; });
+            item.informationRequested.connect(() => { const target = item.directory; browser.showInformation({url: target.location, name: target.name, isDirectory: true, visualType: "folder"}); });
             item.emptyRequested.connect(() => { confirmation.urls = []; confirmation.open(); });
         }
     }
@@ -167,7 +175,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.leftMargin: 17
-            Layout.rightMargin: browser.controller && browser.controller.viewMode === "columns" ? 0 : 16
+            Layout.rightMargin: 0
             spacing: 8
             Loader {
                 Layout.fillWidth: true
@@ -233,6 +241,7 @@ Rectangle {
                         parent: contentScroll
                         objectName: "filesBodyScrollBar"
                         anchors.right: parent.right
+                        anchors.rightMargin: 1
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         width: 8
@@ -242,7 +251,7 @@ Rectangle {
                             implicitWidth: 6
                             implicitHeight: 6
                             radius: 3
-                            color: "#c2bdba"
+                            color: browser.colors.light ? "#5e6b7c" : "#69798e"
                             opacity: parent.pressed ? 1 : parent.hovered ? 0.9 : 0.7
                         }
                         background: Item {}

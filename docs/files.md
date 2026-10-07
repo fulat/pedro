@@ -213,3 +213,9 @@ The shared sidebar uses the global PAPI model. Plus creates a tag, selects its i
 Catalogue changes invalidate open tag results. Native Pedro transfers update stored URIs (including descendants of moved folders), and the existing PAPI File Watch follows external native renames/moves for tagged files. Missing files are omitted from results; no filesystem scan is used to guess unknown destinations. Deleting a tag removes its associations and cleans file metadata without deleting files. Metadata writes run outside the UI thread and expose errors.
 
 `python3 gui/tests/files/tags.py` exercises plus/inline editing, palette selection, assigning files in two directories, global results, rename/colour consistency, native file rename, restart persistence and tag deletion. Set `PEDRO_TEST_PLATFORM=wayland QT_QUICK_BACKEND=rhi` to exercise visible native windows. Tests isolate the catalogue under `build/verification/files/tags/data` and write metadata only to generated fixtures.
+
+### Information pane refinement
+
+An explicit Properties request expands the Files quick window once by the information pane width plus its divider, where desktop space permits. The window remains capped at 96% of the available screen width and maximized/fullscreen windows retain their geometry. This preserves the folder viewport instead of taking its width for the information pane. Body scrollbars align with the outer edge of the file pane.
+
+Information uses an interactive Add Tag button with hover feedback and a pointer cursor. It opens an inline draft with a palette colour and editable name; Enter or clicking outside commits the global definition and assigns it to the current file. Typing an existing tag name reuses that definition. Assigned tags show coloured circles, editable names and a remove-from-file control. Clicking a circle opens the inline palette and updates that tag’s global colour. The separate Edit Tags button and checkbox list have been removed.

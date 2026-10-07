@@ -10,7 +10,61 @@ Item {
     id: details
     objectName: "filesColumnDetails"
     property bool columnMode: false
-    property bool editingTags: false
+    property bool addingTag: false
+    property string draftName: ""
+    property string draftColor: "#0877ff"
+    property string editingTag: ""
+    property string paletteTag: ""
+    property bool draftPalette: false
+    property Item activeEditor: null
+    readonly property var swatches: ["#0877ff", "#13c639", "#8e22ff", "#ffa100", "#ff6eaa", "#ef5b56", "#13b5b1", "#8496ab"]
+    function addTag() {
+        if (addingTag) return;
+        if (!commitTag()) return;
+        const base = qsTranslate("Pedro", "tags.new");
+        let name = base, number = 2;
+        while (Tags.tags.some(tag => tag.name.toLowerCase() === name.toLowerCase())) name = base + " " + number++;
+        draftName = name;
+        draftEditor.text = draftName;
+        activeEditor = draftEditor;
+        draftColor = swatches[Math.floor(Math.random() * swatches.length)];
+        addingTag = true;
+        draftPalette = true;
+        Qt.callLater(() => { draftEditor.forceActiveFocus(); draftEditor.selectAll(); });
+    }
+    function commitTag() {
+        if (Tags.busy) return false;
+        if (addingTag) {
+            const name = draftEditor.text.trim();
+            const existing = Tags.tags.find(tag => tag.name.toLowerCase() === name.toLowerCase());
+            const id = existing ? existing.id : Tags.create(name, draftColor);
+            if (!id) return false;
+            if (existing && existing.color !== draftColor) Tags.setColor(id, draftColor);
+            Tags.assign(details.entry.url, id, true);
+            addingTag = false;
+            draftPalette = false;
+        } else if (editingTag.length && activeEditor) {
+            if (!Tags.rename(editingTag, activeEditor.text)) return false;
+            editingTag = "";
+        }
+        return true;
+    }
+    Item {
+        parent: details.Window.window ? details.Window.window.contentItem : null
+        anchors.fill: parent
+        z: 1000
+        visible: details.addingTag || details.editingTag.length > 0
+        PointHandler {
+            acceptedButtons: Qt.AllButtons
+            onActiveChanged: {
+                if (!active || !details.activeEditor) return;
+                const row = details.activeEditor.parent;
+                const local = parent.mapToItem(row, point.position.x, point.position.y);
+                const palettePoint = parent.mapToItem(tagPalette, point.position.x, point.position.y);
+                if (!row.contains(local) && (!tagPalette.visible || !tagPalette.contains(palettePoint))) details.commitTag();
+            }
+        }
+    }
     readonly property var assignedTags: { const revision = Tags.revision; return details.entry ? Tags.fileTags(details.entry.url) : []; }
     property var controller
     property var entry
@@ -99,54 +153,122 @@ Item {
             }
             Divider {}
             Column {
-                width: parent.width; spacing: 8
+                width: parent.width; spacing: 10
                 Text { text: qsTranslate("Pedro", "files.info.tags"); color: details.colors.ink; font.pixelSize: 13; font.weight: Font.Medium }
-                Flow {
-                    width: parent.width; spacing: 8
+                Column {
+                    width: parent.width; spacing: 6
                     Repeater {
                         model: details.assignedTags
-                        delegate: Rectangle {
+                        delegate: Item {
+                            id: tagRow
                             required property string modelData
                             readonly property var tag: { const revision = Tags.revision; return Tags.definition(modelData); }
-                            width: tagLabel.implicitWidth + 24; height: 30; radius: 15
-                            color: tag.color || details.colors.accent
-                            Text { id: tagLabel; anchors.centerIn: parent; text: parent.tag.name || parent.modelData; color: "white"; font.pixelSize: 12 }
+                            width: parent.width; height: 32
+                            Controls.ToolButton {
+                                objectName: "informationTagColor-" + tagRow.modelData
+                                width: 28; height: 28; y: 2
+                                hoverEnabled: true
+                                onClicked: { details.paletteTag = details.paletteTag === tagRow.modelData ? "" : tagRow.modelData; details.draftPalette = false; }
+                                contentItem: Rectangle { radius: width / 2; color: tagRow.tag.color || details.colors.accent }
+                                padding: 6
+                                background: Rectangle { radius: 8; color: parent.hovered ? details.colors.hover : "transparent" }
+                                HoverHandler { cursorShape: Qt.PointingHandCursor }
+                            }
+                            Controls.TextField {
+                                id: tagName
+                                objectName: "informationTagName-" + tagRow.modelData
+                                x: 32; width: parent.width - 64; height: 32
+                                readOnly: details.editingTag !== tagRow.modelData
+                                text: tagRow.tag.name || tagRow.modelData
+                                color: details.colors.ink; font.pixelSize: 12
+                                padding: 5
+                                selectionColor: "#555b91d1"; selectedTextColor: details.colors.ink
+                                background: Rectangle { radius: 6; color: tagName.readOnly ? "transparent" : details.colors.card; border.color: tagName.readOnly ? "transparent" : details.colors.accent }
+                                HoverHandler { cursorShape: tagName.readOnly ? Qt.PointingHandCursor : Qt.IBeamCursor }
+                                TapHandler {
+                                    onTapped: {
+                                        if (details.editingTag === tagRow.modelData || !details.commitTag()) return;
+                                        details.editingTag = tagRow.modelData;
+                                        details.activeEditor = tagName;
+                                        tagName.text = tagRow.tag.name || tagRow.modelData;
+                                        tagName.forceActiveFocus(); tagName.selectAll();
+                                    }
+                                }
+                                onReadOnlyChanged: if (readOnly) text = Qt.binding(() => tagRow.tag.name || tagRow.modelData)
+                                onAccepted: details.commitTag()
+                                Keys.onEscapePressed: details.editingTag = ""
+                            }
+                            Controls.ToolButton {
+                                objectName: "informationTagRemove-" + tagRow.modelData
+                                anchors.right: parent.right; width: 26; height: 32
+                                text: "×"; enabled: !Tags.busy; hoverEnabled: true
+                                palette.buttonText: details.colors.muted
+                                onClicked: Tags.assign(details.entry.url, tagRow.modelData, false)
+                                HoverHandler { cursorShape: Qt.PointingHandCursor }
+                            }
                         }
                     }
                     Text { visible: !details.assignedTags.length; text: qsTranslate("Pedro", "files.info.untagged"); color: details.colors.muted; font.pixelSize: 12 }
                 }
-                Flow {
-                    width: parent.width; spacing: 10
-                    Controls.Button {
-                        text: "+  " + qsTranslate("Pedro", "files.info.addtag"); enabled: !Tags.busy
-                        onClicked: details.editingTags = !details.editingTags
-                        background: Rectangle { radius: 17; color: "transparent"; border.color: details.colors.line }
-                        contentItem: Text { text: parent.text; color: details.colors.muted; font.pixelSize: 12 }
-                        leftPadding: 14; rightPadding: 14; topPadding: 8; bottomPadding: 8
+                Item {
+                    width: parent.width; height: details.addingTag ? 34 : 0
+                    visible: details.addingTag
+                    Controls.ToolButton {
+                        width: 28; height: 28; y: 3; hoverEnabled: true
+                        onClicked: { details.draftPalette = !details.draftPalette; details.paletteTag = ""; }
+                        contentItem: Rectangle { radius: width / 2; color: details.draftColor }
+                        padding: 6
+                        background: Rectangle { radius: 8; color: parent.hovered ? details.colors.hover : "transparent" }
+                        HoverHandler { cursorShape: Qt.PointingHandCursor }
                     }
-                    Controls.Button {
-                        text: qsTranslate("Pedro", "files.info.edittags"); enabled: !Tags.busy
-                        onClicked: details.editingTags = !details.editingTags
-                        background: Item {}
-                        contentItem: Text { text: parent.text; color: details.colors.accent; font.pixelSize: 12 }
-                        topPadding: 8; bottomPadding: 8
+                    Controls.TextField {
+                        id: draftEditor
+                        objectName: "informationNewTagName"
+                        x: 32; width: parent.width - 32; height: 32
+                        text: details.draftName
+                        color: details.colors.ink; font.pixelSize: 12; padding: 5
+                        selectionColor: "#555b91d1"; selectedTextColor: details.colors.ink
+                        background: Rectangle { radius: 6; color: details.colors.card; border.color: details.colors.accent }
+                        onVisibleChanged: if (visible) details.activeEditor = draftEditor
+                        onTextEdited: {
+                            const existing = Tags.tags.find(tag => tag.name.toLowerCase() === text.trim().toLowerCase());
+                            if (existing) details.draftColor = existing.color;
+                        }
+                        onAccepted: details.commitTag()
+                        Keys.onEscapePressed: { details.addingTag = false; details.draftPalette = false; }
                     }
                 }
-            }
-            Column {
-                width: parent.width
-                visible: details.editingTags
-                Repeater {
-                    model: Tags.tags
-                    delegate: Controls.CheckBox {
-                        required property var modelData
-                        width: parent.width
-                        text: modelData.name
-                        enabled: !Tags.busy
-                        checked: details.assignedTags.indexOf(modelData.id) >= 0
-                        palette.windowText: details.colors.ink
-                        onClicked: Tags.assign(details.entry.url, modelData.id, checked)
+                Flow {
+                    id: tagPalette
+                    width: parent.width; spacing: 7
+                    visible: details.draftPalette || details.paletteTag.length > 0
+                    Repeater {
+                        model: details.swatches
+                        delegate: Rectangle {
+                            required property string modelData
+                            width: 20; height: 20; radius: 10; color: modelData
+                            border.color: details.colors.line
+                            MouseArea {
+                                anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (details.draftPalette) details.draftColor = parent.modelData;
+                                    else Tags.setColor(details.paletteTag, parent.modelData);
+                                }
+                            }
+                        }
                     }
+                }
+                Controls.Button {
+                    id: addTagButton
+                    objectName: "informationAddTag"
+                    text: "+  " + qsTranslate("Pedro", "files.info.addtag")
+                    enabled: !Tags.busy && !details.addingTag
+                    hoverEnabled: true
+                    onClicked: details.addTag()
+                    background: Rectangle { radius: 10; color: addTagButton.down ? details.colors.selected : addTagButton.hovered ? details.colors.hover : details.colors.card; border.color: details.colors.line; Behavior on color { ColorAnimation { duration: 120 } } }
+                    contentItem: Text { text: addTagButton.text; color: details.colors.accent; font.pixelSize: 12 }
+                    leftPadding: 12; rightPadding: 12; topPadding: 8; bottomPadding: 8
+                    HoverHandler { cursorShape: Qt.PointingHandCursor }
                 }
                 Text { width: parent.width; visible: Tags.error.length > 0; text: Tags.error; color: details.colors.muted; wrapMode: Text.Wrap; font.pixelSize: 12 }
             }

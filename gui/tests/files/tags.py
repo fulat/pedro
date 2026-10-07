@@ -36,6 +36,10 @@ probe = r'''
         interval: 300; repeat: true; running: true
         property int step: 0
         property int ticks: 0
+        property bool informationAdded: false
+        property bool outsideAdded: false
+        property real oldWidth: 0
+        property real oldContentWidth: 0
         property bool executing: false
         onTriggered: {
             if (executing) return;
@@ -81,12 +85,40 @@ probe = r'''
                 if (!main.tagRequire(String(directory.location) === "pedro:tag:" + probeTag && directory.count === 2, "tag click must search beyond current directory")) return;
                 if (!main.tagRequire(tagWindow.controller.title === "Project fixture", "tag results title")) return;
                 Tags.rename(probeTag, "Renamed fixture");
+                oldWidth = tagWindow.width;
+                oldContentWidth = main.tagFind(tagWindow.contentItem, "filesBodyScroll").availableWidth;
                 tagWindow.controller.informationRequested(directory.files[0]);
             } else if (step === 7) {
                 const panel = main.tagFind(tagWindow.contentItem, "filesColumnDetails");
                 if (!panel || panel.metadata.size === undefined) return;
                 if (!main.tagRequire(panel.assignedTags.indexOf(probeTag) >= 0 && tagWindow.controller.title === "Renamed fixture" && Tags.definition(probeTag).color === "#13b5b1", "renaming/color must preserve assignment and update all views")) return;
-                panel.editingTags = true;
+                if (tagWindow.Screen.desktopAvailableWidth * 0.96 >= oldWidth + 369) {
+                    if (!main.tagRequire(tagWindow.width >= oldWidth + 368 && main.tagFind(tagWindow.contentItem, "filesBodyScroll").availableWidth >= oldContentWidth - 1, "Properties must expand the window without shrinking folder content")) return;
+                }
+                if (!informationAdded) {
+                    const add = main.tagFind(panel, "informationAddTag");
+                    const scroll = main.tagFind(panel, "filesInformationContent").contentItem;
+                    scroll.contentY = Math.max(0, scroll.contentHeight - scroll.height);
+                    tagPointer.mouseClick(add, 16, 16, Qt.LeftButton);
+                    tagPointer.wait(30);
+                    const input = main.tagFind(panel, "informationNewTagName");
+                    input.text = "Information fixture";
+                    tagPointer.keyClick(Qt.Key_Return);
+                    informationAdded = true;
+                    return;
+                }
+                if (Tags.busy) return;
+                if (!outsideAdded) {
+                    panel.addTag();
+                    main.tagFind(panel, "informationNewTagName").text = "Outside fixture";
+                    tagPointer.mouseClick(panel, panel.width - 30, 14, Qt.LeftButton);
+                    outsideAdded = true;
+                    return;
+                }
+                const outside = Tags.tags.find(tag => tag.name === "Outside fixture");
+                if (!main.tagRequire(outside && panel.assignedTags.indexOf(outside.id) >= 0 && !panel.addingTag, "clicking outside must commit the inline tag")) return;
+                const extra = Tags.tags.find(tag => tag.name === "Information fixture");
+                if (!main.tagRequire(extra && panel.assignedTags.indexOf(extra.id) >= 0 && !panel.addingTag, "inline information tag must commit and attach")) return;
                 Backend.fileTransfer.rename("@FILE_A@", "renamed a.txt");
             } else if (step === 8) {
                 if (Backend.fileTransfer.busy || tagWindow.controller.directory.loading) return;
@@ -129,7 +161,7 @@ second = r'''
     } }
     Timer { id: complete; interval: 200; repeat: true; onTriggered: {
         if (Tags.busy) return;
-        if (Tags.definition("@ID@").id || Tags.fileTags("@SOURCE@").length || Tags.error.length) { console.error("TAG_FAILED deletion cleanup", Tags.error); Qt.exit(1); return; }
+        if (Tags.definition("@ID@").id || Tags.fileTags("@SOURCE@").indexOf("@ID@") >= 0 || Tags.error.length) { console.error("TAG_FAILED deletion cleanup", Tags.error); Qt.exit(1); return; }
         console.log("TAG_PASSED restart and deletion"); Qt.quit();
     } }
 '''.replace('@ID@', id).replace('@SOURCE@', replacements['@RENAMED_A@'])
