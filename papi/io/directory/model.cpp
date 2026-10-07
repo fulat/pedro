@@ -34,12 +34,18 @@ namespace Pedro::Papi::Io::Directory {
                 }
 
                 QString query;
+                QString category;
+
+                void setCategory(const QString& value) {
+                    category = value;
+                    invalidateFilter();
+                }
 
             protected:
 
                 bool filterAcceptsRow(int row, const QModelIndex& parent) const override {
-                    const auto name = sourceModel()->data(sourceModel()->index(row, 0, parent), entryRole).toMap().value("name").toString();
-                    return name.contains(query, Qt::CaseInsensitive);
+                    const auto entry = sourceModel()->data(sourceModel()->index(row, 0, parent), entryRole).toMap();
+                    return entry.value("name").toString().contains(query, Qt::CaseInsensitive) && (category.isEmpty() || entry.value("category").toString() == category);
                 }
 
                 bool lessThan(const QModelIndex& left, const QModelIndex& right) const override {
@@ -166,6 +172,7 @@ namespace Pedro::Papi::Io::Directory {
             const bool thumbnail = contentType && g_content_type_is_a(contentType, "image/*") && QUrl(address).isLocalFile();
             const bool video = contentType && g_content_type_is_a(contentType, "video/*") && QUrl(address).isLocalFile();
             result["contentType"] = type;
+            result["category"] = Pedro::Papi::Io::Content::category(type, folder);
             result["iconNames"] = Pedro::Papi::Io::Content::iconNames(type);
             result["visualType"] = folder ? "folder" : thumbnail ? "image" : video ? "video" : Pedro::Papi::Io::Content::visualType(type);
             result["type"] = description ? QString::fromUtf8(description) : QString{};
@@ -337,6 +344,7 @@ namespace Pedro::Papi::Io::Directory {
             bool loading = false;
             bool globalSearch = false;
             QString search;
+            QString category = QStringLiteral("all");
             int cursor = -1;
             QList<QPair<QString, QString>> history;
             quint64 generation = 0;
@@ -443,6 +451,39 @@ namespace Pedro::Papi::Io::Directory {
         refresh();
     }
 
+    QString Model::category() const {
+        return state->category;
+    }
+
+    void Model::setCategory(const QString& category) {
+        if (state->category == category || (category != "all" && !categories().contains(category))) {
+            return;
+        }
+        state->category = category;
+        for (Order* proxy : {&state->all, static_cast<Order*>(&state->folders), static_cast<Order*>(&state->files)}) {
+            proxy->setCategory(category == "all" ? QString{} : category);
+        }
+        emit categoryChanged();
+        emit contentsChanged();
+    }
+
+    QStringList Model::categories() const {
+        QStringList result;
+        const QStringList order{"folders", "documents", "images", "videos", "audio", "executables", "shell", "other"};
+        QSet<QString> present;
+        for (const auto& entry : state->entries) {
+            if (state->globalSearch || entry.value("name").toString().contains(state->search, Qt::CaseInsensitive)) {
+                present.insert(entry.value("category").toString());
+            }
+        }
+        for (const auto& category : order) {
+            if (present.contains(category)) {
+                result.append(category);
+            }
+        }
+        return result;
+    }
+
     QString Model::search() const {
         return state->search;
     }
@@ -520,7 +561,7 @@ namespace Pedro::Papi::Io::Directory {
 
         QVariantList result;
         for (const auto& item : state->entries) {
-            if (item.value("isDirectory").toBool() && (state->globalSearch || item.value("name").toString().contains(search(), Qt::CaseInsensitive))) {
+            if ((state->category == "all" || item.value("category").toString() == state->category) && item.value("isDirectory").toBool() && (state->globalSearch || item.value("name").toString().contains(search(), Qt::CaseInsensitive))) {
                 result.append(item);
             }
         }
@@ -531,7 +572,7 @@ namespace Pedro::Papi::Io::Directory {
 
         QVariantList result;
         for (const auto& item : state->entries) {
-            if (!item.value("isDirectory").toBool() && (state->globalSearch || item.value("name").toString().contains(search(), Qt::CaseInsensitive))) {
+            if ((state->category == "all" || item.value("category").toString() == state->category) && !item.value("isDirectory").toBool() && (state->globalSearch || item.value("name").toString().contains(search(), Qt::CaseInsensitive))) {
                 result.append(item);
             }
         }
@@ -666,6 +707,7 @@ namespace Pedro::Papi::Io::Directory {
             state->history.append({address, place});
             state->cursor = state->history.size() - 1;
         }
+        setCategory(QStringLiteral("all"));
         state->location = address;
         state->place = place;
         beginResetModel();

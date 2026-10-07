@@ -6,7 +6,34 @@ namespace Pedro::Papi::Io::Content {
 
     bool isDocument(const QString& type) {
 
-        return type == "application/x-empty" || type == "inode/x-empty" || type.startsWith(QStringLiteral("text/")) || type == "application/pdf" || type == "application/json" || type == "application/xml" || type.contains(QStringLiteral("officedocument")) || type.contains(QStringLiteral("opendocument")) || type == "application/msword" || type == "application/rtf";
+        return type == "application/x-zerosize" || type == "application/x-empty" || type == "inode/x-empty" || type.startsWith(QStringLiteral("text/")) || type == "application/pdf" || type == "application/json" || type == "application/xml" || type.contains(QStringLiteral("officedocument")) || type.contains(QStringLiteral("opendocument")) || type == "application/msword" || type == "application/rtf";
+    }
+
+    QString category(const QString& type, bool folder) {
+
+        if (folder) {
+            return QStringLiteral("folders");
+        }
+        if (type.startsWith("image/")) {
+            return QStringLiteral("images");
+        }
+        if (type.startsWith("video/")) {
+            return QStringLiteral("videos");
+        }
+        if (type.startsWith("audio/")) {
+            return QStringLiteral("audio");
+        }
+        const auto visual = visualType(type);
+        if (visual == "shell") {
+            return QStringLiteral("shell");
+        }
+        if (visual == "executable") {
+            return QStringLiteral("executables");
+        }
+        if (visual == "document") {
+            return QStringLiteral("documents");
+        }
+        return QStringLiteral("other");
     }
 
     QString visualType(const QString& type) {
