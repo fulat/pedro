@@ -6,6 +6,7 @@ Loader {
     id: root
     property var controller: null
     property var entry: ({})
+    property bool dropFeedbackEnabled: true
     readonly property bool dropHovered: !!item && item.dropHovered
     readonly property bool cutPending: !!item && item.cutPending
     property bool showName: true
@@ -37,6 +38,7 @@ Loader {
     function dropFiles(urls) { return item && item.dropFiles(urls); }
     onLoaded: {
         item.folder = true;
+        item.dropFeedbackEnabled = Qt.binding(() => root.dropFeedbackEnabled);
         item.controller = Qt.binding(() => root.controller);
         item.entry = Qt.binding(() => root.entry);
         item.showName = Qt.binding(() => root.showName);

@@ -37,6 +37,17 @@ ScrollView {
     property var detailEntry: null
     property var detailController: null
     property var locations: controller && controller.directory ? [controller.directory.location] : []
+    property Item dropColumn: null
+    ListModel { id: columnLocations }
+    function syncColumns() {
+        let shared = 0;
+        while (shared < columnLocations.count && shared < locations.length
+            && columnLocations.get(shared).location === String(locations[shared])) ++shared;
+        if (shared < columnLocations.count) columnLocations.remove(shared, columnLocations.count - shared);
+        for (let index = shared; index < locations.length; ++index)
+            columnLocations.append({location: String(locations[index])});
+    }
+    Component.onCompleted: syncColumns()
     property var pendingLocations: null
     function updateLocations(locations) {
         pendingLocations = locations;
@@ -91,7 +102,7 @@ ScrollView {
         revealLastColumn();
     }
     onAvailableWidthChanged: { closeInformation.stop(); informationSpan = -1; }
-    onLocationsChanged: revealLastColumn()
+    onLocationsChanged: { syncColumns(); revealLastColumn(); }
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     clip: true
     contentWidth: columnRow.width
@@ -192,15 +203,15 @@ ScrollView {
             height: columnRow.height
             Repeater {
                 id: columnRepeater
-                model: columns.locations.length
+                model: columnLocations
                 delegate: Item {
                     id: column
                     objectName: "filesDirectoryColumn-" + index
-                    readonly property string location: columns.locations[index] || ""
+                    required property string location
                     required property int index
                     property string selected: ""
                     property url hoveredFolder: ""
-                    readonly property bool dropHighlighted: String(hoveredFolder).length > 0 || !!(columnDestination.item && columnDestination.item.containsDrag)
+                    readonly property bool dropHighlighted: columns.dropColumn === column
                     readonly property url dropLocation: String(hoveredFolder).length > 0 ? hoveredFolder
                         : columnDestination.item ? columnDestination.item.currentLocation : ""
                     readonly property var directory: directoryModel
@@ -273,6 +284,11 @@ ScrollView {
                         onLoaded: {
                             item.acceptsFiles = Qt.binding(() => !columns.controller.directory.search.trim().length);
                             item.location = Qt.binding(() => directoryModel.location);
+                            item.hoverMoved.connect(accepted => { column.hoveredFolder = ""; columns.dropColumn = accepted ? column : null; });
+                            item.hoverLeft.connect(() => {
+                                if (columns.dropColumn === column) columns.dropColumn = null;
+                                column.hoveredFolder = "";
+                            });
                             item.resolveLocation = position => {
                                 const local = item.mapToItem(columnList.contentItem, position.x, position.y);
                                 const row = columnList.itemAt(local.x, local.y);
@@ -332,8 +348,14 @@ ScrollView {
                             required property var entry
                             readonly property bool folderDropHovered: entry.isDirectory && !!entryIcon.item && !!entryIcon.item.dropHovered
                             onFolderDropHoveredChanged: {
-                                if (folderDropHovered) column.hoveredFolder = entry.url;
-                                else if (String(column.hoveredFolder) === String(entry.url)) column.hoveredFolder = "";
+                                if (folderDropHovered) {
+                                    column.hoveredFolder = entry.url;
+                                    columns.dropColumn = column;
+                                }
+                                else if (String(column.hoveredFolder) === String(entry.url)) {
+                                    column.hoveredFolder = "";
+                                    if (columns.dropColumn === column) columns.dropColumn = null;
+                                }
                             }
                             border.width: entry.isDirectory && column.dropHighlighted && String(column.dropLocation) === String(entry.url) ? 1 : 0
                             border.color: columns.colors.accent
@@ -352,6 +374,7 @@ ScrollView {
                                 source: row.entry.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
                                 onLoaded: {
                                     item.entry = Qt.binding(() => row.entry);
+                                    if (row.entry.isDirectory) item.dropFeedbackEnabled = Qt.binding(() => column.dropHighlighted && String(column.dropLocation) === String(row.entry.url));
                                     item.showName = false;
                                     item.nameSurface = Qt.binding(() => nameSlot);
                                     item.nameAlignment = Text.AlignLeft;

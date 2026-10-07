@@ -29,19 +29,26 @@ original=(root/'gui/Main.qml').read_text()
 fixture=r'''
     property var dragProbeLoader: null
     property bool dragColumnHighlighted: false
+    property string dragHighlightState: ""
     Timer {
         interval: 30; running: true; repeat: true
         onTriggered: {
-            if (!main.dragProbeLoader || main.dragColumnHighlighted) return;
+            if (!main.dragProbeLoader) return;
             const panel = main.dragProbeFind(main.dragProbeLoader.item.contentItem, "filesColumns");
             if (!panel) return;
+            const highlighted = [];
             for (let index = 0; index < panel.locations.length; ++index) {
                 const column = main.dragProbeFind(panel, "filesDirectoryColumn-" + index);
                 if (column && column.dropHighlighted) {
+                    highlighted.push(index);
+                    if (!main.dragColumnHighlighted) console.log("COLUMN_DROP_HIGHLIGHT " + index);
                     main.dragColumnHighlighted = true;
-                    console.log("COLUMN_DROP_HIGHLIGHT " + index);
-                    return;
                 }
+            }
+            const state = JSON.stringify(highlighted);
+            if (main.dragHighlightState !== state) {
+                main.dragHighlightState = state;
+                console.log("COLUMN_DROP_STATE " + state);
             }
         }
     }
@@ -156,6 +163,12 @@ try:
  for i in range(11,21):
   move(x+(dx-x)*i/20,y+(dy-y)*i/20);wait(.06)
  wait(.3);capture('over-desktop.png')
+ if columnMode and os.environ.get('DRAG_EXIT_POINT'):
+  outside=[float(value)*scale for value in os.environ['DRAG_EXIT_POINT'].split(',')]
+  move(*outside);wait(.12)
+  states=[line.split('COLUMN_DROP_STATE ',1)[1].strip() for line in (target/'app.log').read_text().splitlines() if 'COLUMN_DROP_STATE ' in line]
+  assert states and states[-1] == '[]', 'Highlight did not clear when pointer left the columns'
+  move(dx,dy);wait(.2)
  call(r,p,r+'.Session.NotifyPointerButton',GLib.Variant('(ib)',(272,False)));pressed=False
  wait(1);capture('after.png')
  expected=target/os.environ.get('DRAG_EXPECTED_PATH',('source/' if fromChild else 'source/Support/' if columnMode else 'desktop/')+entryName)
@@ -163,7 +176,11 @@ try:
  wait(.1)
  import re
  trace=(target/'app.log').read_text()
- if columnMode:assert 'COLUMN_DROP_HIGHLIGHT ' in trace, 'Destination column never highlighted during native drag'
+ if columnMode:
+  assert 'COLUMN_DROP_HIGHLIGHT ' in trace, 'Destination column never highlighted during native drag'
+  states=[json.loads(value) for value in re.findall(r'COLUMN_DROP_STATE (\[[^\n]*?\])',trace)]
+  assert states and states[-1] == [], 'Column highlight remained after native drag'
+  assert all(len(state) <= 1 for state in states), 'Multiple columns highlighted during native drag'
  match=re.search(r'start_drag\(wl_data_source#\d+, wl_surface#\d+, wl_surface#(\d+),',trace)
  assert match, 'No native Wayland drag started'
  tail=trace[match.end():]

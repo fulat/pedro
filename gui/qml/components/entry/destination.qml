@@ -9,7 +9,9 @@ DropArea {
     property var resolveLocation: null
     property url currentLocation: location
     onLocationChanged: currentLocation = location
-    onExited: currentLocation = location
+    signal hoverMoved(bool accepted)
+    signal hoverLeft()
+    onExited: { currentLocation = location; hoverLeft(); }
     function updateLocation(position) {
         currentLocation = resolveLocation ? resolveLocation(position) : location;
     }
@@ -32,13 +34,16 @@ DropArea {
     onEntered: drag => {
         updateLocation(Qt.point(drag.x, drag.y));
         drag.accepted = canDrop(drag.urls);
+        hoverMoved(drag.accepted);
     }
     onPositionChanged: drag => {
         updateLocation(Qt.point(drag.x, drag.y));
         drag.accepted = canDrop(drag.urls);
+        hoverMoved(drag.accepted);
     }
     onDropped: drop => {
         updateLocation(Qt.point(drop.x, drop.y));
         if (dropFiles(drop.urls)) drop.accept(Qt.MoveAction);
+        hoverLeft();
     }
 }

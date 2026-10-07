@@ -13,6 +13,7 @@ Item {
     property var controller: null
     property var entry: ({})
     readonly property bool cutPending: Backend.clipboard.cutFiles.length > 0 && Backend.clipboard.isCut(entry.url || "")
+    property bool dropFeedbackEnabled: true
     readonly property bool dropHovered: folderDrop.containsDrag
     property bool folder: false
     property bool showName: true
@@ -180,7 +181,7 @@ Item {
         }
         Rectangle {
             anchors.fill: parent
-            visible: parent.containsDrag
+            visible: parent.containsDrag && entryItem.dropFeedbackEnabled
             radius: 8
             color: "#305b99dd"
             border.color: "#805b99dd"

@@ -64,6 +64,8 @@ actions = '''
         property bool executing: false
         property int emptyCycles: 0
         property real originalHeight: 0
+        property var preservedColumn: null
+        property var preservedRow: null
         property int depth: 0
         property var panel: null
         property var standaloneFile: null
@@ -494,8 +496,14 @@ actions = '''
                 if (++emptyCycles < 60) { step = 33; return; }
             } else if (step === 35) {
                 const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                preservedColumn = column;
+                preservedRow = main.clipboardControl(column, "filesColumn-0-Deep");
                 column.openEntry(column.directory.folders.find(entry => entry.name === "Deep"));
             } else if (step === 36) {
+                if (preservedColumn !== main.clipboardControl(window.contentItem, "filesDirectoryColumn-0")
+                    || preservedRow !== main.clipboardControl(preservedColumn, "filesColumn-0-Deep")) {
+                    console.error("CLIPBOARD UI FAILED: navigation recreated existing columns or file rows"); Qt.exit(1); return;
+                }
                 const columns = main.clipboardControl(window.contentItem, "filesColumns");
                 const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-" + (depth + 1));
                 if (!column || column.directory.loading) return;
