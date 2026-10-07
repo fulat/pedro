@@ -445,6 +445,15 @@ actions = '''
                 pointerProbe.wait(70);
                 if (scroll.contentY <= initial || scroll.contentY >= 36) { console.error("CLIPBOARD UI FAILED: wheel scrolling must interpolate smoothly"); Qt.exit(1); return; }
                 pointerProbe.wait(200);
+                const burstStart = scroll.contentY;
+                pointerProbe.mouseWheel(viewport, viewport.width / 2, viewport.height / 2, 0, -1200, Qt.NoButton, Qt.NoModifier, 0);
+                pointerProbe.wait(70);
+                const turningPoint = scroll.contentY;
+                if (turningPoint <= burstStart || turningPoint - burstStart >= 84) { console.error("CLIPBOARD UI FAILED: rapid wheel input must remain bounded and smooth"); Qt.exit(1); return; }
+                pointerProbe.mouseWheel(viewport, viewport.width / 2, viewport.height / 2, 0, 1200, Qt.NoButton, Qt.NoModifier, 0);
+                pointerProbe.wait(70);
+                if (scroll.contentY >= turningPoint) { console.error("CLIPBOARD UI FAILED: reversed wheel must reverse without queued travel"); Qt.exit(1); return; }
+                pointerProbe.wait(250);
                 scroll.contentY = end;
                 effect.pulse();
                 pointerProbe.wait(110);

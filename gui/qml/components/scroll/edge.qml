@@ -13,8 +13,12 @@ Item {
         if (!flickable || flickable.contentHeight <= flickable.height) return;
         const minimum = flickable.originY - flickable.topMargin;
         const maximum = Math.max(minimum, flickable.originY + flickable.contentHeight - flickable.height + flickable.bottomMargin);
-        const start = wheelMotion.running ? wheelMotion.to : flickable.contentY;
-        const destination = Math.max(minimum, Math.min(maximum, start - delta));
+        const current = flickable.contentY;
+        const pending = wheelMotion.running ? wheelMotion.to - current : 0;
+        // Reverse immediately and bound queued travel during rapid wheel input.
+        const start = Math.sign(pending) === Math.sign(-delta) ? current + pending : current;
+        const requested = Math.max(current - 84, Math.min(current + 84, start - delta));
+        const destination = Math.max(minimum, Math.min(maximum, requested));
         if (flickable.atYEnd && delta < 0) {
             motion.stop();
             release.stop();
@@ -24,7 +28,7 @@ Item {
         wheelMotion.stop();
         wheelMotion.from = flickable.contentY;
         wheelMotion.to = destination;
-        wheelMotion.duration = precise ? 70 : 150;
+        wheelMotion.duration = precise ? 110 : 240;
         wheelMotion.start();
     }
     onSurfaceChanged: {
@@ -34,7 +38,7 @@ Item {
         if (surface) surface.transform.push(shift);
     }
     Translate { id: shift; y: 0 }
-    NumberAnimation { id: wheelMotion; target: edge.flickable; property: "contentY"; easing.type: Easing.OutCubic }
+    NumberAnimation { id: wheelMotion; target: edge.flickable; property: "contentY"; easing.type: Easing.OutQuad }
     NumberAnimation { id: release; target: shift; property: "y"; to: 0; duration: 220; easing.type: Easing.OutCubic }
     Timer { id: wheelRelease; interval: 140; onTriggered: release.restart() }
     SequentialAnimation {
@@ -54,7 +58,7 @@ Item {
                 return;
             }
             const precise = event.pixelDelta.y !== 0;
-            const delta = precise ? event.pixelDelta.y : event.angleDelta.y / 120 * 36;
+            const delta = precise ? event.pixelDelta.y : event.angleDelta.y / 120 * 28;
             if (!delta) { event.accepted = false; return; }
             edge.scrollBy(delta, precise);
             event.accepted = true;
