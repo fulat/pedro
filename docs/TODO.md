@@ -401,3 +401,8 @@ El objetivo es extender Pedro Global Search/Spotlight para que pueda entender co
 ### Regla permanente de interfaz: barras de desplazamiento
 
 - Las barras de scroll de Pedro se muestran **solamente cuando el contenido desborda el área visible en ese eje**. Si todo cabe, la barra se oculta; se recalcula al cambiar el contenido, el ancho o la altura. Usar `ScrollBar.AsNeeded` y, en barras personalizadas, vincular también `visible` al desbordamiento (`size < 1`). Esta regla aplica a columnas, Información, listas, visores, editores y paneles del sistema. No usar `AlwaysOn` como valor predeterminado.
+
+### Carpetas grandes y navegación del sistema
+
+- [x] Corregir apertura de las direcciones internas de Computer/Favorites/Recent en columnas y usar inserción inicial por lote en PAPI. Virtualizar cuadrícula y vista mixta para mantener únicamente los delegados visibles; probar 2.100 archivos y la navegación por `/bin` y `/usr/bin` en Wayland. Mostrar carga y errores nativos de lectura.
+- [ ] Si el cierre original reportado en `/bin` reaparece con esta versión, capturar su traza y vista exacta. No se reprodujo un aborto en la prueba mantenida abierta; sí se confirmó que la vista mixta creaba 1.761 filas a la vez, reducidas a unas 18 tras la corrección.

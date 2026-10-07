@@ -282,6 +282,24 @@ ScrollView {
                             Text { visible: row.entry.isDirectory; anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: columns.colors.muted }
                         }
                     }
+                    BusyIndicator {
+                        anchors.centerIn: parent
+                        width: 24
+                        height: 24
+                        visible: directoryModel.loading && directoryModel.count === 0
+                        running: visible
+                        palette.dark: columns.colors.accent
+                    }
+                    Text {
+                        objectName: "filesColumnError"
+                        anchors.fill: parent
+                        anchors.margins: 16
+                        visible: directoryModel.error.length > 0
+                        text: directoryModel.error
+                        color: columns.colors.muted
+                        font.pixelSize: 12
+                        wrapMode: Text.Wrap
+                    }
                     Loader {
                         anchors.right: parent.right
                         height: parent.height

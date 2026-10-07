@@ -178,6 +178,15 @@ Rectangle {
                     item.controller = Qt.binding(() => browser.controller);
                 }
             }
+            BusyIndicator {
+                objectName: "filesLoadingIndicator"
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: 24
+                Layout.preferredHeight: 24
+                visible: directory.loading && !directory.search.length
+                running: visible
+                palette.dark: browser.colors.accent
+            }
             Text {
                 visible: directory.error.length > 0 || Backend.trash.error.length > 0
                 Layout.fillWidth: true
@@ -241,36 +250,49 @@ Rectangle {
                     id: body
                     width: contentScroll.availableWidth
                     spacing: 12
-                    GridView {
-                        id: folderGrid
-                        boundsBehavior: Flickable.StopAtBounds
-                        boundsMovement: Flickable.StopAtBounds
-                        objectName: "filesFolderGrid"
+                    Item {
+                        id: folderGridContainer
                         visible: !browser.controller || browser.controller.viewMode !== "list"
-                        readonly property bool mixed: !browser.controller || browser.controller.viewMode === "mixed"
-                        readonly property int columns: Math.max(1, Math.floor(width / 120))
                         Layout.fillWidth: true
-                        Layout.preferredHeight: Math.ceil(count / columns) * cellHeight
-                        cellWidth: width / columns
-                        cellHeight: 110
-                        interactive: false
-                        model: mixed ? directory.folderModel : directory.entriesModel
-                        delegate: Loader {
-                            id: entryCard
-                            required property var entry
-                            width: folderGrid.cellWidth - 8
-                            height: 104
-                            source: "card.qml"
-                            onLoaded: { item.entry = Qt.binding(() => entryCard.entry); item.controller = Qt.binding(() => browser.controller); }
+                        Layout.preferredHeight: Math.ceil(folderGrid.count / folderGrid.columns) * folderGrid.cellHeight
+                        GridView {
+                            id: folderGrid
+                            boundsBehavior: Flickable.StopAtBounds
+                            boundsMovement: Flickable.StopAtBounds
+                            objectName: "filesFolderGrid"
+                            visible: !browser.controller || browser.controller.viewMode !== "list"
+                            readonly property bool mixed: !browser.controller || browser.controller.viewMode === "mixed"
+                            readonly property int columns: Math.max(1, Math.floor(width / 120))
+                            width: parent.width
+                            y: virtualOffset
+                            height: Math.max(0, Math.min(folderGridContainer.height - virtualOffset,
+                                contentScroll.availableHeight + Math.min(0, contentScroll.contentItem.contentY - folderGridContainer.y)))
+                            readonly property real virtualOffset: Math.max(0, contentScroll.contentItem.contentY - folderGridContainer.y)
+                            contentY: virtualOffset
+                            cellWidth: width / columns
+                            cellHeight: 110
+                            interactive: false
+                            model: mixed ? directory.folderModel : directory.entriesModel
+                            delegate: Loader {
+                                id: entryCard
+                                required property var entry
+                                width: folderGrid.cellWidth - 8
+                                height: 104
+                                source: "card.qml"
+                                onLoaded: { item.entry = Qt.binding(() => entryCard.entry); item.controller = Qt.binding(() => browser.controller); }
+                            }
                         }
                     }
                     Loader {
+                        id: mixedTable
                         visible: browser.controller && browser.controller.viewMode === "mixed" && browser.controller.files.length > 0
                         Layout.fillWidth: true
                         Layout.preferredHeight: item ? item.implicitHeight : 0
                         source: "table.qml"
                         onLoaded: {
                             item.controller = Qt.binding(() => browser.controller);
+                            item.viewportHeight = Qt.binding(() => contentScroll.availableHeight);
+                            item.viewportOffset = Qt.binding(() => contentScroll.contentItem.contentY - mixedTable.y - 33);
                             item.all = Qt.binding(() => browser.controller && browser.controller.viewMode === "list");
                         }
                     }

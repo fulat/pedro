@@ -7,6 +7,9 @@ import "palette.js" as Palette
 Item {
     id: table
     property bool embedded: true
+    property real viewportHeight: 0
+    property real viewportOffset: 0
+    readonly property real visibleStart: Math.max(0, viewportOffset)
     readonly property real viewportWidth: Math.max(0, width - (embedded ? 0 : 12))
     property bool folders: false
     property bool all: true
@@ -24,16 +27,26 @@ Item {
     ListView {
         id: fileList
         Loader {
+            active: !table.embedded
             source: "../scroll/edge.qml"
             onLoaded: item.flickable = Qt.binding(() => fileList);
         }
         bottomMargin: table.embedded ? 0 : 20
         boundsBehavior: Flickable.DragOverBounds
         boundsMovement: Flickable.StopAtBounds
-        y: 33
+        y: 33 + (table.embedded && table.viewportHeight > 0 ? table.visibleStart : 0)
         objectName: table.embedded ? "filesMixedList" : "filesFileList"
         width: table.viewportWidth
-        height: table.embedded ? count * 43 : Math.max(0, table.height - 33)
+        height: table.embedded ? table.viewportHeight > 0
+            ? Math.max(0, Math.min(count * 43 - table.visibleStart, table.viewportHeight + Math.min(0, table.viewportOffset)))
+            : count * 43 : Math.max(0, table.height - 33)
+        Binding {
+            target: fileList
+            property: "contentY"
+            when: table.embedded && table.viewportHeight > 0
+            value: table.visibleStart
+            restoreMode: Binding.RestoreBindingOrValue
+        }
         interactive: !table.embedded
         clip: true
         ScrollBar.vertical: ScrollBar {
