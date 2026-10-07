@@ -215,6 +215,13 @@ ScrollView {
                     readonly property url dropLocation: String(hoveredFolder).length > 0 ? hoveredFolder
                         : columnDestination.item ? columnDestination.item.currentLocation : ""
                     readonly property var directory: directoryModel
+                    function finishDrag() {
+                        columns.dropColumn = null;
+                        for (let index = 0; index < columnRepeater.count; ++index) {
+                            const candidate = columnRepeater.itemAt(index);
+                            if (candidate) candidate.hoveredFolder = "";
+                        }
+                    }
                     function selectForDrag(entry) {
                         selected = entry.id;
                     }
@@ -349,23 +356,25 @@ ScrollView {
                             id: row
                             objectName: "filesColumn-" + column.index + "-" + entry.name
                             required property var entry
+                            readonly property url dropUrl: entry.url
                             readonly property bool folderDropHovered: entry.isDirectory && !!entryIcon.item && !!entryIcon.item.dropHovered
                             onFolderDropHoveredChanged: {
                                 if (folderDropHovered) {
                                     column.hoveredFolder = entry.url;
                                     columns.dropColumn = column;
                                 }
-                                else if (String(column.hoveredFolder) === String(entry.url)) {
+                                else if (String(column.hoveredFolder) === String(row.dropUrl)) {
                                     column.hoveredFolder = "";
                                     if (columns.dropColumn === column) columns.dropColumn = null;
                                 }
                             }
-                            border.width: entry.isDirectory && column.dropHighlighted && String(column.dropLocation) === String(entry.url) ? 1 : 0
+                            readonly property bool dropTarget: entry.isDirectory && column.dropHighlighted && String(column.dropLocation) === String(row.dropUrl)
+                            border.width: dropTarget ? 1 : 0
                             border.color: columns.colors.accent
                             width: ListView.view.width
                             height: 38
                             radius: 7
-                            color: column.selected === entry.id || (columns.controller && columns.controller.isSelected(entry)) ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
+                            color: dropTarget ? columns.colors.selected : column.selected === entry.id || (columns.controller && columns.controller.isSelected(entry)) ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
                             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
                             Item { id: nameSlot; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; height: 32; z: 5 }
                             Loader {
@@ -377,7 +386,7 @@ ScrollView {
                                 source: row.entry.isDirectory ? "../entry/folder.qml" : "../entry/file.qml"
                                 onLoaded: {
                                     item.entry = Qt.binding(() => row.entry);
-                                    if (row.entry.isDirectory) item.dropFeedbackEnabled = Qt.binding(() => column.dropHighlighted && String(column.dropLocation) === String(row.entry.url));
+                                    if (row.entry.isDirectory) item.dropFeedbackEnabled = Qt.binding(() => row.dropTarget);
                                     item.showName = false;
                                     item.nameSurface = Qt.binding(() => nameSlot);
                                     item.nameAlignment = Text.AlignLeft;

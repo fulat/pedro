@@ -32,12 +32,17 @@ QtObject {
     function drop(urls, destination = entry.url) {
         if (!canDrop(urls, destination)) return false;
         Backend.fileTransfer.move(urls, destination);
+        if (owner && owner.finishDrag) owner.finishDrag();
         return true;
     }
 
     function drag(source, urls = entries().map(item => item.url)) {
         if (entry.inTrash || !urls.length) return Qt.IgnoreAction;
-        return Backend.dragFiles(source, urls);
+        try {
+            return Backend.dragFiles(source, urls);
+        } finally {
+            if (owner && owner.finishDrag) owner.finishDrag();
+        }
     }
 
     function dispatch(action, value = entry) {

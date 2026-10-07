@@ -20,12 +20,13 @@ for name in ('qml','config','assets'):
  if not link.exists():link.symlink_to(root/'gui'/name,target_is_directory=True)
 shutil.rmtree(target/'source',ignore_errors=True)
 for name in ('source','desktop'):(target/name).mkdir(exist_ok=True)
-(target/'source/Support').mkdir(exist_ok=True)
+supportName=os.environ.get('DRAG_DESTINATION_NAME','Support')
+(target/'source'/supportName).mkdir(exist_ok=True)
 columnMode=os.environ.get('DRAG_COLUMNS') == '1'
 fromChild=columnMode and os.environ.get('DRAG_FROM_CHILD') == '1'
 emptyFolder=os.environ.get('DRAG_EMPTY_FOLDER') == '1'
 entryName='Native empty folder' if emptyFolder else 'Native text.txt'
-sourceEntry=target/('source/Support' if fromChild else 'source')/entryName
+sourceEntry=target/('source/'+supportName if fromChild else 'source')/entryName
 if emptyFolder:sourceEntry.mkdir()
 else:sourceEntry.write_text('Native drag regression fixture\n')
 (target/'desktop'/entryName).unlink(missing_ok=True)
@@ -45,6 +46,8 @@ fixture=r'''
                 const column = main.dragProbeFind(panel, "filesDirectoryColumn-" + index);
                 if (column && column.dropHighlighted) {
                     highlighted.push(index);
+                    const row = main.dragProbeFind(column, "filesColumn-" + index + "-@DESTINATION_NAME@");
+                    if (row && row.dropTarget) console.log("FOLDER_DROP_FILL " + row.color);
                     if (!main.dragColumnHighlighted) console.log("COLUMN_DROP_HIGHLIGHT " + index);
                     main.dragColumnHighlighted = true;
                 }
@@ -98,10 +101,11 @@ if columnMode:
  fixture=fixture.replace('main.dragProbeLoader.item.width = 650;', 'main.dragProbeLoader.item.controller.viewMode = "columns"; main.dragProbeLoader.item.width = 850;')
  fixture=fixture.replace('const entry = main.dragProbeFind(window.contentItem, "entryComponent-@ENTRY@");', '''const panel = main.dragProbeFind(window.contentItem, "filesColumns");
             if (!panel || panel.locations.length < 2) {
-                if (panel) panel.updateLocations(["@SOURCE@", "@SOURCE@/Support"]);
+                if (panel) panel.updateLocations(["@SOURCE@", "@SOURCE@/@DESTINATION_NAME@"]);
                 return;
             }
             const entry = main.dragProbeFind(panel, "entryComponent-@ENTRY@");''')
+fixture=fixture.replace('@DESTINATION_NAME@',supportName)
 fixture=fixture.replace('@SOURCE@',(target/'source').as_uri()).replace('@DESKTOP@',(target/'desktop').as_uri()).replace('@ENTRY@',entryName)
 position=original.rfind('}')
 (target/'Main.qml').write_text(original[:position]+fixture+original[position:])
@@ -175,7 +179,7 @@ try:
   move(dx,dy);wait(.2)
  call(r,p,r+'.Session.NotifyPointerButton',GLib.Variant('(ib)',(272,False)));pressed=False
  wait(1);capture('after.png')
- expected=target/os.environ.get('DRAG_EXPECTED_PATH',('source/' if fromChild else 'source/Support/' if columnMode else 'desktop/')+entryName)
+ expected=target/os.environ.get('DRAG_EXPECTED_PATH',('source/' if fromChild else 'source/'+supportName+'/' if columnMode else 'desktop/')+entryName)
  assert expected.exists(), 'Native move failed; calibrate DRAG_SOURCE_POINT and DRAG_TARGET_POINT for this display'
  assert not sourceEntry.exists(), 'Native move left the source behind'
  if emptyFolder:assert expected.is_dir() and not list(expected.iterdir()), 'Empty folder did not retain its identity'
@@ -187,6 +191,7 @@ try:
   states=[json.loads(value) for value in re.findall(r'COLUMN_DROP_STATE (\[[^\n]*?\])',trace)]
   assert states and states[-1] == [], 'Column highlight remained after native drag'
   assert all(len(state) <= 1 for state in states), 'Multiple columns highlighted during native drag'
+  if os.environ.get('DRAG_REQUIRE_FOLDER_HIGHLIGHT'):assert 'FOLDER_DROP_FILL ' in trace, 'Folder row never showed a filled drop highlight'
  match=re.search(r'start_drag\(wl_data_source#\d+, wl_surface#\d+, wl_surface#(\d+),',trace)
  assert match, 'No native Wayland drag started'
  tail=trace[match.end():]
