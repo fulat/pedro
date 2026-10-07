@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="tile" x1="12" y1="6" x2="51" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#55b6ff"/><stop offset="1" stop-color="#0867df"/></linearGradient>
+    <linearGradient id="chip" x1="21" y1="18" x2="43" y2="45" gradientUnits="userSpaceOnUse"><stop stop-color="#edf8ff"/><stop offset="1" stop-color="#bedfff"/></linearGradient>
+  </defs>
+  <rect x="7" y="9" width="50" height="50" rx="12" fill="#071320" opacity=".18"/>
+  <rect x="7" y="6" width="50" height="50" rx="12" fill="url(#tile)" stroke="#3795ed"/>
+  <path d="M21 8h22" stroke="white" stroke-opacity=".3" stroke-linecap="round"/>
+  <path d="M25 14v5m7-5v5m7-5v5M25 43v5m7-5v5m7-5v5M15 24h5m-5 7h5m-5 7h5m24-14h5m-5 7h5m-5 7h5" stroke="#d2edff" stroke-width="2" stroke-linecap="round"/>
+  <rect x="20" y="19" width="24" height="24" rx="5" fill="url(#chip)"/>
+  <path d="m27 27-4 4 4 4m10-8 4 4-4 4m-4-10-3 12" stroke="#2179cf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

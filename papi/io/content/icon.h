@@ -8,6 +8,8 @@ namespace Pedro::Papi::Io::Content {
 
     bool isDocument(const QString& type);
 
+    QString visualType(const QString& type);
+
     QStringList iconNames(const QString& type);
 
 }

@@ -167,7 +167,7 @@ namespace Pedro::Papi::Io::Directory {
             const bool video = contentType && g_content_type_is_a(contentType, "video/*") && QUrl(address).isLocalFile();
             result["contentType"] = type;
             result["iconNames"] = Pedro::Papi::Io::Content::iconNames(type);
-            result["visualType"] = folder ? "folder" : thumbnail ? "image" : video ? "video" : Pedro::Papi::Io::Content::isDocument(type) ? "document" : "themed";
+            result["visualType"] = folder ? "folder" : thumbnail ? "image" : video ? "video" : Pedro::Papi::Io::Content::visualType(type);
             result["type"] = description ? QString::fromUtf8(description) : QString{};
             result["size"] = QVariant::fromValue(size);
             result["sizeText"] = folder ? QString{} : formatSize(size);

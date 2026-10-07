@@ -191,3 +191,7 @@ PAPI accepts the existing whitelisted `pedro:computer`, `pedro:favorites` and `p
 Mixed and grid views keep their full scroll extent while limiting Qt ListView/GridView to the visible viewport. The outer scroll position drives the inner view offset; File/Folder delegates are created only around the visible rows. Embedded lists delegate wheel input to the outer scroll view. Loading is indicated explicitly, and column query errors are displayed rather than silently appearing empty.
 
 `python3 gui/tests/files/large.py` verifies 2,100 generated files in mixed/grid/list views, bounded delegate counts, scrolling to the middle and last item, Computer -> / -> /bin, /usr/bin and a native query error. `PEDRO_TEST_PLATFORM=wayland QT_QUICK_BACKEND=rhi` runs it in a visible native window. Fixtures and output stay under `build/verification/files/large`; system folders are read only. A native /bin check observed 1,761 mixed file rows before the viewport correction and approximately 18 afterwards.
+
+### Pedro executable and shell artwork
+
+The shared content classification selects Pedro’s static SVG artwork for ELF executable/PIE/shared-library MIME types and shell-script MIME types. Executables use a blue software chip tile; shell scripts use a compact terminal tile with a `>_` prompt. Desktop and Directory use the same PAPI classification, and the common file icon renders these assets in every view and information panel. Other MIME types retain their existing image/document/theme behavior.

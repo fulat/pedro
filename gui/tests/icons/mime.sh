@@ -15,6 +15,7 @@ read -r -a flags <<< "$(pkg-config --cflags --libs Qt6Quick Qt6Svg Qt6Concurrent
 c++ -std=c++17 -fPIC -I "$sourceDirectory/build/dev/papi/include" \
     "$sourceDirectory/gui/tests/icons/mime.cpp" \
     "$sourceDirectory/papi/io/content/icon.cpp" \
+    "$sourceDirectory/papi/io/search/provider.cpp" \
     "$sourceDirectory/papi/io/directory/model.cpp" \
     "$sourceDirectory/papi/io/desktop/model.cpp" \
     "$taskDirectory/directory.cpp" "$taskDirectory/desktop.cpp" \

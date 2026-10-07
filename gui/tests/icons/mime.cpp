@@ -68,13 +68,16 @@ int main(int argc, char** argv) {
     write(files + "/test.pdf", "%PDF-1.4\n");
     write(files + "/test.zip", QByteArray("PK\003\004", 4));
     write(files + "/test.py", "#!/usr/bin/python3\nprint('test')\n");
+    write(files + "/test.sh", "#!/bin/sh\necho test\n");
+    QFile::remove(files + "/program");
+    require(QFile::copy("/bin/true", files + "/program"), "Cannot copy native ELF fixture");
     write(files + "/unknown", QByteArray("\0\1\2\3", 4));
     png(files + "/image.png", Qt::yellow);
     Pedro::Papi::Io::Directory::Model directory;
     directory.open(QUrl::fromLocalFile(files).toString());
-    waitFor([&] { return !directory.loading() && directory.rowCount() == 6; });
+    waitFor([&] { return !directory.loading() && directory.rowCount() == 8; });
     Pedro::Papi::Io::Desktop::Model desktop;
-    waitFor([&] { return !desktop.loading() && desktop.rowCount() == 6; });
+    waitFor([&] { return !desktop.loading() && desktop.rowCount() == 8; });
     QVariantMap pdfEntry;
     for (auto* model : {static_cast<QAbstractItemModel*>(&directory), static_cast<QAbstractItemModel*>(&desktop)}) {
         for (int row = 0; row < model->rowCount(); ++row) {
@@ -86,6 +89,10 @@ int main(int argc, char** argv) {
                 require(entry.value("visualType") == "folder", "Folder representation must remain special");
             } else if (name == "image.png") {
                 require(entry.value("visualType") == "image", "Local image thumbnail must remain enabled");
+            } else if (name == "test.sh") {
+                require(entry.value("visualType") == "shell", "Shell scripts must use Pedro terminal artwork");
+            } else if (name == "program") {
+                require(entry.value("visualType") == "executable", "Native ELF must use Pedro executable artwork");
             } else {
                 const auto expected = name == "test.pdf" || name == "test.py" ? "document" : "themed";
                 require(entry.value("visualType") == expected, "Document artwork and MIME theme fallback classification");
@@ -159,6 +166,8 @@ int main(int argc, char** argv) {
         require(loaded, "QML icon must load a real themed image or thumbnail");
         delete item;
     };
+    verifyQml("kind: 'executable'");
+    verifyQml("kind: 'shell'");
     verifyQml("kind: 'themed'; iconNames: ['application-pdf']");
     verifyQml("kind: 'image'; imageUrl: '" + QUrl::fromLocalFile(files + "/image.png").toString() + "'");
     engine.rootContext()->setContextProperty("Backend", QVariantMap{{"appearanceMode", "dark"}});

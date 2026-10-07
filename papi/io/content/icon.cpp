@@ -9,6 +9,19 @@ namespace Pedro::Papi::Io::Content {
         return type == "application/x-empty" || type == "inode/x-empty" || type.startsWith(QStringLiteral("text/")) || type == "application/pdf" || type == "application/json" || type == "application/xml" || type.contains(QStringLiteral("officedocument")) || type.contains(QStringLiteral("opendocument")) || type == "application/msword" || type == "application/rtf";
     }
 
+    QString visualType(const QString& type) {
+
+        if (type == "application/x-shellscript" || type == "text/x-shellscript" || type == "application/x-sh") {
+            return QStringLiteral("shell");
+        }
+
+        if (type == "application/x-executable" || type == "application/x-pie-executable" || type == "application/x-sharedlib") {
+            return QStringLiteral("executable");
+        }
+
+        return isDocument(type) ? QStringLiteral("document") : QStringLiteral("themed");
+    }
+
     QStringList iconNames(const QString& type) {
         QStringList names;
         if (!type.isEmpty()) {
