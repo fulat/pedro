@@ -51,8 +51,8 @@ Item {
         }
     }
 
-    function select() {
-        if (interaction.item) interaction.item.select();
+    function select(pointerPress = false) {
+        if (interaction.item) interaction.item.select(false, pointerPress);
     }
 
     function activate() {
@@ -241,7 +241,7 @@ Item {
             dragged = false;
             if (mouse.button === Qt.LeftButton) {
                 if (entryItem.keyboardEnabled) entryItem.forceActiveFocus();
-                entryItem.select();
+                entryItem.select(true);
             }
         }
         onPositionChanged: mouse => {

@@ -78,7 +78,7 @@ Rectangle {
         source: "../entry/destination.qml"
         onLoaded: {
             item.objectName = "filesDropDestination";
-            item.acceptsFiles = Qt.binding(() => !(directory.globalSearch && directory.search.trim().length));
+            item.acceptsFiles = Qt.binding(() => controller.viewMode !== "columns" && !(directory.globalSearch && directory.search.trim().length));
             item.location = Qt.binding(() => directory.location);
         }
     }

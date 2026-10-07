@@ -13,7 +13,11 @@ QtObject {
         return owner && owner.contextEntries ? owner.contextEntries(value) : [value];
     }
 
-    function select(contextMenu = false) {
+    function select(contextMenu = false, pointerPress = false) {
+        if (pointerPress && owner && owner.selectForDrag) {
+            owner.selectForDrag(entry);
+            return;
+        }
         if (owner && owner.select) owner.select(entry, contextMenu);
     }
 

@@ -263,7 +263,12 @@ actions = '''
                 }
                 if (step === 9) {
                     const count = main.previewWindows.length;
-                    pointerProbe.mouseClick(item.inputSurface, 20, 16, Qt.LeftButton);
+                    const columns = main.clipboardControl(window.contentItem, "filesColumns");
+                    columns.detailEntry = null;
+                    const previousModel = controller.selectionModel;
+                    pointerProbe.mousePress(item.inputSurface, 20, 16, Qt.LeftButton);
+                    if (columns.detailEntry || controller.selectionModel !== previousModel) { console.error("CLIPBOARD UI FAILED: pointer press must not open information before drag"); Qt.exit(1); return; }
+                    pointerProbe.mouseRelease(item.inputSurface, 20, 16, Qt.LeftButton);
                     const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
                     if (main.previewWindows.length !== count || !details || details.entry.name !== "shared.txt" || item.activateOnClick) {
                         console.error("CLIPBOARD UI FAILED: single column click must show details, not open"); Qt.exit(1); return;
@@ -499,7 +504,11 @@ actions = '''
                     ++depth;
                     return;
                 }
+                const lastDivider = main.clipboardControl(column, "filesColumnResizeHandle");
+                if (lastDivider && lastDivider.visible) { console.error("CLIPBOARD UI FAILED: terminal column divider must hide"); Qt.exit(1); return; }
+                pointerProbe.wait(80);
                 const scroll = columns.contentItem;
+                if (Math.abs(scroll.contentX - Math.max(0, scroll.contentWidth - scroll.width)) > 1) { console.error("CLIPBOARD UI FAILED: navigation must reveal last column"); Qt.exit(1); return; }
                 const end = scroll.contentWidth - scroll.width;
                 scroll.contentX = 0;
                 if (end <= 0 || scroll.contentX !== 0) { console.error("CLIPBOARD UI FAILED: horizontal column scroll start"); Qt.exit(1); return; }

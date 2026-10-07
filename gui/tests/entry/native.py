@@ -3,6 +3,7 @@
 Requires PyGObject, GStreamer/PipeWire and the Pedro GNOME extension. The default
 pointer coordinates are calibrated for the development display (1728x1084, 2x).
 Set DRAG_SOURCE_POINT and DRAG_TARGET_POINT for a different window placement.
+DRAG_COLUMNS=1 tests column destinations; DRAG_FROM_CHILD=1 moves back to the parent.
 Only the diagnostic process is terminated; the user's Pedro process stays open.
 """
 import os, json, signal, subprocess, time, queue, threading, shutil
@@ -19,8 +20,10 @@ for name in ('qml','config','assets'):
 shutil.rmtree(target/'source',ignore_errors=True)
 for name in ('source','desktop'):(target/name).mkdir(exist_ok=True)
 (target/'source/Support').mkdir(exist_ok=True)
+columnMode=os.environ.get('DRAG_COLUMNS') == '1'
+fromChild=columnMode and os.environ.get('DRAG_FROM_CHILD') == '1'
 entryName='Native text.txt'
-(target/'source'/entryName).write_text('Native drag regression fixture\n')
+(target/('source/Support' if fromChild else 'source')/entryName).write_text('Native drag regression fixture\n')
 (target/'desktop'/entryName).unlink(missing_ok=True)
 original=(root/'gui/Main.qml').read_text()
 fixture=r'''
@@ -63,6 +66,14 @@ fixture=r'''
     }
 '''
 
+if columnMode:
+ fixture=fixture.replace('main.dragProbeLoader.item.width = 650;', 'main.dragProbeLoader.item.controller.viewMode = "columns"; main.dragProbeLoader.item.width = 850;')
+ fixture=fixture.replace('const entry = main.dragProbeFind(window.contentItem, "entryComponent-@ENTRY@");', '''const panel = main.dragProbeFind(window.contentItem, "filesColumns");
+            if (!panel || panel.locations.length < 2) {
+                if (panel) panel.updateLocations(["@SOURCE@", "@SOURCE@/Support"]);
+                return;
+            }
+            const entry = main.dragProbeFind(panel, "entryComponent-@ENTRY@");''')
 fixture=fixture.replace('@SOURCE@',(target/'source').as_uri()).replace('@DESKTOP@',(target/'desktop').as_uri()).replace('@ENTRY@',entryName)
 position=original.rfind('}')
 (target/'Main.qml').write_text(original[:position]+fixture+original[position:])
@@ -91,6 +102,7 @@ try:
  pipeline=Gst.parse_launch(f'pipewiresrc path={node[0]} ! queue leaky=downstream max-size-buffers=1 max-size-bytes=0 max-size-time=0 ! videoconvert ! videoscale ! videorate ! video/x-raw,width=1728,height=1084,framerate=5/1 ! pngenc compression-level=1 ! appsink name=frames max-buffers=1 drop=true sync=false')
  pipeline.set_state(Gst.State.PLAYING); frames=pipeline.get_by_name('frames')
  def capture(name):
+  while frames.emit('try-pull-sample',0):pass
   sample=frames.emit('try-pull-sample',2000000000)
   if sample:
    buffer=sample.get_buffer();(target/name).write_bytes(buffer.extract_dup(0,buffer.get_size()));print('CAPTURE',name,flush=True)
@@ -129,7 +141,7 @@ try:
  wait(.3);capture('over-desktop.png')
  call(r,p,r+'.Session.NotifyPointerButton',GLib.Variant('(ib)',(272,False)));pressed=False
  wait(1);capture('after.png')
- expected=target/os.environ.get('DRAG_EXPECTED_PATH','desktop/'+entryName)
+ expected=target/os.environ.get('DRAG_EXPECTED_PATH',('source/' if fromChild else 'source/Support/' if columnMode else 'desktop/')+entryName)
  assert expected.exists(), 'Native move failed; calibrate DRAG_SOURCE_POINT and DRAG_TARGET_POINT for this display'
  wait(.1)
  import re
