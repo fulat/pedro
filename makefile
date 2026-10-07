@@ -51,9 +51,9 @@ gui-config:
 gui-build: gui-config
 	cmake --build "$(GUI_BUILD_DIR)" --target pedro_gui --parallel $(JOBS)
 
-dev: gui-config
 	cmake --build "$(GUI_BUILD_DIR)" --target pedro-gui-run --parallel $(JOBS)
 
+dev: gui
 gui start GUI: gui-config
 	cmake --build "$(GUI_BUILD_DIR)" --target pedro-gui-run --parallel $(JOBS)
 
