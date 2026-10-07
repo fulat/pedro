@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check conditional window-width restoration when Information closes."""
+"""Check Information keeps the window width and uses horizontal column scrolling."""
 import os
 from pathlib import Path
 import shutil
@@ -50,7 +50,7 @@ probe = r'''
                     original = informationWindow.width;
                     controller.informationRequested(controller.files[0]);
                 } else if (step === 2) {
-                    if (browser.originalInformationWidth !== original || informationWindow.width < original) { console.error("WIDTH_FAILED expansion tracking"); Qt.exit(1); return; }
+                    if (Math.abs(informationWindow.width - original) > 1) { console.error("WIDTH_FAILED properties must keep window width"); Qt.exit(1); return; }
                     browser.informationEntry = null;
                 } else if (step === 3) {
                     if (Math.abs(informationWindow.width - original) > 1) { console.error("WIDTH_FAILED original must restore"); Qt.exit(1); return; }
@@ -79,7 +79,13 @@ probe = r'''
                     informationPointer.mouseClick(row, 20, 16, Qt.LeftButton);
                 } else if (step === 10) {
                     const columns = main.informationControl(browser, "filesColumns");
-                    if (!columns.detailEntry || informationWindow.width < original + browser.defaultInformationWidth - 1) { console.error("WIDTH_FAILED column click must add information width"); Qt.exit(1); return; }
+                    if (!columns.detailEntry || Math.abs(informationWindow.width - original) > 1) { console.error("WIDTH_FAILED column click must keep window width"); Qt.exit(1); return; }
+                    const bar = main.informationControl(columns, "filesColumnsHorizontalBar");
+                    const scroll = columns.contentItem;
+                    const end = Math.max(0, scroll.contentWidth - scroll.width);
+                    if (!bar || !bar.visible || end <= 0 || Math.abs(scroll.contentX - end) > 1) { console.error("WIDTH_FAILED horizontal scrolling must reveal information"); Qt.exit(1); return; }
+                    scroll.contentX = 0;
+                    if (scroll.contentX !== 0) { console.error("WIDTH_FAILED horizontal scrolling must return to folders"); Qt.exit(1); return; }
                     const column = main.informationControl(browser, "filesDirectoryColumn-0");
                     informationPointer.mouseClick(column, 80, column.height - 40, Qt.LeftButton);
                 } else if (step === 11) {
@@ -96,7 +102,7 @@ probe = r'''
                     const columns = main.informationControl(browser, "filesColumns");
                     if (columns.detailEntry) return;
                     if (Math.abs(informationWindow.width - original) > 1) { console.error("WIDTH_FAILED divider collapse must restore window width"); Qt.exit(1); return; }
-                    console.log("WIDTH_PASSED properties and column click expansion, close restoration and user resize preservation");
+                    console.log("WIDTH_PASSED fixed window width, horizontal information scrolling and user resize preservation");
                     Qt.quit();
                 }
             }
@@ -114,4 +120,4 @@ result = subprocess.run([str(root / 'build/dev/gui/pedro-gui')], env=environment
 (target / 'check.log').write_text(result.stdout)
 if result.returncode or 'WIDTH_PASSED' not in result.stdout or any(value in result.stdout for value in ('WIDTH_FAILED', 'TypeError', 'ReferenceError', 'Binding loop')):
     raise SystemExit(result.stdout)
-print('PASS: conditional Information window-width restoration')
+print('PASS: fixed Information window width and horizontal column scrolling')

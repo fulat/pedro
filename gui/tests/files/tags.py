@@ -39,7 +39,6 @@ probe = r'''
         property bool informationAdded: false
         property bool outsideAdded: false
         property real oldWidth: 0
-        property real oldContentWidth: 0
         property bool executing: false
         onTriggered: {
             if (executing) return;
@@ -86,15 +85,12 @@ probe = r'''
                 if (!main.tagRequire(tagWindow.controller.title === "Project fixture", "tag results title")) return;
                 Tags.rename(probeTag, "Renamed fixture");
                 oldWidth = tagWindow.width;
-                oldContentWidth = main.tagFind(tagWindow.contentItem, "filesBodyScroll").availableWidth;
                 tagWindow.controller.informationRequested(directory.files[0]);
             } else if (step === 7) {
                 const panel = main.tagFind(tagWindow.contentItem, "filesColumnDetails");
                 if (!panel || panel.metadata.size === undefined) return;
                 if (!main.tagRequire(panel.assignedTags.indexOf(probeTag) >= 0 && tagWindow.controller.title === "Renamed fixture" && Tags.definition(probeTag).color === "#13b5b1", "renaming/color must preserve assignment and update all views")) return;
-                if (tagWindow.Screen.desktopAvailableWidth * 0.96 >= oldWidth + 369) {
-                    if (!main.tagRequire(tagWindow.width >= oldWidth + 368 && main.tagFind(tagWindow.contentItem, "filesBodyScroll").availableWidth >= oldContentWidth - 1, "Properties must expand the window without shrinking folder content")) return;
-                }
+                if (!main.tagRequire(Math.abs(tagWindow.width - oldWidth) <= 1, "Properties must keep the current window width")) return;
                 if (!informationAdded) {
                     const add = main.tagFind(panel, "informationAddTag");
                     const scroll = main.tagFind(panel, "filesInformationContent").contentItem;
