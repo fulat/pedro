@@ -503,6 +503,13 @@ actions = '''
                 const end = scroll.contentWidth - scroll.width;
                 scroll.contentX = 0;
                 if (end <= 0 || scroll.contentX !== 0) { console.error("CLIPBOARD UI FAILED: horizontal column scroll start"); Qt.exit(1); return; }
+                pointerProbe.wait(30);
+                const bar = main.clipboardControl(window.contentItem, "filesColumnsHorizontalBar");
+                if (!bar || !bar.visible || bar.y + bar.height < columns.height - 9) { console.error("CLIPBOARD UI FAILED: bottom horizontal scrollbar must stay visible at the edge"); Qt.exit(1); return; }
+                pointerProbe.mousePress(bar, 4 + bar.availableWidth * bar.size / 2, 6, Qt.LeftButton, Qt.NoModifier, 0);
+                pointerProbe.mouseMove(bar, bar.width - 5, 6, 0, Qt.LeftButton);
+                pointerProbe.mouseRelease(bar, bar.width - 5, 6, Qt.LeftButton, Qt.NoModifier, 0);
+                if (scroll.contentX <= 0) { console.error("CLIPBOARD UI FAILED: mouse drag must scroll columns horizontally"); Qt.exit(1); return; }
                 scroll.contentX = end;
                 if (scroll.contentX !== end) { console.error("CLIPBOARD UI FAILED: horizontal column scroll end"); Qt.exit(1); return; }
                 pointerProbe.mouseClick(column, 80, column.height - 40, Qt.LeftButton);

@@ -90,10 +90,36 @@ ScrollView {
     clip: true
     contentWidth: columnRow.width
     contentHeight: availableHeight
-    ScrollBar.horizontal.interactive: true
+    bottomPadding: horizontalBar.visible ? 22 : 0
     ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
-    ScrollBar.horizontal.visible: ScrollBar.horizontal.size < 1
+    ScrollBar.horizontal: ScrollBar {
+        id: horizontalBar
+        objectName: "filesColumnsHorizontalBar"
+        orientation: Qt.Horizontal
+        z: 20
+        parent: columns
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 18
+        anchors.rightMargin: 18
+        anchors.bottomMargin: 8
+        height: 12
+        padding: 3
+        policy: ScrollBar.AsNeeded
+        visible: size < 1
+        interactive: true
+        minimumSize: Math.min(1, 36 / Math.max(1, width))
+        contentItem: Rectangle {
+            implicitWidth: 36
+            implicitHeight: 6
+            radius: 3
+            color: horizontalBar.pressed || horizontalBar.hovered ? columns.colors.accent : columns.colors.light ? "#5e6b7c" : "#69798e"
+            Behavior on color { ColorAnimation { duration: 120 } }
+        }
+        background: Rectangle { radius: 6; color: columns.colors.line; opacity: 0.35 }
+        HoverHandler { cursorShape: Qt.PointingHandCursor }
+    }
     Connections {
         target: columns.controller ? columns.controller.directory : null
         function onLocationChanged() {
@@ -122,6 +148,7 @@ ScrollView {
             onActiveChanged: {
                 if (!active || !columns.controller) return;
                 const local = parent.mapToItem(columnRow, point.position.x, point.position.y);
+                if (local.y < 0 || local.y >= columnRow.height) return;
                 if (columns.controller.containsEntry(columnRow, local)) return;
                 let column = null;
                 for (let index = 0; index < columnRepeater.count; ++index) {

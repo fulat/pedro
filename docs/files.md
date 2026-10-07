@@ -223,3 +223,5 @@ Information uses an interactive Add Tag button with hover feedback and a pointer
 Closing Information restores the width captured before its automatic expansion only if the user has not subsequently resized the window width or maximized/fullscreened it. A width change remains remembered even if the user later returns to the expanded width; that user-chosen geometry is preserved. The restore is deferred until the information pane is actually closed, including drag-to-collapse.
 
 After the Information column collapses, its preceding folder column returns to the normal 240-pixel width with a 220 ms easing animation. A new divider drag cancels that restoration, and reopening Information during the transition completes the normal-width reset first.
+
+Overflowing column chains show a persistent, mouse-draggable horizontal scrollbar in a reserved 22-pixel gutter along the bottom window edge, above the 7-pixel native resize hit area. Its thumb is at least 36 pixels wide, uses Pedro colours with hover feedback, and does not overlap entries or clear selection while dragged. The bar disappears when the columns fit the viewport.
