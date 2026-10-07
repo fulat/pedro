@@ -20,7 +20,7 @@ Rectangle {
     readonly property var confirmationWindow: confirmation
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
-    readonly property real toolbarHeight: controller && String(controller.directory.location).startsWith("trash:") ? 0 : 55
+    readonly property real toolbarHeight: typeFilters.visible ? typeFilters.height : 0
     color: colors.surface
 
     Loader {
@@ -171,8 +171,9 @@ Rectangle {
             spacing: 8
             Loader {
                 Layout.fillWidth: true
-                visible: browser.controller && !String(browser.controller.directory.location).startsWith("trash:")
-                Layout.preferredHeight: visible ? 55 : 0
+                id: typeFilters
+                visible: !!item && item.showFilters
+                Layout.preferredHeight: visible ? item.implicitHeight : 0
                 source: "toolbar.qml"
                 onLoaded: {
                     item.controller = Qt.binding(() => browser.controller);

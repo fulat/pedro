@@ -197,3 +197,9 @@ Mixed and grid views keep their full scroll extent while limiting Qt ListView/Gr
 The shared content classification selects Pedro’s static SVG artwork for ELF executable/PIE/shared-library MIME types and shell-script MIME types. Executables use a blue software chip tile; shell scripts use a compact terminal tile with a `>_` prompt. Desktop and Directory use the same PAPI classification, and the common file icon renders these assets in every view and information panel. Other MIME types retain their existing image/document/theme behavior.
 
 New Files windows default to grid view and sorting by type. The controller applies the initial sort as soon as its directory model is assigned; choosing another view or sort remains available through the existing controls.
+
+### Contextual type filters
+
+The type bar lists only categories present in the current directory or matching search results: folders, documents, images, videos, audio, executables, shell scripts and other files. It hides when fewer than two categories exist. Available choices are calculated before the selected type filter, preserving All and the other choices while filtering. In column view the bar follows the active column’s directory. Filesystem changes refresh the choices; navigation and a remaining single category reset the filter to All.
+
+Filtering reuses PAPI’s existing Qt sorting/filtering proxies and the MIME information supplied by GIO. It affects grid, list, mixed and column views and selection operations. Empty extensionless files reported as `application/x-zerosize` belong to documents. `python3 gui/tests/files/filters.py` verifies native categories, actual type filtering, one-type/empty hiding, search, child columns and live folder creation. Add `PEDRO_TEST_PLATFORM=wayland QT_QUICK_BACKEND=rhi` for a visible native run.

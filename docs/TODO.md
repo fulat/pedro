@@ -406,3 +406,5 @@ El objetivo es extender Pedro Global Search/Spotlight para que pueda entender co
 
 - [x] Corregir apertura de las direcciones internas de Computer/Favorites/Recent en columnas y usar inserción inicial por lote en PAPI. Virtualizar cuadrícula y vista mixta para mantener únicamente los delegados visibles; probar 2.100 archivos y la navegación por `/bin` y `/usr/bin` en Wayland. Mostrar carga y errores nativos de lectura.
 - [ ] Si el cierre original reportado en `/bin` reaparece con esta versión, capturar su traza y vista exacta. No se reprodujo un aborto en la prueba mantenida abierta; sí se confirmó que la vista mixta creaba 1.761 filas a la vez, reducidas a unas 18 tras la corrección.
+
+- [x] Filtros contextuales de Files: mostrar únicamente las categorías MIME presentes en la carpeta/vista activa o resultados de búsqueda, ocultar la barra con cero/un tipo, filtrar mediante proxies Qt de PAPI y actualizar las opciones ante cambios de archivos. Mantener All y las opciones disponibles mientras se selecciona un filtro.

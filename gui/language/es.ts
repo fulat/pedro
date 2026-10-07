@@ -2171,5 +2171,25 @@ o elige Abrir para empezar.</translation>
       <translation>ddd, d 'de' MMM yyyy
 h:mm AP</translation>
     </message>
+    <message>
+      <source>files.browser.audio</source>
+      <extracomment>Stable Pedro key: files.browser.audio</extracomment>
+      <translation>Audio</translation>
+    </message>
+    <message>
+      <source>files.browser.executables</source>
+      <extracomment>Stable Pedro key: files.browser.executables</extracomment>
+      <translation>Ejecutables</translation>
+    </message>
+    <message>
+      <source>files.browser.shell</source>
+      <extracomment>Stable Pedro key: files.browser.shell</extracomment>
+      <translation>Scripts shell</translation>
+    </message>
+    <message>
+      <source>files.browser.other</source>
+      <extracomment>Stable Pedro key: files.browser.other</extracomment>
+      <translation>Otros archivos</translation>
+    </message>
 </context>
 </TS>

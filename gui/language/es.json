@@ -448,5 +448,9 @@
     "files.info.none": "Sin acceso",
     "files.info.refresh": "Actualizar información",
     "files.info.close": "Cerrar información",
-    "files.info.dateformat": "ddd, d 'de' MMM yyyy\nh:mm AP"
+    "files.info.dateformat": "ddd, d 'de' MMM yyyy\nh:mm AP",
+    "files.browser.audio": "Audio",
+    "files.browser.executables": "Ejecutables",
+    "files.browser.shell": "Scripts shell",
+    "files.browser.other": "Otros archivos"
 }
