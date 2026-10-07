@@ -16,8 +16,18 @@ for name in ('qml', 'assets'):
     if not link.exists():
         link.symlink_to(root / 'gui' / name, target_is_directory=True)
 shutil.copytree(root / 'gui/config', target / 'config', dirs_exist_ok=True)
-source = (root / 'gui/Main.qml').read_text()
+source = (root / 'gui/Main.qml').read_text().replace('import QtQuick', 'import QtTest\nimport QtQuick', 1)
 probe = r'''
+    TestCase { id: informationPointer; when: false }
+    function informationControl(item, name) {
+        if (!item) return null;
+        if (item.objectName === name) return item;
+        for (const child of item.children || []) {
+            const found = informationControl(child, name);
+            if (found) return found;
+        }
+        return null;
+    }
     property var informationWindow: null
     Timer {
         interval: 300; running: true; repeat: true
@@ -60,7 +70,33 @@ probe = r'''
                     browser.informationEntry = null;
                 } else if (step === 8) {
                     if (Math.abs(informationWindow.width - expanded) > 1) { console.error("WIDTH_FAILED resize history must stay remembered"); Qt.exit(1); return; }
-                    console.log("WIDTH_PASSED original restore, user resize and resize-back preservation");
+                    controller.viewMode = "columns";
+                    informationWindow.width = 800;
+                } else if (step === 9) {
+                    const row = main.informationControl(browser, "filesColumn-0-file.txt");
+                    if (!row) return;
+                    original = informationWindow.width;
+                    informationPointer.mouseClick(row, 20, 16, Qt.LeftButton);
+                } else if (step === 10) {
+                    const columns = main.informationControl(browser, "filesColumns");
+                    if (!columns.detailEntry || informationWindow.width < original + browser.defaultInformationWidth - 1) { console.error("WIDTH_FAILED column click must add information width"); Qt.exit(1); return; }
+                    const column = main.informationControl(browser, "filesDirectoryColumn-0");
+                    informationPointer.mouseClick(column, 80, column.height - 40, Qt.LeftButton);
+                } else if (step === 11) {
+                    if (Math.abs(informationWindow.width - original) > 1) { console.error("WIDTH_FAILED column background close must restore width"); Qt.exit(1); return; }
+                    const row = main.informationControl(browser, "filesColumn-0-file.txt");
+                    informationPointer.mouseClick(row, 20, 16, Qt.LeftButton);
+                } else if (step === 12) {
+                    const columns = main.informationControl(browser, "filesColumns");
+                    const column = main.informationControl(browser, "filesDirectoryColumn-0");
+                    columns.beginInformationResize(column);
+                    column.preferredWidth = columns.informationSpan - 250;
+                    columns.finishInformationResize(column);
+                } else if (step === 13) {
+                    const columns = main.informationControl(browser, "filesColumns");
+                    if (columns.detailEntry) return;
+                    if (Math.abs(informationWindow.width - original) > 1) { console.error("WIDTH_FAILED divider collapse must restore window width"); Qt.exit(1); return; }
+                    console.log("WIDTH_PASSED properties and column click expansion, close restoration and user resize preservation");
                     Qt.quit();
                 }
             }

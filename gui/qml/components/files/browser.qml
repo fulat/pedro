@@ -20,7 +20,10 @@ Rectangle {
     property bool informationWindowResized: false
     property bool settingInformationWidth: false
     readonly property bool informationVisible: !!informationEntry || (columnsPanel.item && !!columnsPanel.item.detailEntry)
-    onInformationVisibleChanged: if (!informationVisible) Qt.callLater(restoreInformationWidth)
+    onInformationVisibleChanged: {
+        if (informationVisible) expandInformationWidth();
+        else Qt.callLater(restoreInformationWidth);
+    }
     function restoreInformationWidth() {
         const window = browser.Window.window;
         if (informationVisible || originalInformationWidth < 0) return;
@@ -53,10 +56,9 @@ Rectangle {
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
     readonly property real toolbarHeight: typeFilters.visible ? typeFilters.height : 0
-    function showInformation(entry) {
+    function expandInformationWidth() {
         const window = browser.Window.window;
-        const alreadyVisible = !!informationEntry || (columnsPanel.item && !!columnsPanel.item.detailEntry);
-        if (window && !alreadyVisible && window.visibility !== Window.Maximized && window.visibility !== Window.FullScreen) {
+        if (window && originalInformationWidth < 0 && window.visibility !== Window.Maximized && window.visibility !== Window.FullScreen) {
             const available = window.Screen.desktopAvailableWidth || window.width;
             const extra = controller.viewMode === "columns" ? defaultInformationWidth : informationWidth + 9;
             originalInformationWidth = window.width;
@@ -67,6 +69,9 @@ Rectangle {
             expandedInformationWidth = window.width;
             settingInformationWidth = false;
         }
+    }
+    function showInformation(entry) {
+        expandInformationWidth();
         if (controller.viewMode === "columns" && columnsPanel.item) {
             informationEntry = null;
             columnsPanel.item.showInformation(entry);
