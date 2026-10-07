@@ -209,6 +209,7 @@ ScrollView {
                     objectName: "filesDirectoryColumn-" + index
                     required property string location
                     required property int index
+                    readonly property url nextLocation: columns.locations[index + 1] || ""
                     property string selected: ""
                     property url hoveredFolder: ""
                     readonly property bool dropHighlighted: columns.dropColumn === column
@@ -357,6 +358,8 @@ ScrollView {
                             objectName: "filesColumn-" + column.index + "-" + entry.name
                             required property var entry
                             readonly property url dropUrl: entry.url
+                            readonly property bool pathHighlighted: entry.isDirectory && String(column.nextLocation).length > 0
+                                && String(row.dropUrl) === String(column.nextLocation)
                             readonly property bool folderDropHovered: entry.isDirectory && !!entryIcon.item && !!entryIcon.item.dropHovered
                             onFolderDropHoveredChanged: {
                                 if (folderDropHovered) {
@@ -374,7 +377,7 @@ ScrollView {
                             width: ListView.view.width
                             height: 38
                             radius: 7
-                            color: dropTarget ? columns.colors.selected : column.selected === entry.id || (columns.controller && columns.controller.isSelected(entry)) ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
+                            color: dropTarget ? columns.colors.selected : pathHighlighted ? columns.colors.hover : column.selected === entry.id || (columns.controller && columns.controller.isSelected(entry)) ? columns.colors.selected : hover.hovered ? columns.colors.hover : "transparent"
                             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
                             Item { id: nameSlot; x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 62; height: 32; z: 5 }
                             Loader {

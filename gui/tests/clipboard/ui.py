@@ -509,6 +509,12 @@ actions = '''
                     console.error("CLIPBOARD UI FAILED: empty column must accept files and empty sibling folders"); Qt.exit(1); return;
                 }
                 pointerProbe.mouseClick(column, 80, column.height - 40, Qt.LeftButton);
+                const pathName = emptyCycles % 2 ? "context folder" : "nested";
+                const pathRow = main.clipboardControl(window.contentItem, "filesColumn-0-" + pathName);
+                const columns = main.clipboardControl(window.contentItem, "filesColumns");
+                if (!pathRow || !pathRow.pathHighlighted || !Qt.colorEqual(pathRow.color, columns.colors.hover) || controller.selectedEntries.length) {
+                    console.error("CLIPBOARD UI FAILED: path highlight must remain gray after background deselection"); Qt.exit(1); return;
+                }
                 if (++emptyCycles < 60) { step = 33; return; }
             } else if (step === 35) {
                 const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
@@ -546,6 +552,14 @@ actions = '''
                 scroll.contentX = end;
                 if (scroll.contentX !== end) { console.error("CLIPBOARD UI FAILED: horizontal column scroll end"); Qt.exit(1); return; }
                 pointerProbe.mouseClick(column, 80, column.height - 40, Qt.LeftButton);
+                for (let index = 0; index < columns.locations.length - 1; ++index) {
+                    const ancestor = main.clipboardControl(window.contentItem, "filesDirectoryColumn-" + index);
+                    const next = main.clipboardControl(window.contentItem, "filesDirectoryColumn-" + (index + 1));
+                    const pathRow = main.clipboardControl(ancestor, "filesColumn-" + index + "-" + next.directory.name);
+                    if (!pathRow || !pathRow.pathHighlighted || !Qt.colorEqual(pathRow.color, columns.colors.hover)) {
+                        console.error("CLIPBOARD UI FAILED: every ancestor must retain its gray path highlight"); Qt.exit(1); return;
+                    }
+                }
                 controller.directory.open(DESTINATION);
             } else if (step === 37) {
                 const columns = main.clipboardControl(window.contentItem, "filesColumns");
