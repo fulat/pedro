@@ -195,3 +195,5 @@ Mixed and grid views keep their full scroll extent while limiting Qt ListView/Gr
 ### Pedro executable and shell artwork
 
 The shared content classification selects Pedro’s static SVG artwork for ELF executable/PIE/shared-library MIME types and shell-script MIME types. Executables use a blue software chip tile; shell scripts use a compact terminal tile with a `>_` prompt. Desktop and Directory use the same PAPI classification, and the common file icon renders these assets in every view and information panel. Other MIME types retain their existing image/document/theme behavior.
+
+New Files windows default to grid view and sorting by type. The controller applies the initial sort as soon as its directory model is assigned; choosing another view or sort remains available through the existing controls.

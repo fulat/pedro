@@ -158,7 +158,7 @@ Item {
                 item.objectName = "filesViewDropdown";
                 item.symbol = "view";
                 item.options = Options.views();
-                item.selectedKey = Qt.binding(() => header.controller ? header.controller.viewMode : "mixed");
+                item.selectedKey = Qt.binding(() => header.controller ? header.controller.viewMode : "grid");
                 item.chosen.connect(key => header.controller.viewMode = key);
             }
         }
@@ -168,7 +168,7 @@ Item {
                 item.objectName = "filesSortDropdown";
                 item.symbol = "sort";
                 item.options = Options.sorting();
-                item.selectedKey = Qt.binding(() => header.controller ? header.controller.sortKey : "name");
+                item.selectedKey = Qt.binding(() => header.controller ? header.controller.sortKey : "type");
                 item.chosen.connect(key => { header.controller.sortKey = key; header.controller.directory.setSort(key); });
             }
         }

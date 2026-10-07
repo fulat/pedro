@@ -6,10 +6,11 @@ QtObject {
     objectName: "filesController"
     property bool sidebarCollapsed: false
     property string activePlace: directory ? directory.place : ""
-    property string viewMode: "mixed"
-    property string sortKey: "name"
+    property string viewMode: "grid"
+    property string sortKey: "type"
     onSortKeyChanged: { if (directory) directory.setSort(sortKey); }
     property var directory: null
+    onDirectoryChanged: { if (directory) directory.setSort(sortKey); }
     property var window: null
     property var selectedEntry: ({})
     property var selectedEntries: []

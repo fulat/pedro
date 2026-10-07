@@ -261,7 +261,7 @@ Rectangle {
                             boundsMovement: Flickable.StopAtBounds
                             objectName: "filesFolderGrid"
                             visible: !browser.controller || browser.controller.viewMode !== "list"
-                            readonly property bool mixed: !browser.controller || browser.controller.viewMode === "mixed"
+                            readonly property bool mixed: !!browser.controller && browser.controller.viewMode === "mixed"
                             readonly property int columns: Math.max(1, Math.floor(width / 120))
                             width: parent.width
                             y: virtualOffset
