@@ -13,6 +13,7 @@ ScrollView {
     property var controller
     signal backgroundRequested(var directory, point position)
     property bool detailsEnabled: true
+    property real preferredInformationWidth: 240 * 1.7
     property real informationSpan: -1
     property Item closingColumn: null
     NumberAnimation { id: restoreColumn; target: columns.closingColumn; property: "preferredWidth"; to: 240; duration: 220; easing.type: Easing.OutCubic }
@@ -446,7 +447,7 @@ ScrollView {
             visible: active
             width: active ? columns.informationSpan >= 0
                 ? Math.max(0, columns.informationSpan - columnRepeater.itemAt(columnRepeater.count - 1).width)
-                : Math.max(260, columns.availableWidth - directoryRow.width) : 0
+                : Math.max(columns.preferredInformationWidth, columns.availableWidth - directoryRow.width) : 0
             clip: true
             opacity: Math.max(0, Math.min(1, (width - 60) / 180))
             Behavior on opacity { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }

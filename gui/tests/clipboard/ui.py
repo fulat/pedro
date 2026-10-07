@@ -403,7 +403,7 @@ actions = '''
             } else if (step === 26) {
                 const columns = main.clipboardControl(window.contentItem, "filesColumns");
                 const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
-                if (columns.locations.length !== 1 || !details || Math.abs(details.width - Math.max(260, columns.availableWidth - main.clipboardControl(window.contentItem, "filesDirectoryColumn-0").width)) > 1 || !details.columnMode || main.clipboardControl(window.contentItem, "filesDirectoryColumn-1")) {
+                if (columns.locations.length !== 1 || !details || Math.abs(details.width - Math.max(240 * 1.7, columns.availableWidth - main.clipboardControl(window.contentItem, "filesDirectoryColumn-0").width)) > 1 || !details.columnMode || main.clipboardControl(window.contentItem, "filesDirectoryColumn-1")) {
                     console.error("CLIPBOARD UI FAILED: compact file information hierarchy"); Qt.exit(1); return;
                 }
                 if (main.clipboardControl(details, "filesColumnResizeHandle")) { console.error("CLIPBOARD UI FAILED: trailing information divider"); Qt.exit(1); return; }
@@ -589,7 +589,7 @@ actions = '''
                 column.select(column.directory.files.find(entry => entry.name === "drop.txt"));
             } else if (step === 40) {
                 const details = main.clipboardControl(window.contentItem, "filesColumnDetails");
-                if (!details || details.width < 260) { console.error("CLIPBOARD UI FAILED: information must reopen after collapse"); Qt.exit(1); return; }
+                if (!details || details.width < 240 * 1.7) { console.error("CLIPBOARD UI FAILED: information must reopen after collapse"); Qt.exit(1); return; }
                 console.log("CLIPBOARD UI PASSED: information collapse/reopen, smooth scrolling, deep columns and empty folders");
                 Qt.quit();
             }

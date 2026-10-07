@@ -13,7 +13,8 @@ Rectangle {
     objectName: "filesBrowser"
     readonly property var backgroundContextMenu: backgroundMenu.item
     property var informationEntry: null
-    property real informationWidth: 360
+    readonly property real defaultInformationWidth: 240 * 1.7
+    property real informationWidth: defaultInformationWidth
     property real originalInformationWidth: -1
     property real expandedInformationWidth: -1
     property bool informationWindowResized: false
@@ -47,7 +48,7 @@ Rectangle {
     }
     property bool informationClosing: false
     onInformationEntryChanged: { if (informationEntry) { informationClose.stop(); informationClosing = false; } }
-    Timer { id: informationClose; interval: 260; onTriggered: { browser.informationEntry = null; browser.informationClosing = false; browser.informationWidth = 360; } }
+    Timer { id: informationClose; interval: 260; onTriggered: { browser.informationEntry = null; browser.informationClosing = false; browser.informationWidth = browser.defaultInformationWidth; } }
     readonly property var confirmationWindow: confirmation
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var controller: controllerLoader.item
@@ -57,7 +58,7 @@ Rectangle {
         const alreadyVisible = !!informationEntry || (columnsPanel.item && !!columnsPanel.item.detailEntry);
         if (window && !alreadyVisible && window.visibility !== Window.Maximized && window.visibility !== Window.FullScreen) {
             const available = window.Screen.desktopAvailableWidth || window.width;
-            const extra = controller.viewMode === "columns" ? 320 : informationWidth + 9;
+            const extra = controller.viewMode === "columns" ? defaultInformationWidth : informationWidth + 9;
             originalInformationWidth = window.width;
             informationWindowResized = false;
             expandedInformationWidth = Math.max(window.width, Math.min(available * 0.96, window.width + extra));
@@ -370,6 +371,7 @@ Rectangle {
                 onLoaded: {
                     item.controller = Qt.binding(() => browser.controller);
                     item.detailsEnabled = true;
+                    item.preferredInformationWidth = Qt.binding(() => browser.defaultInformationWidth);
                     item.backgroundRequested.connect((target, point) => browser.openBackgroundMenu(target, point));
                 }
             }
