@@ -3,6 +3,8 @@
 #include <pedro/papi/io/directory/model.hpp>
 #include <pedro/papi/io/content/icon.h>
 #include <pedro/papi/io/search/provider.h>
+#include <pedro/papi/io/tag/store.h>
+#include <pedro/papi/io/tag/event.h>
 
 #include <QDateTime>
 #include <QFile>
@@ -198,6 +200,15 @@ namespace Pedro::Papi::Io::Directory {
         Snapshot scan(const QString& address, const QString& place, const Cancellation& cancel, const QString& query) {
 
             Snapshot snapshot;
+            if (address.startsWith("pedro:tag:")) {
+                const auto locations = Pedro::Papi::Io::Tag::locations(address.mid(10), &snapshot.error);
+                for (const auto& location : locations) {
+                    if (g_cancellable_is_cancelled(cancel.get()))
+                        break;
+                    append(snapshot, location, cancel.get());
+                }
+                return snapshot;
+            }
             if (!query.trimmed().isEmpty()) {
                 const auto results = Pedro::Papi::Io::Search::query(query, cancel.get());
                 snapshot.error = results.error;
@@ -394,6 +405,10 @@ namespace Pedro::Papi::Io::Directory {
                              }),
                              this);
         }
+        connect(Pedro::Papi::Io::Tag::Event::instance(), &Pedro::Papi::Io::Tag::Event::changed, this, [this] {
+            if (state->location.startsWith("pedro:tag:"))
+                refresh();
+        });
         openPlace("home");
     }
 
@@ -676,6 +691,10 @@ namespace Pedro::Papi::Io::Directory {
             return;
         }
 
+        if (address.startsWith("pedro:tag:urn:pedro:tag:")) {
+            navigate(address, {}, true);
+            return;
+        }
         const QUrl url(address);
         if (url.isValid() && (url.isLocalFile() || url.scheme() == "trash" || url.scheme() == "smb" || url.scheme() == "mtp" || url.scheme() == "afp" || url.scheme() == "sftp" || url.scheme() == "dav" || url.scheme() == "davs")) {
             navigate(address, {}, true);
@@ -796,7 +815,7 @@ namespace Pedro::Papi::Io::Directory {
                 }
             } else if (state->place == "recent") {
                 addresses.append(QUrl::fromLocalFile(QString::fromUtf8(g_get_user_data_dir())).toString());
-            } else if (state->place != "computer") {
+            } else if (state->place != "computer" && !state->location.startsWith("pedro:tag:")) {
                 addresses.append(state->location);
             }
             for (const auto& address : addresses) {

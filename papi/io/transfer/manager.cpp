@@ -1,5 +1,7 @@
 #include <gio/gio.h>
 
+#include <pedro/papi/io/tag/store.h>
+
 #include <pedro/papi/io/transfer/manager.hpp>
 
 #include <QFileInfo>
@@ -123,6 +125,7 @@ namespace Pedro::Papi::Io::Transfer {
     }
 
     Manager::Manager(QObject* parent) : QObject(parent) {
+        connect(this, &Manager::moved, this, [](const QUrl& source, const QUrl& destination) { Pedro::Papi::Io::Tag::relocate(source, destination); });
     }
 
     Manager::~Manager() {
