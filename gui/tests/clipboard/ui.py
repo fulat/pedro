@@ -492,6 +492,13 @@ actions = '''
                 const emptyBar = main.clipboardControl(column, "filesColumnScrollBar");
                 if (emptyBar.visible) { console.error("CLIPBOARD UI FAILED: empty-column scrollbar must hide"); Qt.exit(1); return; }
                 if (column.directory.count !== 0) { console.error("CLIPBOARD UI FAILED: empty folder fixture"); Qt.exit(1); return; }
+                const destination = main.clipboardControl(column, "filesColumnDropDestination");
+                const sibling = emptyCycles % 2 ? "nested" : "context folder";
+                if (!destination || String(destination.resolveLocation(Qt.point(80, 120))) !== String(column.directory.location)
+                    || !destination.canDrop([DESTINATION + "/drop.txt"])
+                    || !destination.canDrop([DESTINATION + "/" + sibling])) {
+                    console.error("CLIPBOARD UI FAILED: empty column must accept files and empty sibling folders"); Qt.exit(1); return;
+                }
                 pointerProbe.mouseClick(column, 80, column.height - 40, Qt.LeftButton);
                 if (++emptyCycles < 60) { step = 33; return; }
             } else if (step === 35) {

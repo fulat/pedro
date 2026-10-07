@@ -282,6 +282,7 @@ ScrollView {
                             ? Math.max(column.width, columns.availableWidth - column.x) : column.width
                         source: "../entry/destination.qml"
                         onLoaded: {
+                            item.objectName = "filesColumnDropDestination";
                             item.acceptsFiles = Qt.binding(() => !columns.controller.directory.search.trim().length);
                             item.location = Qt.binding(() => directoryModel.location);
                             item.hoverMoved.connect(accepted => { column.hoveredFolder = ""; columns.dropColumn = accepted ? column : null; });
@@ -290,9 +291,11 @@ ScrollView {
                                 column.hoveredFolder = "";
                             });
                             item.resolveLocation = position => {
+                                // Empty/loading directories remain destinations even without delegates.
+                                if (!columnList.count || !columnList.contentItem) return directoryModel.location;
                                 const local = item.mapToItem(columnList.contentItem, position.x, position.y);
                                 const row = columnList.itemAt(local.x, local.y);
-                                return row && row.entry.isDirectory ? row.entry.url : directoryModel.location;
+                                return row && row.entry && row.entry.isDirectory ? row.entry.url : directoryModel.location;
                             };
                         }
                     }
