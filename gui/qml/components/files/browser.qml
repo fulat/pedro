@@ -14,6 +14,37 @@ Rectangle {
     readonly property var backgroundContextMenu: backgroundMenu.item
     property var informationEntry: null
     property real informationWidth: 360
+    property real originalInformationWidth: -1
+    property real expandedInformationWidth: -1
+    property bool informationWindowResized: false
+    property bool settingInformationWidth: false
+    readonly property bool informationVisible: !!informationEntry || (columnsPanel.item && !!columnsPanel.item.detailEntry)
+    onInformationVisibleChanged: if (!informationVisible) Qt.callLater(restoreInformationWidth)
+    function restoreInformationWidth() {
+        const window = browser.Window.window;
+        if (informationVisible || originalInformationWidth < 0) return;
+        const original = originalInformationWidth;
+        const restore = window && !informationWindowResized && Math.abs(window.width - expandedInformationWidth) <= 1
+            && window.visibility !== Window.Maximized && window.visibility !== Window.FullScreen;
+        originalInformationWidth = -1;
+        expandedInformationWidth = -1;
+        if (restore) {
+            settingInformationWidth = true;
+            window.width = original;
+            settingInformationWidth = false;
+        }
+    }
+    Connections {
+        target: browser.Window.window
+        function onWidthChanged() {
+            if (browser.originalInformationWidth >= 0 && !browser.settingInformationWidth
+                && Math.abs(browser.Window.window.width - browser.expandedInformationWidth) > 1) browser.informationWindowResized = true;
+        }
+        function onVisibilityChanged() {
+            if (browser.originalInformationWidth >= 0 && !browser.settingInformationWidth
+                && (browser.Window.window.visibility === Window.Maximized || browser.Window.window.visibility === Window.FullScreen)) browser.informationWindowResized = true;
+        }
+    }
     property bool informationClosing: false
     onInformationEntryChanged: { if (informationEntry) { informationClose.stop(); informationClosing = false; } }
     Timer { id: informationClose; interval: 260; onTriggered: { browser.informationEntry = null; browser.informationClosing = false; browser.informationWidth = 360; } }
@@ -27,7 +58,13 @@ Rectangle {
         if (window && !alreadyVisible && window.visibility !== Window.Maximized && window.visibility !== Window.FullScreen) {
             const available = window.Screen.desktopAvailableWidth || window.width;
             const extra = controller.viewMode === "columns" ? 320 : informationWidth + 9;
-            window.width = Math.max(window.width, Math.min(available * 0.96, window.width + extra));
+            originalInformationWidth = window.width;
+            informationWindowResized = false;
+            expandedInformationWidth = Math.max(window.width, Math.min(available * 0.96, window.width + extra));
+            settingInformationWidth = true;
+            window.width = expandedInformationWidth;
+            expandedInformationWidth = window.width;
+            settingInformationWidth = false;
         }
         if (controller.viewMode === "columns" && columnsPanel.item) {
             informationEntry = null;
