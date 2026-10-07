@@ -526,6 +526,7 @@ actions = '''
                 const columns = main.clipboardControl(window.contentItem, "filesColumns");
                 if (columns.detailEntry) return;
                 const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
+                if (Math.abs(column.width - 240) > 1) return;
                 column.select(column.directory.files.find(entry => entry.name === "drop.txt"));
             } else if (step === 40) {
                 const details = main.clipboardControl(window.contentItem, "filesColumnDetails");

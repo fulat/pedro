@@ -14,8 +14,10 @@ ScrollView {
     signal backgroundRequested(var directory, point position)
     property bool detailsEnabled: true
     property real informationSpan: -1
-    property var closingColumn: null
+    property Item closingColumn: null
+    NumberAnimation { id: restoreColumn; target: columns.closingColumn; property: "preferredWidth"; to: 240; duration: 220; easing.type: Easing.OutCubic }
     function beginInformationResize(column) {
+        restoreColumn.stop();
         if (column.index === columns.locations.length - 1 && informationColumn.active) {
             closeInformation.stop();
             informationSpan = column.width + informationColumn.width;
@@ -30,7 +32,7 @@ ScrollView {
     SequentialAnimation {
         id: closeInformation
         NumberAnimation { target: columns.closingColumn; property: "preferredWidth"; to: columns.informationSpan; duration: 260; easing.type: Easing.InOutCubic }
-        ScriptAction { script: { columns.detailEntry = null; columns.detailController = null; columns.informationSpan = -1; } }
+        ScriptAction { script: { columns.detailEntry = null; columns.detailController = null; columns.informationSpan = -1; restoreColumn.start(); } }
     }
     property var detailEntry: null
     property var detailController: null
@@ -155,6 +157,10 @@ ScrollView {
                     property string selected: ""
                     readonly property var directory: directoryModel
                     function select(entry, contextMenu = false) {
+                        if (restoreColumn.running && columns.closingColumn === column) {
+                            restoreColumn.stop();
+                            preferredWidth = 240;
+                        }
                         if (entry.id !== selected || (!entry.isDirectory && !columns.detailEntry)) {
                             closeInformation.stop();
                             columns.informationSpan = -1;
