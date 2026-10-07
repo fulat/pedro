@@ -9,8 +9,10 @@ testHome=$(mktemp -d "$taskDirectory/home.XXXXXX")
 /usr/lib/qt6/libexec/moc "$sourceDirectory/papi/io/trash/manager.h" -o "$taskDirectory/moc.cpp"
 /usr/lib/qt6/libexec/moc "$sourceDirectory/papi/io/directory/model.hpp" -o "$taskDirectory/directory.cpp"
 /usr/lib/qt6/libexec/moc "$sourceDirectory/papi/io/transfer/manager.hpp" -o "$taskDirectory/transfer.cpp"
+/usr/lib/qt6/libexec/moc "$sourceDirectory/papi/io/tag/event.h" -o "$taskDirectory/tag.cpp"
 read -r -a flags <<< "$(pkg-config --cflags --libs Qt6Gui Qt6Concurrent gio-2.0 gio-unix-2.0)"
 c++ -std=c++17 -fPIC -I "$sourceDirectory/build/dev/papi/include" \
+    "$sourceDirectory/papi/io/tag/store.cpp" "$sourceDirectory/papi/io/tag/event.cpp" "$taskDirectory/tag.cpp" \
     "$sourceDirectory/gui/tests/trash/check.cpp" "$sourceDirectory/papi/io/trash/manager.cpp" \
     "$taskDirectory/moc.cpp" "$taskDirectory/directory.cpp" "$taskDirectory/transfer.cpp" \
     "$sourceDirectory/papi/io/transfer/manager.cpp" \

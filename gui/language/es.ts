@@ -2191,5 +2191,35 @@ h:mm AP</translation>
       <extracomment>Stable Pedro key: files.browser.other</extracomment>
       <translation>Otros archivos</translation>
     </message>
+    <message>
+      <source>tags.new</source>
+      <extracomment>Stable Pedro key: tags.new</extracomment>
+      <translation>Nueva etiqueta</translation>
+    </message>
+    <message>
+      <source>tags.rename</source>
+      <extracomment>Stable Pedro key: tags.rename</extracomment>
+      <translation>Renombrar</translation>
+    </message>
+    <message>
+      <source>tags.color</source>
+      <extracomment>Stable Pedro key: tags.color</extracomment>
+      <translation>Cambiar color</translation>
+    </message>
+    <message>
+      <source>tags.remove</source>
+      <extracomment>Stable Pedro key: tags.remove</extracomment>
+      <translation>Eliminar etiqueta</translation>
+    </message>
+    <message>
+      <source>tags.invalidName</source>
+      <extracomment>Stable Pedro key: tags.invalidName</extracomment>
+      <translation>Escribe un nombre de 1 a 80 caracteres.</translation>
+    </message>
+    <message>
+      <source>tags.duplicateName</source>
+      <extracomment>Stable Pedro key: tags.duplicateName</extracomment>
+      <translation>Ya existe una etiqueta con ese nombre.</translation>
+    </message>
 </context>
 </TS>

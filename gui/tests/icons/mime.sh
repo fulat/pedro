@@ -11,8 +11,10 @@ root = Path(sys.argv[1])
 PY
 /usr/lib/qt6/libexec/moc "$sourceDirectory/papi/io/directory/model.hpp" -o "$taskDirectory/directory.cpp"
 /usr/lib/qt6/libexec/moc "$sourceDirectory/papi/io/desktop/model.hpp" -o "$taskDirectory/desktop.cpp"
+/usr/lib/qt6/libexec/moc "$sourceDirectory/papi/io/tag/event.h" -o "$taskDirectory/tag.cpp"
 read -r -a flags <<< "$(pkg-config --cflags --libs Qt6Quick Qt6Svg Qt6Concurrent gio-2.0 gio-unix-2.0)"
 c++ -std=c++17 -fPIC -I "$sourceDirectory/build/dev/papi/include" \
+    "$sourceDirectory/papi/io/tag/store.cpp" "$sourceDirectory/papi/io/tag/event.cpp" "$taskDirectory/tag.cpp" \
     "$sourceDirectory/gui/tests/icons/mime.cpp" \
     "$sourceDirectory/papi/io/content/icon.cpp" \
     "$sourceDirectory/papi/io/search/provider.cpp" \

@@ -452,5 +452,11 @@
     "files.browser.audio": "Audio",
     "files.browser.executables": "Executables",
     "files.browser.shell": "Shell scripts",
-    "files.browser.other": "Other files"
+    "files.browser.other": "Other files",
+    "tags.new": "New Tag",
+    "tags.rename": "Rename",
+    "tags.color": "Change Color",
+    "tags.remove": "Delete Tag",
+    "tags.invalidName": "Enter a name of 1–80 characters.",
+    "tags.duplicateName": "A tag with that name already exists."
 }

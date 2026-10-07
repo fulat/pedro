@@ -105,6 +105,7 @@ probe = r'''
 position = source.rfind('}')
 (target / 'Main.qml').write_text(source[:position] + probe + source[position:])
 environment = dict(os.environ, PEDRO_DEVELOPMENT_MODE='1', PEDRO_QML_DIR=str(target),
+                   XDG_DATA_HOME=str(target / 'data'),
                    QT_QPA_PLATFORM=os.environ.get('PEDRO_TEST_PLATFORM', 'offscreen'),
                    QT_QUICK_BACKEND=os.environ.get('QT_QUICK_BACKEND', 'software'), QT_QPA_PLATFORMTHEME='none')
 result = subprocess.run([str(root / 'build/dev/gui/pedro-gui')], env=environment,

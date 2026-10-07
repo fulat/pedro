@@ -10,11 +10,14 @@ Item {
     id: details
     objectName: "filesColumnDetails"
     property bool columnMode: false
+    property bool editingTags: false
+    readonly property var assignedTags: { const revision = Tags.revision; return details.entry ? Tags.fileTags(details.entry.url) : []; }
     property var controller
     property var entry
     readonly property var colors: Palette.colors(Backend.appearanceMode)
     readonly property var metadata: information.data
     signal closeRequested()
+    Connections { target: Tags; function onFileTagsChanged(source) { information.refresh(); } }
     Information { id: information; source: details.entry ? details.entry.url || "" : "" }
 
     function date(value) { return value && !isNaN(value.getTime()) ? value.toLocaleString(Qt.locale(), qsTranslate("Pedro", "files.info.dateformat")) : "—"; }
@@ -101,31 +104,51 @@ Item {
                 Flow {
                     width: parent.width; spacing: 8
                     Repeater {
-                        model: details.metadata.tags || []
+                        model: details.assignedTags
                         delegate: Rectangle {
                             required property string modelData
+                            readonly property var tag: { const revision = Tags.revision; return Tags.definition(modelData); }
                             width: tagLabel.implicitWidth + 24; height: 30; radius: 15
-                            color: details.colors.accent
-                            Text { id: tagLabel; anchors.centerIn: parent; text: parent.modelData; color: "white"; font.pixelSize: 12 }
+                            color: tag.color || details.colors.accent
+                            Text { id: tagLabel; anchors.centerIn: parent; text: parent.tag.name || parent.modelData; color: "white"; font.pixelSize: 12 }
                         }
                     }
-                    Text { visible: !(details.metadata.tags || []).length; text: qsTranslate("Pedro", "files.info.untagged"); color: details.colors.muted; font.pixelSize: 12 }
+                    Text { visible: !details.assignedTags.length; text: qsTranslate("Pedro", "files.info.untagged"); color: details.colors.muted; font.pixelSize: 12 }
                 }
                 Flow {
                     width: parent.width; spacing: 10
                     Controls.Button {
-                        text: "+  " + qsTranslate("Pedro", "files.info.addtag"); enabled: false
+                        text: "+  " + qsTranslate("Pedro", "files.info.addtag"); enabled: !Tags.busy
+                        onClicked: details.editingTags = !details.editingTags
                         background: Rectangle { radius: 17; color: "transparent"; border.color: details.colors.line }
-                        contentItem: Text { text: parent.text; color: details.colors.muted; font.pixelSize: 12; opacity: 0.6 }
+                        contentItem: Text { text: parent.text; color: details.colors.muted; font.pixelSize: 12 }
                         leftPadding: 14; rightPadding: 14; topPadding: 8; bottomPadding: 8
                     }
                     Controls.Button {
-                        text: qsTranslate("Pedro", "files.info.edittags"); enabled: false
+                        text: qsTranslate("Pedro", "files.info.edittags"); enabled: !Tags.busy
+                        onClicked: details.editingTags = !details.editingTags
                         background: Item {}
-                        contentItem: Text { text: parent.text; color: details.colors.accent; font.pixelSize: 12; opacity: 0.6 }
+                        contentItem: Text { text: parent.text; color: details.colors.accent; font.pixelSize: 12 }
                         topPadding: 8; bottomPadding: 8
                     }
                 }
+            }
+            Column {
+                width: parent.width
+                visible: details.editingTags
+                Repeater {
+                    model: Tags.tags
+                    delegate: Controls.CheckBox {
+                        required property var modelData
+                        width: parent.width
+                        text: modelData.name
+                        enabled: !Tags.busy
+                        checked: details.assignedTags.indexOf(modelData.id) >= 0
+                        palette.windowText: details.colors.ink
+                        onClicked: Tags.assign(details.entry.url, modelData.id, checked)
+                    }
+                }
+                Text { width: parent.width; visible: Tags.error.length > 0; text: Tags.error; color: details.colors.muted; wrapMode: Text.Wrap; font.pixelSize: 12 }
             }
             Divider {}
             Field { label: "files.info.owner"; symbol: "user"; value: details.metadata.owner || "—" }

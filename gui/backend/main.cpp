@@ -1,4 +1,5 @@
 #include <pedro/papi/io/directory/model.hpp>
+#include <pedro/papi/io/tag/model.h>
 #include <pedro/papi/io/content/applications.hpp>
 
 #include "backend.hpp"
@@ -98,6 +99,9 @@ int main(int argc, char* argv[]) {
 
     qmlRegisterType<Pedro::Papi::Io::Content::Applications>("Pedro.Files", 1, 0, "Applications");
     qmlRegisterType<Pedro::Papi::Io::File::Information>("Pedro.Files", 1, 0, "Information");
+    qmlRegisterSingletonType<Pedro::Papi::Io::Tag::Model>("Pedro.Files", 1, 0, "Tags", [](QQmlEngine* engine, QJSEngine*) -> QObject* {
+        return new Pedro::Papi::Io::Tag::Model(engine);
+    });
     qmlRegisterType<Pedro::Papi::Io::Directory::Model>("Pedro.Files", 1, 0, "Directory");
     engine.rootContext()->setContextProperty(QStringLiteral("Backend"), &backend);
 

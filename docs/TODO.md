@@ -159,7 +159,7 @@ Estas funcionalidades deben quedar documentadas como deseables, pero no deben bl
 
 - [ ] **Advanced Backup** — estrategia completa de backup de archivos personales, independiente de System Restore/Snapshots.
 
-- [ ] **Extended File Metadata / Tags** — parcial: Files expone metadata básica y presenta etiquetas como UI. Implementar persistencia/edición de tags, atributos extendidos e información reutilizable por Files y Search.
+- [x] **Global Tags** — catálogo por usuario con TinySPARQL/Tracker y NAO, nombres/colores editables inline, metadatos GIO/GVFS, búsqueda global por tag y asignación desde Información; verificados persistencia y renombrado de archivos. Atributos extendidos generales siguen fuera de este bloque.
 
 ### Architecture Rules
 
@@ -190,7 +190,9 @@ Internamente puede usar libsecret, GNOME Keyring, XDG Portals, PipeWire, MPRIS, 
 ## Pedro Files
 
 - [x] Panel de información Liquid inspirado en la referencia: icono/nombre reutilizan File/Folder, metadatos GIO reales de tamaño, ubicación, fechas, propietario y permisos. Compartido en columnas, Get Info de Files y una ventana interna desde Desktop; consultas cancelables y protección ante fuentes obsoletas.
-- [ ] Conectar Agregar/Editar etiquetas del panel de información a escritura de metadatos GIO/GVfs (`metadata::pedro-tags`) con validación y monitorización; los controles están visibles y deshabilitados. Verificar persistencia y disponibilidad del backend de metadatos en producción.
+- [x] Conectar Agregar/Editar etiquetas de Información a escritura asíncrona GIO/GVFS (`metadata::pedro-tags`), con catálogo global, validación, seguimiento y pruebas de persistencia en la sesión de desarrollo.
+- [ ] Incluir TinySPARQL/Tracker, su ontología Nepomuk y GVFS metadata en la futura sesión de producción; validar persistencia en la imagen y archivos en volúmenes externos.
+- [ ] Interoperabilidad de tags mantenidos por otras aplicaciones y movimientos externos entre filesystems por copia/eliminación: respetar los límites del observador existente, sin inventar un rastreo del disco para localizar destinos desconocidos.
 
 - [x] Ventana Qt Quick desde dock/lateral, UI light/dark e inglés/español dividida en componentes.
 - [x] Modelos PAPI e historial independientes por ventana; listados reales, Inicio y carpetas XDG, Este equipo mediante montajes GIO, Papelera mediante GVfs, Favoritos/Recientes mediante registros GTK. La Papelera se abre desde el dock.
@@ -408,3 +410,5 @@ El objetivo es extender Pedro Global Search/Spotlight para que pueda entender co
 - [ ] Si el cierre original reportado en `/bin` reaparece con esta versión, capturar su traza y vista exacta. No se reprodujo un aborto en la prueba mantenida abierta; sí se confirmó que la vista mixta creaba 1.761 filas a la vez, reducidas a unas 18 tras la corrección.
 
 - [x] Filtros contextuales de Files: mostrar únicamente las categorías MIME presentes en la carpeta/vista activa o resultados de búsqueda, ocultar la barra con cero/un tipo, filtrar mediante proxies Qt de PAPI y actualizar las opciones ante cambios de archivos. Mantener All y las opciones disponibles mientras se selecciona un filtro.
+
+- [ ] Validar notificaciones del catálogo de tags entre procesos de futuras aplicaciones Pedro; los visores y ventanas actuales comparten el modelo global del proceso y reciben cambios inmediatamente.

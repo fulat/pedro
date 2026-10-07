@@ -1,4 +1,5 @@
 import QtQuick
+import Pedro.Files 1.0
 
 // One instance per Files window. PAPI owns paths, listing and filesystem events.
 QtObject {
@@ -17,7 +18,11 @@ QtObject {
     property string selectionDirectory: ""
     property var selectionModel: directory
     onViewModeChanged: { if (directory && selectionModel !== directory) clearSelection(directory); }
-    readonly property string title: directory && directory.globalSearch && directory.search.trim().length ? qsTranslate("Pedro", "files.browser.searchResults") : directory ? directory.place.length ? qsTranslate("Pedro", "files.browser." + directory.place) : directory.name || qsTranslate("Pedro", "files.browser.computer") : ""
+    readonly property var currentTag: {
+        const revision = Tags.revision;
+        return directory && String(directory.location).startsWith("pedro:tag:") ? Tags.definition(String(directory.location).slice(10)) : ({});
+    }
+    readonly property string title: currentTag.name || (directory && directory.globalSearch && directory.search.trim().length ? qsTranslate("Pedro", "files.browser.searchResults") : directory ? directory.place.length ? qsTranslate("Pedro", "files.browser." + directory.place) : directory.name || qsTranslate("Pedro", "files.browser.computer") : "")
     readonly property var folders: directory ? directory.folders : []
     readonly property var files: directory ? directory.files : []
 
@@ -51,6 +56,12 @@ QtObject {
         activePlace = place;
         clearSelection();
         directory.openPlace(place);
+    }
+
+    function openTag(id) {
+        activePlace = "";
+        clearSelection();
+        directory.open("pedro:tag:" + id);
     }
 
     function resetPlace(place) {
