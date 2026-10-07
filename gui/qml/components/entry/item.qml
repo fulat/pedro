@@ -13,6 +13,7 @@ Item {
     property var controller: null
     property var entry: ({})
     readonly property bool cutPending: Backend.clipboard.cutFiles.length > 0 && Backend.clipboard.isCut(entry.url || "")
+    readonly property bool dropHovered: folderDrop.containsDrag
     property bool folder: false
     property bool showName: true
     property Item nameSurface: null
@@ -166,6 +167,7 @@ Item {
     }
 
     DropArea {
+        id: folderDrop
         parent: entryItem.inputSurface
         anchors.fill: parent
         enabled: entryItem.folder && !entryItem.entry.inTrash

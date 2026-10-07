@@ -141,7 +141,11 @@ ScrollView {
     Connections {
         target: columns.controller
         function onSelectedEntryChanged() {
-            if (columns.detailEntry && columns.detailEntry.id !== columns.controller.selectedEntry.id) columns.detailEntry = null;
+            if (columns.detailEntry && columns.detailEntry.id !== columns.controller.selectedEntry.id) {
+                if (columns.detailController) columns.detailController.selected = "";
+                columns.detailEntry = null;
+                columns.detailController = null;
+            }
             else if (columns.detailEntry) columns.detailEntry = columns.controller.selectedEntry;
         }
     }
@@ -167,6 +171,12 @@ ScrollView {
                 }
                 if (!column && local.x >= columnRow.width) column = columnRepeater.itemAt(columnRepeater.count - 1);
                 if (!column) return;
+                columns.detailEntry = null;
+                columns.detailController = null;
+                for (let index = 0; index < columnRepeater.count; ++index) {
+                    const candidate = columnRepeater.itemAt(index);
+                    if (candidate) candidate.selected = "";
+                }
                 columns.controller.clearSelection(column.directory);
                 if (point.pressedButtons & Qt.RightButton) columns.backgroundRequested(column.directory,
                     parent.mapToItem(columns.Window.window.contentItem, point.position.x, point.position.y));
@@ -189,6 +199,10 @@ ScrollView {
                     readonly property string location: columns.locations[index] || ""
                     required property int index
                     property string selected: ""
+                    property url hoveredFolder: ""
+                    readonly property bool dropHighlighted: String(hoveredFolder).length > 0 || !!(columnDestination.item && columnDestination.item.containsDrag)
+                    readonly property url dropLocation: String(hoveredFolder).length > 0 ? hoveredFolder
+                        : columnDestination.item ? columnDestination.item.currentLocation : ""
                     readonly property var directory: directoryModel
                     function selectForDrag(entry) {
                         selected = entry.id;
@@ -240,7 +254,17 @@ ScrollView {
                             if (column.index === columns.locations.length - 1) columns.controller.selectionModel = directoryModel;
                         }
                     }
+                    Rectangle {
+                        objectName: "filesColumnDropHighlight"
+                        anchors.fill: parent
+                        color: "#180877ff"
+                        border.color: "#700877ff"
+                        border.width: 1
+                        radius: 6
+                        visible: column.dropHighlighted
+                    }
                     Loader {
+                        id: columnDestination
                         anchors.left: parent.left
                         height: parent.height
                         width: column.index === columns.locations.length - 1 && !informationColumn.active
@@ -306,6 +330,13 @@ ScrollView {
                             id: row
                             objectName: "filesColumn-" + column.index + "-" + entry.name
                             required property var entry
+                            readonly property bool folderDropHovered: entry.isDirectory && !!entryIcon.item && !!entryIcon.item.dropHovered
+                            onFolderDropHoveredChanged: {
+                                if (folderDropHovered) column.hoveredFolder = entry.url;
+                                else if (String(column.hoveredFolder) === String(entry.url)) column.hoveredFolder = "";
+                            }
+                            border.width: entry.isDirectory && column.dropHighlighted && String(column.dropLocation) === String(entry.url) ? 1 : 0
+                            border.color: columns.colors.accent
                             width: ListView.view.width
                             height: 38
                             radius: 7
@@ -357,7 +388,6 @@ ScrollView {
                         height: parent.height
                         width: 9
                         z: 10
-                        visible: column.index < columns.locations.length - 1 || informationColumn.active
                         source: "divider.qml"
                         onLoaded: {
                             item.currentWidth = Qt.binding(() => column.preferredWidth);

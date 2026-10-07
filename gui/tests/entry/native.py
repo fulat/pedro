@@ -28,6 +28,23 @@ entryName='Native text.txt'
 original=(root/'gui/Main.qml').read_text()
 fixture=r'''
     property var dragProbeLoader: null
+    property bool dragColumnHighlighted: false
+    Timer {
+        interval: 30; running: true; repeat: true
+        onTriggered: {
+            if (!main.dragProbeLoader || main.dragColumnHighlighted) return;
+            const panel = main.dragProbeFind(main.dragProbeLoader.item.contentItem, "filesColumns");
+            if (!panel) return;
+            for (let index = 0; index < panel.locations.length; ++index) {
+                const column = main.dragProbeFind(panel, "filesDirectoryColumn-" + index);
+                if (column && column.dropHighlighted) {
+                    main.dragColumnHighlighted = true;
+                    console.log("COLUMN_DROP_HIGHLIGHT " + index);
+                    return;
+                }
+            }
+        }
+    }
     function dragProbeFind(item, name) {
         if (!item) return null;
         if (item.objectName === name) return item;
@@ -146,6 +163,7 @@ try:
  wait(.1)
  import re
  trace=(target/'app.log').read_text()
+ if columnMode:assert 'COLUMN_DROP_HIGHLIGHT ' in trace, 'Destination column never highlighted during native drag'
  match=re.search(r'start_drag\(wl_data_source#\d+, wl_surface#\d+, wl_surface#(\d+),',trace)
  assert match, 'No native Wayland drag started'
  tail=trace[match.end():]

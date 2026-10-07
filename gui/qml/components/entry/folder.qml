@@ -6,6 +6,7 @@ Loader {
     id: root
     property var controller: null
     property var entry: ({})
+    readonly property bool dropHovered: !!item && item.dropHovered
     readonly property bool cutPending: !!item && item.cutPending
     property bool showName: true
     property Item nameSurface: null

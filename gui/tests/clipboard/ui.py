@@ -505,7 +505,7 @@ actions = '''
                     return;
                 }
                 const lastDivider = main.clipboardControl(column, "filesColumnResizeHandle");
-                if (lastDivider && lastDivider.visible) { console.error("CLIPBOARD UI FAILED: terminal column divider must hide"); Qt.exit(1); return; }
+                if (!lastDivider || !lastDivider.visible) { console.error("CLIPBOARD UI FAILED: terminal column divider must remain available"); Qt.exit(1); return; }
                 pointerProbe.wait(80);
                 const scroll = columns.contentItem;
                 if (Math.abs(scroll.contentX - Math.max(0, scroll.contentWidth - scroll.width)) > 1) { console.error("CLIPBOARD UI FAILED: navigation must reveal last column"); Qt.exit(1); return; }
@@ -528,6 +528,11 @@ actions = '''
                 if (columns.locations.length !== 1) { console.error("CLIPBOARD UI FAILED: remove nested columns safely"); Qt.exit(1); return; }
                 const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
                 if (column.directory.loading) return;
+                column.select(column.directory.files.find(entry => entry.name === "drop.txt"));
+                pointerProbe.wait(80);
+                columns.contentItem.contentX = 0;
+                pointerProbe.mouseClick(column, 80, column.height - 40, Qt.LeftButton);
+                if (columns.detailEntry || column.selected.length || controller.selectedEntries.length) { console.error("CLIPBOARD UI FAILED: background click must close information and deselect"); Qt.exit(1); return; }
                 column.select(column.directory.files.find(entry => entry.name === "drop.txt"));
             } else if (step === 38) {
                 const column = main.clipboardControl(window.contentItem, "filesDirectoryColumn-0");
